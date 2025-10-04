@@ -1,0 +1,25 @@
+[project]
+name = "simplespecs"
+version = "0.1.0"
+description = "Simple specs extraction service"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "httpx",
+    "pydantic-settings",
+    "python-multipart",
+    "pypdf",
+    "python-docx",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

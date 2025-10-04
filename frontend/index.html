@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SimpleSpecs</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="top-bar">
+        <div class="brand">SimpleSpecs</div>
+        <div class="status" title="Backend health">
+          <span id="health-indicator" class="status-indicator status-offline"></span>
+          <span id="health-label">Checking…</span>
+        </div>
+        <button id="toggle-settings" class="settings-toggle" type="button">
+          Model Settings
+        </button>
+      </header>
+      <div class="app-body">
+        <aside class="left-pane">
+          <section class="upload-panel">
+            <label class="file-input" for="file-input">
+              <input id="file-input" type="file" accept=".pdf,.docx,.txt" />
+              <span>Select a document (PDF, DOCX, TXT)</span>
+            </label>
+            <div id="drop-zone" class="drop-zone">Drop files here</div>
+            <button id="upload-button" type="button" class="primary">Upload &amp; Parse</button>
+          </section>
+          <section class="headers-panel">
+            <header>
+              <h2>Headers</h2>
+              <span id="headers-count" class="pill">0</span>
+            </header>
+            <div id="sidebar-headers" class="headers-sidebar"></div>
+          </section>
+        </aside>
+        <main class="right-pane">
+          <section id="settings-panel" class="settings-panel hidden">
+            <form id="settings-form">
+              <fieldset>
+                <legend>Provider</legend>
+                <label>
+                  <input type="radio" name="provider" value="openrouter" checked />
+                  OpenRouter
+                </label>
+                <label>
+                  <input type="radio" name="provider" value="llamacpp" />
+                  llama.cpp
+                </label>
+              </fieldset>
+              <div class="provider-group" data-provider="openrouter">
+                <label>API Key <input type="password" name="api_key" autocomplete="off" /></label>
+              </div>
+              <div class="provider-group" data-provider="llamacpp">
+                <label>Base URL <input type="text" name="base_url" placeholder="http://localhost:8080" /></label>
+              </div>
+              <label>Model <input type="text" name="model" placeholder="Model name" required /></label>
+              <div class="grid">
+                <label>Temperature <input type="number" name="temperature" step="0.1" min="0" max="2" value="0.2" /></label>
+                <label>Max tokens <input type="number" name="max_tokens" min="16" max="8192" /></label>
+              </div>
+            </form>
+          </section>
+          <section class="actions-bar">
+            <div class="tabs">
+              <button class="tab active" data-tab="headers">Headers</button>
+              <button class="tab" data-tab="specs">Specs</button>
+            </div>
+            <div class="actions">
+              <button id="find-headers" type="button">Find Headers</button>
+              <button id="find-specs" type="button">Find Specs</button>
+              <button id="export-csv" type="button">Export CSV</button>
+            </div>
+          </section>
+          <section class="tab-content" id="tab-headers">
+            <div id="headers-tree" class="headers-tree"></div>
+            <div class="preview">
+              <h3>Section Preview</h3>
+              <pre id="section-preview">Select a header to preview text.</pre>
+            </div>
+          </section>
+          <section class="tab-content hidden" id="tab-specs">
+            <div class="specs-controls">
+              <input id="specs-search" type="search" placeholder="Search specifications" />
+              <select id="sort-select">
+                <option value="section_number">Sort by Section</option>
+                <option value="section_name">Sort by Name</option>
+                <option value="specification">Sort by Specification</option>
+              </select>
+            </div>
+            <div class="table-wrapper">
+              <table id="specs-table">
+                <thead>
+                  <tr>
+                    <th>Section number</th>
+                    <th>Section name</th>
+                    <th>Specification</th>
+                    <th>Domain</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="progress-panel">
+            <div class="progress-bar">
+              <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <pre id="log-console" class="log-console"></pre>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>

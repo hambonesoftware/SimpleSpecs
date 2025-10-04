@@ -1,0 +1,786 @@
+[
+  {
+    "meta": {
+      "phase": "P0",
+      "date": "2025-10-02",
+      "description": "Finalstubs for Phase P0 with PDF engine toggle and UNO-less parsing.",
+      "acceptance_ref": "See plan (UNO-less MinerU) phase P0 document."
+    }
+  },
+  {
+    "file_path": "backend/config.py",
+    "language": "python",
+    "description": "Settings include PDF engine toggle (native|mineru|auto).",
+    "imported_types": [
+      "pydantic.BaseSettings"
+    ],
+    "declared_types": [
+      {
+        "name": "Settings",
+        "type": "class",
+        "line": 1,
+        "docstring": "Runtime settings loaded from env.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": [
+          {
+            "name": "OPENROUTER_API_KEY",
+            "type": "str",
+            "default": "${OPENROUTER_API_KEY}"
+          },
+          {
+            "name": "LLAMACPP_URL",
+            "type": "str",
+            "default": "http://localhost:8080"
+          },
+          {
+            "name": "DB_URL",
+            "type": "str",
+            "default": "sqlite:///./simplespecs.db"
+          },
+          {
+            "name": "ARTIFACTS_DIR",
+            "type": "str",
+            "default": "artifacts"
+          },
+          {
+            "name": "ALLOW_ORIGINS",
+            "type": "list[str]",
+            "default": "*"
+          },
+          {
+            "name": "MAX_FILE_MB",
+            "type": "int",
+            "default": 50
+          },
+          {
+            "name": "PDF_ENGINE",
+            "type": "str",
+            "default": "'native' | 'mineru' | 'auto'"
+          },
+          {
+            "name": "MINERU_ENABLED",
+            "type": "bool",
+            "default": false
+          },
+          {
+            "name": "MINERU_MODEL_OPTS",
+            "type": "dict",
+            "default": "{}"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file_path": "backend/models.py",
+    "language": "python",
+    "description": "Pydantic schemas for API.",
+    "imported_types": [
+      "pydantic.BaseModel",
+      "typing.Literal",
+      "typing.Optional",
+      "typing.List"
+    ],
+    "declared_types": [
+      {
+        "name": "ParsedObject",
+        "type": "class",
+        "line": 1,
+        "docstring": "One extracted text/table/image object.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": [
+          {
+            "name": "object_id",
+            "type": "str"
+          },
+          {
+            "name": "file_id",
+            "type": "str"
+          },
+          {
+            "name": "kind",
+            "type": "Literal['text','table','image']"
+          },
+          {
+            "name": "text",
+            "type": "Optional[str]"
+          },
+          {
+            "name": "page_index",
+            "type": "Optional[int]"
+          },
+          {
+            "name": "bbox",
+            "type": "Optional[tuple[float,float,float,float]]"
+          },
+          {
+            "name": "order_index",
+            "type": "int"
+          },
+          {
+            "name": "metadata",
+            "type": "dict"
+          }
+        ]
+      },
+      {
+        "name": "SectionNode",
+        "type": "class",
+        "line": 1,
+        "docstring": "Header tree node.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": [
+          {
+            "name": "section_id",
+            "type": "str"
+          },
+          {
+            "name": "file_id",
+            "type": "str"
+          },
+          {
+            "name": "number",
+            "type": "Optional[str]"
+          },
+          {
+            "name": "title",
+            "type": "str"
+          },
+          {
+            "name": "depth",
+            "type": "int"
+          },
+          {
+            "name": "children",
+            "type": "list[SectionNode]"
+          },
+          {
+            "name": "span",
+            "type": "dict"
+          }
+        ]
+      },
+      {
+        "name": "SpecItem",
+        "type": "class",
+        "line": 1,
+        "docstring": "Mechanical spec with provenance.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": [
+          {
+            "name": "spec_id",
+            "type": "str"
+          },
+          {
+            "name": "file_id",
+            "type": "str"
+          },
+          {
+            "name": "section_id",
+            "type": "str"
+          },
+          {
+            "name": "section_number",
+            "type": "Optional[str]"
+          },
+          {
+            "name": "section_title",
+            "type": "str"
+          },
+          {
+            "name": "spec_text",
+            "type": "str"
+          },
+          {
+            "name": "confidence",
+            "type": "Optional[float]"
+          },
+          {
+            "name": "source_object_ids",
+            "type": "list[str]"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "file_path": "backend/store.py",
+    "language": "python",
+    "description": "SQLite persistence via SQLModel.",
+    "imported_types": [
+      "sqlmodel.SQLModel",
+      "sqlmodel.Field",
+      "sqlmodel.create_engine",
+      "sqlmodel.Session"
+    ],
+    "declared_types": [
+      {
+        "name": "DBParsedObject",
+        "type": "class",
+        "line": 1,
+        "docstring": "SQLModel table for ParsedObject",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      },
+      {
+        "name": "DBSectionNode",
+        "type": "class",
+        "line": 1,
+        "docstring": "SQLModel table for SectionNode",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      },
+      {
+        "name": "DBSpecItem",
+        "type": "class",
+        "line": 1,
+        "docstring": "SQLModel table for SpecItem",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      },
+      {
+        "name": "get_session",
+        "type": "function",
+        "line": 1,
+        "docstring": "Yield a database session",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": "Session",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/logging.py",
+    "language": "python",
+    "description": "Central logging config.",
+    "imported_types": [
+      "logging",
+      "sys"
+    ],
+    "declared_types": [
+      {
+        "name": "setup_logging",
+        "type": "function",
+        "line": 1,
+        "docstring": "Configure loggers/handlers.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": "None",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/main.py",
+    "language": "python",
+    "description": "App factory; include routers; lifespan.",
+    "imported_types": [
+      "fastapi.FastAPI",
+      "routers.ingest",
+      "routers.headers",
+      "routers.specs",
+      "routers.files",
+      "routers.system",
+      "config.Settings"
+    ],
+    "declared_types": [
+      {
+        "name": "create_app",
+        "type": "function",
+        "line": 1,
+        "docstring": "Create and configure FastAPI app.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [
+          {
+            "name": "settings",
+            "type": "Settings",
+            "default": null
+          }
+        ],
+        "returns": "FastAPI",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/routers/ingest.py",
+    "language": "python",
+    "description": "ingest routes.",
+    "imported_types": [
+      "fastapi.APIRouter",
+      "models",
+      "store",
+      "services"
+    ],
+    "declared_types": [
+      {
+        "name": "ingest_router",
+        "type": "variable",
+        "line": 1,
+        "docstring": "APIRouter for this domain.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/routers/headers.py",
+    "language": "python",
+    "description": "headers routes.",
+    "imported_types": [
+      "fastapi.APIRouter",
+      "models",
+      "store",
+      "services"
+    ],
+    "declared_types": [
+      {
+        "name": "headers_router",
+        "type": "variable",
+        "line": 1,
+        "docstring": "APIRouter for this domain.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/routers/specs.py",
+    "language": "python",
+    "description": "specs routes.",
+    "imported_types": [
+      "fastapi.APIRouter",
+      "models",
+      "store",
+      "services"
+    ],
+    "declared_types": [
+      {
+        "name": "specs_router",
+        "type": "variable",
+        "line": 1,
+        "docstring": "APIRouter for this domain.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/routers/files.py",
+    "language": "python",
+    "description": "files routes.",
+    "imported_types": [
+      "fastapi.APIRouter",
+      "models",
+      "store",
+      "services"
+    ],
+    "declared_types": [
+      {
+        "name": "files_router",
+        "type": "variable",
+        "line": 1,
+        "docstring": "APIRouter for this domain.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/routers/system.py",
+    "language": "python",
+    "description": "system routes.",
+    "imported_types": [
+      "fastapi.APIRouter",
+      "models",
+      "store",
+      "services"
+    ],
+    "declared_types": [
+      {
+        "name": "system_router",
+        "type": "variable",
+        "line": 1,
+        "docstring": "APIRouter for this domain.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/services/llm_client.py",
+    "language": "python",
+    "description": "LLM client adapters.",
+    "imported_types": [
+      "typing.Protocol"
+    ],
+    "declared_types": [
+      {
+        "name": "LLMAdapter",
+        "type": "protocol",
+        "line": 1,
+        "docstring": "complete(prompt, model, temperature, max_tokens)->str",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [
+          {
+            "name": "complete",
+            "type": "function",
+            "line": 1,
+            "docstring": "Run completion.",
+            "modifiers": [],
+            "decorators": [],
+            "extends": [],
+            "args": [
+              {
+                "name": "prompt",
+                "type": "str"
+              },
+              {
+                "name": "model",
+                "type": "str"
+              },
+              {
+                "name": "temperature",
+                "type": "float"
+              },
+              {
+                "name": "max_tokens",
+                "type": "int"
+              }
+            ],
+            "returns": "str",
+            "members": [],
+            "properties": []
+          }
+        ],
+        "properties": []
+      },
+      {
+        "name": "OpenRouterAdapter",
+        "type": "class",
+        "line": 1,
+        "docstring": "Calls OpenRouter HTTP API.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      },
+      {
+        "name": "LlamaCppAdapter",
+        "type": "class",
+        "line": 1,
+        "docstring": "Calls llama.cpp HTTP server.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/services/pdf_parser.py",
+    "language": "python",
+    "description": "Engine-agnostic PDF parser interface and selector.",
+    "imported_types": [
+      "typing.Protocol",
+      "models.ParsedObject"
+    ],
+    "declared_types": [
+      {
+        "name": "PdfParser",
+        "type": "protocol",
+        "line": 1,
+        "docstring": "parse_pdf(file_path)->list[ParsedObject]",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [
+          {
+            "name": "parse_pdf",
+            "type": "function",
+            "line": 1,
+            "docstring": "Parse a PDF into ParsedObject[]",
+            "modifiers": [],
+            "decorators": [],
+            "extends": [],
+            "args": [
+              {
+                "name": "file_path",
+                "type": "str"
+              }
+            ],
+            "returns": "list[ParsedObject]",
+            "members": [],
+            "properties": []
+          }
+        ],
+        "properties": []
+      },
+      {
+        "name": "select_pdf_parser",
+        "type": "function",
+        "line": 1,
+        "docstring": "Return parser instance based on Settings and heuristics.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [
+          {
+            "name": "settings",
+            "type": "Settings"
+          },
+          {
+            "name": "file_path",
+            "type": "str"
+          }
+        ],
+        "returns": "PdfParser",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "frontend/index.html",
+    "language": "html",
+    "description": "Upload \u2192 Find headers \u2192 Build sections \u2192 Find specs.",
+    "imported_types": [],
+    "declared_types": []
+  },
+  {
+    "file_path": "frontend/js/api.js",
+    "language": "javascript",
+    "description": "ESM API",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "api",
+        "type": "namespace",
+        "line": 1,
+        "docstring": "Fetch wrappers for backend routes.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "frontend/js/state.js",
+    "language": "javascript",
+    "description": "App state incl. engine selection.",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "AppState",
+        "type": "class",
+        "line": 1,
+        "docstring": "Tracks file, parsedObjects, sections, specs, and selected PDF engine.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "run.py",
+    "language": "python",
+    "description": "Launch backend + serve frontend.",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "main",
+        "type": "function",
+        "line": 1,
+        "docstring": "Start backend & static frontend servers.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": "int",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "run_local.py",
+    "language": "python",
+    "description": "Local dev runner.",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "main",
+        "type": "function",
+        "line": 1,
+        "docstring": "Run backend only (dev).",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": "int",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "README.md",
+    "language": "markdown",
+    "description": "Setup, run, and engine toggle usage.",
+    "imported_types": [],
+    "declared_types": []
+  },
+  {
+    "file_path": "backend/tests/test_contracts.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_models_schema",
+        "type": "function",
+        "line": 1,
+        "docstring": "Validate models schemas.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/tests/test_routes_mock.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_routes_mock",
+        "type": "function",
+        "line": 1,
+        "docstring": "Mock endpoints respond 200.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/tests/test_system_capabilities.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_capabilities_endpoint",
+        "type": "function",
+        "line": 1,
+        "docstring": "Detect optional tools and MinerU availability.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  }
+]

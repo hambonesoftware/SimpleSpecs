@@ -1,0 +1,71 @@
+[
+  {
+    "meta": {
+      "phase": "P5",
+      "date": "2025-10-02",
+      "description": "Finalstubs for Phase P5 with PDF engine toggle and UNO-less parsing.",
+      "acceptance_ref": "See plan (UNO-less MinerU) phase P5 document."
+    }
+  },
+  {
+    "file_path": "backend/routers/files.py",
+    "language": "python",
+    "description": "files routes.",
+    "imported_types": [
+      "fastapi.APIRouter",
+      "models",
+      "store",
+      "services"
+    ],
+    "declared_types": [
+      {
+        "name": "files_router",
+        "type": "variable",
+        "line": 1,
+        "docstring": "APIRouter for this domain.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "frontend/styles.css",
+    "language": "css",
+    "description": "Clean, minimal styles.",
+    "imported_types": [],
+    "declared_types": []
+  },
+  {
+    "file_path": "README.md",
+    "language": "markdown",
+    "description": "Setup, run, and engine toggle usage.",
+    "imported_types": [],
+    "declared_types": []
+  },
+  {
+    "file_path": "backend/tests/test_export_csv_json.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_export_formats",
+        "type": "function",
+        "line": 1,
+        "docstring": "CSV/JSON schema correctness.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  }
+]

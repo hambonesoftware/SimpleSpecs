@@ -1,0 +1,131 @@
+[
+  {
+    "meta": {
+      "phase": "P2",
+      "date": "2025-10-02",
+      "description": "Finalstubs for Phase P2 with PDF engine toggle and UNO-less parsing.",
+      "acceptance_ref": "See plan (UNO-less MinerU) phase P2 document."
+    }
+  },
+  {
+    "file_path": "backend/routers/headers.py",
+    "language": "python",
+    "description": "headers routes.",
+    "imported_types": [
+      "fastapi.APIRouter",
+      "models",
+      "store",
+      "services"
+    ],
+    "declared_types": [
+      {
+        "name": "headers_router",
+        "type": "variable",
+        "line": 1,
+        "docstring": "APIRouter for this domain.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/services/headers.py",
+    "language": "python",
+    "description": "Header discovery.",
+    "imported_types": [
+      "typing.List",
+      "models.SectionNode",
+      "models.ParsedObject",
+      "services.llm_client.LLMAdapter"
+    ],
+    "declared_types": [
+      {
+        "name": "build_headers_prompt",
+        "type": "function",
+        "line": 1,
+        "docstring": "Create headers prompt from doc text.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [
+          {
+            "name": "objects",
+            "type": "list[ParsedObject]"
+          }
+        ],
+        "returns": "str",
+        "members": [],
+        "properties": []
+      },
+      {
+        "name": "parse_nested_list_to_tree",
+        "type": "function",
+        "line": 1,
+        "docstring": "Convert nested list to SectionNode tree.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [
+          {
+            "name": "file_id",
+            "type": "str"
+          },
+          {
+            "name": "nested_list_text",
+            "type": "str"
+          }
+        ],
+        "returns": "SectionNode",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "frontend/js/ui-sections.js",
+    "language": "javascript",
+    "description": "Sections UI",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "initSections",
+        "type": "function",
+        "line": 1,
+        "docstring": "Render header tree and previews.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/tests/test_headers_parse.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_nested_list_parse_variants",
+        "type": "function",
+        "line": 1,
+        "docstring": "Robust list\u2192tree parsing.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  }
+]
