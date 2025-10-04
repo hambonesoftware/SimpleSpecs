@@ -168,34 +168,69 @@ function normalize(value) {
   return value.toLowerCase();
 }
 
+function resolveSectionNumber(row) {
+  return row.section_number ?? row.section ?? row.sectionNumber ?? "";
+}
+
+function resolveSectionName(row) {
+  return row.section_name ?? row.section_title ?? row.sectionName ?? "";
+}
+
+function resolveSpecification(row) {
+  return row.specification ?? row.spec_text ?? row.text ?? "";
+}
+
+function resolveDomain(row) {
+  return row.domain ?? row.category ?? row.group ?? "";
+}
+
+function buildRenderableSpecs(specs) {
+  if (!Array.isArray(specs)) return [];
+  return specs.map((row) => ({
+    section_number: resolveSectionNumber(row),
+    section_name: resolveSectionName(row),
+    specification: resolveSpecification(row),
+    domain: resolveDomain(row),
+  }));
+}
+
 export function renderSpecsTable(tableBody, specs, { searchTerm = "", sortKey = "section_number" } = {}) {
   tableBody.innerHTML = "";
-  let rows = Array.isArray(specs) ? [...specs] : [];
+  const rows = buildRenderableSpecs(specs);
+  let filtered = rows;
   if (searchTerm) {
     const term = searchTerm.toLowerCase();
-    rows = rows.filter((row) =>
+    filtered = rows.filter((row) =>
       [row.section_number, row.section_name, row.specification, row.domain]
         .join(" ")
         .toLowerCase()
         .includes(term),
     );
   }
-  rows.sort((a, b) => {
+  filtered.sort((a, b) => {
     const left = normalize(String(a[sortKey] || ""));
     const right = normalize(String(b[sortKey] || ""));
     return left.localeCompare(right, undefined, { numeric: true });
   });
 
   const fragment = document.createDocumentFragment();
-  rows.forEach((row) => {
+  filtered.forEach((row) => {
     const tr = document.createElement("tr");
-    [row.section_number, row.section_name, row.specification, row.domain].forEach((value) => {
+    [row.section_number, row.section_name, row.specification, row.domain || "—"].forEach((value) => {
       const td = document.createElement("td");
-      td.textContent = value;
+      td.textContent = value || "";
       tr.appendChild(td);
     });
     fragment.appendChild(tr);
   });
+  if (!fragment.childNodes.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 4;
+    td.textContent = "No specifications found.";
+    tr.appendChild(td);
+    fragment.appendChild(tr);
+  }
   tableBody.appendChild(fragment);
 }
 
