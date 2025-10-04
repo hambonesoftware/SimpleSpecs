@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import json
 import tempfile
+from collections.abc import Mapping, Sequence, Set as AbstractSet
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
@@ -30,11 +31,27 @@ def specs_path(upload_id: str) -> Path:
     return _path_for(f"{upload_id}_specs.json")
 
 
+def _normalize_json(value: Any) -> Any:
+    """Convert *value* into a JSON-serializable structure."""
+
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, Mapping):
+        return {str(key): _normalize_json(val) for key, val in value.items()}
+    if isinstance(value, AbstractSet):
+        return [_normalize_json(val) for val in value]
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return [_normalize_json(val) for val in value]
+    return str(value)
+
+
 def write_jsonl(path: Path, items: Iterable[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as fh:
         for item in items:
-            fh.write(json.dumps(item, ensure_ascii=False))
+            fh.write(json.dumps(_normalize_json(item), ensure_ascii=False))
             fh.write("\n")
 
 
@@ -54,7 +71,7 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as fh:
-        json.dump(payload, fh, ensure_ascii=False, indent=2)
+        json.dump(_normalize_json(payload), fh, ensure_ascii=False, indent=2)
 
 
 def read_json(path: Path) -> Any:
