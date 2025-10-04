@@ -15,6 +15,7 @@ from ..services.text_blocks import (
     section_text,
 )
 from ..store import headers_path, read_jsonl, upload_objects_path, write_json
+from ..text.toc_filters import is_real_header_line, mark_toc_pages
 
 logger = get_logger(__name__)
 
@@ -106,6 +107,30 @@ def parse_and_store_headers(upload_id: str, response_text: str) -> list[HeaderIt
 
     objects_raw = read_jsonl(upload_objects_path(upload_id))
     entries = document_line_entries(objects_raw)
+    toc_pages: set[int] = set()
+    if entries:
+        page_lines: dict[int, list[str]] = {}
+        for entry in entries:
+            if entry.page_index is None:
+                continue
+            page_lines.setdefault(entry.page_index, []).append(entry.text)
+        if page_lines:
+            max_page_index = max(page_lines)
+            pages = [page_lines.get(i, []) for i in range(max_page_index + 1)]
+            toc_pages = mark_toc_pages(pages)
+
+        filtered_entries = [
+            entry
+            for entry in entries
+            if is_real_header_line(
+                entry.text,
+                entry.page_index if entry.page_index is not None else -1,
+                toc_pages,
+            )
+        ]
+        if filtered_entries:
+            entries = filtered_entries
+
     lines = [entry.text for entry in entries]
 
     for header in headers:
