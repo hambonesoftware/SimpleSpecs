@@ -34,10 +34,29 @@ function createHeaderButton(header, { activeSection, processedSections, onSelect
   }
   button.appendChild(status);
 
-  const label = document.createElement("span");
-  label.className = "header-label";
-  label.textContent = `${header.section_number} ${header.section_name}`;
-  button.appendChild(label);
+  const details = document.createElement("div");
+  details.className = "header-details";
+
+  const title = document.createElement("span");
+  title.className = "header-label";
+  title.textContent = `${header.section_number} ${header.section_name}`;
+  details.appendChild(title);
+
+  const locationParts = [];
+  if (header.page_number != null) {
+    locationParts.push(`Page ${header.page_number}`);
+  }
+  if (header.line_number != null) {
+    locationParts.push(`Line ${header.line_number}`);
+  }
+  if (locationParts.length > 0) {
+    const meta = document.createElement("span");
+    meta.className = "header-meta";
+    meta.textContent = locationParts.join(" • ");
+    details.appendChild(meta);
+  }
+
+  button.appendChild(details);
 
   button.addEventListener("click", () => onSelect?.(header));
   return button;
@@ -95,8 +114,54 @@ export function renderSidebarHeadersList(container, headers, { onSelect, activeS
   container.appendChild(list);
 }
 
-export function updateSectionPreview(element, text) {
-  element.textContent = text || "No preview available.";
+export function updateSectionPreview(element, preview) {
+  element.innerHTML = "";
+
+  if (!preview) {
+    const placeholder = document.createElement("p");
+    placeholder.className = "section-preview-placeholder";
+    placeholder.textContent = "Select a header to preview text.";
+    element.appendChild(placeholder);
+    return;
+  }
+
+  if (typeof preview === "string") {
+    const placeholder = document.createElement("p");
+    placeholder.className = "section-preview-placeholder";
+    placeholder.textContent = preview;
+    element.appendChild(placeholder);
+    return;
+  }
+
+  const { header, text } = preview;
+  if (!header) {
+    updateSectionPreview(element, text || "Select a header to preview text.");
+    return;
+  }
+
+  const title = document.createElement("p");
+  title.className = "section-preview-title";
+  title.textContent = `${header.section_number} ${header.section_name}`;
+  element.appendChild(title);
+
+  const metaParts = [];
+  if (header.page_number != null) {
+    metaParts.push(`Page ${header.page_number}`);
+  }
+  if (header.line_number != null) {
+    metaParts.push(`Line ${header.line_number}`);
+  }
+  if (metaParts.length > 0) {
+    const meta = document.createElement("p");
+    meta.className = "section-preview-meta";
+    meta.textContent = metaParts.join(" • ");
+    element.appendChild(meta);
+  }
+
+  const pre = document.createElement("pre");
+  pre.className = "section-preview-text";
+  pre.textContent = text || "No preview available.";
+  element.appendChild(pre);
 }
 
 function normalize(value) {
