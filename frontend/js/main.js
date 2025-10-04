@@ -250,8 +250,8 @@ async function handleHeaders() {
     const duration = ((performance.now() - startTime) / 1000).toFixed(1);
     log(`Headers extracted (${headers.length}) in ${duration}s.`);
   } catch (error) {
-    log(`Header extraction failed: ${error.message}`);
-    const rawResponse = error?.detail?.response_text;
+	const rawResponse = error?.detail?.response_text;
+    log(`Header extraction failed: ${rawResponse}`);
     if (rawResponse) {
       log("Raw LLM response:");
       log(rawResponse);

@@ -261,7 +261,7 @@ async def extract_openrouter_headers(
     messages = build_header_messages(document)
 
     base_url = _normalize_openrouter_base_url(payload.base_url)
-    timeout = float((payload.params or {}).get("timeout", 60.0))
+    timeout = float((payload.params or {}).get("timeout", 360.0))
     response_text = await _chat_via_openrouter(
         base_url=base_url,
         api_key=api_key,
