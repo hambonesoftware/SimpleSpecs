@@ -32,5 +32,9 @@ def normalize_openrouter_base_url(raw_base_url: str | None) -> str:
             detail="base_url must include a hostname",
         )
 
-    return str(parsed)
+    sanitized = parsed.copy_with(query=None, fragment=None)
+    if sanitized.scheme == "http":
+        sanitized = sanitized.copy_with(scheme="https")
+
+    return str(sanitized)
 

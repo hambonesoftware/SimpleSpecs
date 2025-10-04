@@ -32,6 +32,13 @@ def test_normalize_base_url_adds_scheme_when_missing() -> None:
     )
 
 
+def test_normalize_base_url_upgrades_http_scheme() -> None:
+    assert (
+        normalize_openrouter_base_url("http://openrouter.ai/api/v1")
+        == "https://openrouter.ai/api/v1"
+    )
+
+
 def test_normalize_base_url_rejects_invalid_value() -> None:
     with pytest.raises(HTTPException) as exc_info:
         normalize_openrouter_base_url("http://")

@@ -84,6 +84,8 @@ export async function updateModelSettings(payload) {
 function buildPayload({ uploadId, provider, model, params, apiKey, baseUrl }, options = {}) {
   const includeProvider = options.includeProvider !== false;
   const normalizedProvider = provider || "openrouter";
+  const sanitizedApiKey = typeof apiKey === "string" ? apiKey.trim() : "";
+  const sanitizedBaseUrl = typeof baseUrl === "string" ? baseUrl.trim() : "";
   const payload = {
     upload_id: uploadId,
     model,
@@ -93,15 +95,12 @@ function buildPayload({ uploadId, provider, model, params, apiKey, baseUrl }, op
     payload.provider = normalizedProvider;
   }
   if (normalizedProvider === "openrouter") {
-    if (apiKey) {
-      payload.api_key = apiKey;
-    }
-    if (baseUrl) {
-      payload.base_url = baseUrl;
+    if (sanitizedApiKey) {
+      payload.api_key = sanitizedApiKey;
     }
   }
-  if (normalizedProvider === "llamacpp" && baseUrl) {
-    payload.base_url = baseUrl;
+  if (normalizedProvider === "llamacpp" && sanitizedBaseUrl) {
+    payload.base_url = sanitizedBaseUrl;
   }
   return payload;
 }
