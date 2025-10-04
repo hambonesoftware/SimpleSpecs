@@ -1,0 +1,337 @@
+[
+  {
+    "meta": {
+      "phase": "P1",
+      "date": "2025-10-02",
+      "description": "Finalstubs for Phase P1 with PDF engine toggle and UNO-less parsing.",
+      "acceptance_ref": "See plan (UNO-less MinerU) phase P1 document."
+    }
+  },
+  {
+    "file_path": "backend/routers/ingest.py",
+    "language": "python",
+    "description": "ingest routes.",
+    "imported_types": [
+      "fastapi.APIRouter",
+      "models",
+      "store",
+      "services"
+    ],
+    "declared_types": [
+      {
+        "name": "ingest_router",
+        "type": "variable",
+        "line": 1,
+        "docstring": "APIRouter for this domain.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/services/pdf_parser.py",
+    "language": "python",
+    "description": "Engine-agnostic PDF parser interface and selector.",
+    "imported_types": [
+      "typing.Protocol",
+      "models.ParsedObject"
+    ],
+    "declared_types": [
+      {
+        "name": "PdfParser",
+        "type": "protocol",
+        "line": 1,
+        "docstring": "parse_pdf(file_path)->list[ParsedObject]",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [
+          {
+            "name": "parse_pdf",
+            "type": "function",
+            "line": 1,
+            "docstring": "Parse a PDF into ParsedObject[]",
+            "modifiers": [],
+            "decorators": [],
+            "extends": [],
+            "args": [
+              {
+                "name": "file_path",
+                "type": "str"
+              }
+            ],
+            "returns": "list[ParsedObject]",
+            "members": [],
+            "properties": []
+          }
+        ],
+        "properties": []
+      },
+      {
+        "name": "select_pdf_parser",
+        "type": "function",
+        "line": 1,
+        "docstring": "Return parser instance based on Settings and heuristics.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [
+          {
+            "name": "settings",
+            "type": "Settings"
+          },
+          {
+            "name": "file_path",
+            "type": "str"
+          }
+        ],
+        "returns": "PdfParser",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/services/pdf_native.py",
+    "language": "python",
+    "description": "Native PDF extraction pipeline.",
+    "imported_types": [
+      "pdfplumber",
+      "pymupdf",
+      "pikepdf",
+      "typing.List",
+      "models.ParsedObject"
+    ],
+    "declared_types": [
+      {
+        "name": "NativePdfParser",
+        "type": "class",
+        "line": 1,
+        "docstring": "Implements PdfParser using pdfplumber/PyMuPDF/pikepdf and Camelot/Tabula.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/services/pdf_mineru.py",
+    "language": "python",
+    "description": "MinerU-backed PDF extraction pipeline.",
+    "imported_types": [
+      "typing.List",
+      "models.ParsedObject"
+    ],
+    "declared_types": [
+      {
+        "name": "MinerUPdfParser",
+        "type": "class",
+        "line": 1,
+        "docstring": "Implements PdfParser using MinerU (magic-pdf) and normalizes to ParsedObject.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/services/parse_docx.py",
+    "language": "python",
+    "description": "DOCX extractor.",
+    "imported_types": [
+      "docx",
+      "typing.List",
+      "models.ParsedObject"
+    ],
+    "declared_types": [
+      {
+        "name": "parse_docx",
+        "type": "function",
+        "line": 1,
+        "docstring": "Extract paragraphs/tables/runs with styles.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [
+          {
+            "name": "file_path",
+            "type": "str"
+          }
+        ],
+        "returns": "list[ParsedObject]",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/services/parse_txt.py",
+    "language": "python",
+    "description": "TXT extractor.",
+    "imported_types": [
+      "typing.List",
+      "models.ParsedObject"
+    ],
+    "declared_types": [
+      {
+        "name": "parse_txt",
+        "type": "function",
+        "line": 1,
+        "docstring": "Line-by-line TXT extraction with encoding detection.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [
+          {
+            "name": "file_path",
+            "type": "str"
+          }
+        ],
+        "returns": "list[ParsedObject]",
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/tests/test_parse_pdf_native.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_pdf_native_golden",
+        "type": "function",
+        "line": 1,
+        "docstring": "Verify native parser against goldens.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/tests/test_parse_pdf_mineru.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_pdf_mineru_golden",
+        "type": "function",
+        "line": 1,
+        "docstring": "Verify MinerU parser against goldens.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/tests/test_pdf_parity.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_native_vs_mineru_parity",
+        "type": "function",
+        "line": 1,
+        "docstring": "Compare coverage metrics between engines with tolerance.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/tests/test_parse_docx.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_parse_docx_golden",
+        "type": "function",
+        "line": 1,
+        "docstring": "DOCX extraction goldens.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/tests/test_parse_txt.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_parse_txt_golden",
+        "type": "function",
+        "line": 1,
+        "docstring": "TXT extraction goldens.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  },
+  {
+    "file_path": "backend/tests/test_upload_limits.py",
+    "language": "python",
+    "description": "",
+    "imported_types": [],
+    "declared_types": [
+      {
+        "name": "test_limits",
+        "type": "function",
+        "line": 1,
+        "docstring": "File size/type validation.",
+        "modifiers": [],
+        "decorators": [],
+        "extends": [],
+        "args": [],
+        "returns": null,
+        "members": [],
+        "properties": []
+      }
+    ]
+  }
+]
