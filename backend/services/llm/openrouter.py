@@ -5,14 +5,27 @@ from typing import Any, List
 
 import httpx
 
+from ...openrouter import normalize_openrouter_base_url
 from .llm_provider import LLMProvider
 
 
 class OpenRouterProvider(LLMProvider):
-    def __init__(self, *, model: str, params: dict[str, Any] | None, api_key: str) -> None:
+    def __init__(
+        self,
+        *,
+        model: str,
+        params: dict[str, Any] | None,
+        api_key: str,
+        base_url: str | None = None,
+    ) -> None:
         super().__init__(model=model, params=params)
         self.api_key = api_key
-        self.endpoint = "https://openrouter.ai/api/v1/chat/completions"
+        normalized_base_url = normalize_openrouter_base_url(base_url)
+        endpoint = normalized_base_url.rstrip("/")
+        if not endpoint.endswith("/chat/completions"):
+            endpoint = f"{endpoint}/chat/completions"
+        self.base_url = normalized_base_url
+        self.endpoint = endpoint
 
     async def _chat(self, messages: List[dict[str, str]]) -> str:
         payload: dict[str, Any] = {"model": self.model, "messages": messages}

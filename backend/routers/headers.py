@@ -5,9 +5,9 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException, status
-from httpx import InvalidURL
 
 from ..models import HeaderItem, OpenRouterHeadersRequest
+from ..openrouter import normalize_openrouter_base_url
 from ._headers_common import (
     build_header_messages,
     fetch_document_text,
@@ -15,43 +15,6 @@ from ._headers_common import (
 )
 
 router = APIRouter(prefix="/api/openrouter", tags=["headers"])
-
-
-def _normalize_openrouter_base_url(raw_base_url: str | None) -> str:
-    """Return a sanitized base URL for OpenRouter requests.
-
-    The UI allows users to input a custom base URL. Some users provide a host
-    without a scheme (e.g. ``openrouter.ai/api/v1``), which causes ``httpx`` to
-    treat the entire string as a hostname and yields a DNS error such as
-    ``getaddrinfo failed``. To avoid this sharp edge we coerce the scheme to
-    HTTPS when missing and rely on ``httpx``'s URL parser to validate the
-    resulting URL.
-    """
-
-    base_url = (raw_base_url or "https://openrouter.ai/api/v1").strip()
-    if not base_url:
-        base_url = "https://openrouter.ai/api/v1"
-
-    if "://" not in base_url:
-        base_url = f"https://{base_url}"
-
-    try:
-        parsed = httpx.URL(base_url)
-    except InvalidURL as exc:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid base_url: {exc}",
-        ) from exc
-
-    if not parsed.scheme or not parsed.host:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="base_url must include a hostname",
-        )
-
-    return str(parsed)
-
-
 async def _chat_via_openrouter(
     *,
     base_url: str,
@@ -153,7 +116,7 @@ async def extract_openrouter_headers(
     document = fetch_document_text(payload.upload_id)
     messages = build_header_messages(document)
 
-    base_url = _normalize_openrouter_base_url(payload.base_url)
+    base_url = normalize_openrouter_base_url(payload.base_url)
     timeout = float((payload.params or {}).get("timeout", 60.0))
     response_text = await _chat_via_openrouter(
         base_url=base_url,

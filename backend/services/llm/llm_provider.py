@@ -55,7 +55,12 @@ def get_provider(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="OpenRouter API key is required",
             )
-        return OpenRouterProvider(model=model, params=params, api_key=api_key)
+        return OpenRouterProvider(
+            model=model,
+            params=params,
+            api_key=api_key,
+            base_url=base_url,
+        )
     if provider == "llamacpp":
         from .llamacpp import LlamaCPPProvider
 
