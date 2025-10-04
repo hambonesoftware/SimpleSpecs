@@ -62,6 +62,7 @@ let activeSection = null;
 let settingsSaveTimer = null;
 let allowSettingsAutosave = false;
 let lastPersistedSettings = null;
+const reportedInvalidHeaderMatches = new Set();
 
 function log(message) {
   addLog(message);
@@ -91,35 +92,66 @@ function normalize(value) {
   return value.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
-function findLineIndex(lines, header) {
+function isLikelyTableOfContentsLine(line) {
+  if (!line) return false;
+  const compact = line.replace(/\s+/g, "");
+  if (!compact) return false;
+  if (compact.includes("....")) return true;
+  const dotCount = (compact.match(/\./g) || []).length;
+  return dotCount >= 6;
+}
+
+function findLineIndex(lines, header, { reportMismatch = false } = {}) {
   const combo = normalize(`${header.section_number} ${header.section_name}`);
   const number = normalize(header.section_number);
   const name = normalize(header.section_name);
-  for (let i = 0; i < lines.length; i += 1) {
-    const current = normalize(lines[i]);
-    if (current.startsWith(combo)) return i;
+  const invalidMatches = [];
+
+  const checks = [
+    (current) => current.startsWith(combo),
+    (current) => number && current.startsWith(number) && current.includes(name),
+    (current) => name && current.includes(name),
+  ];
+
+  for (const check of checks) {
+    for (let i = 0; i < lines.length; i += 1) {
+      const original = lines[i];
+      const current = normalize(original);
+      if (!check(current)) continue;
+      if (isLikelyTableOfContentsLine(original)) {
+        invalidMatches.push({ index: i, line: original });
+        continue;
+      }
+      return i;
+    }
   }
-  for (let i = 0; i < lines.length; i += 1) {
-    const current = normalize(lines[i]);
-    if (number && current.startsWith(number) && current.includes(name)) return i;
+
+  if (reportMismatch && invalidMatches.length > 0) {
+    const key = `${header.section_number} ${header.section_name}`.trim();
+    if (!reportedInvalidHeaderMatches.has(key)) {
+      reportedInvalidHeaderMatches.add(key);
+      log(
+        `Skipping match for "${header.section_number} ${header.section_name}" because the line in the document contains too many periods and appears to be from a table of contents.`,
+      );
+    }
   }
-  for (let i = 0; i < lines.length; i += 1) {
-    const current = normalize(lines[i]);
-    if (name && current.includes(name)) return i;
-  }
-  return 0;
+
+  return -1;
 }
 
 function computeSectionText(header) {
   const lines = getDocumentLines();
   if (!lines.length) return "";
   const headers = state.headers || [];
-  const start = findLineIndex(lines, header);
+  const start = findLineIndex(lines, header, { reportMismatch: true });
+  if (start < 0) {
+    return "Unable to match this header to the document text because the closest line contains too many periods (likely a table of contents entry).";
+  }
   let end = lines.length;
   headers.forEach((candidate) => {
     if (candidate.section_number === header.section_number) return;
     const candidateIndex = findLineIndex(lines, candidate);
-    if (candidateIndex > start && candidateIndex < end) {
+    if (candidateIndex >= 0 && candidateIndex > start && candidateIndex < end) {
       end = candidateIndex;
     }
   });
@@ -202,6 +234,7 @@ async function handleUpload() {
     log(`Parsed ${response.object_count} objects (upload ${response.upload_id}).`);
     await loadObjects(response.upload_id);
     setUpload({ uploadId: response.upload_id, objects: state.objects });
+    reportedInvalidHeaderMatches.clear();
     refreshHeaders();
     updateProgress(progressFill, 40);
     log("Document ready. Proceed with header extraction.");
@@ -223,6 +256,7 @@ async function handleHeaders() {
     return;
   }
   log("Requesting headers from LLM…");
+  reportedInvalidHeaderMatches.clear();
   updateProgress(progressFill, 60);
   const config = {
     uploadId: state.uploadId,
