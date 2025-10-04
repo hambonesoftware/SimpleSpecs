@@ -25,15 +25,17 @@ def _make_object(file_id: str, index: int, text: str) -> ParsedObject:
 
 
 def test_compute_section_spans() -> None:
-    """Objects are deterministically partitioned across section leaves."""
+    """Objects after each header are grouped until the next header."""
 
     file_id = "file"
     objects = [
-        _make_object(file_id, 0, "Heading"),
-        _make_object(file_id, 1, "Details 1"),
-        _make_object(file_id, 2, "Details 2"),
-        _make_object(file_id, 3, "Details 3"),
-        _make_object(file_id, 4, "Details 4"),
+        _make_object(file_id, 0, "Alpha"),
+        _make_object(file_id, 1, "Alpha details 1"),
+        _make_object(file_id, 2, "Alpha details 2"),
+        _make_object(file_id, 3, "Gamma"),
+        _make_object(file_id, 4, "Gamma details"),
+        _make_object(file_id, 5, "Delta"),
+        _make_object(file_id, 6, "Delta details"),
     ]
 
     section_alpha = SectionNode(
@@ -44,17 +46,17 @@ def test_compute_section_spans() -> None:
         children=[],
         span=SectionSpan(
             start_object=objects[0].object_id,
-            end_object=objects[1].object_id,
+            end_object=objects[2].object_id,
         ),
     )
-    section_beta = SectionNode(
-        section_id="sec-beta",
+    section_gamma = SectionNode(
+        section_id="sec-gamma",
         file_id=file_id,
-        title="Beta",
+        title="Gamma",
         depth=2,
         children=[],
         span=SectionSpan(
-            start_object=objects[0].object_id,
+            start_object=objects[3].object_id,
             end_object=objects[4].object_id,
         ),
     )
@@ -65,19 +67,8 @@ def test_compute_section_spans() -> None:
         depth=2,
         children=[],
         span=SectionSpan(
-            start_object=objects[2].object_id,
-            end_object=objects[4].object_id,
-        ),
-    )
-    section_gamma = SectionNode(
-        section_id="sec-gamma",
-        file_id=file_id,
-        title="Gamma",
-        depth=1,
-        children=[],
-        span=SectionSpan(
-            start_object=objects[0].object_id,
-            end_object=objects[4].object_id,
+            start_object=objects[5].object_id,
+            end_object=objects[6].object_id,
         ),
     )
     section_parent = SectionNode(
@@ -85,32 +76,29 @@ def test_compute_section_spans() -> None:
         file_id=file_id,
         title="Parent",
         depth=1,
-        children=[section_beta, section_delta],
+        children=[section_gamma, section_delta],
     )
     root = SectionNode(
         section_id="root",
         file_id=file_id,
         title="Document",
         depth=0,
-        children=[section_alpha, section_gamma, section_parent],
+        children=[section_alpha, section_parent],
     )
 
     mapping = compute_section_spans(root, objects)
 
-    assert mapping["sec-alpha"] == [objects[0].object_id, objects[1].object_id]
-    assert mapping["sec-delta"] == [
-        objects[2].object_id,
-        objects[3].object_id,
+    assert mapping["sec-alpha"] == [objects[1].object_id, objects[2].object_id]
+    assert mapping["sec-gamma"] == [objects[4].object_id]
+    assert mapping["sec-delta"] == [objects[6].object_id]
+    assert mapping["sec-parent"] == [
         objects[4].object_id,
+        objects[6].object_id,
     ]
-    assert mapping["sec-gamma"] == []
-    assert mapping["sec-beta"] == []
-    assert mapping["sec-parent"] == mapping["sec-delta"]
     assert mapping["root"] == [obj.object_id for obj in objects]
     assert set(mapping.keys()) == {
         "root",
         "sec-alpha",
-        "sec-beta",
         "sec-delta",
         "sec-gamma",
         "sec-parent",
