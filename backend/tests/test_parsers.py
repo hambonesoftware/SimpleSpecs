@@ -6,6 +6,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from backend.models import LINE_KIND, PARAGRAPH_KIND, TABLE_KIND
 from backend.services.parsing import parse_document
 
 
@@ -16,8 +17,8 @@ def test_parse_txt(tmp_path: Path) -> None:
     objects = parse_document(sample)
 
     assert len(objects) == 3
-    assert all(obj["type"] == "text" for obj in objects)
-    assert {obj["content"] for obj in objects} == {"Line one", "Line two", "Line three"}
+    assert all(obj["kind"] == LINE_KIND for obj in objects)
+    assert {obj["text"] for obj in objects} == {"Line one", "Line two", "Line three"}
 
 
 def test_parse_docx(tmp_path: Path) -> None:
@@ -36,11 +37,11 @@ def test_parse_docx(tmp_path: Path) -> None:
 
     objects = parse_document(sample)
 
-    texts = [obj for obj in objects if obj["type"] == "text"]
-    tables = [obj for obj in objects if obj["type"] == "table"]
+    texts = [obj for obj in objects if obj["kind"] == PARAGRAPH_KIND]
+    tables = [obj for obj in objects if obj["kind"] == TABLE_KIND]
 
-    assert any(obj["content"] == "Introduction" for obj in texts)
-    assert any("Header" in obj["content"] for obj in tables)
+    assert any(obj["text"] == "Introduction" for obj in texts)
+    assert any("Header" in (obj["text"] or "") for obj in tables)
 
 
 def test_parse_pdf(tmp_path: Path) -> None:
@@ -58,7 +59,7 @@ def test_parse_pdf(tmp_path: Path) -> None:
 
     objects = parse_document(sample)
 
-    assert any(obj["type"] == "text" for obj in objects)
-    contents = "\n".join(obj["content"] for obj in objects if obj["type"] == "text")
+    assert any(obj["kind"] == LINE_KIND for obj in objects)
+    contents = "\n".join(obj["text"] for obj in objects if obj["kind"] == LINE_KIND)
     assert "Introduction" in contents
     assert "Provide two bolts" in contents

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from charset_normalizer import from_path
 
-from ..models import ParsedObject
+from ..models import LineObject, ParsedObject
 
 
 def parse_txt(file_path: str) -> list[ParsedObject]:
@@ -20,14 +20,15 @@ def parse_txt(file_path: str) -> list[ParsedObject]:
     objects: list[ParsedObject] = []
     for index, line in enumerate(text.splitlines()):
         objects.append(
-            ParsedObject(
+            LineObject(
                 object_id=f"{file_id}-txt-{index:06d}",
                 file_id=file_id,
-                kind="text",
                 text=line,
                 page_index=0,
                 bbox=None,
                 order_index=index,
+                line_index=index,
+                is_blank=len(line.strip()) == 0,
                 metadata={"engine": "txt", "encoding": best.encoding if best else "utf-8"},
             )
         )

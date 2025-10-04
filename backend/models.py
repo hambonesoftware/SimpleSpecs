@@ -1,12 +1,13 @@
 """Pydantic models for the SimpleSpecs backend."""
 from __future__ import annotations
 
-from typing import Any, Iterable, Literal
+from typing import Annotated, Any, Dict, Iterable, List, Literal, Optional, Union
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    TypeAdapter,
     field_serializer,
     field_validator,
     model_validator,
@@ -74,23 +75,36 @@ class SectionNode(BaseModel):
         return value
 
 
-class ParsedObject(BaseModel):
-    """Normalized representation of a parsed document element."""
+class Word(BaseModel):
+    text: str
+    bbox: Optional[BoundingBox] = None
+    font: Optional[str] = None
+    size: Optional[float] = None
+    bold: Optional[bool] = None
+    italic: Optional[bool] = None
+    color: Optional[str] = None
+    page_index: Optional[int] = None
+    line_index: Optional[int] = None
+    meta: Dict[str, Any] = Field(default_factory=dict)
 
-    model_config = ConfigDict(extra="allow")
 
-    object_id: str = Field(..., description="Unique identifier for the extracted element")
-    file_id: str = Field(..., description="Identifier of the owning file")
-    kind: str = Field(..., description="Element type: text, table, image, other")
-    text: str | None = Field(None, description="Primary textual content of the element")
-    page_index: int | None = Field(None, description="Zero-based page index if available")
-    bbox: BoundingBox | None = Field(
-        None, description="Bounding box coordinates [x0, y0, x1, y1] where available"
-    )
-    order_index: int = Field(0, description="Document order index assigned during ingestion")
-    metadata: dict[str, Any] | None = Field(
-        default=None, description="Additional metadata for the parsed element"
-    )
+class _ObjectBase(BaseModel):
+    """Canonical fields for any parsed object."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    object_id: str = Field(..., description="Unique id for the extracted element")
+    file_id: str = Field(..., description="Owning file/upload id")
+    kind: str
+
+    text: Optional[str] = None
+    page_index: Optional[int] = None
+    bbox: Optional[BoundingBox] = None
+    order_index: int = Field(0, ge=0, description="Reading-order index")
+    tokens: Optional[int] = None
+    parent_id: Optional[str] = None
+    children_ids: List[str] = Field(default_factory=list)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("bbox", mode="before")
     @classmethod
@@ -99,18 +113,80 @@ class ParsedObject(BaseModel):
             return value
         return BoundingBox.model_validate(value)
 
-    @field_validator("order_index")
+    @field_validator("children_ids", mode="before")
     @classmethod
-    def _non_negative_order(cls, value: int) -> int:
-        if value < 0:
-            raise ValueError("order_index must be non-negative")
-        return value
+    def _ensure_children_ids(cls, value: Any) -> Any:
+        if value is None:
+            return []
+        if isinstance(value, (list, tuple, set)):
+            return [str(item) for item in value]
+        raise TypeError("children_ids must be a sequence of identifiers")
+
+    @field_validator("metadata", mode="before")
+    @classmethod
+    def _ensure_metadata(cls, value: Any) -> Dict[str, Any]:
+        if value is None:
+            return {}
+        if isinstance(value, dict):
+            return value
+        raise TypeError("metadata must be a mapping")
 
     @field_serializer("bbox")
     def _serialize_bbox(self, value: BoundingBox | None) -> list[float] | None:
         if value is None:
             return None
         return value.to_list()
+
+
+class LineObject(_ObjectBase):
+    kind: Literal["line"] = "line"
+    words: List[Word] = Field(default_factory=list)
+    is_blank: Optional[bool] = None
+    line_index: Optional[int] = None
+
+
+class ParagraphObject(_ObjectBase):
+    kind: Literal["para"] = "para"
+    line_span: Optional[List[int]] = None
+    paragraph_index: Optional[int] = None
+
+
+class HeaderObject(_ObjectBase):
+    kind: Literal["header"] = "header"
+    level: int
+    number: Optional[str] = None
+    normalized_text: Optional[str] = None
+    path: Optional[str] = None
+
+
+class TableObject(_ObjectBase):
+    kind: Literal["table"] = "table"
+    n_rows: Optional[int] = None
+    n_cols: Optional[int] = None
+    has_header_row: Optional[bool] = None
+    markdown: Optional[str] = None
+
+
+class FigureObject(_ObjectBase):
+    kind: Literal["figure"] = "figure"
+    caption: Optional[str] = None
+    ref_id: Optional[str] = None
+
+
+ParsedObject = Annotated[
+    Union[LineObject, ParagraphObject, HeaderObject, TableObject, FigureObject],
+    Field(discriminator="kind"),
+]
+
+
+PARSED_OBJECT_ADAPTER = TypeAdapter(ParsedObject)
+PARSED_OBJECT_TYPES = (LineObject, ParagraphObject, HeaderObject, TableObject, FigureObject)
+
+LINE_KIND = "line"
+PARAGRAPH_KIND = "para"
+HEADER_KIND = "header"
+TABLE_KIND = "table"
+FIGURE_KIND = "figure"
 
 
 class UploadResponse(BaseModel):

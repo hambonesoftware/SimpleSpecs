@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..models import ParsedObject
+from ..models import ParagraphObject, ParsedObject, TableObject
 
 try:  # pragma: no cover - optional dependency
     from docx import Document
@@ -26,14 +26,12 @@ def parse_docx(file_path: str) -> list[ParsedObject]:
         if not text:
             continue
         objects.append(
-            ParsedObject(
+            ParagraphObject(
                 object_id=f"{file_id}-docx-text-{order_index:06d}",
                 file_id=file_id,
-                kind="text",
                 text=text,
-                page_index=None,
-                bbox=None,
                 order_index=order_index,
+                paragraph_index=order_index,
                 metadata={"engine": "docx", "source": "python-docx"},
             )
         )
@@ -44,15 +42,17 @@ def parse_docx(file_path: str) -> list[ParsedObject]:
         for row in table.rows:
             rows.append([cell.text.strip() for cell in row.cells])
         table_text = "\n".join("\t".join(cell for cell in row) for row in rows)
+        n_rows = len(rows) or None
+        n_cols = max((len(row) for row in rows), default=0) or None
         objects.append(
-            ParsedObject(
+            TableObject(
                 object_id=f"{file_id}-docx-table-{table_index:06d}",
                 file_id=file_id,
-                kind="table",
                 text=table_text or None,
-                page_index=None,
-                bbox=None,
                 order_index=order_index,
+                markdown=table_text or None,
+                n_rows=n_rows,
+                n_cols=n_cols,
                 metadata={"engine": "docx", "source": "python-docx"},
             )
         )

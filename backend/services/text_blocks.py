@@ -5,7 +5,15 @@ import difflib
 import re
 from typing import Sequence
 
-from ..models import HeaderItem, ParsedObject
+from ..models import (
+    HEADER_KIND,
+    LINE_KIND,
+    PARAGRAPH_KIND,
+    TABLE_KIND,
+    HeaderItem,
+    PARSED_OBJECT_TYPES,
+    ParsedObject,
+)
 
 
 def document_lines(objects: Sequence[dict | ParsedObject]) -> list[str]:
@@ -14,15 +22,15 @@ def document_lines(objects: Sequence[dict | ParsedObject]) -> list[str]:
     lines: list[str] = []
     for obj in objects:
         data = obj
-        if isinstance(obj, ParsedObject):
+        if isinstance(obj, PARSED_OBJECT_TYPES):
             data = obj.model_dump()
         kind = data.get("kind") or data.get("type")
         text = data.get("text") or data.get("content") or ""
-        if kind == "text":
+        if kind in {LINE_KIND, PARAGRAPH_KIND, HEADER_KIND}:
             content = str(text).strip()
             if content:
                 lines.append(content)
-        elif kind == "table":
+        elif kind == TABLE_KIND:
             content = str(text).strip()
             if content:
                 lines.extend(line.strip() for line in content.splitlines() if line.strip())

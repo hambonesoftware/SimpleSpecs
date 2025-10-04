@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 from ..config import Settings, get_settings
-from ..models import ParsedObject, SectionNode, SectionSpan
+from ..models import PARSED_OBJECT_ADAPTER, ParsedObject, SectionNode, SectionSpan
 
 __all__ = ["compute_section_spans", "load_persisted_chunks", "run_chunking"]
 
@@ -42,7 +42,7 @@ def _load_parsed_objects(file_id: str, settings: Settings) -> list[ParsedObject]
         raise FileNotFoundError("parsed_objects_missing")
     with objects_path.open("r", encoding="utf-8") as handle:
         payload = json.load(handle)
-    return [ParsedObject.model_validate(item) for item in payload]
+    return [PARSED_OBJECT_ADAPTER.validate_python(item) for item in payload]
 
 
 def _load_sections(file_id: str, settings: Settings) -> SectionNode:

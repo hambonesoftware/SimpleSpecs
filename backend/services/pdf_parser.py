@@ -5,7 +5,13 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from ..config import Settings, get_settings
-from ..models import ParsedObject
+from ..models import (
+    FIGURE_KIND,
+    LINE_KIND,
+    PARAGRAPH_KIND,
+    TABLE_KIND,
+    ParsedObject,
+)
 from .pdf_mineru import MinerUPdfParser, MinerUUnavailableError
 from .pdf_native import NativePdfParser
 
@@ -38,9 +44,12 @@ class AutoPdfParser:
     def _should_use_mineru(self, native_objects: list[ParsedObject]) -> bool:
         if not self.settings.MINERU_ENABLED:
             return False
-        text_chars = sum(len(obj.text or "") for obj in native_objects if obj.kind == "text")
-        has_images = any(obj.kind == "image" for obj in native_objects)
-        has_tables = any(obj.kind == "table" for obj in native_objects)
+        textual_kinds = {LINE_KIND, PARAGRAPH_KIND}
+        text_chars = sum(
+            len(obj.text or "") for obj in native_objects if obj.kind in textual_kinds
+        )
+        has_images = any(obj.kind == FIGURE_KIND for obj in native_objects)
+        has_tables = any(obj.kind == TABLE_KIND for obj in native_objects)
         low_density = text_chars < 200
         return (low_density and has_images) or (not has_tables and has_images)
 

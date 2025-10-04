@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ..models import ParsedObject
+from ..models import FigureObject, ParagraphObject, ParsedObject, TableObject
 
 try:  # pragma: no cover - optional dependency
     import pdfplumber  # type: ignore
@@ -54,14 +54,14 @@ class NativePdfParser:
                     for page_index, page in enumerate(pdf.pages):
                         text = page.extract_text() or ""
                         page_bbox = [0.0, 0.0, float(page.width or 0), float(page.height or 0)]
-                        obj = ParsedObject(
+                        obj = ParagraphObject(
                             object_id=f"{file_id}-txt-{order_index:06d}",
                             file_id=file_id,
-                            kind="text",
                             text=text.strip() or None,
                             page_index=page_index,
                             bbox=page_bbox,
                             order_index=order_index,
+                            paragraph_index=order_index,
                             metadata={**metadata, "source": "pdfplumber"},
                         )
                         objects.append(obj)
@@ -76,14 +76,16 @@ class NativePdfParser:
                 for table_idx, table in enumerate(tables):
                     page_index = int(getattr(table, "page", 1)) - 1
                     table_text = table.df.to_csv(index=False)
-                    table_obj = ParsedObject(
+                    table_obj = TableObject(
                         object_id=f"{file_id}-tbl-{table_idx:06d}",
                         file_id=file_id,
-                        kind="table",
                         text=table_text,
                         page_index=page_index,
                         bbox=None,
                         order_index=0,
+                        n_rows=len(rows) or None,
+                        n_cols=len(rows[0]) if rows and rows[0] else None,
+                        markdown=table_text or None,
                         metadata={**metadata, "table_engine": "camelot"},
                     )
                     table_entries.append((page_index, table_obj))
@@ -100,14 +102,14 @@ class NativePdfParser:
                         for block_index, block in enumerate(text_dict.get("blocks", [])):
                             if block.get("type") == 1:
                                 bbox = [float(coord) for coord in block.get("bbox", (0, 0, 0, 0))]
-                                image_obj = ParsedObject(
+                                image_obj = FigureObject(
                                     object_id=f"{file_id}-img-{page_index:03d}-{block_index:03d}",
                                     file_id=file_id,
-                                    kind="image",
                                     text=None,
                                     page_index=page_index,
                                     bbox=bbox,
                                     order_index=0,
+                                    caption=None,
                                     metadata={**metadata, "source": "pymupdf"},
                                 )
                                 image_entries.append((page_index, image_obj))

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, File, HTTPException, Query, UploadFile, status
 
-from ..models import ObjectsResponse, ParsedObject, UploadResponse
+from ..models import ObjectsResponse, PARSED_OBJECT_ADAPTER, ParsedObject, UploadResponse
 from ..services.parsing import parse_document
 from ..store import read_jsonl, upload_objects_path, write_jsonl
 
@@ -63,7 +63,7 @@ async def get_objects(
     if not path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Upload not found")
     raw_objects = read_jsonl(path)
-    objects = [ParsedObject.model_validate(obj) for obj in raw_objects]
+    objects = [PARSED_OBJECT_ADAPTER.validate_python(obj) for obj in raw_objects]
 
     total = len(objects)
     start = (page - 1) * page_size

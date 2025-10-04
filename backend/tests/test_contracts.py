@@ -8,19 +8,19 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from backend.models import BoundingBox, ParsedObject, SectionNode, SpecItem
+from backend.models import BoundingBox, LineObject, SectionNode, SpecItem
 
 
 def test_models_schema() -> None:
     bbox = BoundingBox(x0=0, y0=0, x1=10, y1=10)
-    parsed = ParsedObject(
+    parsed = LineObject(
         object_id="file-obj-1",
         file_id="file",
-        kind="text",
         text="example",
         page_index=0,
         bbox=[bbox.x0, bbox.y0, bbox.x1, bbox.y1],
         order_index=0,
+        line_index=0,
     )
     section = SectionNode(
         section_id="sec-root",
@@ -45,7 +45,7 @@ def test_models_schema() -> None:
         source_object_ids=[parsed.object_id],
     )
 
-    assert parsed.kind == "text"
+    assert parsed.kind == "line"
     assert parsed.order_index == 0
     assert section.children[0].depth == 1
     assert spec.source_object_ids == [parsed.object_id]

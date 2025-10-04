@@ -11,7 +11,7 @@ import httpx
 from ..constants import MAX_TOKENS_LIMIT
 
 from ..config import Settings, get_settings
-from ..models import ParsedObject, SectionNode, SectionSpan
+from ..models import PARSED_OBJECT_ADAPTER, ParsedObject, SectionNode, SectionSpan
 from .llm_client import LLMAdapter
 
 __all__ = ["build_headers_prompt", "parse_nested_list_to_tree"]
@@ -350,7 +350,7 @@ def run_header_discovery(file_id: str, llm_choice: str | None) -> SectionNode:
         raise FileNotFoundError("parsed_objects_missing")
     with objects_path.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
-    objects = [ParsedObject.model_validate(item) for item in data]
+    objects = [PARSED_OBJECT_ADAPTER.validate_python(item) for item in data]
     prompt = build_headers_prompt(objects)
     adapter = _select_adapter(llm_choice, settings)
     try:

@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.main import create_app
+from backend.models import FIGURE_KIND, LINE_KIND, PARAGRAPH_KIND, TABLE_KIND
 
 
 client = TestClient(create_app())
@@ -84,8 +85,9 @@ def test_native_vs_mineru_parity() -> None:
 
     native_kinds = {obj["kind"] for obj in native_objects}
     mineru_kinds = {obj["kind"] for obj in mineru_objects}
-    assert native_kinds & {"text", "table", "image"}
-    assert mineru_kinds & {"text", "table", "image"}
-    assert native_kinds & {"text", "table", "image"} == mineru_kinds & {"text", "table", "image"}
+    canonical_kinds = {LINE_KIND, PARAGRAPH_KIND, TABLE_KIND, FIGURE_KIND}
+    assert native_kinds & canonical_kinds
+    assert mineru_kinds & canonical_kinds
+    assert (native_kinds & canonical_kinds) == (mineru_kinds & canonical_kinds)
 
     assert abs(len(native_objects) - len(mineru_objects)) <= max(2, len(native_objects) // 2)
