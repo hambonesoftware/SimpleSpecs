@@ -140,7 +140,6 @@ def _build_request_body(
         "stream": False,
         "modalities": ["text"],
         "response_format": {"type": "text"},
-        "reasoning": {"max_output_tokens": 0},
     }
 
     if not params:
@@ -170,7 +169,7 @@ async def _chat_via_openrouter(
     model: str,
     messages: List[Dict[str, str]],
     params: Optional[Dict[str, Any]] = None,
-    timeout: float = 60.0,
+    timeout: float = 360.0,
 ) -> str:
     """Call OpenRouter's OpenAI-compatible chat completions endpoint."""
 

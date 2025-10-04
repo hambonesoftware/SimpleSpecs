@@ -81,7 +81,7 @@ def parse_and_store_headers(upload_id: str, response_text: str) -> list[HeaderIt
     if not match:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="LLM returned unexpected format",
+            detail=f"LLM returned unexpected format {response_text}",
         )
 
     headers = _parse_headers_block(match.group(1))
