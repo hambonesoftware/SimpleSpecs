@@ -22,6 +22,7 @@ _INDENT_WIDTH = 2
 _BULLET_PREFIXES = ("- ", "* ", "+ ", "• ", "– ", "— ")
 _ENUM_RE = re.compile(r"^(?:[0-9]+|[A-Za-z]+)(?:\.[0-9A-Za-z]+)*$")
 _ROMAN_RE = re.compile(r"^[IVXLCDM]+$")
+_TOC_FILL_PATTERN = re.compile(r"\.{4,}")
 
 
 @dataclass
@@ -190,7 +191,10 @@ def _prepare_object_lines(objects: Sequence[ParsedObject]) -> list[list[str]]:
         entries: list[str] = []
         text = obj.text or ""
         for line in text.splitlines():
-            _, title = _split_marker(line.strip())
+            stripped_line = line.strip()
+            if _TOC_FILL_PATTERN.search(stripped_line):
+                continue
+            _, title = _split_marker(stripped_line)
             normalized = _normalize_text_for_match(title)
             if normalized:
                 entries.append(normalized)
