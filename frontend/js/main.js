@@ -64,6 +64,12 @@ let allowSettingsAutosave = false;
 let lastPersistedSettings = null;
 const reportedInvalidHeaderMatches = new Set();
 
+const TOC_PATTERNS = [
+  /(?:\. ?){4,}/,
+  /(?:[_\-·•]\s?){3,}/,
+  /(?:[._\-·•]\s?){4,}(?:\d{1,4}|[IVXLCDM]{1,6})\s*$/i,
+];
+
 function log(message) {
   addLog(message);
   appendLog(logConsole, message);
@@ -94,11 +100,9 @@ function normalize(value) {
 
 function isLikelyTableOfContentsLine(line) {
   if (!line) return false;
-  const compact = line.replace(/\s+/g, "");
-  if (!compact) return false;
-  if (compact.includes("....")) return true;
-  const dotCount = (compact.match(/\./g) || []).length;
-  return dotCount >= 6;
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  return TOC_PATTERNS.some((pattern) => pattern.test(trimmed));
 }
 
 function findLineIndex(lines, header, { reportMismatch = false } = {}) {

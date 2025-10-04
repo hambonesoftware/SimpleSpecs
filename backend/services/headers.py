@@ -22,7 +22,11 @@ _INDENT_WIDTH = 2
 _BULLET_PREFIXES = ("- ", "* ", "+ ", "• ", "– ", "— ")
 _ENUM_RE = re.compile(r"^(?:[0-9]+|[A-Za-z]+)(?:\.[0-9A-Za-z]+)*$")
 _ROMAN_RE = re.compile(r"^[IVXLCDM]+$")
-_TOC_FILL_PATTERN = re.compile(r"\.{4,}")
+_TOC_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"(?:\. ?){4,}"),
+    re.compile(r"(?:[_\-·•]\s?){3,}"),
+    re.compile(r"(?:[._\-·•]\s?){4,}(?:\d{1,4}|[IVXLCDM]{1,6})\s*$", re.IGNORECASE),
+)
 
 
 @dataclass
@@ -30,6 +34,13 @@ class _LineItem:
     depth: int
     number: Optional[str]
     title: str
+
+
+def _is_toc_line(text: str) -> bool:
+    stripped = text.strip()
+    if not stripped:
+        return False
+    return any(pattern.search(stripped) for pattern in _TOC_PATTERNS)
 
 
 def build_headers_prompt(objects: list[ParsedObject]) -> str:
@@ -192,7 +203,7 @@ def _prepare_object_lines(objects: Sequence[ParsedObject]) -> list[list[str]]:
         text = obj.text or ""
         for line in text.splitlines():
             stripped_line = line.strip()
-            if _TOC_FILL_PATTERN.search(stripped_line):
+            if _is_toc_line(stripped_line):
                 continue
             _, title = _split_marker(stripped_line)
             normalized = _normalize_text_for_match(title)
