@@ -6,6 +6,7 @@ from typing import Iterable
 
 from fastapi import HTTPException, status
 
+from ..logging import get_logger
 from ..models import HeaderItem
 from ..services.text_blocks import (
     document_line_entries,
@@ -14,6 +15,8 @@ from ..services.text_blocks import (
     section_text,
 )
 from ..store import headers_path, read_jsonl, upload_objects_path, write_json
+
+logger = get_logger(__name__)
 
 _HEADERS_PROMPT = """Please show a simple numbered nested list of all headers and subheaders for this document.
 Return ONLY the list enclosed in #headers# fencing, like:
@@ -81,6 +84,8 @@ def persist_headers(upload_id: str, headers: Iterable[HeaderItem]) -> None:
 
 def parse_and_store_headers(upload_id: str, response_text: str) -> list[HeaderItem]:
     """Extract ``HeaderItem`` entries from an LLM response and persist them."""
+
+    logger.info("Raw header response: %s", response_text)
 
     match = _HEADERS_BLOCK_RE.search(response_text)
     if not match:
