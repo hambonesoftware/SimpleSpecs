@@ -7,6 +7,8 @@ from fastapi.testclient import TestClient
 
 from backend.config import get_settings
 from backend.main import create_app
+from backend.models import ParagraphObject
+from backend.services.headers import _prepare_object_lines
 
 
 def _create_client(monkeypatch, tmp_path: Path) -> TestClient:
@@ -86,3 +88,32 @@ def test_nested_list_parse_variants(monkeypatch, tmp_path):
     persisted_again = client.get(f"/headers/{file_id}")
     assert persisted_again.status_code == 200
     assert persisted_again.json() == llama_tree
+
+
+def test_prepare_object_lines_skips_toc_rows():
+    objects = [
+        ParagraphObject(
+            object_id="obj-1",
+            file_id="file-1",
+            text="\n".join(["1. Scope ....... 5", "Scope Overview"]),
+        ),
+        ParagraphObject(
+            object_id="obj-2",
+            file_id="file-1",
+            text="Appendix A - References ___ 12",
+        ),
+        ParagraphObject(
+            object_id="obj-3",
+            file_id="file-1",
+            text="\n".join(["Preface · · · IV", "Project Goals"]),
+        ),
+    ]
+
+    prepared = _prepare_object_lines(objects)
+    flattened = [line for group in prepared for line in group]
+
+    assert "overview" in flattened
+    assert "goals" in flattened
+    normalized_flattened = {" ".join(item.split()) for item in flattened}
+    excluded = {"1 scope 5", "appendix a references 12", "preface iv"}
+    assert excluded.isdisjoint(normalized_flattened)
