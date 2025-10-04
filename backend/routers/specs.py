@@ -1,6 +1,7 @@
 """Specifications extraction endpoints."""
 from __future__ import annotations
 
+import hashlib
 import re
 from typing import List
 
@@ -91,13 +92,24 @@ async def extract_specs(payload: SpecsRequest) -> List[SpecItem]:
                 line = line[1:].strip()
             if not line:
                 continue
+            section_identifier = f"{payload.upload_id}|{header.section_number}|{header.section_name}"
+            section_hash = hashlib.sha1(section_identifier.encode("utf-8")).hexdigest()
+            spec_id_seed = f"{section_hash}|{line}"
+            spec_id = hashlib.sha1(spec_id_seed.encode("utf-8")).hexdigest()
             specs.append(
                 SpecItem(
-                    section_number=header.section_number,
-                    section_name=header.section_name,
-                    specification=line,
+                    spec_id=spec_id,
+                    file_id=payload.upload_id,
+                    section_id=section_hash,
+                    section_number=header.section_number or None,
+                    section_title=header.section_name,
+                    spec_text=line,
+                    source_object_ids=[],
                 )
             )
 
-    write_json(specs_path(payload.upload_id), [spec.model_dump() for spec in specs])
+    write_json(
+        specs_path(payload.upload_id),
+        [spec.model_dump(mode="json") for spec in specs],
+    )
     return specs

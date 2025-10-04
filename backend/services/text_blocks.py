@@ -16,12 +16,14 @@ def document_lines(objects: Sequence[dict | ParsedObject]) -> list[str]:
         data = obj
         if isinstance(obj, ParsedObject):
             data = obj.model_dump()
-        if data.get("type") == "text":
-            content = str(data.get("content", "")).strip()
+        kind = data.get("kind") or data.get("type")
+        text = data.get("text") or data.get("content") or ""
+        if kind == "text":
+            content = str(text).strip()
             if content:
                 lines.append(content)
-        elif data.get("type") == "table":
-            content = str(data.get("content", "")).strip()
+        elif kind == "table":
+            content = str(text).strip()
             if content:
                 lines.extend(line.strip() for line in content.splitlines() if line.strip())
     return lines

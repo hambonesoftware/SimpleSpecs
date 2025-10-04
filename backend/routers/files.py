@@ -13,8 +13,10 @@ from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
 from ..config import get_settings
-from ..models import SectionNode, SpecItem
+from ..models import ParsedObject, SectionNode, SpecItem
 from ..services.chunker import load_persisted_chunks, run_chunking
+from ..services.headers import load_persisted_headers, run_header_discovery
+from ..services.specs import extract_specs_for_sections
 
 files_router = APIRouter(prefix="", tags=["files"])
 
@@ -46,6 +48,14 @@ def _load_json(path: Path) -> Any:
         return json.load(handle)
 
 
+def _load_parsed_objects(file_id: str, base: Path) -> list[ParsedObject]:
+    parsed_path = base / "parsed" / "objects.json"
+    if not parsed_path.exists():
+        raise FileNotFoundError("parsed_objects_missing")
+    data = _load_json(parsed_path)
+    return [ParsedObject.model_validate(item) for item in data]
+
+
 @files_router.post("/chunks/{file_id}", response_model=dict[str, list[str]])
 def create_chunks(file_id: str) -> dict[str, list[str]]:
     """Compute and persist section chunks for the provided file."""
@@ -66,6 +76,84 @@ def get_chunks(file_id: str) -> dict[str, list[str]]:
     except FileNotFoundError as exc:
         detail = str(exc) or "Chunks not found."
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail) from exc
+
+
+@files_router.get("/headers/{file_id}", response_model=SectionNode)
+def get_headers(file_id: str) -> SectionNode:
+    """Return persisted section hierarchy for a file."""
+
+    try:
+        return load_persisted_headers(file_id)
+    except FileNotFoundError:
+        try:
+            return run_header_discovery(file_id, None)
+        except FileNotFoundError as exc:
+            detail = str(exc) or "Parsed objects missing."
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail) from exc
+
+
+@files_router.post("/headers/{file_id}/find", response_model=SectionNode)
+def discover_headers(file_id: str, llm: str | None = Query(default=None)) -> SectionNode:
+    """Run header discovery for the provided file and persist the results."""
+
+    try:
+        return run_header_discovery(file_id, llm)
+    except FileNotFoundError as exc:
+        detail = str(exc) or "Parsed objects missing."
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail) from exc
+
+
+class _NullAdapter:
+    def generate(self, prompt: str) -> str:  # noqa: D401 - simple deterministic stub
+        return ""
+
+
+def _select_specs_adapter(llm: str | None) -> _NullAdapter:
+    _ = llm  # currently deterministic fallback regardless of provider
+    return _NullAdapter()
+
+
+@files_router.post("/specs/{file_id}/find", response_model=list[SpecItem])
+def discover_specs(file_id: str, llm: str | None = Query(default=None)) -> list[SpecItem]:
+    """Extract mechanical specifications for each leaf section."""
+
+    settings = get_settings()
+    base = Path(settings.ARTIFACTS_DIR) / file_id
+    if not base.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found.")
+
+    try:
+        objects = _load_parsed_objects(file_id, base)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+    try:
+        section_root = load_persisted_headers(file_id)
+    except FileNotFoundError:
+        section_root = run_header_discovery(file_id, None)
+
+    adapter = _select_specs_adapter(llm)
+    try:
+        return extract_specs_for_sections(file_id, section_root, objects, adapter)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+
+@files_router.get("/specs/{file_id}", response_model=list[SpecItem])
+def get_specs(file_id: str) -> list[SpecItem]:
+    """Return persisted specifications for a processed file."""
+
+    settings = get_settings()
+    target = Path(settings.ARTIFACTS_DIR) / file_id / "specs" / "specs.json"
+    if not target.exists():
+        try:
+            return discover_specs(file_id, None)
+        except HTTPException:
+            raise
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    payload = _load_json(target)
+    return [SpecItem.model_validate(item) for item in payload]
 
 
 @files_router.get("/qa/{file_id}")
