@@ -2,12 +2,31 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from ..config import Settings, get_settings
 from ..models import ParsedObject, SectionNode
 
 __all__ = ["compute_section_spans", "load_persisted_chunks", "run_chunking"]
+
+
+def _extract_text(obj: ParsedObject) -> str:
+    """Return textual content for the parsed object if available."""
+
+    return (
+        getattr(obj, "text", None)
+        or getattr(obj, "content", None)
+        or ""
+    )
+
+
+def _normalize_heading_text(text: str) -> str:
+    """Normalize heading text for fuzzy comparisons."""
+
+    cleaned = re.sub(r"[\s]+", " ", text or "").strip().lower()
+    cleaned = re.sub(r"[^0-9a-z ]+", "", cleaned)
+    return cleaned
 
 
 def _sorted_objects(objects: list[ParsedObject]) -> list[ParsedObject]:
@@ -90,17 +109,51 @@ def compute_section_spans(root: SectionNode, objects: list[ParsedObject]) -> dic
     _collect(root)
 
     leaf_ranges: dict[str, tuple[int, int]] = {}
+    anchor_index: dict[str, int] = {}
+    ordered_leaf_entries: list[tuple[int, int, str, SectionNode, int | None, int]] = []
     for leaf in leaf_nodes:
-        start_id = leaf.span.start_object
-        end_id = leaf.span.end_object
-        if start_id is None or end_id is None:
+        span = leaf.span
+        if span is None or span.start_object is None:
             continue
-        start_index = object_index.get(start_id)
-        end_index = object_index.get(end_id)
-        if start_index is None or end_index is None:
+        start_index = object_index.get(span.start_object)
+        if start_index is None:
             continue
-        low, high = sorted((start_index, end_index))
-        leaf_ranges[leaf.section_id] = (low, high)
+        end_index = object_index.get(span.end_object) if span.end_object is not None else None
+        order_position = (
+            min(start_index, end_index)
+            if end_index is not None
+            else start_index
+        )
+        anchor_index[leaf.section_id] = start_index
+        ordered_leaf_entries.append(
+            (order_position, leaf.depth, leaf.section_id, leaf, end_index, start_index)
+        )
+
+    ordered_leaf_entries.sort(key=lambda item: (item[0], item[1], item[2]))
+
+    total_objects = len(ordered_objects)
+    for idx, (order_pos, _, section_id, leaf, explicit_end, anchor_pos) in enumerate(ordered_leaf_entries):
+        next_boundary = total_objects
+        for later_idx in range(idx + 1, len(ordered_leaf_entries)):
+            candidate_pos = ordered_leaf_entries[later_idx][0]
+            if candidate_pos > order_pos:
+                next_boundary = candidate_pos
+                break
+        effective_end = next_boundary - 1 if next_boundary > 0 else -1
+        if explicit_end is not None:
+            effective_end = min(effective_end, explicit_end)
+        anchor_obj = ordered_objects[anchor_pos] if 0 <= anchor_pos < total_objects else None
+        anchor_text = _normalize_heading_text(_extract_text(anchor_obj)) if anchor_obj else ""
+        title_text = _normalize_heading_text(leaf.title)
+        is_heading_anchor = bool(
+            anchor_text
+            and title_text
+            and (anchor_text.startswith(title_text) or title_text.startswith(anchor_text))
+        )
+        start_inclusive = anchor_pos + 1 if is_heading_anchor else anchor_pos
+        if start_inclusive > effective_end:
+            continue
+        leaf_ranges[section_id] = (start_inclusive, effective_end)
 
     leaf_chunks: dict[str, list[str]] = {leaf.section_id: [] for leaf in leaf_nodes}
 
@@ -108,12 +161,13 @@ def compute_section_spans(root: SectionNode, objects: list[ParsedObject]) -> dic
         candidates: list[tuple[int, int, str, SectionNode]] = []
         for leaf in leaf_nodes:
             span = leaf_ranges.get(leaf.section_id)
-            if span is None:
+            anchor_pos = anchor_index.get(leaf.section_id)
+            if span is None or anchor_pos is None:
                 continue
             start_idx, end_idx = span
             if index < start_idx or index > end_idx:
                 continue
-            distance = index - start_idx
+            distance = index - anchor_pos
             candidates.append((distance, leaf.depth, leaf.section_id, leaf))
         if not candidates:
             continue
@@ -135,6 +189,18 @@ def compute_section_spans(root: SectionNode, objects: list[ParsedObject]) -> dic
         return aggregate
 
     _build(root)
+
+    assigned_leaf_ids = {oid for chunk in leaf_chunks.values() for oid in chunk}
+    if root.section_id in result:
+        missing_ids = [
+            obj.object_id
+            for obj in ordered_objects
+            if obj.object_id not in assigned_leaf_ids
+        ]
+        if missing_ids:
+            combined = list(dict.fromkeys(result[root.section_id] + missing_ids))
+            combined.sort(key=lambda oid: object_index.get(oid, len(ordered_objects)))
+            result[root.section_id] = combined
 
     for node in all_nodes:
         result.setdefault(node.section_id, [])
