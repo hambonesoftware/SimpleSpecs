@@ -81,27 +81,40 @@ export async function updateModelSettings(payload) {
   });
 }
 
-function buildPayload({ uploadId, provider, model, params, apiKey, baseUrl }) {
+function buildPayload({ uploadId, provider, model, params, apiKey, baseUrl }, options = {}) {
+  const includeProvider = options.includeProvider !== false;
+  const normalizedProvider = provider || "openrouter";
   const payload = {
     upload_id: uploadId,
-    provider,
     model,
     params: params || {},
   };
-  if (provider === "openrouter" && apiKey) {
-    payload.api_key = apiKey;
+  if (includeProvider) {
+    payload.provider = normalizedProvider;
   }
-  if (provider === "llamacpp" && baseUrl) {
+  if (normalizedProvider === "openrouter") {
+    if (apiKey) {
+      payload.api_key = apiKey;
+    }
+    if (baseUrl) {
+      payload.base_url = baseUrl;
+    }
+  }
+  if (normalizedProvider === "llamacpp" && baseUrl) {
     payload.base_url = baseUrl;
   }
   return payload;
 }
 
 export async function requestHeaders(config) {
-  return request("/api/headers", {
+  const endpoint =
+    (config.provider || "openrouter") === "llamacpp"
+      ? "/api/ollama/headers"
+      : "/api/openrouter/headers";
+  return request(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...JSON_HEADERS },
-    body: JSON.stringify(buildPayload(config)),
+    body: JSON.stringify(buildPayload(config, { includeProvider: false })),
   });
 }
 

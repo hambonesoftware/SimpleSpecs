@@ -31,13 +31,19 @@ class ObjectsResponse(BaseModel):
     total: int
 
 
-class HeadersRequest(BaseModel):
+class OpenRouterHeadersRequest(BaseModel):
     upload_id: str
-    provider: Literal["openrouter", "llamacpp"]
     model: str
     params: dict[str, Any] | None = None
-    api_key: str | None = None
+    api_key: str
     base_url: str | None = None
+
+
+class OllamaHeadersRequest(BaseModel):
+    upload_id: str
+    model: str
+    params: dict[str, Any] | None = None
+    base_url: str
 
 
 class HeaderItem(BaseModel):
