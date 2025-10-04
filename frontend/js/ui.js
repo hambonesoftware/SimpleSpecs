@@ -17,7 +17,7 @@ function buildTree(headers) {
   return root;
 }
 
-function createHeaderButton(header, { activeSection, processedSections, onSelect } = {}) {
+function createHeaderButton(header, { activeSection, headerProgress, onSelect } = {}) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "header-node";
@@ -28,9 +28,13 @@ function createHeaderButton(header, { activeSection, processedSections, onSelect
   const status = document.createElement("span");
   status.className = "header-status";
   const key = header?.section_number ? String(header.section_number) : null;
-  if (key && processedSections?.has(key)) {
+  const progress = key ? headerProgress?.get(key) : null;
+  if (progress?.requested) {
+    status.classList.add("header-status--requested");
+    status.textContent = progress.completed ? "✓✓" : "✓";
+  }
+  if (progress?.completed) {
     status.classList.add("header-status--complete");
-    status.textContent = "✓";
   }
   button.appendChild(status);
 
@@ -62,36 +66,36 @@ function createHeaderButton(header, { activeSection, processedSections, onSelect
   return button;
 }
 
-function renderTreeNode(node, activeSection, processedSections, onSelect) {
+function renderTreeNode(node, activeSection, headerProgress, onSelect) {
   if (!node.children) return document.createDocumentFragment();
   const ul = document.createElement("ul");
   const entries = Array.from(node.children.entries()).sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }));
   entries.forEach(([, child]) => {
     const li = document.createElement("li");
     if (child.header) {
-      const button = createHeaderButton(child.header, { activeSection, processedSections, onSelect });
+      const button = createHeaderButton(child.header, { activeSection, headerProgress, onSelect });
       li.appendChild(button);
     }
     if (child.children && child.children.size > 0) {
-      li.appendChild(renderTreeNode(child, activeSection, processedSections, onSelect));
+      li.appendChild(renderTreeNode(child, activeSection, headerProgress, onSelect));
     }
     ul.appendChild(li);
   });
   return ul;
 }
 
-export function renderHeadersTree(container, headers, { onSelect, activeSection, processedSections } = {}) {
+export function renderHeadersTree(container, headers, { onSelect, activeSection, headerProgress } = {}) {
   container.innerHTML = "";
   if (!headers?.length) {
     container.textContent = "No headers extracted yet.";
     return;
   }
   const tree = buildTree(headers);
-  const fragment = renderTreeNode(tree, activeSection, processedSections, onSelect);
+  const fragment = renderTreeNode(tree, activeSection, headerProgress, onSelect);
   container.appendChild(fragment);
 }
 
-export function renderSidebarHeadersList(container, headers, { onSelect, activeSection, processedSections } = {}) {
+export function renderSidebarHeadersList(container, headers, { onSelect, activeSection, headerProgress } = {}) {
   container.innerHTML = "";
   if (!headers?.length) {
     container.textContent = "No headers extracted yet.";
@@ -106,7 +110,7 @@ export function renderSidebarHeadersList(container, headers, { onSelect, activeS
     .sort((a, b) => a.section_number.localeCompare(b.section_number, undefined, { numeric: true }))
     .forEach((header) => {
       const item = document.createElement("li");
-      const button = createHeaderButton(header, { activeSection, processedSections, onSelect });
+      const button = createHeaderButton(header, { activeSection, headerProgress, onSelect });
       item.appendChild(button);
       list.appendChild(item);
     });

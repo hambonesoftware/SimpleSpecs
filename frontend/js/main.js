@@ -18,6 +18,7 @@ import {
   updateSettings,
   addLog,
   resetLogs,
+  markHeaderRequested,
   markHeaderProcessed,
 } from "./state.js";
 import { MAX_TOKENS_LIMIT } from "./constants.js";
@@ -162,12 +163,11 @@ function computeSectionText(header) {
   return lines.slice(start, end).join("\n").trim();
 }
 
-function getProcessedSections() {
-  const processed = new Set();
-  state.headerProgress?.forEach((isComplete, section) => {
-    if (isComplete) processed.add(section);
-  });
-  return processed;
+function getHeaderProgress() {
+  if (!state.headerProgress) {
+    return new Map();
+  }
+  return new Map(state.headerProgress);
 }
 
 function selectHeader(header, { refresh = true } = {}) {
@@ -189,20 +189,20 @@ function selectHeader(header, { refresh = true } = {}) {
 }
 
 function refreshHeaders() {
-  const processedSections = getProcessedSections();
+  const headerProgress = getHeaderProgress();
   if (!state.headers?.length) {
     activeSection = null;
   }
 
   renderHeadersTree(headersTreeEl, state.headers, {
     activeSection,
-    processedSections,
+    headerProgress,
     onSelect: (header) => selectHeader(header),
   });
 
   renderSidebarHeadersList(sidebarHeadersEl, state.headers, {
     activeSection,
-    processedSections,
+    headerProgress,
     onSelect: (header) => selectHeader(header),
   });
 
@@ -313,6 +313,11 @@ async function handleSpecs() {
   }
   log("Requesting specifications from LLM…");
   updateProgress(progressFill, 80);
+  (state.headers || [])
+    .map((header) => header?.section_number)
+    .filter(Boolean)
+    .forEach((sectionNumber) => markHeaderRequested(sectionNumber));
+  refreshHeaders();
   const config = {
     uploadId: state.uploadId,
     provider: state.provider,

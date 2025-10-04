@@ -37,7 +37,7 @@ export function setHeaders(headers) {
   headers.forEach((header) => {
     if (header?.section_number) {
       const key = String(header.section_number);
-      state.headerProgress.set(key, false);
+      state.headerProgress.set(key, { requested: false, completed: false });
     }
   });
 }
@@ -46,13 +46,30 @@ export function setSpecs(specs) {
   state.specs = specs;
 }
 
-export function markHeaderProcessed(sectionNumber) {
-  if (!sectionNumber) return;
+function ensureHeaderProgress(sectionNumber) {
+  if (!sectionNumber) return null;
   if (!state.headerProgress) {
     state.headerProgress = new Map();
   }
   const key = String(sectionNumber);
-  state.headerProgress.set(key, true);
+  const current = state.headerProgress.get(key) || { requested: false, completed: false };
+  state.headerProgress.set(key, current);
+  return { key, current };
+}
+
+export function markHeaderRequested(sectionNumber) {
+  const result = ensureHeaderProgress(sectionNumber);
+  if (!result) return;
+  const { key, current } = result;
+  state.headerProgress.set(key, { ...current, requested: true });
+}
+
+export function markHeaderProcessed(sectionNumber) {
+  if (!sectionNumber) return;
+  const result = ensureHeaderProgress(sectionNumber);
+  if (!result) return;
+  const { key, current } = result;
+  state.headerProgress.set(key, { ...current, requested: true, completed: true });
 }
 
 export function setSectionText(sectionNumber, text) {
