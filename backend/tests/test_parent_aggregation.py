@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
 
 from backend.config import get_settings
 from backend.main import create_app
-from backend.models import ParsedObject, SectionNode
+from backend.models import PARSED_OBJECT_ADAPTER, ParsedObject, SectionNode
 from backend.services.chunker import compute_section_spans
 
 
@@ -67,7 +67,7 @@ def test_parent_equals_union() -> None:
     try:
         with objects_path.open("r", encoding="utf-8") as handle:
             raw_objects = json.load(handle)
-        objects = [ParsedObject.model_validate(item) for item in raw_objects]
+        objects = [PARSED_OBJECT_ADAPTER.validate_python(item) for item in raw_objects]
 
         mapping = compute_section_spans(root, objects)
         mapping_again = compute_section_spans(root, objects)

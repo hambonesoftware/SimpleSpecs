@@ -8,19 +8,19 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from backend.models import ParsedObject, SectionNode, SectionSpan
+from backend.models import ParagraphObject, ParsedObject, SectionNode, SectionSpan
 from backend.services.chunker import compute_section_spans
 
 
 def _make_object(file_id: str, index: int, text: str) -> ParsedObject:
-    return ParsedObject(
+    return ParagraphObject(
         object_id=f"{file_id}-obj-{index}",
         file_id=file_id,
-        kind="text",
         text=text,
         page_index=0,
         bbox=None,
         order_index=index,
+        paragraph_index=index,
     )
 
 

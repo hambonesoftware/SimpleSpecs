@@ -8,12 +8,13 @@ from pathlib import Path
 from typing import Iterable
 
 from ..config import Settings, get_settings
-from ..models import ParsedObject, SectionNode, SpecItem
+from ..models import LINE_KIND, PARAGRAPH_KIND, ParsedObject, SectionNode, SpecItem
 from .llm_client import LLMAdapter
 
 __all__ = ["build_specs_prompt", "extract_specs_for_sections"]
 
 _MAX_SECTION_TEXT = 10_000
+_TEXTUAL_KINDS = {LINE_KIND, PARAGRAPH_KIND}
 _UNIT_PATTERN = re.compile(
     r"\b\d+(?:\.\d+)?\s?(?:mm|cm|m|in|ft|N|kN|MPa|GPa|°C|°F)\b",
     re.IGNORECASE,
@@ -191,7 +192,7 @@ def extract_specs_for_sections(
         section_lines: list[str] = []
         for object_id in sorted_ids:
             obj = indexed_objects[object_id]
-            if obj.kind != "text":
+            if obj.kind not in _TEXTUAL_KINDS:
                 continue
             text = (obj.text or "").strip()
             if text:

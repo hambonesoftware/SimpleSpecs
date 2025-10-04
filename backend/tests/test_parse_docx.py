@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.main import create_app
+from backend.models import LINE_KIND, PARAGRAPH_KIND
 
 
 client = TestClient(create_app())
@@ -54,5 +55,9 @@ def test_parse_docx_golden() -> None:
     assert parsed.status_code == 200, parsed.text
     objects = parsed.json()
     _assert_objects_shape(objects)
-    texts = [obj.get("text") for obj in objects if obj["kind"] == "text" and obj.get("text")]
+    texts = [
+        obj.get("text")
+        for obj in objects
+        if obj["kind"] in {LINE_KIND, PARAGRAPH_KIND} and obj.get("text")
+    ]
     assert any(text and ("Hello" in text or "World" in text) for text in texts)

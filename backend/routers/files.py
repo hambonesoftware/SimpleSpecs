@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
 from ..config import get_settings
-from ..models import ParsedObject, SectionNode, SpecItem
+from ..models import PARSED_OBJECT_ADAPTER, ParsedObject, SectionNode, SpecItem
 from ..services.chunker import load_persisted_chunks, run_chunking
 from ..services.headers import load_persisted_headers, run_header_discovery
 from ..services.specs import extract_specs_for_sections
@@ -53,7 +53,7 @@ def _load_parsed_objects(file_id: str, base: Path) -> list[ParsedObject]:
     if not parsed_path.exists():
         raise FileNotFoundError("parsed_objects_missing")
     data = _load_json(parsed_path)
-    return [ParsedObject.model_validate(item) for item in data]
+    return [PARSED_OBJECT_ADAPTER.validate_python(item) for item in data]
 
 
 @files_router.post("/chunks/{file_id}", response_model=dict[str, list[str]])

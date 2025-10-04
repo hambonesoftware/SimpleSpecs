@@ -11,7 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from backend.config import get_settings
-from backend.models import ParsedObject, SectionNode
+from backend.models import ParagraphObject, ParsedObject, SectionNode
 from backend.services.specs import extract_specs_for_sections
 
 
@@ -57,21 +57,21 @@ def test_dedup_and_merge() -> None:
         (chunks_dir / "chunks.json").write_text(json.dumps(chunk_map))
 
         objects = [
-            ParsedObject(
+            ParagraphObject(
                 object_id="obj-1",
                 file_id=file_id,
-                kind="text",
                 text="- Maximum load 500 N",
                 page_index=0,
                 order_index=0,
+                paragraph_index=0,
             ),
-            ParsedObject(
+            ParagraphObject(
                 object_id="obj-2",
                 file_id=file_id,
-                kind="text",
                 text="- Allowable stress per ASTM A36",
                 page_index=0,
                 order_index=1,
+                paragraph_index=1,
             ),
         ]
 

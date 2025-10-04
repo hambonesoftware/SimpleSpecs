@@ -9,7 +9,14 @@ from typing import Annotated, Iterable
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 
 from ..config import Settings, get_settings
-from ..models import ParsedObject
+from ..models import (
+    FIGURE_KIND,
+    LINE_KIND,
+    PARAGRAPH_KIND,
+    PARSED_OBJECT_ADAPTER,
+    PARSED_OBJECT_TYPES,
+    ParsedObject,
+)
 from ..services.parse_docx import parse_docx
 from ..services.parse_txt import parse_txt
 from ..services.pdf_mineru import MinerUUnavailableError
@@ -23,11 +30,15 @@ def _ensure_order(
 ) -> list[ParsedObject]:
     ordered: list[ParsedObject] = []
     for idx, obj in enumerate(objects):
-        payload = obj.model_dump()
-        payload["file_id"] = file_id
-        payload["order_index"] = idx
-        payload["object_id"] = payload.get("object_id") or f"{file_id}-{idx:06d}"
-        ordered.append(ParsedObject(**payload))
+        if not isinstance(obj, PARSED_OBJECT_TYPES):
+            obj = PARSED_OBJECT_ADAPTER.validate_python(obj)
+        updates = {
+            "file_id": file_id,
+            "order_index": idx,
+        }
+        if not getattr(obj, "object_id", None):
+            updates["object_id"] = f"{file_id}-{idx:06d}"
+        ordered.append(obj.model_copy(update=updates))
     return ordered
 
 
@@ -40,7 +51,7 @@ def _write_objects_json(target: Path, objects: list[ParsedObject]) -> None:
 def _load_objects_json(path: Path) -> list[ParsedObject]:
     with path.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
-    return [ParsedObject.model_validate(item) for item in data]
+    return [PARSED_OBJECT_ADAPTER.validate_python(item) for item in data]
 
 
 def _validate_extension(filename: str | None) -> str:
@@ -151,8 +162,11 @@ async def upload_and_parse(
     ordered_objects = _ensure_order(objects, file_id)
 
     if extension == "pdf":
-        has_text = any(obj.kind == "text" and (obj.text or "").strip() for obj in ordered_objects)
-        has_images = any(obj.kind == "image" for obj in ordered_objects)
+        textual_kinds = {LINE_KIND, PARAGRAPH_KIND}
+        has_text = any(
+            obj.kind in textual_kinds and (obj.text or "").strip() for obj in ordered_objects
+        )
+        has_images = any(obj.kind == FIGURE_KIND for obj in ordered_objects)
         selected_engine = _resolve_engine(engine, settings)
         if selected_engine != "mineru" and not has_text and has_images and not _is_ocr_available():
             raise HTTPException(
