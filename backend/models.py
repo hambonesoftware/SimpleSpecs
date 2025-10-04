@@ -217,6 +217,9 @@ class OllamaHeadersRequest(BaseModel):
 class HeaderItem(BaseModel):
     section_number: str
     section_name: str
+    page_number: int | None = None
+    line_number: int | None = None
+    chunk_text: str | None = None
 
 
 class SpecsRequest(BaseModel):

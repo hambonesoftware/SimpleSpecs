@@ -1,6 +1,7 @@
 """Utilities for working with parsed text blocks."""
 from __future__ import annotations
 
+from dataclasses import dataclass
 import difflib
 import re
 from typing import Sequence
@@ -16,25 +17,61 @@ from ..models import (
 )
 
 
-def document_lines(objects: Sequence[dict | ParsedObject]) -> list[str]:
-    """Return a list of text lines extracted from parsed objects."""
+@dataclass(frozen=True)
+class LineEntry:
+    """Text line with associated location metadata."""
 
-    lines: list[str] = []
+    text: str
+    page_index: int | None = None
+    line_index: int | None = None
+
+
+def document_line_entries(objects: Sequence[dict | ParsedObject]) -> list[LineEntry]:
+    """Return structured line entries extracted from parsed objects."""
+
+    entries: list[LineEntry] = []
     for obj in objects:
-        data = obj
+        data: dict[str, object]
         if isinstance(obj, PARSED_OBJECT_TYPES):
             data = obj.model_dump()
+        else:
+            data = obj
+
         kind = data.get("kind") or data.get("type")
         text = data.get("text") or data.get("content") or ""
+        page_index = data.get("page_index")
+        line_index = data.get("line_index")
+
         if kind in {LINE_KIND, PARAGRAPH_KIND, HEADER_KIND}:
             content = str(text).strip()
             if content:
-                lines.append(content)
+                entries.append(
+                    LineEntry(
+                        text=content,
+                        page_index=int(page_index) if page_index is not None else None,
+                        line_index=int(line_index) if line_index is not None else None,
+                    )
+                )
         elif kind == TABLE_KIND:
             content = str(text).strip()
-            if content:
-                lines.extend(line.strip() for line in content.splitlines() if line.strip())
-    return lines
+            if not content:
+                continue
+            lines = [line.strip() for line in content.splitlines() if line.strip()]
+            for line in lines:
+                entries.append(
+                    LineEntry(
+                        text=line,
+                        page_index=int(page_index) if page_index is not None else None,
+                        line_index=None,
+                    )
+                )
+    return entries
+
+
+def document_lines(objects: Sequence[dict | ParsedObject]) -> list[str]:
+    """Return a list of text lines extracted from parsed objects."""
+
+    return [entry.text for entry in document_line_entries(objects)]
 
 
 def document_text(objects: Sequence[dict | ParsedObject]) -> str:
@@ -71,11 +108,13 @@ def _find_line_index(lines: Sequence[str], header: HeaderItem) -> int:
     return 0
 
 
-def section_text(lines: Sequence[str], headers: Sequence[HeaderItem], header: HeaderItem) -> str:
-    """Return the best-effort text for a header section."""
+def section_bounds(
+    lines: Sequence[str], headers: Sequence[HeaderItem], header: HeaderItem
+) -> tuple[int, int]:
+    """Return the half-open slice describing a header's section bounds."""
 
     if not lines:
-        return ""
+        return (0, 0)
 
     start_index = _find_line_index(lines, header)
     try:
@@ -95,6 +134,17 @@ def section_text(lines: Sequence[str], headers: Sequence[HeaderItem], header: He
             next_index = candidate_index
     if next_index <= start_index:
         next_index = len(lines)
+
+    return (start_index, next_index)
+
+
+def section_text(lines: Sequence[str], headers: Sequence[HeaderItem], header: HeaderItem) -> str:
+    """Return the best-effort text for a header section."""
+
+    if not lines:
+        return ""
+
+    start_index, next_index = section_bounds(lines, headers, header)
 
     extracted = lines[start_index:next_index]
     return "\n".join(extracted).strip()

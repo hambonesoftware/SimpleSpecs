@@ -64,7 +64,7 @@ async def extract_specs(payload: SpecsRequest) -> List[SpecItem]:
 
     specs: list[SpecItem] = []
     for header in headers:
-        text = section_text(lines, headers, header)
+        text = header.chunk_text or section_text(lines, headers, header)
         prompt = _SPEC_PROMPT_TEMPLATE.format(
             section_number=header.section_number,
             section_name=header.section_name,

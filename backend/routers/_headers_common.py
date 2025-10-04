@@ -7,7 +7,12 @@ from typing import Iterable
 from fastapi import HTTPException, status
 
 from ..models import HeaderItem
-from ..services.text_blocks import document_text
+from ..services.text_blocks import (
+    document_line_entries,
+    document_text,
+    section_bounds,
+    section_text,
+)
 from ..store import headers_path, read_jsonl, upload_objects_path, write_json
 
 _HEADERS_PROMPT = """Please show a simple numbered nested list of all headers and subheaders for this document.
@@ -90,6 +95,37 @@ def parse_and_store_headers(upload_id: str, response_text: str) -> list[HeaderIt
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="No headers parsed",
         )
+
+    objects_raw = read_jsonl(upload_objects_path(upload_id))
+    entries = document_line_entries(objects_raw)
+    lines = [entry.text for entry in entries]
+
+    for header in headers:
+        if lines:
+            start_index, _ = section_bounds(lines, headers, header)
+            text = section_text(lines, headers, header)
+        else:
+            start_index = None
+            text = ""
+        normalized_text = text.strip() or f"{header.section_number} {header.section_name}".strip()
+        header.chunk_text = normalized_text
+
+        if (
+            start_index is not None
+            and 0 <= start_index < len(entries)
+            and entries
+        ):
+            entry = entries[start_index]
+            header.page_number = (
+                entry.page_index + 1 if entry.page_index is not None else None
+            )
+            if entry.line_index is not None:
+                header.line_number = entry.line_index + 1
+            else:
+                header.line_number = start_index + 1
+        else:
+            header.page_number = None
+            header.line_number = None
 
     persist_headers(upload_id, headers)
     return headers

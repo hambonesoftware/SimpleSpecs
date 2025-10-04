@@ -137,9 +137,16 @@ function getProcessedSections() {
 function selectHeader(header, { refresh = true } = {}) {
   if (!header) return;
   activeSection = header.section_number;
-  const preview = state.sectionTexts.get(header.section_number) || computeSectionText(header);
-  setSectionText(header.section_number, preview);
-  updateSectionPreview(sectionPreviewEl, preview);
+  let preview = header.chunk_text;
+  if (preview == null) {
+    preview = state.sectionTexts.get(header.section_number);
+  }
+  if (preview == null) {
+    preview = computeSectionText(header);
+  }
+  const text = preview ?? "";
+  setSectionText(header.section_number, text);
+  updateSectionPreview(sectionPreviewEl, { header, text });
   if (refresh) {
     refreshHeaders();
   }
@@ -230,8 +237,10 @@ async function handleHeaders() {
     const headers = await requestHeaders(config);
     setHeaders(headers);
     headers.forEach((header) => {
-      const text = computeSectionText(header);
-      if (text) setSectionText(header.section_number, text);
+      const text = header.chunk_text || computeSectionText(header);
+      if (text !== undefined && text !== null) {
+        setSectionText(header.section_number, text);
+      }
     });
     if (headers.length > 0) {
       selectHeader(headers[0], { refresh: false });
