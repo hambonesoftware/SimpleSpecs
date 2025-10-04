@@ -26,18 +26,29 @@ async function handleResponse(response) {
   const contentType = response.headers.get("content-type") || "";
   if (!response.ok) {
     let message = `Request failed with status ${response.status}`;
+    let detail;
     if (contentType.includes("application/json")) {
       const data = await response.json().catch(() => null);
-      if (data?.detail) {
-        message = Array.isArray(data.detail)
-          ? data.detail.map((item) => item.msg || item).join(", ")
-          : data.detail;
+      if (data && Object.prototype.hasOwnProperty.call(data, "detail")) {
+        detail = data.detail;
+        if (Array.isArray(detail)) {
+          message = detail.map((item) => item.msg || item).join(", ");
+        } else if (typeof detail === "string") {
+          message = detail;
+        } else if (detail && typeof detail === "object") {
+          message = detail.message || message;
+        }
       }
     } else {
       const text = await response.text().catch(() => "");
       if (text) message = text;
     }
-    throw new Error(message);
+    const error = new Error(message);
+    if (detail !== undefined) {
+      error.detail = detail;
+    }
+    error.status = response.status;
+    throw error;
   }
   if (contentType.includes("application/json")) {
     return response.json();
