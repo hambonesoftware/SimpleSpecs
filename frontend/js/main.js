@@ -251,6 +251,11 @@ async function handleHeaders() {
     log(`Headers extracted (${headers.length}) in ${duration}s.`);
   } catch (error) {
     log(`Header extraction failed: ${error.message}`);
+    const rawResponse = error?.detail?.response_text;
+    if (rawResponse) {
+      log("Raw LLM response:");
+      log(rawResponse);
+    }
     updateProgress(progressFill, 50);
   }
 }
