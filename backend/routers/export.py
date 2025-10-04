@@ -18,16 +18,32 @@ async def export_specs(upload_id: str = Query(...)) -> StreamingResponse:
     if not specs:
         raise HTTPException(status_code=404, detail="No specifications available")
 
-    header = ["Section number", "Section name", "Specification", "Domain"]
+    header = [
+        "spec_id",
+        "file_id",
+        "section_id",
+        "section_number",
+        "section_title",
+        "spec_text",
+        "confidence",
+        "source_object_ids",
+    ]
     buffer = io.StringIO()
     writer = csv.writer(buffer)
     writer.writerow(header)
     for item in specs:
+        source_ids = item.get("source_object_ids") or []
+        if not isinstance(source_ids, list):
+            source_ids = [str(source_ids)]
         row = [
-            (item.get("section_number") or "").replace("\r", " ").replace("\n", " "),
-            (item.get("section_name") or "").replace("\r", " ").replace("\n", " "),
-            (item.get("specification") or "").replace("\r", " ").replace("\n", " "),
-            (item.get("domain") or "").replace("\r", " ").replace("\n", " "),
+            item.get("spec_id", ""),
+            item.get("file_id", ""),
+            item.get("section_id", ""),
+            item.get("section_number", ""),
+            item.get("section_title", ""),
+            item.get("spec_text", ""),
+            item.get("confidence", ""),
+            ",".join(str(value) for value in source_ids),
         ]
         writer.writerow(row)
     buffer.seek(0)
