@@ -3,7 +3,7 @@ from __future__ import annotations
 import importlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from ..config import Settings, get_settings
 from ..models import (
@@ -119,6 +119,7 @@ class MinerUPdfParser:
 
         objects: list[ParsedObject] = []
         order_index = 0
+
         def _coerce_int(value: Any) -> int | None:
             if value is None:
                 return None
@@ -138,20 +139,108 @@ class MinerUPdfParser:
                     return None
             return None
 
-        for item in result if isinstance(result, list) else []:
+        def _coerce_bbox(value: Any) -> list[float] | None:
+            if value is None:
+                return None
+            if isinstance(value, (list, tuple)) and len(value) == 4:
+                try:
+                    return [float(v) for v in value]
+                except (TypeError, ValueError):
+                    return None
+            if isinstance(value, dict):
+                keys = ("x0", "y0", "x1", "y1")
+                if all(key in value for key in keys):
+                    try:
+                        return [float(value[key]) for key in keys]
+                    except (TypeError, ValueError):
+                        return None
+            return None
+
+        def _coerce_text(item: dict[str, Any]) -> str | None:
+            value = item.get("text")
+            if isinstance(value, str) and value.strip():
+                return value
+            for key in ("content", "value", "text_content", "caption"):
+                text_value = item.get(key)
+                if isinstance(text_value, str) and text_value.strip():
+                    return text_value
+            return value if isinstance(value, str) else None
+
+        def _iter_items(payload: Any, inherited_page: int | None = None) -> Iterable[dict[str, Any]]:
+            if payload is None:
+                return
+            if isinstance(payload, list):
+                for entry in payload:
+                    yield from _iter_items(entry, inherited_page=inherited_page)
+                return
+            if not isinstance(payload, dict):
+                return
+
+            looks_like_item = any(key in payload for key in ("kind", "type", "category", "text"))
+            if looks_like_item:
+                page_value = _coerce_int(payload.get("page_index"))
+                if page_value is None:
+                    for key in ("page", "page_no", "page_num", "page_number"):
+                        page_value = _coerce_int(payload.get(key))
+                        if page_value is not None:
+                            break
+                normalized = dict(payload)
+                if inherited_page is not None and normalized.get("page_index") is None:
+                    normalized["page_index"] = inherited_page
+                elif page_value is not None:
+                    normalized["page_index"] = page_value
+                yield normalized
+
+            for key in (
+                "elements",
+                "items",
+                "blocks",
+                "paragraphs",
+                "objects",
+                "result",
+                "data",
+                "layout",
+                "children",
+            ):
+                if key in payload:
+                    yield from _iter_items(payload[key], inherited_page=inherited_page)
+
+            for key in ("pages", "page_items", "page_list"):
+                if key not in payload:
+                    continue
+                pages = payload[key]
+                if not isinstance(pages, list):
+                    continue
+                for page in pages:
+                    if not isinstance(page, dict):
+                        continue
+                    page_index = _coerce_int(page.get("page_index"))
+                    if page_index is None:
+                        page_index = _coerce_int(page.get("page"))
+                    yield from _iter_items(page, inherited_page=page_index)
+
+        for item in _iter_items(result):
+            if not isinstance(item, dict):
+                continue
+
             metadata = {**(item.get("metadata") or {}), "engine": engine}
             base_kwargs = {
                 "object_id": f"{file_id}-mineru-{order_index:06d}",
                 "file_id": file_id,
-                "text": item.get("text"),
-                "page_index": item.get("page_index"),
-                "bbox": item.get("bbox"),
+                "text": _coerce_text(item),
+                "page_index": _coerce_int(item.get("page_index")) or _coerce_int(item.get("page")) or _coerce_int(item.get("page_no")),
+                "bbox": _coerce_bbox(item.get("bbox")) or _coerce_bbox(item.get("box")) or _coerce_bbox(item.get("rect")) or _coerce_bbox(item.get("region")),
                 "order_index": order_index,
                 "metadata": metadata,
             }
-            kind = (item.get("kind") or "para").lower()
+
+            kind_value = item.get("kind") or item.get("type") or item.get("category") or "para"
+            kind = str(kind_value).lower()
+            if kind not in {"para", "paragraph", "text", "line", "textline", "header", "heading", "table", "figure", "image"}:
+                metadata.setdefault("mineru_kind", kind)
+
             if kind in {"line", "textline"}:
-                words_payload = item.get("words") or []
+                words_payload = item.get("words") or item.get("tokens") or []
                 words: list[Word] = []
                 for word in words_payload:
                     if isinstance(word, Word):
@@ -166,7 +255,7 @@ class MinerUPdfParser:
                     line_index=item.get("line_index"),
                     is_blank=item.get("is_blank"),
                 )
-            elif kind in {"para", "paragraph", "text"}:
+            elif kind in {"para", "paragraph", "text", "list", "list_item", "bullet", "caption", "formula", "code"}:
                 line_span = item.get("line_span")
                 if isinstance(line_span, (list, tuple)):
                     processed_span = []
@@ -184,10 +273,10 @@ class MinerUPdfParser:
                     line_span=line_span if isinstance(line_span, list) else None,
                     paragraph_index=item.get("paragraph_index"),
                 )
-            elif kind in {"header", "heading"}:
+            elif kind in {"header", "heading", "title"}:
                 obj = HeaderObject(
                     **base_kwargs,
-                    level=int(item.get("level", 1)),
+                    level=int(_coerce_int(item.get("level")) or 1),
                     number=item.get("number"),
                     normalized_text=item.get("normalized_text"),
                     path=item.get("path"),
@@ -207,11 +296,13 @@ class MinerUPdfParser:
                     ref_id=item.get("ref_id"),
                 )
             else:
-                raise ValueError(f"Unsupported MinerU object kind: {kind}")
+                obj = ParagraphObject(
+                    **base_kwargs,
+                    paragraph_index=item.get("paragraph_index"),
+                )
             objects.append(obj)
             order_index += 1
         if not objects:
-            # As a last resort fall back to the native parser but annotate provenance.
             native_fallback = NativePdfParser()
             native_objects = native_fallback.parse_pdf(file_path)
             return [
