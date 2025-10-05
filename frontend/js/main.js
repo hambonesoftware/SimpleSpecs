@@ -1,17 +1,17 @@
 import {
   checkHealth,
-  uploadFile,
-  fetchObjects,
+  ingestFile,
+  fetchParsedObjects,
   fetchModelSettings,
   requestHeaders,
   exportSpecs,
   updateModelSettings,
   streamSpecs,
+  fetchSystemCapabilities,
 } from "./api.js";
 import {
   state,
   setUpload,
-  setObjects,
   setHeaders,
   setSpecs,
   setSectionText,
@@ -22,6 +22,9 @@ import {
   markHeaderRequested,
   markHeaderResponded,
   markHeaderProcessed,
+  setEngine,
+  getEngine,
+  ENGINE_OPTIONS,
 } from "./state.js";
 import { MAX_TOKENS_LIMIT } from "./constants.js";
 import {
@@ -58,6 +61,11 @@ const exportCsvBtn = document.getElementById("export-csv");
 const toggleSettingsBtn = document.getElementById("toggle-settings");
 const settingsPanel = document.getElementById("settings-panel");
 const settingsForm = document.getElementById("settings-form");
+const engineToggle = document.getElementById("engine-toggle");
+const engineButtons = engineToggle ? Array.from(engineToggle.querySelectorAll("[data-engine]")) : [];
+
+const ENGINE_STORAGE_KEY = "simplespecs.pdf_engine";
+const ENGINE_SET = new Set(ENGINE_OPTIONS);
 
 let selectedFile = null;
 let activeTab = "headers";
@@ -222,9 +230,90 @@ function refreshSpecs() {
   });
 }
 
-async function loadObjects(uploadId) {
-  const { items } = await fetchObjects(uploadId, 1, 1000);
-  setObjects(items);
+function normalizeEngine(engine) {
+  if (typeof engine !== "string") {
+    return null;
+  }
+  const normalized = engine.toLowerCase();
+  return ENGINE_SET.has(normalized) ? normalized : null;
+}
+
+function readPersistedEngine() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const stored = window.localStorage.getItem(ENGINE_STORAGE_KEY);
+    return normalizeEngine(stored);
+  } catch (error) {
+    console.warn("Unable to read stored engine selection:", error);
+    return null;
+  }
+}
+
+function persistEngineSelection(engine) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(ENGINE_STORAGE_KEY, engine);
+  } catch (error) {
+    console.warn("Unable to persist engine selection:", error);
+  }
+}
+
+function setupEngineToggle() {
+  if (!engineToggle || engineButtons.length === 0) {
+    return;
+  }
+
+  const updateButtons = (engine) => {
+    engineButtons.forEach((button) => {
+      const isActive = button.dataset.engine === engine;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+  };
+
+  const applyEngine = (engine, { persist = false } = {}) => {
+    const normalized = normalizeEngine(engine);
+    if (!normalized) {
+      updateButtons(getEngine());
+      return getEngine();
+    }
+    const current = setEngine(normalized);
+    updateButtons(current);
+    if (persist) {
+      persistEngineSelection(current);
+    }
+    return current;
+  };
+
+  engineButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      applyEngine(button.dataset.engine, { persist: true });
+    });
+  });
+
+  const stored = readPersistedEngine();
+  if (stored) {
+    applyEngine(stored);
+    return;
+  }
+
+  updateButtons(getEngine());
+
+  (async () => {
+    try {
+      const capabilities = await fetchSystemCapabilities();
+      const backendEngine = normalizeEngine(capabilities?.pdf_engine);
+      if (backendEngine) {
+        applyEngine(backendEngine);
+      }
+    } catch (error) {
+      console.warn("Failed to load default engine from backend:", error);
+    }
+  })();
 }
 
 async function handleUpload() {
@@ -233,20 +322,41 @@ async function handleUpload() {
     return;
   }
   clearLog();
-  log(`Uploading ${selectedFile.name}…`);
+  const engine = getEngine();
+  log(`Uploading ${selectedFile.name} with the ${engine} engine…`);
   updateProgress(progressFill, 10);
   try {
-    const response = await uploadFile(selectedFile);
-    log(`Parsed ${response.object_count} objects (upload ${response.upload_id}).`);
-    await loadObjects(response.upload_id);
-    setUpload({ uploadId: response.upload_id, objects: state.objects });
+    const response = await ingestFile(selectedFile, engine);
+    const fileId = response.file_id || response.upload_id;
+    const status = response.status || "processed";
+    const reportedCount = Number.isFinite(Number(response.object_count))
+      ? Number(response.object_count)
+      : 0;
+    if (!fileId) {
+      throw new Error("Upload response missing file identifier.");
+    }
+    updateProgress(progressFill, 25);
+    if (status !== "processed") {
+      log(`Ingest status: ${status}. Fetching parsed objects…`);
+    }
+    const fetchedObjects = await fetchParsedObjects(fileId);
+    const objects = Array.isArray(fetchedObjects) ? fetchedObjects : [];
+    setUpload({ uploadId: fileId, objects });
+    const parsedCount = objects.length || reportedCount;
+    log(`Parsed ${parsedCount} objects (file ${fileId}).`);
     reportedInvalidHeaderMatches.clear();
     refreshHeaders();
     updateProgress(progressFill, 40);
     log("Document ready. Proceed with header extraction.");
     updateProgress(progressFill, 50);
   } catch (error) {
-    log(`Upload failed: ${error.message}`);
+    const detail = error?.detail;
+    const detailMessage = typeof detail === "string" ? detail : detail?.message;
+    const message = detailMessage || error.message;
+    log(`Upload failed: ${message}`);
+    if (detail && typeof detail === "object" && detail.error === "mineru_not_available") {
+      log("Switch to the native engine or install MinerU to continue.");
+    }
     updateProgress(progressFill, 0);
     throw error;
   }
@@ -600,9 +710,10 @@ function setupSettingsForm() {
   loadPersistedSettings().catch(() => undefined);
 }
 
-function setupSearchControls() {
+function setupSpecsControls() {
   specsSearch.addEventListener("input", refreshSpecs);
   sortSelect.addEventListener("change", refreshSpecs);
+  setupEngineToggle();
 }
 
 async function pollHealth() {
@@ -619,7 +730,7 @@ function initialize() {
   setupDragAndDrop();
   setupTabs();
   setupSettingsForm();
-  setupSearchControls();
+  setupSpecsControls();
   toggleSettingsBtn.addEventListener("click", () => toggleSettings(settingsPanel));
 
   fileInput.addEventListener("change", (event) => {
