@@ -1,5 +1,11 @@
 import { MAX_TOKENS_LIMIT } from "./constants.js";
 
+const DEFAULT_HEADER_PROGRESS = {
+  requested: false,
+  responded: false,
+  completed: false,
+};
+
 export const state = {
   uploadId: null,
   objects: [],
@@ -27,19 +33,23 @@ export function setUpload({ uploadId, objectCount, objects }) {
   state.headerProgress = new Map();
 }
 
+export function resetHeaderProgress() {
+  state.headerProgress = new Map();
+  (state.headers || []).forEach((header) => {
+    if (header?.section_number != null) {
+      const key = String(header.section_number);
+      state.headerProgress.set(key, { ...DEFAULT_HEADER_PROGRESS });
+    }
+  });
+}
+
 export function setObjects(objects) {
   state.objects = objects;
 }
 
 export function setHeaders(headers) {
   state.headers = headers;
-  state.headerProgress = new Map();
-  headers.forEach((header) => {
-    if (header?.section_number) {
-      const key = String(header.section_number);
-      state.headerProgress.set(key, { requested: false, completed: false });
-    }
-  });
+  resetHeaderProgress();
 }
 
 export function setSpecs(specs) {
@@ -52,9 +62,15 @@ function ensureHeaderProgress(sectionNumber) {
     state.headerProgress = new Map();
   }
   const key = String(sectionNumber);
-  const current = state.headerProgress.get(key) || { requested: false, completed: false };
-  state.headerProgress.set(key, current);
-  return { key, current };
+  const current = state.headerProgress.get(key);
+  if (current) {
+    const normalized = { ...DEFAULT_HEADER_PROGRESS, ...current };
+    state.headerProgress.set(key, normalized);
+    return { key, current: normalized };
+  }
+  const initial = { ...DEFAULT_HEADER_PROGRESS };
+  state.headerProgress.set(key, initial);
+  return { key, current: initial };
 }
 
 export function markHeaderRequested(sectionNumber) {
@@ -64,12 +80,19 @@ export function markHeaderRequested(sectionNumber) {
   state.headerProgress.set(key, { ...current, requested: true });
 }
 
+export function markHeaderResponded(sectionNumber) {
+  const result = ensureHeaderProgress(sectionNumber);
+  if (!result) return;
+  const { key, current } = result;
+  state.headerProgress.set(key, { ...current, requested: true, responded: true });
+}
+
 export function markHeaderProcessed(sectionNumber) {
   if (!sectionNumber) return;
   const result = ensureHeaderProgress(sectionNumber);
   if (!result) return;
   const { key, current } = result;
-  state.headerProgress.set(key, { ...current, requested: true, completed: true });
+  state.headerProgress.set(key, { ...current, requested: true, responded: true, completed: true });
 }
 
 export function setSectionText(sectionNumber, text) {

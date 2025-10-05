@@ -29,12 +29,15 @@ function createHeaderButton(header, { activeSection, headerProgress, onSelect } 
   status.className = "header-status";
   const key = header?.section_number ? String(header.section_number) : null;
   const progress = key ? headerProgress?.get(key) : null;
-  if (progress?.requested) {
-    status.classList.add("header-status--requested");
-    status.textContent = progress.completed ? "✓✓" : "✓";
-  }
   if (progress?.completed) {
-    status.classList.add("header-status--complete");
+    status.classList.add("header-status--responded", "header-status--complete");
+    status.textContent = "✓✓";
+  } else if (progress?.responded) {
+    status.classList.add("header-status--responded");
+    status.textContent = "✓✓";
+  } else if (progress?.requested) {
+    status.classList.add("header-status--requested");
+    status.textContent = "✓";
   }
   button.appendChild(status);
 
