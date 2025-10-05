@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from backend.config import get_settings
 from backend.main import create_app
 from backend.models import ParagraphObject
-from backend.services.headers import _prepare_object_lines
+from backend.services.headers import _assign_spans, _prepare_object_lines, parse_nested_list_to_tree
 
 
 def _create_client(monkeypatch, tmp_path: Path) -> TestClient:
@@ -117,3 +117,77 @@ def test_prepare_object_lines_skips_toc_rows():
     normalized_flattened = {" ".join(item.split()) for item in flattened}
     excluded = {"1 scope 5", "appendix a references 12", "preface iv"}
     assert excluded.isdisjoint(normalized_flattened)
+
+
+def test_prepare_object_lines_includes_number_prefix():
+    objects = [
+        ParagraphObject(
+            object_id="obj-1",
+            file_id="file-1",
+            text="\n".join(
+                [
+                    "1) Scope Summary",
+                    "1 Scope Summary",
+                    "Section 1.1 Background",
+                ]
+            ),
+        )
+    ]
+
+    prepared = _prepare_object_lines(objects)
+    assert prepared == [
+        [
+            "scope summary",
+            "1 scope summary",
+            "summary",
+            "1 1 background",
+            "section 1 1 background",
+            "background",
+        ]
+    ]
+
+
+def test_assign_spans_matches_numbered_headers():
+    file_id = "file-1"
+    objects = [
+        ParagraphObject(
+            object_id="obj-1",
+            file_id=file_id,
+            text="1) Scope Summary\nDetails about scope.",
+        ),
+        ParagraphObject(
+            object_id="obj-2",
+            file_id=file_id,
+            text="Section 1.1 Background\nAdditional information.",
+        ),
+        ParagraphObject(
+            object_id="obj-3",
+            file_id=file_id,
+            text="2. Requirements\nRequirements go here.",
+        ),
+    ]
+
+    tree = parse_nested_list_to_tree(
+        file_id,
+        "\n".join(
+            [
+                "1 Scope Summary",
+                "  1.1 Background",
+                "2 Requirements",
+            ]
+        ),
+    )
+
+    _assign_spans(tree, objects)
+
+    sections = {child.title: child for child in tree.children}
+    summary = sections["Scope Summary"]
+    background = summary.children[0]
+    requirements = sections["Requirements"]
+
+    assert summary.span and summary.span.start_object == "obj-1"
+    assert summary.span.end_object == "obj-2"
+    assert background.span and background.span.start_object == "obj-2"
+    assert background.span.end_object == "obj-2"
+    assert requirements.span and requirements.span.start_object == "obj-3"
+    assert requirements.span.end_object == "obj-3"

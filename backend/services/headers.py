@@ -190,6 +190,7 @@ def _normalize_enumerator(token: str) -> Optional[str]:
 def _normalize_text_for_match(text: str) -> str:
     cleaned = re.sub(r"[\s]+", " ", text)
     cleaned = re.sub(r"[^0-9A-Za-z ]+", " ", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned)
     return cleaned.strip().lower()
 
 
@@ -203,15 +204,29 @@ def _prepare_object_lines(objects: Sequence[ParsedObject]) -> list[list[str]]:
     prepared: list[list[str]] = []
     for obj in objects:
         entries: list[str] = []
+        seen: set[str] = set()
         text = obj.text or ""
         for line in text.splitlines():
             stripped_line = line.strip()
             if _is_toc_line(stripped_line):
                 continue
-            _, title = _split_marker(stripped_line)
-            normalized = _normalize_text_for_match(title)
-            if normalized:
-                entries.append(normalized)
+            number, title = _split_marker(stripped_line)
+            queue: list[tuple[Optional[str], str]] = [(number, title)]
+            while queue:
+                current_number, current_title = queue.pop(0)
+                normalized_title = _normalize_text_for_match(current_title)
+                if normalized_title and normalized_title not in seen:
+                    entries.append(normalized_title)
+                    seen.add(normalized_title)
+                if current_number:
+                    combined = f"{current_number} {current_title}".strip()
+                    normalized_combined = _normalize_text_for_match(combined)
+                    if normalized_combined and normalized_combined not in seen:
+                        entries.append(normalized_combined)
+                        seen.add(normalized_combined)
+                sub_number, remainder = _split_marker(current_title)
+                if remainder != current_title:
+                    queue.append((sub_number, remainder))
         prepared.append(entries)
     return prepared
 
