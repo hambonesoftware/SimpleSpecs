@@ -25,21 +25,71 @@ from ..store import (
 
 router = APIRouter(prefix="/api")
 
-_SPEC_PROMPT_TEMPLATE = """You are extracting mechanical engineering specifications from a single section of a document.
+_SPEC_PROMPT_TEMPLATE = """You are an expert mechanical engineering specification extraction system. Your task is to analyze the provided document section and identify ONLY mechanical engineering specifications.
 
-Section number: {section_number}
-Section name: {section_name}
+SECTION CONTEXT:
+Section Number: {section_number}
+Section Name: {section_name}
 
-Section text:
+INPUT TEXT:
 {section_text}
 
-Task: List ONLY the exact specification statements in this section that define requirements (methods, processes, specific parts, materials, tolerances, ratings, standards, environmental constraints, duty cycles, etc.). Return each specification as its original text (verbatim), one per line. If none, return "NONE".
+CRITICAL INSTRUCTIONS:
+1. Extract ONLY specifications that define REQUIREMENTS - these are mandatory, measurable, or verifiable statements
+2. Focus exclusively on MECHANICAL ENGINEERING domains including:
+   - Materials and metallurgy
+   - Manufacturing processes and methods
+   - Mechanical components and assemblies
+   - Tolerances, fits, and dimensional constraints
+   - Surface treatments and coatings
+   - Fasteners and joining methods
+   - Mechanical properties (strength, hardness, durability)
+   - Thermal management and heat transfer
+   - Fluid systems and hydraulics
+   - Structural requirements and load ratings
+   - Mechanical interfaces and connections
+   - Wear resistance and service life
+   - Corrosion protection
+   - Mechanical testing methods
+   - Duty cycles and operational limits
+   - Environmental operating conditions
+   - Mechanical safety factors
+   - Industry standards (ASME, ASTM, ISO, SAE, etc.)
 
-Output format (fenced):
+EXTRACTION CRITERIA:
+- Must be a complete requirement statement
+- Must contain measurable/verifiable criteria
+- Must use original text VERBATIM - no paraphrasing
+- Must be mechanically relevant (exclude electrical, software, etc.)
+- Include standards references ONLY if mechanically relevant
+
+OUTPUT FORMAT:
 #specs#
-- <spec 1>
-- <spec 2>
+- [Exact verbatim specification 1]
+- [Exact verbatim specification 2]
+- [Exact verbatim specification 3]
 #specs#
+
+If no mechanical engineering specifications are found, return:
+#specs#
+NONE
+#specs#
+
+EXAMPLES OF WHAT TO EXTRACT:
+✓ "All structural steel shall comply with ASTM A36"
+✓ "Surface finish shall be 32 μin Ra maximum"
+✓ "Maximum operating temperature: 150°C"
+✓ "Duty cycle: 50% continuous operation"
+✓ "Tolerance: ±0.005 inches"
+✓ "Material: 6061-T6 aluminum alloy"
+✓ "Thread specification: UNC 1/4-20"
+✓ "Safety factor: 4:1 minimum"
+
+EXAMPLES OF WHAT TO EXCLUDE:
+✗ "The system should be reliable" (vague, not measurable)
+✗ "Electrical input: 120V AC" (electrical, not mechanical)
+✗ "Software shall interface with PLC" (software-related)
+✗ General descriptions without requirements
 """
 
 
