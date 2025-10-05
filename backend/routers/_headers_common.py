@@ -16,6 +16,7 @@ from ..services.text_blocks import (
     section_bounds,
     section_text,
 )
+from ..header_export import write_header_search_report
 from ..store import headers_path, read_json, read_jsonl, upload_objects_path, write_json
 from ..text.toc_filters import is_real_header_line, mark_toc_pages
 
@@ -202,6 +203,10 @@ def parse_and_store_headers(upload_id: str, response_text: str) -> list[HeaderIt
             header.line_number = None
 
     persist_headers(upload_id, headers)
+    try:
+        write_header_search_report(headers)
+    except Exception:  # pragma: no cover - best effort logging
+        logger.warning("Failed to write header search report", exc_info=True)
     return headers
 
 __all__ = [
