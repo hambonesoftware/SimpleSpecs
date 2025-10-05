@@ -119,6 +119,37 @@ def test_prepare_object_lines_skips_toc_rows():
     assert excluded.isdisjoint(normalized_flattened)
 
 
+def test_prepare_object_lines_skips_marked_toc_pages():
+    objects = [
+        ParagraphObject(
+            object_id="obj-1",
+            file_id="file-1",
+            page_index=0,
+            text="\n".join(
+                [
+                    "Table of Contents",
+                    "1 Scope ............. 5",
+                    "1.1 Purpose ........ 6",
+                ]
+            ),
+        ),
+        ParagraphObject(
+            object_id="obj-2",
+            file_id="file-1",
+            page_index=1,
+            text="\n".join(["1 Scope", "Purpose of this specification"]),
+        ),
+    ]
+
+    prepared = _prepare_object_lines(objects)
+    flattened = [line for group in prepared for line in group]
+
+    assert any("purpose" in line for line in flattened)
+    normalized = {" ".join(item.split()) for item in flattened}
+    assert "table of contents" not in normalized
+    assert "1 scope 5" not in normalized
+
+
 def test_prepare_object_lines_includes_number_prefix():
     objects = [
         ParagraphObject(
