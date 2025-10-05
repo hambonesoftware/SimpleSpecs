@@ -7,6 +7,7 @@ from typing import Any, List
 
 import httpx
 
+from ...logging import get_logger
 from ...openrouter import normalize_openrouter_base_url
 from .llm_provider import LLMProvider
 
@@ -50,6 +51,9 @@ class _OpenRouterRateLimiter:
 _OPENROUTER_RATE_LIMITER = _OpenRouterRateLimiter()
 
 
+logger = get_logger(__name__)
+
+
 class OpenRouterProvider(LLMProvider):
     def __init__(
         self,
@@ -79,6 +83,7 @@ class OpenRouterProvider(LLMProvider):
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(self.endpoint, json=payload, headers=headers)
         response.raise_for_status()
+        logger.info("Header LM raw response (OpenRouter provider): %s", response.text)
         data = response.json()
         try:
             return data["choices"][0]["message"]["content"].strip()
