@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from typing import Iterable
 
 from fastapi import HTTPException, status
 
+from ..config import get_settings
 from ..logging import get_logger
 from ..models import HeaderItem
 from ..services.text_blocks import (
@@ -14,7 +16,7 @@ from ..services.text_blocks import (
     section_bounds,
     section_text,
 )
-from ..store import headers_path, read_jsonl, upload_objects_path, write_json
+from ..store import headers_path, read_json, read_jsonl, upload_objects_path, write_json
 from ..text.toc_filters import is_real_header_line, mark_toc_pages
 
 logger = get_logger(__name__)
@@ -34,14 +36,53 @@ _HEADERS_BLOCK_RE = re.compile(r"#headers#(.*?)#headers#", re.DOTALL | re.IGNORE
 _SECTION_LINE_RE = re.compile(r"^(\d+(?:\.\d+)*)[\s\-\.]+(.+)$")
 
 
+def _ingest_objects_path(upload_id: str) -> Path:
+    settings = get_settings()
+    return Path(settings.ARTIFACTS_DIR) / upload_id / "parsed" / "objects.json"
+
+
+def _load_parsed_objects(upload_id: str) -> tuple[list[dict], bool]:
+    """Return parsed objects for *upload_id* and whether any source was found."""
+
+    source_found = False
+    objects_raw: list[dict] = []
+
+    jsonl_path = upload_objects_path(upload_id)
+    if jsonl_path.exists():
+        source_found = True
+        objects_raw = read_jsonl(jsonl_path)
+
+    if not objects_raw:
+        ingest_path = _ingest_objects_path(upload_id)
+        if ingest_path.exists():
+            source_found = True
+            data = read_json(ingest_path) or []
+            if not isinstance(data, list):
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Parsed objects file is malformed",
+                )
+            objects_raw = []
+            for entry in data:
+                if isinstance(entry, dict):
+                    objects_raw.append(entry)
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="Parsed objects entries must be mappings",
+                    )
+
+    return objects_raw, source_found
+
+
 def fetch_document_text(upload_id: str) -> str:
     """Return the concatenated text for an uploaded document.
 
     Raises an ``HTTPException`` if the upload cannot be located or contains no text.
     """
 
-    objects_raw = read_jsonl(upload_objects_path(upload_id))
-    if not objects_raw:
+    objects_raw, source_found = _load_parsed_objects(upload_id)
+    if not source_found:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Upload not found")
 
     document = document_text(objects_raw)
@@ -105,7 +146,7 @@ def parse_and_store_headers(upload_id: str, response_text: str) -> list[HeaderIt
             detail="No headers parsed",
         )
 
-    objects_raw = read_jsonl(upload_objects_path(upload_id))
+    objects_raw, _ = _load_parsed_objects(upload_id)
     entries = document_line_entries(objects_raw)
     toc_pages: set[int] = set()
     if entries:
