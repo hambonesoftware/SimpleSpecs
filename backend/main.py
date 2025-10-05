@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from .config import get_settings
 from .database import init_db
 from .routers import (
     export,
@@ -43,10 +44,17 @@ app.include_router(export.router)
 app.include_router(system.system_router)
 
 @app.on_event("startup")
-def _ensure_database() -> None:
-    """Create required database tables when the application boots."""
+def _on_startup() -> None:
+    """Prepare services and emit startup diagnostics."""
+
+    from .services.pdf_mineru import check_mineru_availability
 
     init_db()
+
+    settings = get_settings()
+    available, reason = check_mineru_availability(settings=settings)
+    if not available and reason:
+        print(f"[startup] MinerU unavailable: {reason}")
 
 frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 if frontend_dir.exists():

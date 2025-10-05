@@ -17,7 +17,11 @@ from ..models import (
 )
 from .pdf_native import NativePdfParser
 
-__all__ = ["MinerUPdfParser", "MinerUUnavailableError"]
+__all__ = [
+    "MinerUPdfParser",
+    "MinerUUnavailableError",
+    "check_mineru_availability",
+]
 
 
 class MinerUUnavailableError(RuntimeError):
@@ -36,6 +40,24 @@ def _load_mineru_module() -> tuple[Any | None, str | None, str | None]:
         except Exception as exc:
             return None, name, str(exc)
     return None, None, last_error
+
+
+def check_mineru_availability(
+    settings: Settings | None = None,
+) -> tuple[bool, str | None]:
+    """Return whether MinerU can be used and why it is unavailable otherwise."""
+
+    settings = settings or get_settings()
+    if not settings.MINERU_ENABLED:
+        return False, "MinerU is disabled in settings."
+
+    module, _module_name, error_message = _load_mineru_module()
+    if module is None:
+        if error_message:
+            return False, f"MinerU client library could not be imported: {error_message}"
+        return False, "MinerU client library is not installed."
+
+    return True, None
 
 
 @dataclass
