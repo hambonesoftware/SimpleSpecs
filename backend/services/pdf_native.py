@@ -48,26 +48,67 @@ class NativePdfParser:
             except Exception:
                 metadata.setdefault("warnings", []).append("pikepdf_failed")
 
+        text_objects: list[ParagraphObject] = []
+        pdfplumber_failed = False
         if pdfplumber is not None:
             try:
                 with pdfplumber.open(file_path) as pdf:
                     for page_index, page in enumerate(pdf.pages):
                         text = page.extract_text() or ""
                         page_bbox = [0.0, 0.0, float(page.width or 0), float(page.height or 0)]
-                        obj = ParagraphObject(
-                            object_id=f"{file_id}-txt-{order_index:06d}",
+                        text_objects.append(
+                            ParagraphObject(
+                                object_id=f"{file_id}-txt-{len(text_objects):06d}",
+                                file_id=file_id,
+                                text=text.strip() or None,
+                                page_index=page_index,
+                                bbox=page_bbox,
+                                order_index=0,
+                                paragraph_index=len(text_objects),
+                                metadata={**metadata, "source": "pdfplumber"},
+                            )
+                        )
+            except Exception:
+                pdfplumber_failed = True
+                metadata.setdefault("warnings", []).append("pdfplumber_failed")
+
+        doc = None
+        if fitz is not None:
+            try:
+                doc = fitz.open(file_path)
+            except Exception:
+                metadata.setdefault("warnings", []).append("pymupdf_failed")
+                doc = None
+
+        if not text_objects and doc is not None:
+            try:
+                for page_index in range(doc.page_count):
+                    page = doc.load_page(page_index)
+                    text = page.get_text("text") or ""
+                    rect = page.rect or fitz.Rect(0, 0, 0, 0)
+                    text_objects.append(
+                        ParagraphObject(
+                            object_id=f"{file_id}-txt-{len(text_objects):06d}",
                             file_id=file_id,
                             text=text.strip() or None,
                             page_index=page_index,
-                            bbox=page_bbox,
-                            order_index=order_index,
-                            paragraph_index=order_index,
-                            metadata={**metadata, "source": "pdfplumber"},
+                            bbox=[float(rect.x0), float(rect.y0), float(rect.x1), float(rect.y1)],
+                            order_index=0,
+                            paragraph_index=len(text_objects),
+                            metadata={**metadata, "source": "pymupdf"},
                         )
-                        objects.append(obj)
-                        order_index += 1
+                    )
             except Exception:
-                metadata.setdefault("warnings", []).append("pdfplumber_failed")
+                metadata.setdefault("warnings", []).append("pymupdf_text_failed")
+
+        if not text_objects:
+            if pdfplumber_failed:
+                metadata.setdefault("warnings", []).append("text_extraction_failed")
+
+        for obj in text_objects:
+            updated = obj.model_copy(update={"order_index": order_index, "paragraph_index": order_index})
+            objects.append(updated)
+            order_index += 1
 
         table_entries: list[tuple[int, ParsedObject]] = []
         if camelot is not None:
@@ -76,6 +117,7 @@ class NativePdfParser:
                 for table_idx, table in enumerate(tables):
                     page_index = int(getattr(table, "page", 1)) - 1
                     table_text = table.df.to_csv(index=False)
+                    rows = table.df.values.tolist()
                     table_obj = TableObject(
                         object_id=f"{file_id}-tbl-{table_idx:06d}",
                         file_id=file_id,
@@ -93,11 +135,32 @@ class NativePdfParser:
                 metadata.setdefault("warnings", []).append("camelot_failed")
 
         image_entries: list[tuple[int, ParsedObject]] = []
-        if fitz is not None:
+        if doc is not None:
             try:
-                with fitz.open(file_path) as doc:
-                    for page_index in range(doc.page_count):
-                        page = doc.load_page(page_index)
+                for page_index in range(doc.page_count):
+                    page = doc.load_page(page_index)
+                    text_dict = page.get_text("dict")
+                    for block_index, block in enumerate(text_dict.get("blocks", [])):
+                        if block.get("type") == 1:
+                            bbox = [float(coord) for coord in block.get("bbox", (0, 0, 0, 0))]
+                            image_obj = FigureObject(
+                                object_id=f"{file_id}-img-{page_index:03d}-{block_index:03d}",
+                                file_id=file_id,
+                                text=None,
+                                page_index=page_index,
+                                bbox=bbox,
+                                order_index=0,
+                                caption=None,
+                                metadata={**metadata, "source": "pymupdf"},
+                            )
+                            image_entries.append((page_index, image_obj))
+            except Exception:
+                metadata.setdefault("warnings", []).append("pymupdf_image_failed")
+        elif fitz is not None:
+            try:
+                with fitz.open(file_path) as fallback_doc:
+                    for page_index in range(fallback_doc.page_count):
+                        page = fallback_doc.load_page(page_index)
                         text_dict = page.get_text("dict")
                         for block_index, block in enumerate(text_dict.get("blocks", [])):
                             if block.get("type") == 1:
@@ -115,6 +178,9 @@ class NativePdfParser:
                                 image_entries.append((page_index, image_obj))
             except Exception:
                 metadata.setdefault("warnings", []).append("pymupdf_failed")
+
+        if doc is not None:
+            doc.close()
 
         # Merge tables and images into the ordered list by page index.
         for entries in (sorted(table_entries, key=lambda item: (item[0], item[1].object_id)), sorted(image_entries, key=lambda item: (item[0], item[1].object_id))):
