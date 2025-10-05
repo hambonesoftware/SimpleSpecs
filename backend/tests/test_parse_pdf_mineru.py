@@ -12,10 +12,7 @@ from backend.services import pdf_mineru
 
 
 client = TestClient(create_app())
-MINERU_AVAILABLE = any(
-    importlib.util.find_spec(name) is not None
-    for name in ("magic_pdf", "mineru", "mineru_core")
-)
+MINERU_AVAILABLE = importlib.util.find_spec("mineru") is not None
 
 
 def _build_pdf_bytes() -> bytes:
