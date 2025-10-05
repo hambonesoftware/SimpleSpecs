@@ -1,9 +1,9 @@
+"""Integration helpers for the MinerU PDF parser."""
 from __future__ import annotations
 
-import importlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, List
 
 from ..config import Settings, get_settings
 from ..models import (
@@ -15,12 +15,14 @@ from ..models import (
     TableObject,
     Word,
 )
+from .mineru_adapter import MinerUConfig, NormObj, load_mineru_client, parse_with_mineru
 from .pdf_native import NativePdfParser
 
 __all__ = [
     "MinerUPdfParser",
     "MinerUUnavailableError",
     "check_mineru_availability",
+    "mineru_blocks_to_parsed_objects",
 ]
 
 
@@ -32,18 +34,12 @@ def _load_mineru_module() -> tuple[Any | None, str | None, str | None]:
     """Attempt to import the MinerU client library."""
 
     try:
-        module = importlib.import_module("mineru")
+        client = load_mineru_client()
     except ModuleNotFoundError as exc:
         return None, None, str(exc)
     except Exception as exc:  # pragma: no cover - optional dependency
-        return None, "mineru", str(exc)
-    if not hasattr(module, "parse"):
-        message = (
-            "MinerU client library is installed but is missing the 'parse' API. "
-            "Please install the official MinerU package or choose the native engine."
-        )
-        return None, "mineru", message
-    return module, "mineru", None
+        return None, "mineru.cli.client", str(exc)
+    return client, "mineru", None
 
 
 def check_mineru_availability(
@@ -62,6 +58,162 @@ def check_mineru_availability(
         return False, "MinerU client library is not installed."
 
     return True, None
+
+
+def _coerce_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        try:
+            return int(float(text))
+        except ValueError:
+            return None
+    return None
+
+
+def _coerce_bool(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        text = value.strip().lower()
+        if text in {"true", "1", "yes", "y"}:
+            return True
+        if text in {"false", "0", "no", "n"}:
+            return False
+    return None
+
+
+def _normalize_page(value: Any) -> int | None:
+    page = _coerce_int(value)
+    if page is None:
+        return None
+    # MinerU typically reports pages as 1-based indexes.
+    if page > 0:
+        return page - 1
+    return page
+
+
+def _normalize_bbox(value: Any) -> list[float] | None:
+    if value is None:
+        return None
+    if isinstance(value, (list, tuple)) and len(value) == 4:
+        try:
+            return [float(v) for v in value]
+        except (TypeError, ValueError):
+            return None
+    if isinstance(value, dict):
+        keys = ("x0", "y0", "x1", "y1")
+        if all(key in value for key in keys):
+            try:
+                return [float(value[key]) for key in keys]
+            except (TypeError, ValueError):
+                return None
+    return None
+
+
+def _sanitize_text(value: Any) -> str | None:
+    if isinstance(value, str):
+        text = value.strip()
+        return text or None
+    return None
+
+
+def mineru_blocks_to_parsed_objects(
+    blocks: Iterable[NormObj],
+    file_id: str,
+    engine: str = "mineru",
+) -> List[ParsedObject]:
+    """Convert normalized MinerU blocks into SimpleSpecs parsed objects."""
+
+    objects: list[ParsedObject] = []
+    for order_index, block in enumerate(blocks):
+        if not isinstance(block, dict):
+            continue
+
+        metadata = dict(block.get("meta") or {})
+        metadata.setdefault("source", block.get("source", "mineru"))
+        metadata.setdefault("mineru_kind", block.get("kind"))
+        metadata.setdefault("mineru_block_id", block.get("id"))
+        metadata["engine"] = engine
+
+        base_kwargs = {
+            "object_id": f"{file_id}-mineru-{order_index:06d}",
+            "file_id": file_id,
+            "text": _sanitize_text(block.get("text")),
+            "page_index": _normalize_page(block.get("page")),
+            "bbox": _normalize_bbox(block.get("bbox")),
+            "order_index": order_index,
+            "metadata": metadata,
+        }
+
+        kind = (block.get("kind") or "paragraph").lower()
+        if kind == "heading":
+            level = _coerce_int(metadata.get("level")) or 1
+            obj = HeaderObject(
+                **base_kwargs,
+                level=level,
+                number=metadata.get("number"),
+                normalized_text=metadata.get("normalized_text"),
+                path=metadata.get("path"),
+            )
+        elif kind == "table":
+            obj = TableObject(
+                **base_kwargs,
+                n_rows=_coerce_int(metadata.get("n_rows")),
+                n_cols=_coerce_int(metadata.get("n_cols")),
+                has_header_row=_coerce_bool(metadata.get("has_header_row")),
+                markdown=base_kwargs["text"],
+            )
+        elif kind == "figure":
+            obj = FigureObject(
+                **base_kwargs,
+                caption=base_kwargs["text"],
+                ref_id=metadata.get("ref_id"),
+            )
+        elif kind == "line":
+            words_payload = metadata.get("words") or []
+            words: list[Word] = []
+            for word in words_payload:
+                if isinstance(word, Word):
+                    words.append(word)
+                elif isinstance(word, dict):
+                    words.append(Word.model_validate(word))
+                elif isinstance(word, str):
+                    words.append(Word(text=word))
+            obj = LineObject(
+                **base_kwargs,
+                words=words,
+                is_blank=metadata.get("is_blank"),
+                line_index=_coerce_int(metadata.get("line_index")),
+            )
+        else:
+            line_span = metadata.get("line_span")
+            processed_span: list[int] | None = None
+            if isinstance(line_span, (list, tuple)):
+                processed_span = []
+                for entry in line_span:
+                    value = _coerce_int(entry)
+                    if value is None:
+                        processed_span = None
+                        break
+                    processed_span.append(value)
+            obj = ParagraphObject(
+                **base_kwargs,
+                line_span=processed_span,
+                paragraph_index=_coerce_int(metadata.get("paragraph_index")),
+            )
+        objects.append(obj)
+
+    return objects
 
 
 @dataclass
@@ -83,224 +235,43 @@ class MinerUPdfParser:
             raise MinerUUnavailableError("MinerU client library is not installed.")
 
     def parse_pdf(self, file_path: str) -> list[ParsedObject]:
-        file_id = Path(file_path).resolve().parent.parent.name
+        resolved = Path(file_path).resolve()
+        file_id = resolved.parent.parent.name or resolved.stem
         if self._module_name != "mineru":  # pragma: no cover - optional dependency
             raise MinerUUnavailableError("MinerU client library is not available.")
-        return self._parse_mineru(file_path, file_id)
+        return self._parse_mineru(str(resolved), file_id)
 
     def _parse_mineru(self, file_path: str, file_id: str) -> list[ParsedObject]:
+        pdf_path = Path(file_path)
         try:
-            result = self._module.parse(file_path)  # type: ignore[attr-defined]
+            pdf_bytes = pdf_path.read_bytes()
+        except OSError as exc:  # pragma: no cover - filesystem edge case
+            raise MinerUUnavailableError(str(exc)) from exc
+
+        cfg = MinerUConfig()
+        for key, value in (self.settings.MINERU_MODEL_OPTS or {}).items():
+            if hasattr(cfg, key):
+                setattr(cfg, key, value)
+
+        try:
+            blocks, _ = parse_with_mineru(file_id, pdf_bytes, pdf_path.name, cfg)
         except Exception as exc:  # pragma: no cover - optional dependency
             raise MinerUUnavailableError(str(exc)) from exc
-        return self._normalize_mineru_output(result, file_path, file_id, engine="mineru")
 
-    def _normalize_mineru_output(
-        self, result: Any, file_path: str, file_id: str, engine: str
-    ) -> list[ParsedObject]:
-        if not result:  # pragma: no cover - optional dependency
+        objects = mineru_blocks_to_parsed_objects(blocks, file_id, engine="mineru")
+        if not objects:
             native_fallback = NativePdfParser()
             return [
                 obj.model_copy(
                     update={
-                        "metadata": {**obj.metadata, "engine": engine, "source": "native_fallback"}
+                        "metadata": {
+                            **obj.metadata,
+                            "engine": "mineru",
+                            "mineru_mode": cfg.mode,
+                            "source": "native_fallback",
+                        }
                     }
                 )
                 for obj in native_fallback.parse_pdf(file_path)
-            ]
-
-        objects: list[ParsedObject] = []
-        order_index = 0
-
-        def _coerce_int(value: Any) -> int | None:
-            if value is None:
-                return None
-            if isinstance(value, bool):
-                return int(value)
-            if isinstance(value, int):
-                return value
-            if isinstance(value, float):
-                return int(value)
-            if isinstance(value, str):
-                text = value.strip()
-                if not text:
-                    return None
-                try:
-                    return int(float(text))
-                except ValueError:
-                    return None
-            return None
-
-        def _coerce_bbox(value: Any) -> list[float] | None:
-            if value is None:
-                return None
-            if isinstance(value, (list, tuple)) and len(value) == 4:
-                try:
-                    return [float(v) for v in value]
-                except (TypeError, ValueError):
-                    return None
-            if isinstance(value, dict):
-                keys = ("x0", "y0", "x1", "y1")
-                if all(key in value for key in keys):
-                    try:
-                        return [float(value[key]) for key in keys]
-                    except (TypeError, ValueError):
-                        return None
-            return None
-
-        def _coerce_text(item: dict[str, Any]) -> str | None:
-            value = item.get("text")
-            if isinstance(value, str) and value.strip():
-                return value
-            for key in ("content", "value", "text_content", "caption"):
-                text_value = item.get(key)
-                if isinstance(text_value, str) and text_value.strip():
-                    return text_value
-            return value if isinstance(value, str) else None
-
-        def _iter_items(payload: Any, inherited_page: int | None = None) -> Iterable[dict[str, Any]]:
-            if payload is None:
-                return
-            if isinstance(payload, list):
-                for entry in payload:
-                    yield from _iter_items(entry, inherited_page=inherited_page)
-                return
-            if not isinstance(payload, dict):
-                return
-
-            looks_like_item = any(key in payload for key in ("kind", "type", "category", "text"))
-            if looks_like_item:
-                page_value = _coerce_int(payload.get("page_index"))
-                if page_value is None:
-                    for key in ("page", "page_no", "page_num", "page_number"):
-                        page_value = _coerce_int(payload.get(key))
-                        if page_value is not None:
-                            break
-                normalized = dict(payload)
-                if inherited_page is not None and normalized.get("page_index") is None:
-                    normalized["page_index"] = inherited_page
-                elif page_value is not None:
-                    normalized["page_index"] = page_value
-                yield normalized
-
-            for key in (
-                "elements",
-                "items",
-                "blocks",
-                "paragraphs",
-                "objects",
-                "result",
-                "data",
-                "layout",
-                "children",
-            ):
-                if key in payload:
-                    yield from _iter_items(payload[key], inherited_page=inherited_page)
-
-            for key in ("pages", "page_items", "page_list"):
-                if key not in payload:
-                    continue
-                pages = payload[key]
-                if not isinstance(pages, list):
-                    continue
-                for page in pages:
-                    if not isinstance(page, dict):
-                        continue
-                    page_index = _coerce_int(page.get("page_index"))
-                    if page_index is None:
-                        page_index = _coerce_int(page.get("page"))
-                    yield from _iter_items(page, inherited_page=page_index)
-
-        for item in _iter_items(result):
-            if not isinstance(item, dict):
-                continue
-
-            metadata = {**(item.get("metadata") or {}), "engine": engine}
-            base_kwargs = {
-                "object_id": f"{file_id}-mineru-{order_index:06d}",
-                "file_id": file_id,
-                "text": _coerce_text(item),
-                "page_index": _coerce_int(item.get("page_index")) or _coerce_int(item.get("page")) or _coerce_int(item.get("page_no")),
-                "bbox": _coerce_bbox(item.get("bbox")) or _coerce_bbox(item.get("box")) or _coerce_bbox(item.get("rect")) or _coerce_bbox(item.get("region")),
-                "order_index": order_index,
-                "metadata": metadata,
-            }
-
-            kind_value = item.get("kind") or item.get("type") or item.get("category") or "para"
-            kind = str(kind_value).lower()
-            if kind not in {"para", "paragraph", "text", "line", "textline", "header", "heading", "table", "figure", "image"}:
-                metadata.setdefault("mineru_kind", kind)
-
-            if kind in {"line", "textline"}:
-                words_payload = item.get("words") or item.get("tokens") or []
-                words: list[Word] = []
-                for word in words_payload:
-                    if isinstance(word, Word):
-                        words.append(word)
-                    elif isinstance(word, str):
-                        words.append(Word(text=word))
-                    else:
-                        words.append(Word.model_validate(word))
-                obj = LineObject(
-                    **base_kwargs,
-                    words=words,
-                    line_index=item.get("line_index"),
-                    is_blank=item.get("is_blank"),
-                )
-            elif kind in {"para", "paragraph", "text", "list", "list_item", "bullet", "caption", "formula", "code"}:
-                line_span = item.get("line_span")
-                if isinstance(line_span, (list, tuple)):
-                    processed_span = []
-                    for entry in line_span:
-                        try:
-                            processed_span.append(int(entry))
-                        except (TypeError, ValueError):
-                            break
-                    else:
-                        line_span = processed_span
-                else:
-                    line_span = None
-                obj = ParagraphObject(
-                    **base_kwargs,
-                    line_span=line_span if isinstance(line_span, list) else None,
-                    paragraph_index=item.get("paragraph_index"),
-                )
-            elif kind in {"header", "heading", "title"}:
-                obj = HeaderObject(
-                    **base_kwargs,
-                    level=int(_coerce_int(item.get("level")) or 1),
-                    number=item.get("number"),
-                    normalized_text=item.get("normalized_text"),
-                    path=item.get("path"),
-                )
-            elif kind == "table":
-                obj = TableObject(
-                    **base_kwargs,
-                    n_rows=_coerce_int(item.get("n_rows")),
-                    n_cols=_coerce_int(item.get("n_cols")),
-                    has_header_row=item.get("has_header_row"),
-                    markdown=item.get("markdown") or item.get("text"),
-                )
-            elif kind in {"figure", "image"}:
-                obj = FigureObject(
-                    **base_kwargs,
-                    caption=item.get("caption"),
-                    ref_id=item.get("ref_id"),
-                )
-            else:
-                obj = ParagraphObject(
-                    **base_kwargs,
-                    paragraph_index=item.get("paragraph_index"),
-                )
-            objects.append(obj)
-            order_index += 1
-        if not objects:
-            native_fallback = NativePdfParser()
-            native_objects = native_fallback.parse_pdf(file_path)
-            return [
-                obj.model_copy(
-                    update={"metadata": {**obj.metadata, "engine": engine, "source": "native_fallback"}}
-                )
-                for obj in native_objects
             ]
         return objects
