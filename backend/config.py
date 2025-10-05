@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     ALLOW_ORIGINS: List[str] = Field(default_factory=lambda: ["*"])
     MAX_FILE_MB: int = Field(default=50, ge=1)
     PDF_ENGINE: Literal["native", "mineru", "auto"] = Field(default="native")
-    MINERU_ENABLED: bool = Field(default=False)
+    MINERU_ENABLED: bool = Field(default=True)
     MINERU_MODEL_OPTS: Dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("ALLOW_ORIGINS", mode="before")
