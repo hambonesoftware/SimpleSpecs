@@ -13,6 +13,11 @@ from ..constants import MAX_TOKENS_LIMIT
 from ..config import Settings, get_settings
 from ..logging import get_logger
 from ..models import PARSED_OBJECT_ADAPTER, ParsedObject, SectionNode, SectionSpan
+from ..text.toc_filters import (
+    TOC_DOT_LEADER_LINE,
+    is_probably_toc_line,
+    mark_toc_pages,
+)
 from .llm_client import LLMAdapter
 
 __all__ = ["build_headers_prompt", "parse_nested_list_to_tree"]
@@ -25,10 +30,9 @@ _INDENT_WIDTH = 2
 _BULLET_PREFIXES = ("- ", "* ", "+ ", "• ", "– ", "— ")
 _ENUM_RE = re.compile(r"^(?:[0-9]+|[A-Za-z]+)(?:\.[0-9A-Za-z]+)*$")
 _ROMAN_RE = re.compile(r"^[IVXLCDM]+$")
-_TOC_PATTERNS: tuple[re.Pattern[str], ...] = (
-    re.compile(r"(?:\. ?){4,}"),
-    re.compile(r"(?:[_\-·•]\s?){3,}"),
-    re.compile(r"(?:[._\-·•]\s?){4,}(?:\d{1,4}|[IVXLCDM]{1,6})\s*$", re.IGNORECASE),
+_TOC_TRAILING_PAGE_RE = re.compile(
+    r"([\._\u00B7\u2022\u22C5\u00B7\u2026\u2014\u2013\-]{2,}).{0,12}(\d{1,4}|[IVXLCDM]{1,7})\s*$",
+    re.IGNORECASE,
 )
 
 
@@ -43,7 +47,13 @@ def _is_toc_line(text: str) -> bool:
     stripped = text.strip()
     if not stripped:
         return False
-    return any(pattern.search(stripped) for pattern in _TOC_PATTERNS)
+    if TOC_DOT_LEADER_LINE.search(stripped):
+        return True
+    if _TOC_TRAILING_PAGE_RE.search(stripped):
+        return True
+    if is_probably_toc_line(stripped, in_toc_region=True):
+        return True
+    return False
 
 
 def build_headers_prompt(objects: list[ParsedObject]) -> str:
@@ -202,7 +212,27 @@ def _iter_sections(node: SectionNode) -> Iterator[SectionNode]:
 
 def _prepare_object_lines(objects: Sequence[ParsedObject]) -> list[list[str]]:
     prepared: list[list[str]] = []
+    page_lines: dict[int, list[str]] = {}
+
     for obj in objects:
+        page_index = getattr(obj, "page_index", None)
+        text = obj.text or ""
+        if page_index is None or not text:
+            continue
+        for raw_line in text.splitlines():
+            stripped_line = raw_line.strip()
+            if stripped_line:
+                page_lines.setdefault(page_index, []).append(stripped_line)
+
+    toc_pages: set[int] = set()
+    if page_lines:
+        max_page = max(page_lines)
+        pages = [page_lines.get(i, []) for i in range(max_page + 1)]
+        toc_pages = mark_toc_pages(pages)
+
+    for obj in objects:
+        if getattr(obj, "page_index", None) in toc_pages:
+            continue
         entries: list[str] = []
         seen: set[str] = set()
         text = obj.text or ""
