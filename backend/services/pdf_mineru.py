@@ -37,6 +37,12 @@ def _load_mineru_module() -> tuple[Any | None, str | None, str | None]:
         return None, None, str(exc)
     except Exception as exc:  # pragma: no cover - optional dependency
         return None, "mineru", str(exc)
+    if not hasattr(module, "parse"):
+        message = (
+            "MinerU client library is installed but is missing the 'parse' API. "
+            "Please install the official MinerU package or choose the native engine."
+        )
+        return None, "mineru", message
     return module, "mineru", None
 
 

@@ -14,8 +14,13 @@ def test_check_mineru_availability_disabled() -> None:
 
 
 def test_check_mineru_availability_success(monkeypatch) -> None:
+    class FakeModule:
+        @staticmethod
+        def parse(path: str):  # pragma: no cover - simplified stand-in
+            return []
+
     def fake_loader():
-        return object(), "mineru", None
+        return FakeModule(), "mineru", None
 
     monkeypatch.setattr(pdf_mineru, "_load_mineru_module", fake_loader)
     settings = Settings(MINERU_ENABLED=True)
@@ -37,3 +42,20 @@ def test_check_mineru_availability_failure(monkeypatch) -> None:
 
     assert not available
     assert reason == "MinerU client library could not be imported: boom"
+
+
+def test_check_mineru_availability_missing_parse(monkeypatch) -> None:
+    def fake_loader():
+        return None, "mineru", (
+            "MinerU client library is installed but is missing the 'parse' API. "
+            "Please install the official MinerU package or choose the native engine."
+        )
+
+    monkeypatch.setattr(pdf_mineru, "_load_mineru_module", fake_loader)
+    settings = Settings(MINERU_ENABLED=True)
+
+    available, reason = pdf_mineru.check_mineru_availability(settings=settings)
+
+    assert not available
+    assert reason is not None
+    assert "missing the 'parse' API" in reason
