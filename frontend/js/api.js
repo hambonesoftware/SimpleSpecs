@@ -136,6 +136,54 @@ export async function requestSpecs(config) {
   });
 }
 
+export async function* streamSpecs(config, { signal } = {}) {
+  const endpoint = "/api/specs/stream";
+  const resolvedUrl = resolveUrl(endpoint);
+  const response = await fetch(resolvedUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...JSON_HEADERS },
+    body: JSON.stringify(buildPayload(config)),
+    signal,
+  });
+
+  if (!response.ok) {
+    await handleResponse(response);
+    return;
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) {
+    return;
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    buffer += decoder.decode(value, { stream: true });
+
+    let newlineIndex = buffer.indexOf("\n");
+    while (newlineIndex !== -1) {
+      const line = buffer.slice(0, newlineIndex).trim();
+      buffer = buffer.slice(newlineIndex + 1);
+      if (line) {
+        yield JSON.parse(line);
+      }
+      newlineIndex = buffer.indexOf("\n");
+    }
+  }
+
+  const remaining = buffer + decoder.decode();
+  const finalLine = remaining.trim();
+  if (finalLine) {
+    yield JSON.parse(finalLine);
+  }
+}
+
 export async function exportSpecs(uploadId) {
   const response = await request(`/api/export/specs.csv?upload_id=${encodeURIComponent(uploadId)}`);
   const blob = await response.blob();

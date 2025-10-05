@@ -4,9 +4,9 @@ import {
   fetchObjects,
   fetchModelSettings,
   requestHeaders,
-  requestSpecs,
   exportSpecs,
   updateModelSettings,
+  streamSpecs,
 } from "./api.js";
 import {
   state,
@@ -18,7 +18,9 @@ import {
   updateSettings,
   addLog,
   resetLogs,
+  resetHeaderProgress,
   markHeaderRequested,
+  markHeaderResponded,
   markHeaderProcessed,
 } from "./state.js";
 import { MAX_TOKENS_LIMIT } from "./constants.js";
@@ -311,13 +313,17 @@ async function handleSpecs() {
     log("Please configure a model name in settings.");
     return;
   }
+  resetHeaderProgress();
+  refreshHeaders();
   log("Requesting specifications from LLM…");
   updateProgress(progressFill, 80);
-  (state.headers || [])
-    .map((header) => header?.section_number)
-    .filter(Boolean)
-    .forEach((sectionNumber) => markHeaderRequested(sectionNumber));
-  refreshHeaders();
+  const totalHeaders = state.headers.length;
+  const processedSections = new Set();
+  const respondedSections = new Set();
+  const requestedSections = new Set();
+  const collectedSpecs = [];
+  setSpecs([]);
+  refreshSpecs();
   const config = {
     uploadId: state.uploadId,
     provider: state.provider,
@@ -328,25 +334,86 @@ async function handleSpecs() {
   };
   const startTime = performance.now();
   try {
-    const specs = await requestSpecs(config);
-    setSpecs(specs);
-    refreshSpecs();
-    const processed = new Set();
-    specs.forEach((spec) => {
-      const sectionNumber = spec.section_number || spec.section;
-      const key = sectionNumber ? String(sectionNumber) : null;
-      if (key && !processed.has(key)) {
-        processed.add(key);
-        markHeaderProcessed(key);
+    for await (const event of streamSpecs(config)) {
+      const eventType = event?.event;
+      const sectionNumber = event?.section_number ?? event?.section ?? event?.sectionNumber;
+      const key = sectionNumber != null ? String(sectionNumber) : null;
+
+      if (eventType === "request" && key && !requestedSections.has(key)) {
+        requestedSections.add(key);
+        markHeaderRequested(key);
+        refreshHeaders();
+        continue;
       }
-    });
-    refreshHeaders();
-    updateProgress(progressFill, 100);
-    const duration = ((performance.now() - startTime) / 1000).toFixed(1);
-    log(`Specifications extracted (${specs.length}) in ${duration}s.`);
+
+      if (eventType === "response" && key && !respondedSections.has(key)) {
+        respondedSections.add(key);
+        markHeaderResponded(key);
+        refreshHeaders();
+        continue;
+      }
+
+      if (eventType === "processed" && key && !processedSections.has(key)) {
+        const specsForSection = Array.isArray(event?.specs) ? event.specs : [];
+        if (specsForSection.length > 0) {
+          collectedSpecs.push(...specsForSection);
+          setSpecs([...collectedSpecs]);
+          refreshSpecs();
+        }
+        processedSections.add(key);
+        markHeaderProcessed(key);
+        refreshHeaders();
+        if (totalHeaders > 0) {
+          const progress = 80 + Math.round((processedSections.size / totalHeaders) * 20);
+          updateProgress(progressFill, Math.min(progress, 99));
+        }
+        continue;
+      }
+
+      if (eventType === "complete") {
+        const finalSpecs = Array.isArray(event?.specs) ? event.specs : collectedSpecs;
+        if (finalSpecs !== state.specs) {
+          setSpecs(finalSpecs);
+          refreshSpecs();
+        }
+        const duration = ((performance.now() - startTime) / 1000).toFixed(1);
+        updateProgress(progressFill, 100);
+        log(`Specifications extracted (${finalSpecs.length}) in ${duration}s.`);
+        break;
+      }
+
+      if (eventType === "error") {
+        const status = event?.status ? ` (status ${event.status})` : "";
+        const message = event?.message || "Specification extraction failed.";
+        throw new Error(`${message}${status}`);
+      }
+    }
+
+    if (processedSections.size < totalHeaders) {
+      const remaining = (state.headers || [])
+        .map((header) => header?.section_number)
+        .filter((section) => section != null)
+        .map((section) => String(section))
+        .filter((section) => !processedSections.has(section));
+      remaining.forEach((section) => {
+        processedSections.add(section);
+        markHeaderProcessed(section);
+      });
+      refreshHeaders();
+    }
+
+    if (!state.specs?.length && collectedSpecs.length > 0) {
+      setSpecs([...collectedSpecs]);
+      refreshSpecs();
+    }
+
+    if (processedSections.size >= totalHeaders) {
+      updateProgress(progressFill, 100);
+    }
   } catch (error) {
     log(`Specification extraction failed: ${error.message}`);
-    updateProgress(progressFill, 80);
+    updateProgress(progressFill, 65);
+    throw error;
   }
 }
 

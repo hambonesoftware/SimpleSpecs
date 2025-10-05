@@ -242,6 +242,11 @@ button:hover {
   color: var(--accent);
 }
 
+.header-status--responded {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .header-status--complete {
   color: #22c55e;
 }

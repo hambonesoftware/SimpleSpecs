@@ -1,11 +1,15 @@
 """Specifications extraction endpoints."""
 from __future__ import annotations
 
+import asyncio
 import hashlib
+import json
 import re
-from typing import List
+from collections.abc import Awaitable, Callable
+from typing import Any, List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import StreamingResponse
 
 from ..models import HeaderItem, SpecItem, SpecsRequest
 from ..services.llm import get_provider
@@ -39,8 +43,29 @@ Output format (fenced):
 """
 
 
-@router.post("/specs", response_model=list[SpecItem])
-async def extract_specs(payload: SpecsRequest) -> List[SpecItem]:
+SpecEvent = dict[str, Any]
+NotifyCallback = Callable[[SpecEvent], Awaitable[None] | None]
+
+
+def _ensure_status(event: SpecEvent) -> SpecEvent:
+    """Return a shallow copy of an event with serializable data."""
+
+    if "specs" in event:
+        specs = event["specs"]
+        if isinstance(specs, list):
+            event = {**event, "specs": [spec for spec in specs]}
+    return event
+
+
+async def _notify(callback: NotifyCallback | None, event: SpecEvent) -> None:
+    if not callback:
+        return
+    result = callback(_ensure_status(event))
+    if asyncio.iscoroutine(result):
+        await result
+
+
+async def _collect_specs(payload: SpecsRequest, notify: NotifyCallback | None = None) -> list[SpecItem]:
     raw_objects = read_jsonl(upload_objects_path(payload.upload_id))
     if not raw_objects:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Upload not found")
@@ -64,6 +89,14 @@ async def extract_specs(payload: SpecsRequest) -> List[SpecItem]:
 
     specs: list[SpecItem] = []
     for header in headers:
+        await _notify(
+            notify,
+            {
+                "event": "request",
+                "section_number": header.section_number,
+                "section_name": header.section_name,
+            },
+        )
         text = header.chunk_text or section_text(lines, headers, header)
         prompt = _SPEC_PROMPT_TEMPLATE.format(
             section_number=header.section_number,
@@ -75,6 +108,14 @@ async def extract_specs(payload: SpecsRequest) -> List[SpecItem]:
             {"role": "user", "content": prompt},
         ]
         response_text = await provider.chat(messages)
+        await _notify(
+            notify,
+            {
+                "event": "response",
+                "section_number": header.section_number,
+                "section_name": header.section_name,
+            },
+        )
         match = re.search(r"#specs#(.*?)#specs#", response_text, re.DOTALL | re.IGNORECASE)
         if not match:
             raise HTTPException(
@@ -83,7 +124,17 @@ async def extract_specs(payload: SpecsRequest) -> List[SpecItem]:
             )
         block = match.group(1).strip()
         if not block or block.strip().upper() == "NONE":
+            await _notify(
+                notify,
+                {
+                    "event": "processed",
+                    "section_number": header.section_number,
+                    "section_name": header.section_name,
+                    "specs": [],
+                },
+            )
             continue
+        new_specs: list[SpecItem] = []
         for raw_line in block.splitlines():
             line = raw_line.strip()
             if not line or line.upper() == "NONE":
@@ -96,20 +147,82 @@ async def extract_specs(payload: SpecsRequest) -> List[SpecItem]:
             section_hash = hashlib.sha1(section_identifier.encode("utf-8")).hexdigest()
             spec_id_seed = f"{section_hash}|{line}"
             spec_id = hashlib.sha1(spec_id_seed.encode("utf-8")).hexdigest()
-            specs.append(
-                SpecItem(
-                    spec_id=spec_id,
-                    file_id=payload.upload_id,
-                    section_id=section_hash,
-                    section_number=header.section_number or None,
-                    section_title=header.section_name,
-                    spec_text=line,
-                    source_object_ids=[],
-                )
+            spec_item = SpecItem(
+                spec_id=spec_id,
+                file_id=payload.upload_id,
+                section_id=section_hash,
+                section_number=header.section_number or None,
+                section_title=header.section_name,
+                spec_text=line,
+                source_object_ids=[],
             )
+            specs.append(spec_item)
+            new_specs.append(spec_item)
+        await _notify(
+            notify,
+            {
+                "event": "processed",
+                "section_number": header.section_number,
+                "section_name": header.section_name,
+                "specs": [spec.model_dump(mode="json") for spec in new_specs],
+            },
+        )
 
-    write_json(
-        specs_path(payload.upload_id),
-        [spec.model_dump(mode="json") for spec in specs],
+    serialized = [spec.model_dump(mode="json") for spec in specs]
+    write_json(specs_path(payload.upload_id), serialized)
+    await _notify(
+        notify,
+        {
+            "event": "complete",
+            "specs": serialized,
+        },
     )
     return specs
+
+
+@router.post("/specs", response_model=list[SpecItem])
+async def extract_specs(payload: SpecsRequest) -> List[SpecItem]:
+    return await _collect_specs(payload)
+
+
+@router.post("/specs/stream")
+async def stream_specs(payload: SpecsRequest) -> StreamingResponse:
+    async def event_stream() -> Any:
+        queue: asyncio.Queue[SpecEvent | None] = asyncio.Queue()
+
+        async def emit(event: SpecEvent) -> None:
+            await queue.put(event)
+
+        async def producer() -> None:
+            try:
+                await _collect_specs(payload, emit)
+            except HTTPException as exc:  # pragma: no cover - passthrough for clients
+                await queue.put(
+                    {
+                        "event": "error",
+                        "status": exc.status_code,
+                        "message": exc.detail,
+                    }
+                )
+            except Exception as exc:  # pragma: no cover - safety net for clients
+                await queue.put(
+                    {
+                        "event": "error",
+                        "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        "message": str(exc),
+                    }
+                )
+            finally:
+                await queue.put(None)
+
+        producer_task = asyncio.create_task(producer())
+        try:
+            while True:
+                item = await queue.get()
+                if item is None:
+                    break
+                yield json.dumps(item) + "\n"
+        finally:
+            await producer_task
+
+    return StreamingResponse(event_stream(), media_type="application/x-ndjson")
