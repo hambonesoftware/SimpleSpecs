@@ -1,5 +1,8 @@
 import { MAX_TOKENS_LIMIT } from "./constants.js";
 
+export const ENGINE_OPTIONS = ["auto", "native", "mineru"];
+const ENGINE_SET = new Set(ENGINE_OPTIONS);
+
 const DEFAULT_HEADER_PROGRESS = {
   requested: false,
   responded: false,
@@ -15,6 +18,7 @@ export const state = {
   headerProgress: new Map(),
   provider: "openrouter",
   model: "",
+  engine: ENGINE_OPTIONS[0],
   params: {
     temperature: 0.2,
     max_tokens: MAX_TOKENS_LIMIT,
@@ -109,6 +113,22 @@ export function updateSettings({ provider, model, temperature, maxTokens, apiKey
   };
   state.apiKey = apiKey;
   state.baseUrl = baseUrl;
+}
+
+export function setEngine(engine) {
+  if (typeof engine !== "string") {
+    return state.engine;
+  }
+  const normalized = engine.toLowerCase();
+  if (!ENGINE_SET.has(normalized)) {
+    return state.engine;
+  }
+  state.engine = normalized;
+  return state.engine;
+}
+
+export function getEngine() {
+  return state.engine;
 }
 
 export function addLog(entry) {
