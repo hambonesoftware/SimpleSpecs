@@ -2,13 +2,25 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from pathlib import Path
 
 from ..config import Settings, get_settings
-from ..models import PARSED_OBJECT_ADAPTER, ParsedObject, SectionNode, SectionSpan
+from ..header_export import write_header_search_report
+from ..models import (
+    PARSED_OBJECT_ADAPTER,
+    HeaderItem,
+    ParsedObject,
+    SectionNode,
+    SectionSpan,
+)
+from ..store import headers_path, read_json
 
 __all__ = ["compute_section_spans", "load_persisted_chunks", "run_chunking"]
+
+
+logger = logging.getLogger(__name__)
 
 
 def _extract_text(obj: ParsedObject) -> str:
@@ -82,7 +94,35 @@ def run_chunking(file_id: str, settings: Settings | None = None) -> dict[str, li
     sections = _load_sections(file_id, settings)
     mapping = compute_section_spans(sections, objects)
     _persist_chunks(file_id, mapping, settings)
+    _export_header_report(file_id)
     return mapping
+
+
+def _export_header_report(file_id: str) -> None:
+    path = headers_path(file_id)
+    if not path.exists():
+        return
+    try:
+        payload = read_json(path) or []
+    except Exception:  # pragma: no cover - best effort logging
+        logger.warning("Failed to read stored headers for report", exc_info=True)
+        return
+    if not isinstance(payload, list):
+        return
+    items: list[HeaderItem] = []
+    for entry in payload:
+        if not isinstance(entry, dict):
+            continue
+        try:
+            items.append(HeaderItem.model_validate(entry))
+        except Exception:  # pragma: no cover - skip invalid entries
+            logger.debug("Skipping malformed header entry while exporting report")
+    if not items:
+        return
+    try:
+        write_header_search_report(items)
+    except Exception:  # pragma: no cover - best effort logging
+        logger.warning("Failed to write header search report", exc_info=True)
 
 
 def compute_section_spans(root: SectionNode, objects: list[ParsedObject]) -> dict[str, list[str]]:
