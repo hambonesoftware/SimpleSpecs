@@ -29,17 +29,15 @@ class MinerUUnavailableError(RuntimeError):
 
 
 def _load_mineru_module() -> tuple[Any | None, str | None, str | None]:
-    last_error: str | None = None
-    for name in ("mineru", "magic_pdf"):
-        try:
-            module = importlib.import_module(name)
-            return module, name, None
-        except ModuleNotFoundError as exc:
-            last_error = str(exc)
-            continue
-        except Exception as exc:
-            return None, name, str(exc)
-    return None, None, last_error
+    """Attempt to import the MinerU client library."""
+
+    try:
+        module = importlib.import_module("mineru")
+    except ModuleNotFoundError as exc:
+        return None, None, str(exc)
+    except Exception as exc:  # pragma: no cover - optional dependency
+        return None, "mineru", str(exc)
+    return module, "mineru", None
 
 
 def check_mineru_availability(
@@ -80,21 +78,9 @@ class MinerUPdfParser:
 
     def parse_pdf(self, file_path: str) -> list[ParsedObject]:
         file_id = Path(file_path).resolve().parent.parent.name
-        if self._module_name == "magic_pdf":  # pragma: no cover - optional dependency
-            return self._parse_magic_pdf(file_path, file_id)
-        if self._module_name == "mineru":  # pragma: no cover - optional dependency
-            return self._parse_mineru(file_path, file_id)
-        raise MinerUUnavailableError("Unsupported MinerU module.")
-
-    def _parse_magic_pdf(self, file_path: str, file_id: str) -> list[ParsedObject]:
-        try:
-            pipeline = getattr(self._module, "pipeline", None)
-            if pipeline is None:
-                raise AttributeError("pipeline not available")
-            result = pipeline(file_path)
-        except Exception as exc:  # pragma: no cover - optional dependency
-            raise MinerUUnavailableError(str(exc)) from exc
-        return self._normalize_mineru_output(result, file_path, file_id, engine="magic_pdf")
+        if self._module_name != "mineru":  # pragma: no cover - optional dependency
+            raise MinerUUnavailableError("MinerU client library is not available.")
+        return self._parse_mineru(file_path, file_id)
 
     def _parse_mineru(self, file_path: str, file_id: str) -> list[ParsedObject]:
         try:
