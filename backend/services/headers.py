@@ -11,10 +11,13 @@ import httpx
 from ..constants import MAX_TOKENS_LIMIT
 
 from ..config import Settings, get_settings
+from ..logging import get_logger
 from ..models import PARSED_OBJECT_ADAPTER, ParsedObject, SectionNode, SectionSpan
 from .llm_client import LLMAdapter
 
 __all__ = ["build_headers_prompt", "parse_nested_list_to_tree"]
+
+logger = get_logger(__name__)
 
 _FALLBACK_NESTED_LIST = """1. Introduction\n  1.1 Background\n2. Methods\n3. Results"""
 _MAX_PROMPT_CHARACTERS = 4000
@@ -311,6 +314,7 @@ class _OpenRouterAdapter:
                 timeout=10.0,
             )
             response.raise_for_status()
+            logger.info("Header LM raw response (OpenRouter adapter): %s", response.text)
             data = response.json()
             message = data.get("choices", [{}])[0].get("message", {})
             content = message.get("content")
@@ -340,6 +344,7 @@ class _LlamaCppAdapter:
                 timeout=10.0,
             )
             response.raise_for_status()
+            logger.info("Header LM raw response (llama.cpp adapter): %s", response.text)
             data = response.json()
             content = data.get("content") or data.get("completion") or data.get("text")
             if isinstance(content, str) and content.strip():
@@ -372,6 +377,7 @@ def run_header_discovery(file_id: str, llm_choice: str | None) -> SectionNode:
         response_text = adapter.generate(prompt)
     except Exception:
         response_text = _FALLBACK_NESTED_LIST
+    logger.info("Header LM raw response (discovery): %s", response_text)
     if not isinstance(response_text, str) or not response_text.strip():
         response_text = _FALLBACK_NESTED_LIST
     root = parse_nested_list_to_tree(file_id, response_text)

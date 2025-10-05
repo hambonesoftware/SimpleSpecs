@@ -17,7 +17,11 @@ from typing import Any, Dict, List, Optional
 
 import httpx
 
+from ...logging import get_logger
 from .llm_provider import LLMProvider
+
+
+logger = get_logger(__name__)
 
 
 class LlamaCPPProvider(LLMProvider):
@@ -74,6 +78,7 @@ class LlamaCPPProvider(LLMProvider):
 
         async with httpx.AsyncClient(timeout=self.timeout, headers=self.headers) as client:
             resp = await client.post(url, json=payload)
+            logger.info("Header LM raw response (llama.cpp provider): %s", resp.text)
             # Raise detailed HTTP errors early
             try:
                 resp.raise_for_status()
