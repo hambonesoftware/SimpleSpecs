@@ -16,6 +16,7 @@ from .routers import (
     headers,
     headers_ollama,
     ingest,
+    parse,
     settings,
     specs,
     system,
@@ -36,6 +37,7 @@ app.include_router(health.router)
 app.include_router(upload.router)
 app.include_router(ingest.ingest_router)
 app.include_router(files.files_router)
+app.include_router(parse.router)
 app.include_router(headers.router)
 app.include_router(headers_ollama.router)
 app.include_router(settings.router)
