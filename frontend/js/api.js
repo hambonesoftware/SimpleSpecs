@@ -66,18 +66,23 @@ export async function checkHealth() {
   return request("/healthz", { headers: JSON_HEADERS });
 }
 
-export async function uploadFile(file) {
+export async function ingestFile(file, engine) {
   const formData = new FormData();
-  formData.append("file", file);
-  return request("/api/upload", {
+  if (file) {
+    formData.append("file", file);
+  }
+  if (engine) {
+    formData.append("engine", engine);
+  }
+  return request("/ingest", {
     method: "POST",
     body: formData,
   });
 }
 
-export async function fetchObjects(uploadId, page = 1, pageSize = 500) {
-  const params = new URLSearchParams({ upload_id: uploadId, page: String(page), page_size: String(pageSize) });
-  return request(`/api/objects?${params.toString()}`, { headers: JSON_HEADERS });
+export async function fetchParsedObjects(fileId) {
+  const encoded = encodeURIComponent(fileId);
+  return request(`/parsed/${encoded}`, { headers: JSON_HEADERS });
 }
 
 export async function fetchModelSettings() {
@@ -90,6 +95,10 @@ export async function updateModelSettings(payload) {
     headers: { "Content-Type": "application/json", ...JSON_HEADERS },
     body: JSON.stringify(payload),
   });
+}
+
+export async function fetchSystemCapabilities() {
+  return request("/system/capabilities", { headers: JSON_HEADERS });
 }
 
 function buildPayload({ uploadId, provider, model, params, apiKey, baseUrl }, options = {}) {

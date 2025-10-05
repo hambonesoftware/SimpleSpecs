@@ -435,18 +435,64 @@ button:hover {
 
 .specs-controls {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
 .specs-controls input,
 .specs-controls select {
-  flex: 1;
+  flex: 1 1 200px;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
   border-radius: 0.5rem;
   padding: 0.5rem;
+}
+
+.engine-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-panel .engine-control {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.engine-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.engine-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.engine-option {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.engine-option:hover,
+.engine-option:focus {
+  background: var(--accent-muted);
+  outline: none;
+}
+
+.engine-option.active {
+  background: var(--accent);
+  color: #031b2e;
 }
 
 .table-wrapper {
