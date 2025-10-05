@@ -21,6 +21,14 @@
       <div class="app-body">
         <aside class="left-pane">
           <section class="upload-panel">
+            <div class="engine-control">
+              <span class="engine-label">PDF engine</span>
+              <div id="engine-toggle" class="engine-toggle" role="group" aria-label="PDF engine">
+                <button type="button" class="engine-option" data-engine="auto" aria-pressed="false">Auto</button>
+                <button type="button" class="engine-option" data-engine="native" aria-pressed="false">Native</button>
+                <button type="button" class="engine-option" data-engine="mineru" aria-pressed="false">MinerU</button>
+              </div>
+            </div>
             <label class="file-input" for="file-input">
               <input id="file-input" type="file" accept=".pdf,.docx,.txt" />
               <span>Select a document (PDF, DOCX, TXT)</span>

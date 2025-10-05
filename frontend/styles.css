@@ -457,6 +457,11 @@ button:hover {
   gap: 0.5rem;
 }
 
+.upload-panel .engine-control {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
 .engine-label {
   font-size: 0.8rem;
   color: var(--muted);
