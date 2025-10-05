@@ -8,6 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.main import create_app
+from backend.services import pdf_mineru
 
 
 client = TestClient(create_app())
@@ -77,3 +78,17 @@ def test_pdf_mineru_golden() -> None:
     assert parsed.status_code == 200, parsed.text
     objects: list[dict[str, Any]] = parsed.json()
     _assert_objects_shape(objects)
+
+
+def test_mineru_import_error_message(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SIMPLS_MINERU_ENABLED", "true")
+
+    def fake_loader() -> tuple[None, str, str]:
+        return None, "mineru", "boom"
+
+    monkeypatch.setattr(pdf_mineru, "_load_mineru_module", fake_loader)
+
+    with pytest.raises(pdf_mineru.MinerUUnavailableError) as excinfo:
+        pdf_mineru.MinerUPdfParser(settings=pdf_mineru.Settings(MINERU_ENABLED=True))
+
+    assert "boom" in str(excinfo.value)

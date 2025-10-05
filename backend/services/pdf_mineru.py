@@ -24,16 +24,18 @@ class MinerUUnavailableError(RuntimeError):
     """Raised when the MinerU engine cannot be used."""
 
 
-def _load_mineru_module() -> tuple[Any | None, str | None]:
+def _load_mineru_module() -> tuple[Any | None, str | None, str | None]:
+    last_error: str | None = None
     for name in ("mineru", "magic_pdf"):
         try:
             module = importlib.import_module(name)
-            return module, name
-        except ModuleNotFoundError:
+            return module, name, None
+        except ModuleNotFoundError as exc:
+            last_error = str(exc)
             continue
-        except Exception:
-            return None, name
-    return None, None
+        except Exception as exc:
+            return None, name, str(exc)
+    return None, None, last_error
 
 
 @dataclass
@@ -46,8 +48,12 @@ class MinerUPdfParser:
         self.settings = self.settings or get_settings()
         if not self.settings.MINERU_ENABLED:
             raise MinerUUnavailableError("MinerU is disabled in settings.")
-        self._module, self._module_name = _load_mineru_module()
+        self._module, self._module_name, error_message = _load_mineru_module()
         if self._module is None:
+            if error_message:
+                raise MinerUUnavailableError(
+                    f"MinerU client library could not be imported: {error_message}"
+                )
             raise MinerUUnavailableError("MinerU client library is not installed.")
 
     def parse_pdf(self, file_path: str) -> list[ParsedObject]:
