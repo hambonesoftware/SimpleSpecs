@@ -18,6 +18,7 @@ from httpx import InvalidURL
 from ..models import HeaderItem, OpenRouterHeadersRequest
 from ._headers_common import (
     build_header_messages,
+    clean_document_for_headers,
     fetch_document_text,
     parse_and_store_headers,
 )
@@ -109,6 +110,23 @@ def _dump_json(ctx: DebugCtx, filename: str, obj: Any) -> None:
             json.dump(obj, f, ensure_ascii=False, indent=2)
     except Exception as e:  # pragma: no cover - best effort debug logging
         logger.debug("[headers][%s][dump] failed to write %s: %r", ctx.request_id, filename, e)
+
+
+def _dump_evidence(ctx: DebugCtx, title: str, snippet: Optional[str], tag: str) -> None:
+    if ctx is None or snippet is None:
+        return
+    try:
+        safe_title = re.sub(r"[^A-Za-z0-9_\-]+", "_", title).strip("_")[:60] or "header"
+        path = ctx.path(f"evidence_{tag}__{safe_title}.txt")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(snippet, encoding="utf-8")
+    except Exception as exc:  # pragma: no cover - best effort debug logging
+        logger.debug(
+            "[headers][%s][dump] failed to write evidence for %s: %r",
+            ctx.request_id,
+            title,
+            exc,
+        )
 
 
 def _time_ms(t0: float) -> int:
@@ -507,9 +525,21 @@ async def extract_openrouter_headers(payload: OpenRouterHeadersRequest) -> List[
             {"chars": len(document or ""), "preview": _shorten(document)},
         )
 
+        cleaned_document = clean_document_for_headers(document)
+        logger.debug(
+            "[headers][%s] cleaned document (%d chars)",
+            req_id,
+            len(cleaned_document or ""),
+        )
+        _dump_json(
+            ctx,
+            "cleaned_document_preview.json",
+            {"chars": len(cleaned_document or ""), "preview": _shorten(cleaned_document)},
+        )
+
         # Build messages
         t_msg = time.time()
-        messages = build_header_messages(document)
+        messages = build_header_messages(cleaned_document)
         logger.debug(
             "[headers][%s] built messages (%d items) in %d ms",
             req_id,
@@ -532,12 +562,15 @@ async def extract_openrouter_headers(payload: OpenRouterHeadersRequest) -> List[
         ctx.base_url = base_url
 
         # Timeout and params
-        timeout = float((payload.params or {}).get("timeout", 360.0))
+        params = dict(payload.params or {})
+        params.setdefault("temperature", 0)
+        params.setdefault("stop", ["#headers_end#"])
+        timeout = float(params.get("timeout", 360.0))
         logger.debug(
             "[headers][%s] timeout=%s params_keys=%s api_key=%s",
             req_id,
             timeout,
-            list((payload.params or {}).keys()),
+            list(params.keys()),
             redacted_key,
         )
 
@@ -548,7 +581,7 @@ async def extract_openrouter_headers(payload: OpenRouterHeadersRequest) -> List[
             api_key=api_key,
             model=payload.model,
             messages=messages,
-            params=payload.params,
+            params=params,
             timeout=timeout,
             ctx=ctx,
         )
@@ -566,7 +599,17 @@ async def extract_openrouter_headers(payload: OpenRouterHeadersRequest) -> List[
 
         # Parse + store headers
         t_parse = time.time()
-        headers_items = parse_and_store_headers(payload.upload_id, response_text)
+        headers_items = parse_and_store_headers(
+            payload.upload_id,
+            response_text,
+            cleaned_document=cleaned_document,
+            on_verify=lambda header, _pos, snippet: _dump_evidence(
+                ctx, header.section_name, snippet, "body"
+            ),
+            on_reject=lambda header, snippet: _dump_evidence(
+                ctx, header.section_name, snippet, "rejected"
+            ),
+        )
         logger.debug(
             "[headers][%s] parse_and_store_headers -> %d items in %d ms",
             req_id,
