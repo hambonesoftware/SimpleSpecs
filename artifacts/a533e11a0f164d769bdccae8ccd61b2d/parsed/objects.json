@@ -1,0 +1,611 @@
+[
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000000",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "A N   A M E R I C A N   N A T I O N A L   S T A N D A R D  \nMeasurement of Liquid Flow in \nClosed  Conduits Using Transit-Time \nUltrasonic  Flowmeters \nANSVASME MFC-5M-1985 \nREAFFIRMED 1994 \nFOR  CURRENT COMMIllEE PERSONNEL \nPLEASE  SEE  ASME  MANUAL 6 - 1  1 \nSPONSORED  AND  PUBLISHED  BY \nT H E   A M E R I C A N   S O C I E T Y  \nO F  M E C H A N I C A L   E N G I N E E R S  \nUnited  Engineering  Center \n345 East 47th  Street  New \nYork, N. Y. 1001 7 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nREAFFIRMED 2001\nFOR CURRENT COMMITTEE PERSONNEL\nPLEASE E-MAIL CS@asme.org",
+    "page_index": 0,
+    "bbox": [
+      0.0,
+      0.0,
+      611.9994506835938,
+      791.9756469726562
+    ],
+    "order_index": 0,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 0
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000001",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "Date of Issuance: July 15, 1985 \nThis  Standard will be revised when the Society approves the issuance of a new edition. \nThere will be no addenda  or written interpretations of the requirements of this Standard \nissued to this Edition. \nThis code or standard was developed  under procedures accredited as meeting the criteria for \nAmerican National Standards. The Consensus Committee that approved the  code or standard was \nbalanced to assure that individuals from competent and concerned interests have  had an oppor- \ntunity to participate. The proposed code or standard was made  available for public review and \ncomment which provides an opportunity for additional public input  from industry, academia, reg- \nulatory agencies,  and the public-at-large. \nASME does not \"approve,\"  \"rate,\"  or  \"endorse\"  any \nitem, construction, proprietary device,  or \nactivity. \nASME does not take any position with respect to the  validity  of any patent  rights asserted in \nconnection with any items mentioned in this document, and  does not undertake to insure anyone \nutilizing a standard against liability  for infringement of any applicable Letters Patent,  nor  assume \nany such liability. Users  of a code or standard are expressly advised that determination of the \nvalidity of any such patent rights, and the risk of infringement of such rights, is entirely their own \nresponsibility. \nParticipation by federal agency representativek) or person(s) affiliated with industry is not to \nbe interpreted as government or industry endorsement of this code or standard. \nASME accepts responsibility for only those interpretations issued in accordance with governing \nASME procedures and policies which preclude the issuance of interpretations by individual vol- \nunteers. \nNo part of this document may be reproduced in any form, \nin an electronic retrieval system or otherwise, \nwithout the prior written permission of the publisher. \nCopyright 0 1985 by \nTHE AMERICAN  SOCIETY \nOF MECHANICAL ENGINEERS \nAll Rights Reserved \nPrinted in U.S.A. \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 1,
+    "bbox": [
+      0.0,
+      0.0,
+      611.279296875,
+      792.0
+    ],
+    "order_index": 1,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 1
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000002",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "FOREWORD \n(This Foreword is not part of ANSllASME  MFC-5M-1985.) \nThe 'need for a document describing measurement  of liquid  flows  by means of transit-time \nultrasonic flowmeters  has been  recognized for many years.  This document represents the first \nformal attempt  to establish common  ground  between  the \nusers and manufacturers of these \nmeters.  Doppler flowmeters are not covered by this document. \nThis Standard, which  was  approved  by the ASME Standards  Committee on Measurement of \nFluid  Flow  in Closed Conduits, was approved and designated  as an American  National Standard \nby the American  National Standards  Institute on April 12, 1985. \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 2,
+    "bbox": [
+      0.0,
+      0.0,
+      611.279296875,
+      791.9750366210938
+    ],
+    "order_index": 2,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 2
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000003",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "ASME STANDARDS  COMMITTEE \nMeasurement of Fluid Flow in Closed Conduits \n(The  following is the roster of  the  Committee  at the time of approval of this Standard.) \nOFFICERS \nR. W. Miller, Chairman \nW. F. 2. Lee, Vice  Chairman \nK. Wessely. Secretary \nCOMMITTEE  PERSONNEL \nR. B. Abernethy,  Pratt & Whitney  Aircraft, West Palm Beach, Florida \nJ. W. Adam, Houston, Texas \nN. A. Alston,  Diederich  Standard Corp., Boulder,  Colorado \nH. P. Bean, El Paso, Texas \nS. R. Beitler,  The  Ohio  State  University,  Columbus,  Ohio \nM. Bradner, The  Foxboro Co., Foxboro, Massachusetts \nE.  E. Buxton,  St. Albans, West Virginia \nJ. S. Castorina. Naval Ship System Engineering  Station,  Philadelphia, Pennsylvania \nG. P. Corpron,  Rosemount Inc., Eden Prairie, Minnesota \nC. F. Cusick, Philadelphia, Pennsylvania \nL. A. Dodge, Richmond Heights,  Ohio \nR. B. Dowdell,  University  of  Rhode Island, Kingston,  Rhode  Island \nR. L. Galley, Antioch,  California \nD. Halmi, D. Halmi & Associates Inc., Pawtucket,  Rhode  Island \nR. M. Hickox, S.O.R., Inc., Olathe, Kansas \nH. S. Hillbrath,  Boeing Aerospace Co., Santa Clara, California \nE. H. Jones, Jr., Gulf Research and  Development Co., Houston, Texas \nL. J. Kemp. Palos Verdes Estates, California \nD. R. Keyser, Aero-Mechanical Branch, Warminster, Pennsylvania \nC.  P. Kittredge,  Princeton,  New Jersey \nW. F. 2. Lee, Rockwell  International,  Pittsburgh, Pennsylvania \nE. D. Mannherz, Fischer & Porter Co., Warminster, Pennsylvania \nG. E. Mattingly,  National  Bureau of Standards, Washington, D.C. \nR. W. Miller,  The  Foxboro Co., Foxboro, Massachusetts \nR. V. Moone,  Union  Carbide Corp., Tonawanda,  New York \nL. C. Neale, Jefferson, Massachusetts \nM. H. November, Hacienda Heights, California \nW. M. Reese, Jr., Fluidic  Techniques  Inc.,  Mansfield, Texas \nP. G. Scott, Observer, The  Foxboro Co., Foxboro, Massachusetts \nH. E. Snider, AWWA Standards Committee, Kansas City,  Missouri \nD. A. Sullivan, Fern Engineering, Bourne, Massachusetts \nR. G. Teyssandier, Daniel  Industries Inc., Houston, Texas \nJ. S. Yard, Fischer & Porter Co., Warminster, Pennsylvania \nV \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 3,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0238647460938,
+      791.9993286132812
+    ],
+    "order_index": 3,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 3
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000004",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "SUBCOMMITTEE 9 - ULTRASONIC FLOWMETERS \nR. G. Teyssandier, Chairman, Daniel  Industries, Inc., Houston, Texas \nR. W. Burdett,  Kennecott  Minerals Co., Salt  Lake  City,  Utah \nC. G. Clyde, Utah State  University, Logan, Utah \nG. P. Corpron,  Rosemount Inc., Eden Prairie, Minnesota \nL. D. DiNapoli, Leeds & Northrup Co., North Wales, Pennsylvania \nD. J. Grant,  NASA, Greenbelt, Maryland \nD. Halrni, D. Halmi & Associates Inc., Pawtucket,  Rhode  Island \nR. E. Johnson, BC Hydro & Power  Authorities,  Surrey,  British  Columbia, Canada \nL. J. Kernp, Palos Verdes Estates, California \nR. B. Kirnball,  Technical Sales Development Co., San Francisco,  California \nF. C. Lowell, Ferranti ORE Inc., Falmouth, Massachusetts \nL. C. Neale, Jefferson, Massachusetts \nP. H. Nelson, Bureau of Reclamation, Denver, Colorado \nW. E. VanOver. Transducers Inc., Cerritos,  California \nJ. H. Vignos, The  Foxboro Co., Foxboro, Massachusetts \nE. M. Zacharias, Jr., MAPCO  Controls Co., Tulsa, Oklahoma \nvi \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 4,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0230102539062,
+      791.9990844726562
+    ],
+    "order_index": 4,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 4
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000005",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "CONTENTS \n... \nForeword . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  \n111 \nCommittee \n \nRoster \n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  \nv \n1 \n \nGeneral \n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  \n1 \n2 \nFlowmeter Description . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  \n1 \n3 \nError  Sources  and \nTheir Reduction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  \n6 \n4 \nApplication \n \nGuidelines \n. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  \n8 \n5 \nMeter Factor  Determination  and \nVerification .......................... \n9 \nFigures \n1  Wetted \nTransducer Configuration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  \n4 \n2 \nProtected  Configuration \nWith Cavities . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  \n4 \n3 \nProtected  Configuration With Protrusions ............................. \n4 \n4 \nProtected  Configuration With Smooth Bore ............................ \n4 \n5 \nAcoustic Path Configurations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  \n5 \n6 \nA  Typical Cross Path Ultrasonic Flowmeter  Configuration  (Paths \nMay Be Multipath Diametric or Chordal) ............................ \n7 \nAppendices \nA  Acoustic  Transit \nTime  in a Nonuniform Fluid  Velocity Field . . . . . . . . . . . . . . . .  11 \nB \nSelection Guidelines ........................................... \n14 \nvii \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 5,
+    "bbox": [
+      0.0,
+      0.0,
+      611.9998168945312,
+      791.99951171875
+    ],
+    "order_index": 5,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 5
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000006",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "ANSllASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \nAN  AMERICAN  NATIONAL  STANDARD \nMEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS  USING  TRANSIT-TIME \nULTRASONIC  FLOWMETERS \n1 GENERAL \n1.1 Scope \nThis Standard applies only to ultrasonic flowmeters \nthat base their  operation on the  measurement of transit \ntimes  of  acoustic signals. Further,  this  Standard  concerns \nonly  the application of  such  meters  when used to mea- \nsure the volumetric flow  rate  of \na liquid  exhibiting \nhomogeneous acoustic properties  and flowing  in  a  com- \npletely  fdled closed conduit. \nNot covered by  this  Standard \nare ultrasonic flow- \nmeters  that derive volumetric  flow rate  from measure- \nments  of  the  deviation, scattering  (Doppler flowmeter), \nor correlation  of  acoustic signals. \n1.2 Purpose \nThis Standard provides: \n(a) a  description of  the  operating principles employed \n(b) a description of error sources and  performance \n(c) a common set of  terminology, symbols,  defini- \nby the ultrasonic flowmeters covered in this  Standard; \nverification procedures; \ntions,  and specifications. \n1.3 Terminology, Symbols, and Definitions \nTerminology and symbols  used \nin this Standard, \nexcept  for  those defined below, are  in  accordance with \nANWASME  MFC-lM, Glossary of Terms Used in the \nMeasurement of  Fluid  Flow in  Pipes. \nacoustic path - the  path  that  the  acoustic signals follow \nas they propagate through  the measurement  section  be- \ntween  the  transducer  elements \naxid  flow \nvelocity (Vax) - the  component  of \nliquid \nflow velocity at a point in the measurement  section that \nis parallel to  the  measurement section\u2019s  axis and in the \ndirection of the  flow being measured \ncross flow velocity - the  component  of  liquid flow ve- \nlocity  at a point in the measurement  section that is per- \npendicular to the measurement section\u2019s axis \nmeasurement section - the section of  conduit in which \nthe volumetric  flow rate is sensed by  the  acoustic signals. \nThe measurement  section \nis bounded  at  both  ends \nby \nplanes  perpendicular to  the axis of  the section and lo- \ncated  at  the  extreme  upstream  and  downstream  trans- \nducer  positions. \nnonrefractive system - an  ultrasonic  flowmeter  in which \nthe  acoustic  path crosses the solid/process  liquid inter- \nfaces at a  right angle \nrefractive system - an  ultrasonic  flowmeter in  which the \nacoustic path crosses the solid/process  liquid  interfaces \nat  other  than a right angle \ntransducer - the  combination  of  the  transducer element \nand passive materials \ntransducer element - an active component  that  pro- \nduces  either acoustic output in  response to an electric \nstimulus and/or  an \nelectric output in  response \nto an \nacoustic stimulus \ntransit time (t) - the  time  required  for  an acoustic signal \nto traverse an acoustic path \nvelocity profire correction factor (S) - a  dimensionless \nfactor based on measured  knowledge of the velocity pro- \nfile used to adjust  the  meter  output \n2 FLOWMETER  DESCRIPTION \nThe  transit-time \nultrasonic flowmeter being con- \nsidered in  this  Standard is a complete system composed \nof the primary device, which is a measurement section \nwith  one or more pairs of transducers,  and  the secondary \ndevice, which is the electronic equipment necessary to \noperate  the  transducers,  make  the  measurements,  pro- \ncess the measured data,  and display or record results. \n1 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 6,
+    "bbox": [
+      0.0,
+      0.0,
+      611.9998168945312,
+      791.9990844726562
+    ],
+    "order_index": 6,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 6
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000007",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "ANSIIASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \n2.1  Operating  Principles \n2.1.1 Introduction. At any given instant,  the differ- \nence between the  apparent speed of sound in a moving \nliquid and  the speed of sound in that same liquid at rest \nis directly proportional to the liquid\u2019s instantaneous \nvelocity. As a consequence, a measure of the average \nvelocity of the liquid along a  path can be obtained by \ntransmitting an acoustic pulse along the  path  and sub- \nsequently measuring its  transit time. \nThe volumetric flow rate of a liquid flowing in a com- \npletely filled closed conduit is defined as the average \nvelocity of  the liquid over a cross section multiplied by \nthe area of the cross section. Thus, by measuring the \naverage velocity of  a liquid along one  or more acoustic \npaths and combining the measurements with knowledge \nof the cross-sectional area and the velocity profile over \nthe cross section,  it is  possible to obtain an estimate of \nthe volumetric flow rate of the liquid in the  conduit. \nThe theoretical considerations involved in implement- \ning these concepts is the subject of  this section. \n2.1.2 Fluid Velocity Measurement. Several techniques \ncan  be  used to obtain  a measure of the average effective \nspeed of propagation of an acoustic pulse in a moving \nliquid in-order to determine the average axial flow ve- \nlocity (V,) \nalong an acoustic path. Two approaches, \ntransit-time difference and frequency difference, will  be \ndiscussed here. \n2.1.2.1 Transit-Time  Difference. The  basis of this \ntechnique is the direct  measurement of the transit time \nof acoustic signals as they propagate between a trans- \nmitter and a receiver, both of which are assumed (see \npara. 2.1.3) to be in direct contact with the liquid. Dif- \nferent transmitter/receiver arrangements are described in \npara. 2.1.3 below. For an acoustic signal traveling up- \nstream, the  apparent sound speed at any point along the \nline of transmission, assuming only axial flow, is \nwhere C, is the speed of sound in the liquid at rest, 6 is \nthe angle between the acoustic path  and V,, and V, is \nthe axial flow velocity at  the point in question (see  Fig. \n1). For  a downstream pulse, \nIn the ideal case of plug flow, V,, is constant through- \nout the liquid and the acoustic path is a straight line, \ni.e., 0 = constant = 8, (path angle for fluid at rest). \nMEASUREMENT  OF  LIQUID  FLOW  IN  CLOSED  CONDUITS \nUSING  TRANSIT-TIME  ULTRASONIC  FLOWMETERS \nConsequently, Cup and CdO- \nare both constants along \nthe acoustic path.  In  this case the upstream and down- \nstream transit times(tup, tdo-) \nare given respectively by: \ntup = \n(3) \nc, ++ \n- v, \ncos eo \nand \n(4) \nsin\u2019 e, + V ,  cos e, \nwhere 1, is the straight line distance between the  centers \nof the faces of  the acoustic transmitter  and receiver. \nTaking the difference between the reciprocals of these \ntransit times leads to \n1 \n1 \n2va, cos e, \n- \ntdown \n \ntup \nIO \nand,  on rearranging, to \nwhere At = tup - tdown. Since v,, is constant, v, = v,, \n(the average flow velocity). \nThis analysis becomes more complicated in the  ab- \nsence of plug flow. Nevertheless, to the degree that \n(Vax/Co)&ax. << 1, the result for the average  of \nthe \naxial liquid velocity along the acoustic path (v,) \nis \nidentical (see Appendix A), i.e., \n- \n2.1.2.2 Frequency Difference. In a frequency differ- \nence measurement approach,  the reception of an acous- \ntic signal at  the receiver is used  as a reference for gener- \nating a subsequent acoustic signal at  the  transmitter. \nAssuming no delays other  than  the propagation time of \nthe acoustic pulses in the liquid, the frequency at which \nthe pulses are generated or received  is proportional to the \nreciprocal of their transit time. The equations derived in \nthe previous paragraph are equally valid in this case, the \n2 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 7,
+    "bbox": [
+      0.0,
+      0.0,
+      610.5596923828125,
+      792.0
+    ],
+    "order_index": 7,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 7
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000008",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "MEASUREMENT OF LIQUID  FLOW \nIN CLOSED  CONDUITS \nUSING  TRANSIT-TIME  ULTRASONIC  FLOWMETERS \nANSI/ASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \ntransit  time \nbeing  replaced  by \nthe reciprocal of a con- \n2.1.4 Estimating Volumetric Flow. Once  the average \nstant (Kf) \ntimes \n \nthe \nfrequencies, i.e., \naxial flow \n \nvelocity \n \nalong \nan \n \nacoustic \n \npath \n \nhas \nbeen \nfound,  the volumetric  flow rate can be calculated from \n- \nKf 10 \nthe following equation: \nv, \n= \n(fdown - fup) \n(6) \n2 cos eo \nn \n2.1.3 Transducer  Considerations. \nIn  the \npreceding \nparagraph it was assumed that  the  transducer \nelement \nwas in  direct contact  with  the  liquid  and  that  the acous- \ntic signal was propagated  normal to  the  transducer/liquid \ninterface.  In  most\u2019 \ncases it is desirable to  protect  the \ntransducer element  from  the process  liquid by using in- \ntervening  materials \n(see Figs. 2 and 3). If such  an  ar- \nrangement is employed,  Eq. \n(5) takes the following \nform: \nwhere to, a function of temperature, is the  transit  time \nof the  acoustic signals in the intervening  materials. \nThe  equation  appropriate  to  the  frequency difference \ntechnique must also be  modified: \nwhere fo is equal to 1 /to. \nUse of an intervening  material also allows the possibil- \nity of acoustic signals entering  and \nleaving the liquid \nalong  a path  that is not  normal  to  the solid/liquid inter- \nface. For  example,  the \nintervening material  could \nbe \nflush with  the inside surface of the  conduit as  in Fig. 4. \nThis further  complicates  the acoustic  analysis.since not \nonly  the  corrections  mentioned \nabove, but also correc- \ntions  for  the  refraction \nof the  acoustic signals at  the \nsolid/liquid interface  must be introduced. This  refraction \ntakes place according to Snell\u2019s Law, i.e., \nwhere C is the  sound speed  in the liquid and Cp is the \nsound speed in the intervening  material. \nAs a  conse- \nquence, 0 and to (f,) in  Eqs. (7) and (8) now become \nfunctions of the  sound speeds (C, Cp), and  hence, in gen- \neral, of the  temperature, pressure, and  composition of \nthe process  fluid and intervening  materials. \nwhere: \nA = the average cross-sectional  area of the measure- \nment  section (L*) \nQ = the volumetric  flow \nrate in the  measurement \nsection (L3/t) \nS = a  velocity  profile correction  factor (dimension- \nless) \nv,i \n= the average axial  flow  velocity  along  acoustic \npath i(L/t) \nWi = a weighting factor  for  acoustic  path i that is de- \npendent  on  measurement  section  geometry and \nacoustic path  location (dimensionless) \nNote  that increasing n can reduce the sensitivity of S to \nflow profiie  variations. \nn = the  number of acoustic  paths \n2.2 Implementation \n2.2.1 Primary  Device. The primary device consists of \na  separate spool piece with  transducers installed, or  an \nexisting  section of  conduit  to which transducers are  in- \nstalled in  the field. \n2.2.1.1 Measurement  Section. The section of  con- \nduit in  which the volumetric  flow rate is sensed by the \nacoustic signals is called the measurement section. This \nsection is bounded  at  both  ends by  planes  perpendicular \nto the axis of the  section  located \nat the  extreme  up- \nstream and  downstream  transducer positions. The mea- \nsurement  section is usually circular in  cross section;  how- \never, it may  be  square,  rectangular,  elliptical, \nor some \nother shape. \n2.2.1.2 Transducers. The  transducers  transmit  and \nreceive acoustic energy. They  may be factory rtlounted \nor field mounted  by clamping, threading, or bonding. \nTransducers may be wetted by the liquid or be non- \nwetted. Wetted transducers may  be flush  mounted, re- \ncessed, or  protrude  into  the \nflow stream. Some non- \nwetted  transducers may  be  removed  while the  line is in \nservice. \n2.2.1.3 Acoustic  Paths. There  may be one (single \npath)  or  more  (multipath)  acoustic  paths \nin the measure- \nment  section,  each having a pair of transducers. Common \n3 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 8,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0231323242188,
+      791.9755249023438
+    ],
+    "order_index": 8,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 8
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000009",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "ANSllASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \nUpstream \ntransducer \nelement \nDownstream \ntransducer \nelement \nI \nI \nMEASUREMENT OF LIQUID  FLOW \nIN CLOSED  CONDUITS \nUSING  TRANSIT-TIME  ULTRASONIC  FLOWMETERS \nIntervening \nmaterial \n\\ \\  \n\\ \nI \nMeasurement \nI \nsection \nFIG. 3 \nPROTECTED CONFIGURATION  WITH \nPROTRUSIONS \nFIG. 1 \nWETTED TRANSDUCER \nCONFIGURATION \nIntervening \nmaterial '\\ \n\\ \nIntervening \nmaterial \nL?\\ \nFIG. 2 \nPROTECTED CONFIGURATION \n \nWITH \n \nFIG. \n4 \nPROTECTED CONFIGURATION \n \nWITH \nCAVITIES \nSMOOTH BORE \n4 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 9,
+    "bbox": [
+      0.0,
+      0.0,
+      610.5596923828125,
+      790.319091796875
+    ],
+    "order_index": 9,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 9
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000010",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "MEASUREMENT  OF  LIQUID  FLOW \nIN CLOSED  CONDUITS \nUSING  TRANSIl-TIME  ULTRASONIC  FLOWMETERS \nSingle Path \nAxial \nMultipath \nANSI/ASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \nDiametric \nChordal \nChordal \nDiametric \n.FIG. 5 \nACOUSTIC PATH  CONFIGURATIONS \ntypes are  axial, \ndiametric,  and  chordal, \nas shown in \nFig. 5. \n2.2.2 Secondary  Device. The secondary device com- \nprises the  electronic  equipment required to operate  the \ntransducers, make  the measurements, process the mea- \nsured data,  and display or record the results. \n2.2.2.1 Operation of Transducers. Transducers may \nbe excited simultaneously or  alternately  with  one  or \nmore transmissions  in  each  direction. \nThe acoustic  fre- \nquency  and pulse repetition  rate may vary. The  intercon- \nnecting cable lengths  between  the \nsecondary and pri- \nmary devices are an  important  consideration,  and  their \nmaximum  length is usually defined  by  the  manufacturer. \n2.2.2.2 Measurement Method. The  transit  time  of \nan acoustic  pulse is usually taken  to be the  time interval \nbetween initial excitation  of  the  transmitter  and \nsome \ncharacteristic point  of  the received signal. Exact details \nvary from  one  manufacturer to another. \n2.2.2.3 Processing of Data. The processing section, \nin addition  to estimating the  flow  rate  from \nmeasured \ntransit  times,  should \nbe capable of rejecting invalid \nmeasurements, noise, etc.  The  indicated flow rate  may \nbe the result of one  or  more \nindividual flow  velocity \ndeterminations. \n2.2.2.4  Displays  and  Outputs. \nMost meters have \nseveral outputs available, either as standard  features  or \nas  optional  additions  to  the  equipment. \nDisplays may \nshow  flow rate, integrated flow volume and/or  direction, \nand may be  analog or digital. Signal outputs usually in- \nclude one or  more  of  the following: current, voltage, dig- \nital,  and a  pulse rate  proportional to flow.  These outputs \nmay  or may not be  electrically  isolated. Flowmeters may \nalso include  alarms and diagnostic aids. \n5 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 10,
+    "bbox": [
+      0.0,
+      0.0,
+      611.279296875,
+      790.319091796875
+    ],
+    "order_index": 10,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 10
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000011",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "ANSIIASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \n3 ERROR SOURCES AND THEIR REDUCTION \nThe purpose of this Section is to describe possible er- \nror sources for  the ultrasonic flowmeters covered by this \nStandard. Although these errors may not be significant \nin some cases, they should all be addressed in detail \nwhen analyzing the error for  a particular flowmeter. \n3.1 Axial  Velocity  Estimate \nAxial velocity errors are those  errors  that are made in \nthe  determination of Fax across an acoustic path [see \nEqs. (5)-(8)]. \n. \n3.1.1 Acoustic  Path  Length  and  Angle. \nThe determi- \nnation of axial flow velocity (Fa) is  based on  the acous- \ntic path length (1,) and angle (6). The error in v, \nis  in \ndirect proportion to the  uncertainty in the acoustic path \nlength and angle. Acoustic path length and angle errors \nmay be static due to inaccuracies in the initial measure- \nments, or  they may be dynamic due to changes  in the \nmeasurement section or, in the case of refractive sys- \ntems, changes in the index of refraction of  the materials \nin the acoustic path. \nErrors in the acoustic path .length or angle for nonre- \nfractive systems can  be reduced by accurate geometric \nand acoustic measurements. For flowmeters in which \nsound energy undergoes refraction,  errors \nin acoustic \npath length or angle  can  be \nreduced by design and/or \ncompensation based upon knowledge of the speed of \nsound in  the process liquid and intervening materials be- \ntween the transducer element and  the process liquid. \nIn certain applications, compensation for changes in \nacoustic path length and angle which result from temper- \nature  or pressure induced pipe deformation may be pro- \nvided for in either refractive or nonrefractive systems. \nSystems where the transducers are field mounted can \nachieve accuracies comparable to systems where the \ntransducers are factory  mounted if precise postinstalla- \ntion measurements are made and  the scaling of the elec- \ntronics is adjusted to reflect these as-built dimensions. \n3.1.2 Transit Time \n3.1.2.1  Timing. Uncertainty in the transit-time mea- \nsurement due to limits in internal timing accuracy \n- and \nresolution lead to a corresponding uncertainty in V,. \nErrors in the measurement of transit time may be re- \nduced by the use of stable and accurate high frequency \noscillators and averaging many individual transit-time \nmeasurements. Transit-time measurement errors are the \nmost amenable of all potential  errors to analysis. \nTransit-time measurement errors due to differences \nbetween upstream to downstream and downstream to \nupstream electronic signal paths may be reduced by \nMEASUREMENT  OF  LIQUID  FLOW  IN \nCLOSED  CONDUITS \nUSING  TRANSIT-TIME  ULTRASONIC  FLOWMETERS \nusing the same detection electronics and transducer pairs \nfor both directions of propagation. \n3.1.2.2  Signal  Detection. Acoustic transit-time mea- \nsurements may be affected by inconsistencies in recogni- \ntion of  the received acoustic signal caused by variations \nin received  signal  level of waveform and noise. \n(a) Variations in  received  signal  level \nor waveform \ncan occur as the acoustic properties of  the \nliquid in \nthe measurement section change  because \nof excessive \namounts of entrained air, suspended solids, temperature, \npressure, etc., or as transducer fouling occurs. These vari- \nations may result in uncertainty in determining the  tran- \nsit time, thus causing uncertainty in V,. \n(b) Noise  can affect the accuracy of the transit-time \nmeasurement. Noise sources may be either electrical or \nacoustic, and either external or self-generated. Generally, \nexternally generated electronic or acoustic noise is ran- \ndom  with respect to the received  signal. Self-generated \nacoustic noise, however, is  usually synchronized with  the \nreceived  signal and is therefore  much harder to compen- \nsate for in the secondary device. \nSignal detection  errors are reduced by operating  with \nhigh signal-to-noise ratios. Methods can  be provided that \nwill reject those signals which are excessively attenuated \nor which are distorted  by noise. \nIf the background noise  is  caused by external sources, \nthe signal-to-noise ratio can  be improved by increasing \nthe  transmitted signal  level.  However, in many cases, the \nmost troublesome noise  is  self-generated acoustic noise. \nThis noise generally increases as the level of  the trans- \nmitted signal  is \nincreased. The signal-to-noise ratio, in \nthese cases, may be  improved by acoustically isolating \nthe transducers from the measurement section by ap- \nplication of damping materials and/or  other \nsuitable \ntechniques. \n3.1.3 Sound  Speed  Dependency. The speed of sound \nin the liquid and in any intervening materials along the \nacoustic path varies with composition, temperature,  and \npressure. Depending upon a particular ultrasonic flow- \nmeter\u2019s  design, \nI,, \n8 ,  and to (f,) [Eqs. (7) and (811 \nmay be affected. \nIn nearly all  cases, the  errors caused by sound speed \nvariations in the liquid are negligible for  a properly im- \nplemented, nonrefractive, wetted transducer system. \nChanges in the speed of sound in the intervening ma- \nterial may, however, require compensation for non- \nwetted transducer systems. \nIn refractive systems, changes in the speed of sound in \nintervening materials and the process liquid affect the \nacoustic path length and angle. It is possible to compen- \nsate for these effects. In rare cases, changes in the speed \n6 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 11,
+    "bbox": [
+      0.0,
+      0.0,
+      610.5596923828125,
+      789.3599853515625
+    ],
+    "order_index": 11,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 11
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000012",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "MEASUREMENT  OF  LIQUID  FLOW \nIN CLOSED  CONDUITS \nUSING  TRANSIT-TIME  ULTRASONIC  FLOWMETERS \nANSllASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \n/ \n/ \n\\ \n/ \n\\ \nFIG. 6 A  TYPICAL CROSS PATH  ULTRASONIC FLOWMETER CONFIGURATION \n(PATHS MAY BE MULTIPATH  DIAMETRIC OR CHORDAL) \nof sound in the liquid may refract the beam so much \nthat  it misses the opposing transducer. Accurate knowl- \nedge  of \nthe speed of sound in a particular liquid can \nreduce this possibility. \n3.1.4 Secondary Flow. Secondary flow can produce \nan error in the determination of v, since it is normally \nassumed  in the calculations that all flow is in the axial \ndirection. Secondary flow is a result of flow perturba- \ntions occurring upstream or downstream of the measure- \nment section because  of  devices such as elbows, valves, \nand pumps. Secondary flow may result in  an error in \ndetermining \n- \nthe transit time which ultimately affects \nThe most effective way to reduce secondary flow er- \nrors is to avoid installations where  severe secondary flow \nexists. Reduction of secondary flow may require long, \nstraight runs of pipe and/or  the use of flow straighteners, \ndepending upon the  nature of the secondary flow source \nand the accuracy required. Secondary flow errors can \nalso  be reduced by the use of an appropriate acoustic \npath  orientation or by computing line velocities on ap- \npropriate multiple acoustic paths, i.e., crossed paths as \nillustrated in Fig. 6 ,  and averaging. \nvu. \n3.2  Integration \nIntegration error is the error in the flow rate estimate \nwhich occurs in the  computation of the flow rate from \nFa,, A ,  S, and Wi \nas shown in Eq. (10). \n3.2.1 Cross  Section  Dimensional  Errors. \nError in the \nassumed cross-sectional area of the measurement section \ncauses an error in the flow rate estimate. This error may \nbe due to initial measurement section shape irregularities, \nsuch as out-of-roundness; or it may be due to changes in \nthe initial shape caused by temperature, pressure, or \nstructural loading. It may also be due to the formation \nof deposits or growths, such as algae,'in the measurement \nsection. Usually it is due to combinations of the items \nmentioned above. \nCross section dimensional errors can be reduced by \nmanufacturing or choosing a measurement section which \nhas constant dimensions along its length, can be accu- \nrately measured, and has a stable surface so that cross \nsection changes with time due to corrosion, material \nbuildup, or loss of protective coatings will  be \nsmall. \nAdditionally, if temperatures  or pressures are expected \nto be substantially different from reference conditions, \nit may be  necessary to adjust the measured dimensions \nto compensate for dimensional changes that may occur \nunder operating conditions. \nIn circular pipes, cross section dimensional errors can \nbe reduced by minimizing the effects of out-of-roundness \nthrough averaging of diameter measurements made at \nthe upstream, middle, and downstream ends of the mea- \nsurement section. \nThe measurement section should be inspected period- \nically to determine if the dimensional factor should be \nadjusted to compensate for observed changes. \n3.22 Acoustic  Path  Location. \nT h e  acoustic path lo- \ncation, particularly in multipath flowmeters, is an impor- \ntant  contributor to overall flowmeter accuracy. The un- \ncertainty in the position of  the acoustic path can cause \nerrors through improper assignment of a weighting  fac- \ntor (Wi) and by causing unnecessary sensitivity of i, to \nthe velocity profile through nonoptimum placement of \ntransducers. \nErrors due to acoustic path location can  be reduced \nby suitable manufacturing techniques in the case of a \nprefabricated measurement section or by accurately \ndetermining the acoustic path  for \nsystems where the \ntransducers are field mounted.  Path  locations \ncan be \n7 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 12,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0238037109375,
+      790.319091796875
+    ],
+    "order_index": 12,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 12
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000013",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "ANSllASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \ndetermined in a variety of ways, but probably the most \naccurate involves optical determination of both the \nacoustic path location and angle within the measurement \nsection. \n3.2.3 Velocity Profile. Ultrasonic flowmeters are af- \nfected by variations in flow profile because uncertainty \nin the velocity profile causes  an \nerror in \nthat may \nnot be compensated for by the velocity profile correc- \ntion  factor S. This error may affect both  the linearity \nand the value of  the flow rate estimate. Velocity profile \nvariations can  be  caused \nby changes in flow rate (both \ntransient and steady state), wall roughness, temperature, \nviscosity, upstream or downstream hydraulic conditions, \ntransducer projections, and transducer cavities. In the \nabsence of upstream and downstream hydraulic effects, \nthe Reynolds number and friction factor of the measure- \nment section would be sufficient to determine the veloc- \nity profile correction factor S. \nThere usually  is a difference between the  actual ve- \nlocity profile and that assumed  in the flowmeter\u2019s  com- \nputations. Since most flowmeter computations assume a \nfully developed velocity profile, errors can be reduced \nby  placing \nthe measurement section as far as possible \nfrom bends, valves, tees, transitions, etc. These errors \ncan also be reduced by using a more accurate model of \nthe actual velocity profile, or in general, by increasing \nthe number of acoustic paths. \n3.3 Computation \nThere is a degree of error associated with  the compu- \ntations made by the electronic circuits because of the \nfinite limits in processing accuracies. However, this error \nwill normally be  negligible. \nComputation errors due to electronics malfunction \ncan  be reduced by using built-in, self-checking features \nin the processor. \n3.4 Calibration \nCalibration is an alternative means for reducing errors \nresulting from  uncertainties \nin path length and angle, \ncross section, and path  location. Velocity profile errors \ncan be corrected with in situ calibration or by properly \nsimulated laboratory calibrations. \nThere is  an uncertainty in the flow rate estimate that \nresults from  errors .involved in the procedure used to \ncalibrate an ultrasonic flowmeter. To reduce calibration \nuncertainty, calibration should be conducted according \nto national (ANSI) or international (ISO) standards. \nMEASUREMENT OF LIQUID  FLOW \nIN CLOSED  CONDUITS \nUSING  TRANSIT-TIME  ULTRASONIC  FLOWMETERS \n3.5 Equipment Degradation \nPerformance errors may arise due to fouling or phys- \nical degradation of  the  equipment. \nEquipment design \nshould include reasonable tolerance to changes in com- \nponent values and process conditions. The equipment \nshould also indicate when degradation of flowmeter \nperformance occurs. The probability of error can  be \nreduced considerably by including suitable self-test or \ndiagnostic circuits in the  equipment. \n4 APPLICATION GUIDELINES \n4.1 Performance  Parameters \nBy evaluating the performance parameters listed \nbelow, a user should be better able to predict the per- \nformance of  a given ultrasonic flowmeter in a specific \napplication, as  well as compare its performance to  other \nultrasonic flowmeters. These parameters are limited \nto those which can  be \nsubstantiated by test or well- \nestablished computational methods. (It should be  em- \nphasized that  the following performance parameters are \nnormally determined by the manufacturer under specific \nreference conditions  that will, in general, differ from the \nuser\u2019s actual conditions.) Subjective or nonperformance \nparameters, such as convenience of installation, reliabil- \nity, and cost, are left to the individual user for evalua- \ntion. In each case below, the range and conditions ap- \nplicable to each parameter should be specified. \n4.1.1  Accuracy. \nAccuracy describes the  uncertainty \nof a measured value  as compared to its true value and is \ncommonly reported as a percentage of actual flow, spap, \nor full scale. The preferred method is to specify the max- \nimum deviation (in percent) between measured flow and \nactual flow (see  also  ANSI/ASME MFC-lM, Glossary of \nTerms Used in the Measurement of Fluid Flow in  Pipes). \n4.1.2 Linearity. The data  obtained by test of any in- \nstrument consists of points scattered around  a  smooth \ncurve that represents the nominal characteristic of the \ninstrument. Linearity is the maximum deviation, at any \nflow rate, of that  smooth curve from a least squares lin- \near fit to the  data and should be reported as a percentage \nof that flow rate. \n4.1.3 Repeatability. Repeatability is the ability of  a \nflowmeter to return to a previously indicated flow rate \nafter  a deviation in either direction from and  return to \nthe flow conditions which caused that indicated flow \nrate. It also includes readout variations under constant \nflow conditions. Repeatability should be reported as the \nmaximum expected deviation between these indicated \nflow rates expressed as a percentage of the flow rate \n8 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 13,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      788.8798828125
+    ],
+    "order_index": 13,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 13
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000014",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "MEASUREMENT  OF  LIQUID  FLOW \nIN CLOSED  CONDUITS \nUSING  TRANSIT-TIME  ULTRASONIC  FLOWMETERS \nindication (see  also  ANSI/ASME \nMFC-lM, Glossary of \nTerms Used in the Measurement of Fluid Flow in Pipes). \n4.1.4 Stability. Stability is a measure of change in ac- \ncuracy with time. It should be reported as the maximum \ndeviation in accuracy, as a percentage of actual flow, \nwhich can  be expected to occur over a specified time \nperiod (subject to constant hydraulic conditions). \n4.1.5 Resolution. Resolution is the minimum change \nin actual flow required to produce an observable change \nin the  output of the equipment. \n4.1.6 Rangeability. Rangeability is the maximum and \nminimum flow rates over which the performance is spec- \nified  (see also ANSI/ASME MFC-lM, Glossary  of Terms \nUsed in the Measurement of Fluid Flow in  Pipes). \n4.1.7. Response Time. Response time is the time it \ntakes, following a step change in the flow rate,  for  the \nflowmeter\u2019s output to indicate a change  in  flow \nrate \nequal to 63% of the step change. \n4.1.8 Power  Requirements. The power requirements \nof the flowmeter, including voltage and frequency toler- \nances necessary for proper performance, as  well  as the \nflowmeter\u2019s power consumption, should be clearly \nspecified. \n4.2 Installation Considerations \n4.2.1 Introduction. Many  of the error sources listed in \nSection 3 can be reduced or eliminated by proper instal- \nlation. Errors the user should address during the design \nphase  of a project are listed below. \n4.2.2 Acoustic  Path  Length  and  Angle. \nChanges in \nacoustic path length and angle can be  caused by signifi- \ncant temperature or pressure changes as  well  as external \nloading of the meter section. The installation location \nshould be chosen to minimize these effects. \n4.2.3 Signal Detection. Suspended solids, fouling, en- \ntrained air, or cavitation (caused  by upstream equipment \nor even the meter itself) may degrade accuracy or pre- \nvent operation by attenuating  the acoustic signal.  Elec- \ntrical interference and acoustic noise  caused by mechan- \nical vibration or cavitation can also interfere with  the \nmeter\u2019s operation. \n4.2.4 Multiple Fluids. Metering fluids with widely dif- \nfering acoustic properties may require multiple primary \ndevices (spool pieces) due to excessive acoustic beam an- \ngular variations in refractive systems and/or excessive \nsignal  loss \ndue to acoustic mismatch or attenuation. \nUnder these conditions  the \nmanufacturer should be \nconsulted. \nANSI/ASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \n4.2.5 Secondary Flow. Secondary flow directly af- \nfects  a meter\u2019s performance and should be considered in \nthe design of  the installation and in the selection and \norientation of a meter. In general, the meter should be \nplaced  as far as possible from upstream elbows, transi- \ntions, valves, etc. \n4.2.6 Integration. Flow profile changes and dimen- \nsional  changes  in \nthe measurement section, including \nthose caused by corrosion, erosion, or material buildup, \ndirectly affect meter performance and should be con- \nsidered  in the selection, location, and orientation of a \nmeter. \nThe measurement section should be inspected period- \nically to determine if the cross section area factor K or \nprofile correction factor S should be adjusted to com- \npensate for observed changes. \n4.2.7 Calibration. Installation considerations and the \nrequired installed accuracy usually determine the method \nof calibration. \n5 METER  FACTOR \nDETERMINATION \nAND  VERIFICATION \nThere are three principal methods of meter factor \n(a) laboratory calibration \n(b) field calibration \n(c) analytical procedures \ndetermination: \nThe first two can  be  used to verify meter performance. \n5.1 Laboratory Calibration \nLaboratory calibrations should be conducted at fa- \ncilities where the procedures are in accordance with \nnational or international standards. \nThe calibration tests should generally  be \nrun using \nwater that is free from acoustically interfering entrained \nair or solid particles. Standard calibrations should be \nconducted using flows that are as free as possible from \nswirl, nonaxisymmetric flow, and pulsation. Generally, \nthese conditions have been achieved by using sufficient \nlengths of straight pipe upstream and downstream of the \nmeasurement section and, if necessary, by installing up- \nstream flow conditioners. \nThe extent to which the above conditions have been \nachieved  can  be determined by noting the sensitivity of \nthe meter factor to rotation and translation of the pri- \nmary device. \nA statistically significant number of runs should be \nmade over a range of flow rates. Flowmeter accuracy, \n9 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 14,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0238037109375,
+      787.4395751953125
+    ],
+    "order_index": 14,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 14
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000015",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "ANSllASME  MFC-5M-1985 \nAN  AMERICAN  NATIONAL  STANDARD \nwithin the uncertainty  of  the  laboratory \nstandards, \nshould be determined by  the combined random and sys- \ntematic  errors \nin the measurement of  the \nvolumetric \nflow rate. \nSpecial calibration tests may also be performed for \nthose cases where the piping in the final installation may \nproduce nonaxisymmetric flow or where other flow ir- \nregularities are suspected. This will require appropriate \nmodeling of upstream and downstream piping. \n5.2 Field Calibration \nField calibration, as opposed to laboratory calibration, \nhas 'the advantage that  true \noperating conditions are \nencountered.  The major disadvantage may be a greater \nMEASUREMENT  OF  LIQUID  FLOW  IN  CLOSED  CONDUITS \nUSING  TRANSIT-TIME  ULTRASONIC  FLOWMETERS \ndegree. of  uncertainty in the accuracy of the standards \nthat are employed. In some cases, these secondary stan- \ndards may  be considerably less accurate than  the ultra- \nsonic flowmeter being calibrated. \n5.3 Analytical Procedures \nAnalytical procedures are often  the \nonly available \ntechnique for meter factor determination. This is partic- \nularly true for very  high  flow rates and large line sizes. \nThese procedures require physical measurements as  well \nas instructions and data supplied by the manufacturer. \nThe  uncertainty in the meter performance should reflect \nuncertainties associated with these procedures as  well  as \nthose error sources outlined in Section 3. \n10 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled",
+    "page_index": 15,
+    "bbox": [
+      0.0,
+      0.0,
+      610.5596923828125,
+      785.0390625
+    ],
+    "order_index": 15,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 15
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000016",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "APPENDIX A \nACOUSTIC TRANSIT TIME IN A NONUNIFORM FLUID VELOCITY FIELD \n(This Appendix is not an integral part of ANSllASME MFC-5M-1985 and is \nincluded for  information purposes only.) \nIn the case of a nonuniform axial flow field, it can be shown that  the length 1 of the acoustic \npath, which in this case  is not  a straight line, is  given to second order by: \nwhere 1, is the straight line distance connecting the centers of the faces of the acoustic trans- \nmitter and receiver  (see Fig. 1) and \nwhere 8, is the angle of 1, with respect to the pipe axis, and vax and Vax2 are  averages  of the \nliquid  axial velocity profile. To the degree that a << 1, the effective path of the acoustic ray \ncan be taken to be a straight line equal to I,. This  being the case, the apparent speed of sound \nat any given point, for an acoustic pulse  traveling upstream along this straight line path, is  given \nbY \n- \nwhile that  for  the downstream pulse  is  given by \nThe transit times for upstream and downstream acoustic pulses (tup, tdown) are given \nrespectively by: \n11 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 16,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0233764648438,
+      790.5596923828125
+    ],
+    "order_index": 16,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 16
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000017",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "and \nTo the  extent  that (V, IC,)' << 1, these equations reduce to \n- \nand \nwhere \nTaking the difference of the reciprocal of these transit times leads to \n2V, cos eo \n1, [1- cosz eo ($J] \n- \nN \nTo  the  extent  that cos' Bo ( v,/Co)' << 1, this result reduces to \n) \n- \nAt \ncos eo \ntdown tup \nwhere At = tup - tdown. \nThe above relationship is  valid to the degree that  the following three conditions are met: \n12 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 17,
+    "bbox": [
+      0.0,
+      0.0,
+      610.5596923828125,
+      787.4395751953125
+    ],
+    "order_index": 17,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 17
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000018",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "Assuming the  worst  case, \ni.e., that velocity profile which  results  in the most stringent condi- \ntions, these  inequalities  reduce to: \nIn most practical  cases  the  middle condition is the limiting one. \n13 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 18,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      788.1591796875
+    ],
+    "order_index": 18,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 18
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000019",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "APPENDIX B \nSELECTION  GUIDELINES \n(This Appendix is not an integral part of ANSllASME  MFC-5M-1985 and is included for information purposes only.) \nThis Appendix is intended to assist in selecting the \nmost appropriate ultrasonic flowmeter for  a particular \napplication. Since there are many variations and differ- \nences even among the same types of flowmeters, this \nAppendix addresses itself only to  the major differences \nbetween the types. It is  suggested that the application \nconditions be discussed with the manufacturers prior to \na decision on  a particular type of flowmeter. \nB1 SINGLE PATH VERSUS MULTIPATH \nINSTRUMENTS \nSingle path  instruments are usually lower in cost than \nmultipath  instruments. They are also less complex, and \ntherefore usually somewhat simpler to install. Multipath \nflowmeters can exhibit  better performance than single \npath  meters under the variable and/or nonideal velocity \nprofile distribution conditions caused  by  changing Reyn- \nolds number, changes in friction factor, and the effects \ncaused by upstream and downstream elbows, valves, or \nother sources of flow disturbance. The choice of path \norientations varies among manufacturers. It can be either \ncrossed or parallel, either chordal or diametric. Choice of \nthe most appropriate  path distribution should be made \nafter  a full discussion of the application conditions with \nthe various manufacturers. \nB2 EXTERNALLY  MOUNTED VERSUS \nINSERT-TYPE  TRANSDUCERS \nExternally mounted transducers are  the simplest to \ninstall on existing pipe and, since they do  not require \nany extensive pipe preparation, are less  expensive \nto \ninstall than insert systems. Since the pipe inner wall  is \nundisturbed,  there is no flow disturbance in the vicinity \nof the transducers. They can also be  easily  removed with- \nout requiring shutdown of the process. Since these sys- \ntems utilize a beam that refracts into  the liquid, they \nmay be affected by variations in the sonic properties of \nthe liquid and  the \npipe. The manufacturer should be \ncontacted to ensure that  the expected application con- \nditions can  be handled with satisfactory performance. \nInsert type systems can be of two types - those using \nwetted transducers and those where the transducers are \ninstalled in a protective well. Where the transducer faces \nand protective surfaces are orthogonal to the acoustic \npath, these systems can offer greater immunity to \nchanges  in the sonic velocity of  the liquid since refrac- \ntion of the beam does not take place. Since these sys- \ntems usually either have the transducer recessed  in a \ncavity or protruding  into  the \nliquid beyond the pipe \nwall, a local flow disturbance results which  may affect \nthe meters performance. Although reportedly rare, the \ntransducer cavity could collect debris. \nThose insert systems where this well  is filed with  a \nprotective window result in refraction of  the \nbeam \nthrough  the liquid and require either relatively constant \nsonic velocity or compensation in the secondary device. \nNOTE: If very  large  changes in sonic  velocity occur, refaaction \nmay cause the sonic beam to miss the opposing transduces. \nInsert type systems may provide greater acoustic \npower since they avoid the transmission loss through the \npipe wall. They may also, in some cases, offer a greater \nsignal-to-noise ratio since they avoid  some of the pipe \nborne, self-generated noise which may affect externally \ninstalled systems. \n14 \nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 19,
+    "bbox": [
+      0.0,
+      0.0,
+      611.279296875,
+      787.198974609375
+    ],
+    "order_index": 19,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 19
+  },
+  {
+    "object_id": "a533e11a0f164d769bdccae8ccd61b2d-txt-000020",
+    "file_id": "a533e11a0f164d769bdccae8ccd61b2d",
+    "kind": "para",
+    "text": "Copyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w",
+    "page_index": 20,
+    "bbox": [
+      0.0,
+      0.0,
+      610.5596923828125,
+      789.5994873046875
+    ],
+    "order_index": 20,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/CreationDate": "D:20010129203808+08'00'",
+        "/Creator": "Acrobat Capture 3.0",
+        "/ModDate": "D:20101005101416",
+        "/Producer": "Adobe PDF Library 4.0 / PDF PT 3.20 (pdf-tools.com)"
+      },
+      "source": "pymupdf"
+    },
+    "line_span": null,
+    "paragraph_index": 20
+  }
+]

@@ -1,0 +1,263 @@
+[
+  {
+    "object_id": "7e708956a51f426cb8a399a678562ff6-txt-000000",
+    "file_id": "7e708956a51f426cb8a399a678562ff6",
+    "kind": "para",
+    "text": "Request for Quotation (RFQ)\nTitle: Industrial Depalletizer Robotic Cell \u2014 Infeed Pallet to Singulated Case Outfeed\nRFQ No.: EPF-RFQ-2025-001\nIssuing Company: EPF, Co.\nIssue Date: September 12, 2025\nProposal Due: October 3, 2025 @ 5:00 PM ET\nPrimary Contact:\nEPF, Co. \u2014 Capital Projects\nAttn: RFQ Lead \u2014 Casey Ellison\n1000 Foundry Park Dr., Sterling Heights, MI 48312 USA\nPhone: +1 (313) 555\u20110142\nEmail: rfq@epf.example.com\n0) Purpose & Background\nEPF, Co. seeks firm fixed\u2011price proposals for a turnkey industrial depalletizer robotic cell that singulates\ncorrugated cases from incoming pallets onto an outfeed conveyor. The solution will be delivered, installed,\ncommissioned, and validated at EPF\u2019s Sterling Heights facility. This RFQ defines the required scope, technical\nand commercial conditions, documentation, acceptance criteria, and proposal format.\n1) Scope Summary\nVendor (Turnkey Integrator) Scope: - System engineering, risk assessment, detailed design, fabrication,\nassembly, wiring, programming, testing, delivery, installation, commissioning, and training. - Provide\ncomplete robotic depalletizing cell including robot(s), end\u2011of\u2011arm tooling (EOAT), case sensing/vision,\nconveyors, guarding, controls, safety, and HMI. - Provide all drawings, BOM, manuals, source code, and\nspare/recommended parts list. - Meet all performance targets and acceptance criteria stated herein.\nEPF Scope (by Owner): - Provide incoming power feed to main disconnect, plant network drop, and\ncompressed air to cell boundary. - Provide pallets and cases for FAT/SAT and production validation. - Provide\nfloor space and building permits as required; assist with offloading and placement per agreed rigging plan.\n2) System Description (Required Function)\n\u2022 Receive full pallets of mixed or single\u2011SKU corrugated cases on an infeed conveyor.\n\u2022 Automatically locate, pick, and place one case at a time to an outfeed singulation conveyor in the\nspecified orientation.\n\u2022 Handle interlayer sheets and top frames (if present) per Section 6.\n\u2022 Detect empty pallet, index pallet out, and stage next pallet automatically.\n1",
+    "page_index": 0,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "order_index": 0,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/Author": "ChatGPT Canvas",
+        "/Creator": "ChatGPT",
+        "/Producer": "WeasyPrint 65.1",
+        "/Title": "Epf, Co"
+      },
+      "source": "pdfplumber"
+    },
+    "line_span": null,
+    "paragraph_index": 0
+  },
+  {
+    "object_id": "7e708956a51f426cb8a399a678562ff6-txt-000001",
+    "file_id": "7e708956a51f426cb8a399a678562ff6",
+    "kind": "para",
+    "text": "\u2022 Provide HMI for recipes, SKUs, alarms, diagnostics, and maintenance.\n3) Performance Requirements\n\u2022 Throughput (sustained): 12 cases/minute (cpm) averaged over 8\u2011hour shift, with peak capability \u2265\n18 cpm for \u2265 60 seconds.\n\u2022 Uptime / Availability: \u2265 95% during SAT performance test window (Section 18).\n\u2022 Pick Success: \u2265 99.0% singulation accuracy without double\u2011feeds; auto\u2011recovery or operator prompt\nfor exceptions.\n\u2022 Changeover: SKU change via HMI recipe in \u2264 60 seconds without tools.\n\u2022 Orientation: Deliver cases long\u2011side\u2011leading (unless recipe specifies otherwise) with spacing \u2265 6 in\n(150 mm) on outfeed.\n4) Materials & Pallet/Case Specifications (EPF Data)\nPallets:\n- Standard: 48 in \u00d7 40 in (1219 \u00d7 1016 mm) GMA; wood stringer pallets; 4\u2011way entry.\n- Max load height: 72 in (1829 mm) including pallet; Max gross pallet weight: 1200 lb (544 kg).\n- Pallet top deckboard gaps \u2264 3.5 in (90 mm).\nCases (corrugated RSC/regular slotted): - Dimensions (L\u00d7W\u00d7H):\n- Min: 6 \u00d7 4 \u00d7 3 in (150 \u00d7 100 \u00d7 75 mm)\n- Max: 24 \u00d7 16 \u00d7 16 in (610 \u00d7 406 \u00d7 406 mm)\n- Mass per case: 1.0\u201335.0 lb (0.45\u201315.9 kg).\n- Surface: kraft or white; may include tape seams/labels; occasional low\u2011gloss shrink wrap.\nUnitization:\n- Patterns: column\u2011stack and interlocked; up to 6 layers; interlayer slip\u2011sheets occasionally present; optional\nstretch wrap up to 3 revolutions.\n- Mixed\u2011SKU pallets up to 2 SKUs per pallet (worst\u2011case alternating layers).\nEnvironment:\n- Temperature 60\u201385\u00b0F (16\u201329\u00b0C), RH 30\u201370%, non\u2011condensing; dust\u2011moderate packaging area.\n- Noise target at cell boundary \u2264 80 dBA (operator position).\n5) Mechanical & Layout Requirements\n\u2022 Footprint: Fit within 18 ft \u00d7 20 ft (5.5 m \u00d7 6.1 m) envelope (vendor to propose optimized layout).\n\u2022 Infeed Conveyor: Chain\u2011driven live roller (CDLR) pallet conveyor, 4,000 lb capacity; top of roller (TOR)\n18 \u00b1 1 in (457 \u00b1 25 mm).\n\u2022 Outfeed Conveyor (cases): Belt or MDR; TOR 30 \u00b1 1 in (762 \u00b1 25 mm) with speed to achieve\nthroughput/spacing.\n2",
+    "page_index": 1,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "order_index": 1,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/Author": "ChatGPT Canvas",
+        "/Creator": "ChatGPT",
+        "/Producer": "WeasyPrint 65.1",
+        "/Title": "Epf, Co"
+      },
+      "source": "pdfplumber"
+    },
+    "line_span": null,
+    "paragraph_index": 1
+  },
+  {
+    "object_id": "7e708956a51f426cb8a399a678562ff6-txt-000002",
+    "file_id": "7e708956a51f426cb8a399a678562ff6",
+    "kind": "para",
+    "text": "\u2022 Pallet Handling: Automatic pallet stop, centering, and presence detection; empty pallet discharge to\noutfeed pallet conveyor or stacker.\n\u2022 Guarding: Perimeter fencing with interlocked doors; polycarbonate vision panels at robot area;\nmaintenance access clearances \u2265 36 in.\n6) Robotics, EOAT & Sensing\n\u2022 Robot: 6\u2011axis industrial robot suitable for 35 lb payload plus EOAT; reach to cover full pallet footprint\nand outfeed.\n\u2022 EOAT: Vacuum or hybrid (vacuum + mechanical) case gripper with zoned cups, vacuum sensing, and\ncheck valves for porous/irregular surfaces.\n\u2022 Vision/3D Sensing: 3D camera(s) or lidar/structured light to localize case top surfaces and edges;\nalgorithms for top\u2011layer detection, de\u2011wrap bias correction, and double\u2011pick prevention.\n\u2022 Interlayer Handling: Detect slip\u2011sheets; remove to designated bin or park on pallet per recipe.\n7) Controls, Safety & HMI\n\u2022 PLC Standard: Rockwell Automation ControlLogix/CompactLogix with GuardLogix safety (preferred);\nvendor alternatives accepted with justification.\n\u2022 HMI: PanelView or equivalent 12 in+ touchscreen; intuitive recipe management; diagnostics, alarm\nhistory, and maintenance pages.\n\u2022 Networks: EtherNet/IP for I/O and drives; managed switch within panel; IGMP snooping; one (1)\nplant VLAN uplink at boundary.\n\u2022 Electrical: Main disconnect with lockable handle; short\u2011circuit current rating (SCCR) \u2265 65 kA; 480\nVAC 3\u2011phase, 60 Hz; 120 VAC control power via transformer; all panels UL 508A labeled.\n\u2022 Safety: Category and Performance Level to meet required risk reduction (SIL/PL per risk\nassessment). Interlocked doors, e\u2011stops, safety scanners as required.\n\u2022 Utilities: Compressed air 80\u2013100 psig dry/oil\u2011free; vendor to state average and peak SCFM.\n8) Software Deliverables & Standards\n\u2022 Source code for PLC, safety, robot, HMI, and vision (unobfuscated) with comments and symbol\ndatabases.\n\u2022 I/O list, tag database, UDT/ADD\u2011On Instructions naming standard, and network IP plan.\n\u2022 Simulation/offline programming files if used; calibration procedures; backup & restore method.\n9) Documentation Deliverables (at FAT; updated at SAT)\n1. General arrangement (GA) drawings with loads/anchor plan.\n2. Electrical schematics (NFPA 79) and panel layouts with bill of materials.\n3. Pneumatic schematics and EOAT exploded views.\n3",
+    "page_index": 2,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "order_index": 2,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/Author": "ChatGPT Canvas",
+        "/Creator": "ChatGPT",
+        "/Producer": "WeasyPrint 65.1",
+        "/Title": "Epf, Co"
+      },
+      "source": "pdfplumber"
+    },
+    "line_span": null,
+    "paragraph_index": 2
+  },
+  {
+    "object_id": "7e708956a51f426cb8a399a678562ff6-txt-000003",
+    "file_id": "7e708956a51f426cb8a399a678562ff6",
+    "kind": "para",
+    "text": "4. Risk assessment report and verification/validation plan.\n5. Spare/recommended parts list (min/critical spares).\n6. Preventive maintenance plan and lubrication schedule.\n7. User manuals (operation, maintenance, troubleshooting).\n8. Training materials and sign\u2011off sheets.\n10) Compliance & Standards (latest applicable editions)\n\u2022 Applicable OSHA regulations; machine guarding and lockout/tagout.\n\u2022 A3/RIA industrial robot safety (e.g., ANSI/A3 R15.06).\n\u2022 ISO 10218\u20111/\u20112 industrial robot safety and ISO/TS 15066 (if collaborative features are proposed).\n\u2022 NFPA 70 (NEC) and NFPA 79 Electrical Standard for Industrial Machinery.\n\u2022 UL 508A Industrial Control Panels (US) and CSA equivalents (if applicable).\n\u2022 CEMA/ANSI for conveyors; applicable local codes and ordinances.\nVendor must list any exceptions or alternate standards explicitly in the proposal.\n11) FAT, SAT & Acceptance Criteria\nFactory Acceptance Test (FAT): at vendor\u2019s facility prior to shipment.\nVendor to prepare test plan; EPF to witness.\n- Demonstrate sustained 12 cpm with three (3) EPF case sizes and one (1) mixed\u2011SKU pallet.\n- Demonstrate peak 18 cpm for \u2265 60 seconds.\n- Singulation success \u2265 99.0%, no double\u2011feeds; recovery handling for stuck/damaged cases.\n- HMI recipes, alarms, diagnostics, and e\u2011stops; safe torque off; door interlocks.\n- Documentation package (Section 9) 95% complete.\nSite Acceptance Test (SAT): after installation at EPF.\n- 8\u2011hour performance run: \u2265 95% availability; \u2265 99.0% singulation accuracy; \u2265 12 cpm average.\n- Operator training completion and sign\u2011off.\n- As\u2011built documentation delivered; punch\u2011list closed.\n12) Training & Handover\n\u2022 Operator training (2 sessions \u00d7 4 hours) and maintenance training (1 session \u00d7 6 hours).\n\u2022 Training materials (slides, work instructions) in PDF and native formats.\n\u2022 Final handover includes source code archives, passwords/keys, license documents, and asset list.\n4",
+    "page_index": 3,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "order_index": 3,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/Author": "ChatGPT Canvas",
+        "/Creator": "ChatGPT",
+        "/Producer": "WeasyPrint 65.1",
+        "/Title": "Epf, Co"
+      },
+      "source": "pdfplumber"
+    },
+    "line_span": null,
+    "paragraph_index": 3
+  },
+  {
+    "object_id": "7e708956a51f426cb8a399a678562ff6-txt-000004",
+    "file_id": "7e708956a51f426cb8a399a678562ff6",
+    "kind": "para",
+    "text": "13) Warranty & Support\n\u2022 Minimum 12\u2011month warranty from SAT acceptance or 18 months from shipment, whichever occurs\nfirst.\n\u2022 Define response times (remote within 4 hours business days; on\u2011site within 48 hours) and escalation\npath.\n\u2022 Include optional service contract pricing (annual) and spare parts kit.\n14) Project Management & Schedule\n\u2022 Provide detailed schedule (Gantt) with milestones: design release, procurement, fabrication,\nsoftware complete, FAT, shipment, installation, SAT.\n\u2022 Target dates: FAT by Week 14 from PO; SAT complete by Week 18 from PO.\n\u2022 Weekly progress updates and issue log; single point of contact (PM).\n\u2022 Change control procedure for scope/schedule adjustments.\n15) Commercial Terms\n\u2022 Pricing: firm fixed price; provide line\u2011item breakdown (hardware, fabrication, software, FAT,\nshipment, install, SAT, training).\n\u2022 Payment Milestones (proposed): 30% PO; 30% Design Release; 30% FAT pass; 10% SAT pass.\n\u2022 INCOterms: DDP Sterling Heights, MI (unless otherwise proposed).\n\u2022 Taxes: exclude state/local sales tax; note if applicable.\n\u2022 Liquidated damages (optional): propose performance LDs capped at 5% of contract value.\n\u2022 Performance bond (if required): indicate adder.\n\u2022 Validity: quotes valid \u2265 60 days from due date.\n16) Proposal Submission Instructions\n\u2022 Due: October 3, 2025 @ 5:00 PM ET; email PDF to rfq@epf.example.com with subject\n\u201cEPF\u2011RFQ\u20112025\u2011001 \u2013 Depalletizer \u2013 <Vendor Name>\u201d.\n\u2022 Include completed Appendix A\u2013D in original editable formats (Excel/CSV/Native).\n\u2022 Provide 2\u20133 recent, relevant references (contact name, company, phone/email) for similar systems.\n17) Evaluation Criteria (Weighted)\n\u2022 Technical compliance & risk mitigation (30%)\n\u2022 Performance vs. targets (20%)\n\u2022 Schedule & project execution plan (15%)\n\u2022 Total cost of ownership & energy/air consumption (10%)\n\u2022 Service/warranty & lifecycle support (10%)\n5",
+    "page_index": 4,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "order_index": 4,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/Author": "ChatGPT Canvas",
+        "/Creator": "ChatGPT",
+        "/Producer": "WeasyPrint 65.1",
+        "/Title": "Epf, Co"
+      },
+      "source": "pdfplumber"
+    },
+    "line_span": null,
+    "paragraph_index": 4
+  },
+  {
+    "object_id": "7e708956a51f426cb8a399a678562ff6-txt-000005",
+    "file_id": "7e708956a51f426cb8a399a678562ff6",
+    "kind": "para",
+    "text": "\u2022 Past performance/references (10%)\n\u2022 Exceptions (5%)\n18) Site & Utilities (EPF Provided)\n\u2022 Power: 480 VAC 3\u2011phase, 60 Hz, 100 A available at cell boundary.\n\u2022 Air: 100 psig dry/oil\u2011free; 1\u2011in NPT drop at boundary.\n\u2022 Network: 1\u00d7 RJ\u201145 copper to plant VLAN; static IP to be assigned by EPF IT.\n\u2022 Floor: 8\u2011in reinforced concrete slab; anchor embedment allowed per EPF engineering.\n\u2022 Rigging: Vendor to provide rigging plan; EPF to approve and coordinate dock access.\n19) Vendor Responsibilities (Detailed)\n\u2022 Perform and document machinery risk assessment and implement risk reduction.\n\u2022 Provide full guarding & safety devices; validate safety function performance level.\n\u2022 Provide clear access for maintenance; label all devices and cables; provide wire markers and device\ntags.\n\u2022 Provide commissioning spares and all lubricants/consumables for SAT.\n20) Exceptions & Clarifications\nVendor must list any exceptions, deviations, or clarifications in a dedicated section. Items not listed are\nassumed compliant.\n21) Appendices (to be completed and returned with proposal)\nAppendix A \u2014 Technical Response Form (Fill\u2011In)\nA1. Robot & EOAT\n- Robot make/model: _\n- Payload @ CG (lb/kg): _\n- Reach (mm): _\n- EOAT type (vacuum/mech/hybrid): _\n- Vacuum generator: [ ] Ejector [ ] Electric pump; Max SCFM: ____\nA2. Vision/Sensing\n- 3D sensor make/model: _\n- Localization method: _\n- Double\u2011pick prevention: ____\n6",
+    "page_index": 5,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "order_index": 5,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/Author": "ChatGPT Canvas",
+        "/Creator": "ChatGPT",
+        "/Producer": "WeasyPrint 65.1",
+        "/Title": "Epf, Co"
+      },
+      "source": "pdfplumber"
+    },
+    "line_span": null,
+    "paragraph_index": 5
+  },
+  {
+    "object_id": "7e708956a51f426cb8a399a678562ff6-txt-000006",
+    "file_id": "7e708956a51f426cb8a399a678562ff6",
+    "kind": "para",
+    "text": "A3. Conveyors & Pallet Handling\n- Infeed pallet conveyor type & capacity: _\n- Case outfeed conveyor type/width/speed: _\nA4. Controls & Electrical\n- PLC/CPU model & Safety PLC: _\n- Network topology: _\n- Panel SCCR (kA): ____\nA5. Utilities & Consumption\n- Avg/peak air (SCFM): _\n- Full\u2011load amps (FLA): _\nA6. Performance\n- Guaranteed sustained cpm: _\n- Peak cpm (\u2265 60 s): _\n- Pick success %: _\n- Availability %: _\nA7. Layout\n- Proposed footprint (L\u00d7W): _\n- Clearance to walls/aisles: _\nA8. Options (pricing separate)\n- Empty pallet stacker\n- Slip\u2011sheet removal module\n- Additional vision camera\n- Redundant vacuum pump\n- Remote support package\nAppendix B \u2014 Pricing Breakdown (Template)\nUnit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\nMechanical Robot, EOAT, conveyors,\n1 1 lot\nhardware guarding, frames\nElectrical & Panels, devices, wiring, field\n2 1 lot\ncontrols I/O\nPLC/safety/HMI/robot/vision\n3 Software 1 lot\nprogramming\nDesign, drawings, risk\n4 Engineering 1 lot\nassessment\n7",
+    "page_index": 6,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "order_index": 6,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/Author": "ChatGPT Canvas",
+        "/Creator": "ChatGPT",
+        "/Producer": "WeasyPrint 65.1",
+        "/Title": "Epf, Co"
+      },
+      "source": "pdfplumber"
+    },
+    "line_span": null,
+    "paragraph_index": 6
+  },
+  {
+    "object_id": "7e708956a51f426cb8a399a678562ff6-txt-000007",
+    "file_id": "7e708956a51f426cb8a399a678562ff6",
+    "kind": "para",
+    "text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On\u2011site labor, travel, per diem 1 lot\nstart\u2011up\n8 SAT & training On\u2011site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C \u2014 Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long\u2011lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench\u2011tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D \u2014 Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak \u2265 18 cpm\n3 Availability \u2265 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18\u00d720 ft\n8",
+    "page_index": 7,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "order_index": 7,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/Author": "ChatGPT Canvas",
+        "/Creator": "ChatGPT",
+        "/Producer": "WeasyPrint 65.1",
+        "/Title": "Epf, Co"
+      },
+      "source": "pdfplumber"
+    },
+    "line_span": null,
+    "paragraph_index": 7
+  },
+  {
+    "object_id": "7e708956a51f426cb8a399a678562ff6-txt-000008",
+    "file_id": "7e708956a51f426cb8a399a678562ff6",
+    "kind": "para",
+    "text": "Compliant (Y/ Notes /\nSection Requirement\nN) Reference\n6 EOAT with vacuum sensing & anti\u2011double pick\n7 GuardLogix or equivalent safety PLC\n8 Source code deliverables\n9 Docs at FAT; as\u2011built at SAT\n11 FAT/SAT criteria\nStandards compliance (OSHA, A3/RIA, ISO 10218, NFPA\n10\n79, UL 508A)\n22) Proposal Validity & Confidentiality\nProposals shall remain valid for at least sixty (60) days from the due date. All information contained in this\nRFQ and subsequent communications is confidential and shall not be disclosed to third parties except as\nrequired to prepare the proposal.\n23) Right to Award\nEPF, Co. reserves the right to accept or reject any or all proposals, to waive irregularities, and to award in\nthe best interest of the company.\nEnd of RFQ\n9",
+    "page_index": 8,
+    "bbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "order_index": 8,
+    "tokens": null,
+    "parent_id": null,
+    "children_ids": [],
+    "metadata": {
+      "engine": "native",
+      "document_metadata": {
+        "/Author": "ChatGPT Canvas",
+        "/Creator": "ChatGPT",
+        "/Producer": "WeasyPrint 65.1",
+        "/Title": "Epf, Co"
+      },
+      "source": "pdfplumber"
+    },
+    "line_span": null,
+    "paragraph_index": 8
+  }
+]
