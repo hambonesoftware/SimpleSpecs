@@ -1,4 +1,5 @@
 """Application configuration module for SimpleSpecs."""
+
 from functools import lru_cache
 from typing import Any, Dict, List, Literal
 
@@ -15,7 +16,7 @@ class Settings(BaseSettings):
     LLAMACPP_URL: str = Field(default="http://localhost:8080")
     DB_URL: str = Field(default="sqlite:///./simplespecs.db")
     ARTIFACTS_DIR: str = Field(default="artifacts")
-    ALLOW_ORIGINS: List[str] = Field(default_factory=lambda: ["*"])
+    ALLOW_ORIGINS: List[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     MAX_FILE_MB: int = Field(default=50, ge=1)
     PDF_ENGINE: Literal["native", "mineru", "auto"] = Field(default="native")
     MINERU_ENABLED: bool = Field(default=True)
@@ -26,7 +27,7 @@ class Settings(BaseSettings):
     def _ensure_list(cls, value: Any) -> List[str]:
         """Allow comma-separated strings or iterables for origins."""
         if value is None:
-            return ["*"]
+            return ["http://localhost:3000"]
         if isinstance(value, str):
             return [item.strip() for item in value.split(",") if item.strip()]
         return list(value)

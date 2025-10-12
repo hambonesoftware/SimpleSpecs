@@ -1,4 +1,5 @@
 """FastAPI application entry-point for SimpleSpecs."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,9 +13,9 @@ from .database import init_db
 from .routers import (
     export,
     files,
-    health,
     headers,
     headers_ollama,
+    health,
     ingest,
     parse,
     settings,
@@ -23,47 +24,60 @@ from .routers import (
     upload,
 )
 
-app = FastAPI(title="SimpleSpecs", version="1.0.0")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+def _build_app() -> FastAPI:
+    """Create and configure a FastAPI application instance."""
 
-app.include_router(health.router)
-app.include_router(upload.router)
-app.include_router(ingest.ingest_router)
-app.include_router(files.files_router)
-app.include_router(parse.router)
-app.include_router(headers.router)
-app.include_router(headers_ollama.router)
-app.include_router(settings.router)
-app.include_router(specs.router)
-app.include_router(export.router)
-app.include_router(system.system_router)
+    app_settings = get_settings()
+    application = FastAPI(title="SimpleSpecs", version="1.0.0")
 
-@app.on_event("startup")
-def _on_startup() -> None:
-    """Prepare services and emit startup diagnostics."""
+    allowed_origins = app_settings.ALLOW_ORIGINS or ["http://localhost:3000"]
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-    from .services.pdf_mineru import check_mineru_availability
+    application.include_router(health.router)
+    application.include_router(upload.router)
+    application.include_router(ingest.ingest_router)
+    application.include_router(files.files_router)
+    application.include_router(parse.router)
+    application.include_router(headers.router)
+    application.include_router(headers_ollama.router)
+    application.include_router(settings.router)
+    application.include_router(specs.router)
+    application.include_router(export.router)
+    application.include_router(system.system_router)
 
-    init_db()
+    @application.on_event("startup")
+    def _on_startup() -> None:
+        """Prepare services and emit startup diagnostics."""
 
-    settings = get_settings()
-    available, reason = check_mineru_availability(settings=settings)
-    if not available and reason:
-        print(f"[startup] MinerU unavailable: {reason}")
+        from .services.pdf_mineru import check_mineru_availability
 
-frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
-if frontend_dir.exists():
-    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+        init_db()
+
+        refreshed_settings = get_settings()
+        available, reason = check_mineru_availability(settings=refreshed_settings)
+        if not available and reason:
+            print(f"[startup] MinerU unavailable: {reason}")
+
+    frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+    if frontend_dir.exists():
+        application.mount(
+            "/", StaticFiles(directory=frontend_dir, html=True), name="frontend"
+        )
+
+    return application
+
+
+app = _build_app()
 
 
 def create_app() -> FastAPI:
-    """Compatibility factory returning the configured application."""
+    """Compatibility factory returning a configured application."""
 
-    return app
+    return _build_app()
