@@ -45,6 +45,10 @@ python scripts/run_headers.py record "Epf, Co.pdf"
 
 # Validate both fixtures match the committed golden files
 python scripts/run_headers.py check
+
+# Replay a stored upload without re-specifying the PDF path
+python scripts/run_headers.py record --upload-id <upload_id>
+python scripts/run_headers.py check --upload-id <upload_id>
 ```
 
 The `Golden Header Replay` GitHub Actions workflow runs the same `check`

@@ -128,6 +128,35 @@ def _run_pipeline_for_pdf(
     return upload_id, objects, header_items, lines, response_text
 
 
+def _find_pdf_for_upload(
+    upload_id: str,
+    *,
+    settings,
+    index_path: Path | None = None,
+) -> Path:
+    """Return a PDF path for a stored upload."""
+
+    source_dir = Path(settings.ARTIFACTS_DIR) / upload_id / "source"
+    if source_dir.exists():
+        for candidate in sorted(p for p in source_dir.iterdir() if p.is_file()):
+            return candidate
+
+    if index_path is not None and index_path.exists():
+        try:
+            with index_path.open("r", encoding="utf-8") as handle:
+                entries = json.load(handle)
+        except json.JSONDecodeError as exc:  # pragma: no cover - configuration error
+            raise RuntimeError(f"Invalid index JSON: {index_path}") from exc
+
+        for entry in entries:
+            if entry.get("upload_id") == upload_id and entry.get("pdf"):
+                candidate = ROOT / entry["pdf"]
+                if candidate.exists():
+                    return candidate
+
+    raise FileNotFoundError(f"No stored PDF found for upload_id={upload_id}")
+
+
 def _diff(actual: object, expected: object) -> tuple[bool, str]:
     actual_text = json.dumps(actual, ensure_ascii=False, indent=2, sort_keys=True)
     expected_text = json.dumps(expected, ensure_ascii=False, indent=2, sort_keys=True)
@@ -147,15 +176,36 @@ def _diff(actual: object, expected: object) -> tuple[bool, str]:
 
 
 def record_baseline(
-    pdf_path: Path,
+    pdf_path: Path | None = None,
     *,
     index_path: Path = DEFAULT_INDEX,
     engine: str = "native",
+    upload_id: str | None = None,
 ) -> None:
-    upload_id, objects, header_items, lines, response_text = _run_pipeline_for_pdf(
-        pdf_path, engine=engine
+    settings = get_settings()
+
+    resolved_pdf: Path | None = None
+    if pdf_path is not None:
+        resolved_pdf = pdf_path.resolve()
+        if not resolved_pdf.exists():
+            raise FileNotFoundError(f"PDF not found: {resolved_pdf}")
+
+    if resolved_pdf is None:
+        if upload_id is None:
+            raise ValueError("Either pdf_path or upload_id must be provided")
+        resolved_pdf = _find_pdf_for_upload(upload_id, settings=settings, index_path=index_path)
+
+    if upload_id is not None and resolved_pdf is not None:
+        actual_upload = _hash_file(resolved_pdf)
+        if actual_upload != upload_id:
+            raise ValueError(
+                f"Provided upload_id ({upload_id}) does not match PDF hash {actual_upload}",
+            )
+
+    upload_id_result, objects, header_items, lines, response_text = _run_pipeline_for_pdf(
+        resolved_pdf, engine=engine
     )
-    stem = _slugify(pdf_path.stem)
+    stem = _slugify(resolved_pdf.stem)
 
     golden_dir = index_path.parent
     layout_dir = ROOT / "tests" / "fixtures" / "layout"
@@ -184,8 +234,8 @@ def record_baseline(
 
     entry = {
         "name": stem,
-        "pdf": str(pdf_path.relative_to(ROOT)),
-        "upload_id": upload_id,
+        "pdf": str(resolved_pdf.relative_to(ROOT)),
+        "upload_id": upload_id_result,
         "parsed": str(parsed_file.relative_to(ROOT)),
         "headers": str(headers_file.relative_to(ROOT)),
         "raw": str(raw_file.relative_to(ROOT)),
@@ -196,16 +246,27 @@ def record_baseline(
     index.append(entry)
     index.sort(key=lambda item: item["name"])
     _write_json(index_path, index)
-    LOGGER.info("Recorded baseline for %s (upload_id=%s)", pdf_path.name, upload_id)
+    LOGGER.info("Recorded baseline for %s (upload_id=%s)", resolved_pdf.name, upload_id_result)
 
 
-def check_baselines(index_path: Path = DEFAULT_INDEX, *, engine: str = "native") -> int:
+def check_baselines(
+    index_path: Path = DEFAULT_INDEX,
+    *,
+    engine: str = "native",
+    upload_id: str | None = None,
+) -> int:
     if not index_path.exists():
         LOGGER.error("Missing index file: %s", index_path)
         return 1
 
     with index_path.open("r", encoding="utf-8") as handle:
         entries = json.load(handle)
+
+    if upload_id is not None:
+        entries = [entry for entry in entries if entry.get("upload_id") == upload_id]
+        if not entries:
+            LOGGER.error("No baseline entries match upload_id=%s", upload_id)
+            return 1
 
     failures: list[str] = []
     for entry in entries:
@@ -259,6 +320,11 @@ def parse_args(argv: Iterable[str]) -> argparse.Namespace:
     parser.add_argument("target", nargs="?", help="Path to PDF when recording")
     parser.add_argument("--index", dest="index", default=str(DEFAULT_INDEX), help="Path to baseline index JSON")
     parser.add_argument("--engine", dest="engine", default="native", help="PDF engine override")
+    parser.add_argument(
+        "--upload-id",
+        dest="upload_id",
+        help="Replay using an existing upload_id",
+    )
     return parser.parse_args(list(argv))
 
 
@@ -268,16 +334,24 @@ def main(argv: Iterable[str] | None = None) -> int:
     index_path = Path(args.index).resolve()
 
     if args.command == "record":
-        if not args.target:
-            raise SystemExit("record command requires a PDF path")
-        pdf_path = Path(args.target).resolve()
-        if not pdf_path.exists():
-            raise SystemExit(f"PDF not found: {pdf_path}")
-        record_baseline(pdf_path, index_path=index_path, engine=args.engine)
+        pdf_path = Path(args.target).resolve() if args.target else None
+        try:
+            record_baseline(
+                pdf_path,
+                index_path=index_path,
+                engine=args.engine,
+                upload_id=args.upload_id,
+            )
+        except (FileNotFoundError, ValueError) as exc:
+            raise SystemExit(str(exc)) from exc
         return 0
 
     if args.command == "check":
-        return check_baselines(index_path=index_path, engine=args.engine)
+        return check_baselines(
+            index_path=index_path,
+            engine=args.engine,
+            upload_id=args.upload_id,
+        )
 
     raise SystemExit(f"Unsupported command: {args.command}")
 
