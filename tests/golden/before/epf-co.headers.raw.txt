@@ -1,0 +1,24 @@
+#headers#
+1 Appendix A — Technical Response Form (Fill‑In)
+2 Appendix B — Pricing Breakdown (Template)
+1 1 lot
+2 1 lot
+3 Software 1 lot
+4 Engineering 1 lot
+5 FAT Build, debug, FAT execution 1 lot
+6 To EPF, MI (DDP) 1 lot
+7 On‑site labor, travel, per diem 1 lot
+8 SAT & training On‑site testing, training 1 lot
+9 Options (list)
+12 Appendix C — Schedule & Milestones (Template)
+13 Appendix D — Compliance Matrix (Vendor to Complete)
+3 Throughput sustained 12 cpm; peak ≥ 18 cpm
+3 Availability ≥ 95% in SAT
+4 Case size & weight ranges
+5 Footprint within 18×20 ft
+6 EOAT with vacuum sensing & anti‑double pick
+7 GuardLogix or equivalent safety PLC
+8 Source code deliverables
+9 Docs at FAT; as‑built at SAT
+11 FAT/SAT criteria
+#headers#

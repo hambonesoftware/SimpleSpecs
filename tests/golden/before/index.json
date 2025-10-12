@@ -1,0 +1,20 @@
+[
+  {
+    "headers": "tests/golden/before/epf-co.headers.json",
+    "layout": "tests/fixtures/layout/epf-co.lines.jsonl",
+    "name": "epf-co",
+    "parsed": "tests/golden/before/epf-co.objects.json",
+    "pdf": "Epf, Co.pdf",
+    "raw": "tests/golden/before/epf-co.headers.raw.txt",
+    "upload_id": "acc7e1454ebf571adef928927a60dae5affdd5ef6e6404c92334c3b2626c626d"
+  },
+  {
+    "headers": "tests/golden/before/mfc-5m-r2001-e1985.headers.json",
+    "layout": "tests/fixtures/layout/mfc-5m-r2001-e1985.lines.jsonl",
+    "name": "mfc-5m-r2001-e1985",
+    "parsed": "tests/golden/before/mfc-5m-r2001-e1985.objects.json",
+    "pdf": "MFC-5M_R2001_E1985.pdf",
+    "raw": "tests/golden/before/mfc-5m-r2001-e1985.headers.raw.txt",
+    "upload_id": "23f7eae5862f408016f419b70f31387658517ddd7e2af01bf4ce1ae16b6f8182"
+  }
+]

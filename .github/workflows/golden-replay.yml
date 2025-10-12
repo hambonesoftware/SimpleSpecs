@@ -1,0 +1,38 @@
+name: Golden Header Replay
+
+on:
+  pull_request:
+    branches: ['**']
+  workflow_dispatch:
+
+jobs:
+  replay:
+    name: Run header replay baselines
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify header baselines
+        run: |
+          python scripts/run_headers.py check
+
+      - name: Upload replay artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: header-replay-debug
+          path: |
+            artifacts
+            tests/golden/before/index.json
+            tests/golden/before/*.headers.raw.txt
