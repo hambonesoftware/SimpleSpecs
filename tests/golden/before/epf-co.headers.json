@@ -1,0 +1,156 @@
+[
+  {
+    "chunk_text": "• Past performance/references (10%)\n• Exceptions (5%)\n18) Site & Utilities (EPF Provided)\n• Power: 480 VAC 3‑phase, 60 Hz, 100 A available at cell boundary.\n• Air: 100 psig dry/oil‑free; 1‑in NPT drop at boundary.\n• Network: 1× RJ‑45 copper to plant VLAN; static IP to be assigned by EPF IT.\n• Floor: 8‑in reinforced concrete slab; anchor embedment allowed per EPF engineering.\n• Rigging: Vendor to provide rigging plan; EPF to approve and coordinate dock access.\n19) Vendor Responsibilities (Detailed)\n• Perform and document machinery risk assessment and implement risk reduction.\n• Provide full guarding & safety devices; validate safety function performance level.\n• Provide clear access for maintenance; label all devices and cables; provide wire markers and device\ntags.\n• Provide commissioning spares and all lubricants/consumables for SAT.\n20) Exceptions & Clarifications\nVendor must list any exceptions, deviations, or clarifications in a dedicated section. Items not listed are\nassumed compliant.\n21) Appendices (to be completed and returned with proposal)\nAppendix A — Technical Response Form (Fill‑In)\nA1. Robot & EOAT\n- Robot make/model: _\n- Payload @ CG (lb/kg): _\n- Reach (mm): _\n- EOAT type (vacuum/mech/hybrid): _\n- Vacuum generator: [ ] Ejector [ ] Electric pump; Max SCFM: ____\nA2. Vision/Sensing\n- 3D sensor make/model: _\n- Localization method: _\n- Double‑pick prevention: ____\n6",
+    "line_number": 6,
+    "page_number": 6,
+    "section_name": "Appendix A — Technical Response Form (Fill‑In)",
+    "section_number": "1"
+  },
+  {
+    "chunk_text": "A3. Conveyors & Pallet Handling\n- Infeed pallet conveyor type & capacity: _\n- Case outfeed conveyor type/width/speed: _\nA4. Controls & Electrical\n- PLC/CPU model & Safety PLC: _\n- Network topology: _\n- Panel SCCR (kA): ____\nA5. Utilities & Consumption\n- Avg/peak air (SCFM): _\n- Full‑load amps (FLA): _\nA6. Performance\n- Guaranteed sustained cpm: _\n- Peak cpm (≥ 60 s): _\n- Pick success %: _\n- Availability %: _\nA7. Layout\n- Proposed footprint (L×W): _\n- Clearance to walls/aisles: _\nA8. Options (pricing separate)\n- Empty pallet stacker\n- Slip‑sheet removal module\n- Additional vision camera\n- Redundant vacuum pump\n- Remote support package\nAppendix B — Pricing Breakdown (Template)\nUnit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\nMechanical Robot, EOAT, conveyors,\n1 1 lot\nhardware guarding, frames\nElectrical & Panels, devices, wiring, field\n2 1 lot\ncontrols I/O\nPLC/safety/HMI/robot/vision\n3 Software 1 lot\nprogramming\nDesign, drawings, risk\n4 Engineering 1 lot\nassessment\n7",
+    "line_number": 7,
+    "page_number": 7,
+    "section_name": "Appendix B — Pricing Breakdown (Template)",
+    "section_number": "2"
+  },
+  {
+    "chunk_text": "A3. Conveyors & Pallet Handling\n- Infeed pallet conveyor type & capacity: _\n- Case outfeed conveyor type/width/speed: _\nA4. Controls & Electrical\n- PLC/CPU model & Safety PLC: _\n- Network topology: _\n- Panel SCCR (kA): ____\nA5. Utilities & Consumption\n- Avg/peak air (SCFM): _\n- Full‑load amps (FLA): _\nA6. Performance\n- Guaranteed sustained cpm: _\n- Peak cpm (≥ 60 s): _\n- Pick success %: _\n- Availability %: _\nA7. Layout\n- Proposed footprint (L×W): _\n- Clearance to walls/aisles: _\nA8. Options (pricing separate)\n- Empty pallet stacker\n- Slip‑sheet removal module\n- Additional vision camera\n- Redundant vacuum pump\n- Remote support package\nAppendix B — Pricing Breakdown (Template)\nUnit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\nMechanical Robot, EOAT, conveyors,\n1 1 lot\nhardware guarding, frames\nElectrical & Panels, devices, wiring, field\n2 1 lot\ncontrols I/O\nPLC/safety/HMI/robot/vision\n3 Software 1 lot\nprogramming\nDesign, drawings, risk\n4 Engineering 1 lot\nassessment\n7",
+    "line_number": 7,
+    "page_number": 7,
+    "section_name": "1 lot",
+    "section_number": "1"
+  },
+  {
+    "chunk_text": "A3. Conveyors & Pallet Handling\n- Infeed pallet conveyor type & capacity: _\n- Case outfeed conveyor type/width/speed: _\nA4. Controls & Electrical\n- PLC/CPU model & Safety PLC: _\n- Network topology: _\n- Panel SCCR (kA): ____\nA5. Utilities & Consumption\n- Avg/peak air (SCFM): _\n- Full‑load amps (FLA): _\nA6. Performance\n- Guaranteed sustained cpm: _\n- Peak cpm (≥ 60 s): _\n- Pick success %: _\n- Availability %: _\nA7. Layout\n- Proposed footprint (L×W): _\n- Clearance to walls/aisles: _\nA8. Options (pricing separate)\n- Empty pallet stacker\n- Slip‑sheet removal module\n- Additional vision camera\n- Redundant vacuum pump\n- Remote support package\nAppendix B — Pricing Breakdown (Template)\nUnit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\nMechanical Robot, EOAT, conveyors,\n1 1 lot\nhardware guarding, frames\nElectrical & Panels, devices, wiring, field\n2 1 lot\ncontrols I/O\nPLC/safety/HMI/robot/vision\n3 Software 1 lot\nprogramming\nDesign, drawings, risk\n4 Engineering 1 lot\nassessment\n7",
+    "line_number": 7,
+    "page_number": 7,
+    "section_name": "1 lot",
+    "section_number": "2"
+  },
+  {
+    "chunk_text": "A3. Conveyors & Pallet Handling\n- Infeed pallet conveyor type & capacity: _\n- Case outfeed conveyor type/width/speed: _\nA4. Controls & Electrical\n- PLC/CPU model & Safety PLC: _\n- Network topology: _\n- Panel SCCR (kA): ____\nA5. Utilities & Consumption\n- Avg/peak air (SCFM): _\n- Full‑load amps (FLA): _\nA6. Performance\n- Guaranteed sustained cpm: _\n- Peak cpm (≥ 60 s): _\n- Pick success %: _\n- Availability %: _\nA7. Layout\n- Proposed footprint (L×W): _\n- Clearance to walls/aisles: _\nA8. Options (pricing separate)\n- Empty pallet stacker\n- Slip‑sheet removal module\n- Additional vision camera\n- Redundant vacuum pump\n- Remote support package\nAppendix B — Pricing Breakdown (Template)\nUnit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\nMechanical Robot, EOAT, conveyors,\n1 1 lot\nhardware guarding, frames\nElectrical & Panels, devices, wiring, field\n2 1 lot\ncontrols I/O\nPLC/safety/HMI/robot/vision\n3 Software 1 lot\nprogramming\nDesign, drawings, risk\n4 Engineering 1 lot\nassessment\n7",
+    "line_number": 7,
+    "page_number": 7,
+    "section_name": "Software 1 lot",
+    "section_number": "3"
+  },
+  {
+    "chunk_text": "A3. Conveyors & Pallet Handling\n- Infeed pallet conveyor type & capacity: _\n- Case outfeed conveyor type/width/speed: _\nA4. Controls & Electrical\n- PLC/CPU model & Safety PLC: _\n- Network topology: _\n- Panel SCCR (kA): ____\nA5. Utilities & Consumption\n- Avg/peak air (SCFM): _\n- Full‑load amps (FLA): _\nA6. Performance\n- Guaranteed sustained cpm: _\n- Peak cpm (≥ 60 s): _\n- Pick success %: _\n- Availability %: _\nA7. Layout\n- Proposed footprint (L×W): _\n- Clearance to walls/aisles: _\nA8. Options (pricing separate)\n- Empty pallet stacker\n- Slip‑sheet removal module\n- Additional vision camera\n- Redundant vacuum pump\n- Remote support package\nAppendix B — Pricing Breakdown (Template)\nUnit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\nMechanical Robot, EOAT, conveyors,\n1 1 lot\nhardware guarding, frames\nElectrical & Panels, devices, wiring, field\n2 1 lot\ncontrols I/O\nPLC/safety/HMI/robot/vision\n3 Software 1 lot\nprogramming\nDesign, drawings, risk\n4 Engineering 1 lot\nassessment\n7",
+    "line_number": 7,
+    "page_number": 7,
+    "section_name": "Engineering 1 lot",
+    "section_number": "4"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "FAT Build, debug, FAT execution 1 lot",
+    "section_number": "5"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "To EPF, MI (DDP) 1 lot",
+    "section_number": "6"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "On‑site labor, travel, per diem 1 lot",
+    "section_number": "7"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "SAT & training On‑site testing, training 1 lot",
+    "section_number": "8"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "Options (list)",
+    "section_number": "9"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "Appendix C — Schedule & Milestones (Template)",
+    "section_number": "12"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "Appendix D — Compliance Matrix (Vendor to Complete)",
+    "section_number": "13"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "Throughput sustained 12 cpm; peak ≥ 18 cpm",
+    "section_number": "3"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "Availability ≥ 95% in SAT",
+    "section_number": "3"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "Case size & weight ranges",
+    "section_number": "4"
+  },
+  {
+    "chunk_text": "Unit Price Extended\nLine Item Description Qty Unit\n(USD) (USD)\n5 FAT Build, debug, FAT execution 1 lot\nFreight &\n6 To EPF, MI (DDP) 1 lot\ninsurance\nInstallation &\n7 On‑site labor, travel, per diem 1 lot\nstart‑up\n8 SAT & training On‑site testing, training 1 lot\n9 Options (list)\n10 Total $0.00\nAppendix C — Schedule & Milestones (Template)\nMilestone Target Weeks After PO Notes\nDesign Release / Drawing Submittal 3 Includes GA, schematics\nProcurement Complete 6 Long‑lead items ordered\nFabrication Complete 9 Panels built, conveyors fabricated\nSoftware Complete (Alpha) 10 Bench‑tested\nFAT 14 EPF witness\nShip 15 DDP Sterling Heights\nInstall 16 Mechanical/electrical\nSAT 18 Performance run\nAppendix D — Compliance Matrix (Vendor to Complete)\nCompliant (Y/ Notes /\nSection Requirement\nN) Reference\n3 Throughput sustained 12 cpm; peak ≥ 18 cpm\n3 Availability ≥ 95% in SAT\n4 Case size & weight ranges\n5 Footprint within 18×20 ft\n8",
+    "line_number": 8,
+    "page_number": 8,
+    "section_name": "Footprint within 18×20 ft",
+    "section_number": "5"
+  },
+  {
+    "chunk_text": "Compliant (Y/ Notes /\nSection Requirement\nN) Reference\n6 EOAT with vacuum sensing & anti‑double pick\n7 GuardLogix or equivalent safety PLC\n8 Source code deliverables\n9 Docs at FAT; as‑built at SAT\n11 FAT/SAT criteria\nStandards compliance (OSHA, A3/RIA, ISO 10218, NFPA\n10\n79, UL 508A)\n22) Proposal Validity & Confidentiality\nProposals shall remain valid for at least sixty (60) days from the due date. All information contained in this\nRFQ and subsequent communications is confidential and shall not be disclosed to third parties except as\nrequired to prepare the proposal.\n23) Right to Award\nEPF, Co. reserves the right to accept or reject any or all proposals, to waive irregularities, and to award in\nthe best interest of the company.\nEnd of RFQ\n9",
+    "line_number": 9,
+    "page_number": 9,
+    "section_name": "EOAT with vacuum sensing & anti‑double pick",
+    "section_number": "6"
+  },
+  {
+    "chunk_text": "Compliant (Y/ Notes /\nSection Requirement\nN) Reference\n6 EOAT with vacuum sensing & anti‑double pick\n7 GuardLogix or equivalent safety PLC\n8 Source code deliverables\n9 Docs at FAT; as‑built at SAT\n11 FAT/SAT criteria\nStandards compliance (OSHA, A3/RIA, ISO 10218, NFPA\n10\n79, UL 508A)\n22) Proposal Validity & Confidentiality\nProposals shall remain valid for at least sixty (60) days from the due date. All information contained in this\nRFQ and subsequent communications is confidential and shall not be disclosed to third parties except as\nrequired to prepare the proposal.\n23) Right to Award\nEPF, Co. reserves the right to accept or reject any or all proposals, to waive irregularities, and to award in\nthe best interest of the company.\nEnd of RFQ\n9",
+    "line_number": 9,
+    "page_number": 9,
+    "section_name": "GuardLogix or equivalent safety PLC",
+    "section_number": "7"
+  },
+  {
+    "chunk_text": "Compliant (Y/ Notes /\nSection Requirement\nN) Reference\n6 EOAT with vacuum sensing & anti‑double pick\n7 GuardLogix or equivalent safety PLC\n8 Source code deliverables\n9 Docs at FAT; as‑built at SAT\n11 FAT/SAT criteria\nStandards compliance (OSHA, A3/RIA, ISO 10218, NFPA\n10\n79, UL 508A)\n22) Proposal Validity & Confidentiality\nProposals shall remain valid for at least sixty (60) days from the due date. All information contained in this\nRFQ and subsequent communications is confidential and shall not be disclosed to third parties except as\nrequired to prepare the proposal.\n23) Right to Award\nEPF, Co. reserves the right to accept or reject any or all proposals, to waive irregularities, and to award in\nthe best interest of the company.\nEnd of RFQ\n9",
+    "line_number": 9,
+    "page_number": 9,
+    "section_name": "Source code deliverables",
+    "section_number": "8"
+  },
+  {
+    "chunk_text": "Compliant (Y/ Notes /\nSection Requirement\nN) Reference\n6 EOAT with vacuum sensing & anti‑double pick\n7 GuardLogix or equivalent safety PLC\n8 Source code deliverables\n9 Docs at FAT; as‑built at SAT\n11 FAT/SAT criteria\nStandards compliance (OSHA, A3/RIA, ISO 10218, NFPA\n10\n79, UL 508A)\n22) Proposal Validity & Confidentiality\nProposals shall remain valid for at least sixty (60) days from the due date. All information contained in this\nRFQ and subsequent communications is confidential and shall not be disclosed to third parties except as\nrequired to prepare the proposal.\n23) Right to Award\nEPF, Co. reserves the right to accept or reject any or all proposals, to waive irregularities, and to award in\nthe best interest of the company.\nEnd of RFQ\n9",
+    "line_number": 9,
+    "page_number": 9,
+    "section_name": "Docs at FAT; as‑built at SAT",
+    "section_number": "9"
+  },
+  {
+    "chunk_text": "Compliant (Y/ Notes /\nSection Requirement\nN) Reference\n6 EOAT with vacuum sensing & anti‑double pick\n7 GuardLogix or equivalent safety PLC\n8 Source code deliverables\n9 Docs at FAT; as‑built at SAT\n11 FAT/SAT criteria\nStandards compliance (OSHA, A3/RIA, ISO 10218, NFPA\n10\n79, UL 508A)\n22) Proposal Validity & Confidentiality\nProposals shall remain valid for at least sixty (60) days from the due date. All information contained in this\nRFQ and subsequent communications is confidential and shall not be disclosed to third parties except as\nrequired to prepare the proposal.\n23) Right to Award\nEPF, Co. reserves the right to accept or reject any or all proposals, to waive irregularities, and to award in\nthe best interest of the company.\nEnd of RFQ\n9",
+    "line_number": 9,
+    "page_number": 9,
+    "section_name": "FAT/SAT criteria",
+    "section_number": "11"
+  }
+]

@@ -33,3 +33,20 @@ Settings are loaded from environment variables (prefixed with `SIMPLS_` when des
 ```bash
 pytest -q
 ```
+
+## Baseline Replay
+
+The phase P0 baseline fixtures in `tests/golden/before/` can be regenerated or
+verified with the replay script:
+
+```bash
+python scripts/run_headers.py record MFC-5M_R2001_E1985.pdf
+python scripts/run_headers.py record "Epf, Co.pdf"
+
+# Validate both fixtures match the committed golden files
+python scripts/run_headers.py check
+```
+
+The `Golden Header Replay` GitHub Actions workflow runs the same `check`
+command for every pull request and uploads debug artifacts if a mismatch is
+detected.
