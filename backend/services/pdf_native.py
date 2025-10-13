@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -11,15 +12,50 @@ from ..models import FigureObject, ParagraphObject, ParsedObject, TableObject
 
 logger = logging.getLogger(__name__)
 
+
+def _hydrate_pymupdf_metadata() -> None:
+    """Ensure SWIG-generated PyMuPDF types expose a ``__module__`` attribute."""
+
+    try:  # pragma: no cover - optional dependency
+        import gc
+        import pymupdf.mupdf as mupdf  # type: ignore
+    except Exception:  # pragma: no cover - PyMuPDF not importable
+        return
+
+    pending = {"SwigPyPacked", "SwigPyObject", "swigvarlink"}
+    for candidate in gc.get_objects():  # pragma: no branch - bounded set
+        if not isinstance(candidate, type):
+            continue
+        name = getattr(candidate, "__name__", None)
+        if name not in pending:
+            continue
+        if getattr(candidate, "__module__", None) != "pymupdf.mupdf":
+            try:
+                candidate.__module__ = "pymupdf.mupdf"
+            except Exception:  # pragma: no cover - readonly type metadata
+                continue
+        pending.remove(name)
+        if not pending:
+            break
+
+
 try:  # pragma: no cover - optional dependency
     import pdfplumber  # type: ignore
 except Exception:  # pragma: no cover - dependency missing
     pdfplumber = None
 
 try:  # pragma: no cover - optional dependency
-    import fitz  # type: ignore
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message="builtin type .* has no __module__ attribute",
+            category=DeprecationWarning,
+        )
+        import fitz  # type: ignore
 except Exception:  # pragma: no cover - dependency missing
     fitz = None
+else:  # pragma: no cover - executed only when PyMuPDF is importable
+    _hydrate_pymupdf_metadata()
 
 try:  # pragma: no cover - optional dependency
     import camelot  # type: ignore
