@@ -1,10 +1,12 @@
 """Unit tests for document parsers."""
 from __future__ import annotations
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+import pytest
 
 from backend.models import LINE_KIND, PARAGRAPH_KIND, TABLE_KIND
 from backend.routers._headers_common import parse_and_store_headers
@@ -47,17 +49,24 @@ def test_parse_docx(tmp_path: Path) -> None:
 
 
 def test_parse_pdf(tmp_path: Path) -> None:
-    from reportlab.lib.pagesizes import letter
-    from reportlab.pdfgen import canvas
+    import importlib.util
 
     sample = tmp_path / "sample.pdf"
-    c = canvas.Canvas(str(sample), pagesize=letter)
-    c.drawString(72, 720, "1 Introduction")
-    c.drawString(72, 700, "This is a simple PDF line.")
-    c.showPage()
-    c.drawString(72, 720, "2 Requirements")
-    c.drawString(72, 700, "Provide two bolts per assembly.")
-    c.save()
+
+    if importlib.util.find_spec("fitz") is None:
+        pytest.skip("PyMuPDF not installed; skipping PDF generation test")
+
+    import fitz  # type: ignore
+
+    document = fitz.open()
+    first_page = document.new_page()
+    first_page.insert_text((72, 720), "1 Introduction")
+    first_page.insert_text((72, 700), "This is a simple PDF line.")
+    second_page = document.new_page()
+    second_page.insert_text((72, 720), "2 Requirements")
+    second_page.insert_text((72, 700), "Provide two bolts per assembly.")
+    document.save(str(sample))
+    document.close()
 
     objects = parse_document(sample)
 
