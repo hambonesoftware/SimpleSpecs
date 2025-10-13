@@ -23,7 +23,6 @@ dependencies = [
     "pdfminer.six>=20221105",
     "PyMuPDF>=1.23,<1.25",
     "pikepdf>=8,<10",
-    "reportlab>=3.6,<4",
 ]
 
 [project.optional-dependencies]
