@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -29,7 +30,22 @@ def _build_app() -> FastAPI:
     """Create and configure a FastAPI application instance."""
 
     app_settings = get_settings()
-    application = FastAPI(title="SimpleSpecs", version="1.0.0")
+    @asynccontextmanager
+    async def lifespan(application: FastAPI):
+        """Initialize dependencies and report optional MinerU availability."""
+
+        from .services.pdf_mineru import check_mineru_availability
+
+        init_db()
+
+        refreshed_settings = get_settings()
+        available, reason = check_mineru_availability(settings=refreshed_settings)
+        if not available and reason:
+            print(f"[startup] MinerU unavailable: {reason}")
+
+        yield
+
+    application = FastAPI(title="SimpleSpecs", version="1.0.0", lifespan=lifespan)
 
     allowed_origins = app_settings.ALLOW_ORIGINS or ["http://localhost:3000"]
     application.add_middleware(
@@ -51,19 +67,6 @@ def _build_app() -> FastAPI:
     application.include_router(specs.router)
     application.include_router(export.router)
     application.include_router(system.system_router)
-
-    @application.on_event("startup")
-    def _on_startup() -> None:
-        """Prepare services and emit startup diagnostics."""
-
-        from .services.pdf_mineru import check_mineru_availability
-
-        init_db()
-
-        refreshed_settings = get_settings()
-        available, reason = check_mineru_availability(settings=refreshed_settings)
-        if not available and reason:
-            print(f"[startup] MinerU unavailable: {reason}")
 
     frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
     if frontend_dir.exists():
