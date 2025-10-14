@@ -27,7 +27,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "black>=24,<25",
+    "black>=24,<26",
     "isort>=5.13,<6",
     "mypy>=1.10,<2",
     "pip-audit>=2.7,<3",
