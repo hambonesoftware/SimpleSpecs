@@ -2,15 +2,259 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import time
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable, Sequence
 
 from ..models import FigureObject, ParagraphObject, ParsedObject, TableObject
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class TextLine:
+    """Normalized representation for a textual line emitted by PyMuPDF."""
+
+    text: str
+    bbox: tuple[float, float, float, float]
+    font_family: str | None
+    font_size: float | None
+    is_bold: bool
+    is_caps: bool
+    page_no: int
+    line_idx: int
+    column_index: int | None = None
+    span_fonts: list[str] = field(default_factory=list)
+    flags: int | None = None
+    page_width: float | None = None
+    page_height: float | None = None
+
+    @property
+    def indent(self) -> float:
+        return float(self.bbox[0])
+
+    @property
+    def baseline(self) -> float:
+        return float(self.bbox[1])
+
+    @property
+    def width(self) -> float:
+        return float(self.bbox[2] - self.bbox[0])
+
+
+def _structured_debug(enabled: bool, event: str, **data: Any) -> None:
+    if not enabled:
+        return
+    try:
+        payload = json.dumps(data, ensure_ascii=False, sort_keys=True)
+    except TypeError:
+        safe = {key: repr(value) for key, value in data.items()}
+        payload = json.dumps(safe, ensure_ascii=False, sort_keys=True)
+    logger.debug("%s %s", event, payload)
+
+
+def _line_midpoint(bbox: Sequence[float]) -> float:
+    return float((bbox[0] + bbox[2]) / 2.0)
+
+
+def _kmeans_1d(values: Sequence[float], k: int) -> tuple[list[float], list[int], float]:
+    if not values:
+        return [], [], 0.0
+    if k <= 1:
+        mean = sum(values) / len(values)
+        inertia = sum((value - mean) ** 2 for value in values)
+        return [mean], [0 for _ in values], inertia
+    minimum, maximum = min(values), max(values)
+    if math.isclose(minimum, maximum):
+        return [minimum for _ in range(k)], [0 for _ in values], 0.0
+    centers = [
+        minimum + (maximum - minimum) * (index + 0.5) / k for index in range(k)
+    ]
+    assignments = [0 for _ in values]
+    for _ in range(12):
+        moved = False
+        for idx, value in enumerate(values):
+            nearest = min(range(k), key=lambda j: abs(value - centers[j]))
+            if assignments[idx] != nearest:
+                assignments[idx] = nearest
+                moved = True
+        new_centers: list[float] = centers[:]
+        for center_idx in range(k):
+            cluster = [value for value, group in zip(values, assignments) if group == center_idx]
+            if not cluster:
+                continue
+            new_centers[center_idx] = sum(cluster) / len(cluster)
+        if all(math.isclose(a, b, rel_tol=1e-4, abs_tol=1e-2) for a, b in zip(new_centers, centers)):
+            centers = new_centers
+            break
+        centers = new_centers
+        if not moved:
+            break
+    inertia = sum((value - centers[group]) ** 2 for value, group in zip(values, assignments))
+    return centers, assignments, inertia
+
+
+def _score_cluster_count(values: Sequence[float], max_k: int = 3) -> tuple[int, list[int]]:
+    if len(values) < 4:
+        return 1, [0 for _ in values]
+    best_k = 1
+    best_assignments: list[int] = [0 for _ in values]
+    best_score = float("inf")
+    for k in range(1, max_k + 1):
+        centers, assignments, inertia = _kmeans_1d(values, k)
+        if not centers:
+            continue
+        penalty = k * math.log(len(values) + 1)
+        score = inertia + penalty
+        if score < best_score - 1e-3:
+            best_score = score
+            best_k = k
+            best_assignments = assignments
+    return best_k, best_assignments
+
+
+def _assign_columns(
+    lines: list[dict[str, Any]], multi_column: bool, debug: bool
+) -> list[int]:
+    if not multi_column:
+        return [0 for _ in lines]
+    values = [_line_midpoint(line["bbox"]) for line in lines]
+    k, assignments = _score_cluster_count(values)
+    centroid_map: dict[int, list[float]] = {}
+    if k > 1:
+        for assignment, value in zip(assignments, values):
+            centroid_map.setdefault(assignment, []).append(value)
+        centroids = [
+            sum(cluster) / len(cluster)
+            for _, cluster in sorted(centroid_map.items(), key=lambda item: sum(item[1]) / len(item[1]))
+        ]
+        if centroids and (centroids[-1] - centroids[0]) < 120:
+            assignments = [0 for _ in lines]
+            centroid_map = {0: values}
+            centroids = [sum(values) / len(values)] if values else centroids
+    else:
+        centroids = [values[0]] if values else []
+    _structured_debug(
+        debug,
+        "pdf_native.columns",
+        k=k,
+        centroids=centroids,
+    )
+    if k == 1:
+        return [0 for _ in lines]
+    # Ensure columns ordered left-to-right
+    centroids = {}
+    if not centroid_map:
+        for assignment, line in zip(assignments, lines):
+            centroids.setdefault(assignment, []).append(_line_midpoint(line["bbox"]))
+    else:
+        for key, cluster_values in centroid_map.items():
+            centroids[key] = cluster_values
+    ordered = {
+        cluster: rank
+        for rank, (cluster, _) in enumerate(
+            sorted(
+                (
+                    (cluster, sum(values) / len(values))
+                    for cluster, values in centroids.items()
+                ),
+                key=lambda item: item[1],
+            )
+        )
+    }
+    return [ordered.get(cluster, 0) for cluster in assignments]
+
+
+def _iter_page_lines(page: Any) -> Iterable[dict[str, Any]]:
+    dictionary = page.get_text("dict")
+    for block in dictionary.get("blocks", []):
+        if block.get("type") not in (0, 1):
+            continue
+        for line in block.get("lines", []):
+            spans = line.get("spans", [])
+            if not spans:
+                continue
+            text = "".join(span.get("text", "") or "" for span in spans)
+            if not text or not text.strip():
+                continue
+            yield {
+                "text": text,
+                "bbox": tuple(float(value) for value in line.get("bbox", (0.0, 0.0, 0.0, 0.0))),
+                "spans": spans,
+            }
+
+
+def extract_text_lines(
+    file_path: str,
+    *,
+    multi_column: bool = True,
+    debug: bool = False,
+) -> list[TextLine]:
+    """Extract text lines from *file_path* using PyMuPDF with layout heuristics."""
+
+    if fitz is None:
+        raise RuntimeError("PyMuPDF (fitz) is not available")
+
+    lines: list[TextLine] = []
+    with fitz.open(file_path) as document:
+        global_index = 0
+        for page_index in range(document.page_count):
+            page = document.load_page(page_index)
+            raw_lines = list(_iter_page_lines(page))
+            column_assignments = _assign_columns(raw_lines, multi_column, debug)
+            combined: list[tuple[dict[str, Any], int]] = list(zip(raw_lines, column_assignments))
+            combined.sort(key=lambda item: (item[1], item[0]["bbox"][1], item[0]["bbox"][0]))
+            for order, (entry, column) in enumerate(combined):
+                spans = entry["spans"]
+                font_candidates: list[str] = []
+                sizes: list[float] = []
+                bold = False
+                flags = 0
+                for span in spans:
+                    font = span.get("font")
+                    if font:
+                        font_candidates.append(str(font))
+                    size = span.get("size")
+                    if size:
+                        sizes.append(float(size))
+                    span_flags = int(span.get("flags", 0))
+                    flags |= span_flags
+                    if span_flags & 2 or (font and "bold" in str(font).lower()):
+                        bold = True
+                font_family = font_candidates[0] if font_candidates else None
+                font_size = sum(sizes) / len(sizes) if sizes else None
+                text = entry["text"].replace("\u00A0", " ").strip()
+                letters = [char for char in text if char.isalpha()]
+                is_caps = bool(letters) and all(char.isupper() for char in letters)
+                bbox = tuple(float(value) for value in entry["bbox"])
+                rect = page.rect
+                line = TextLine(
+                    text=text,
+                    bbox=bbox,
+                    font_family=font_family,
+                    font_size=font_size,
+                    is_bold=bold,
+                    is_caps=is_caps,
+                    page_no=page_index,
+                    line_idx=global_index,
+                    column_index=column,
+                    span_fonts=font_candidates,
+                    flags=flags,
+                    page_width=rect.width,
+                    page_height=rect.height,
+                )
+                lines.append(line)
+                global_index += 1
+            _structured_debug(
+                debug,
+                "pdf_native.page_summary",
+                page=page_index,
+                total_lines=len(raw_lines),
+            )
+    return lines
 
 
 def _hydrate_pymupdf_metadata() -> None:

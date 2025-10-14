@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Annotated, Any, Dict, List, Literal
 
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic_settings.sources.types import NoDecode
 
@@ -24,6 +24,29 @@ class Settings(BaseSettings):
     PDF_ENGINE: Literal["native", "mineru", "auto"] = Field(default="native")
     MINERU_ENABLED: bool = Field(default=True)
     MINERU_MODEL_OPTS: Dict[str, Any] = Field(default_factory=dict)
+    PARSER_MULTI_COLUMN: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("PARSER_MULTI_COLUMN", "SIMPLS_PARSER_MULTI_COLUMN"),
+    )
+    HEADERS_SUPPRESS_TOC: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("HEADERS_SUPPRESS_TOC", "SIMPLS_HEADERS_SUPPRESS_TOC"),
+    )
+    HEADERS_SUPPRESS_RUNNING: bool = Field(
+        default=True,
+        validation_alias=AliasChoices(
+            "HEADERS_SUPPRESS_RUNNING",
+            "SIMPLS_HEADERS_SUPPRESS_RUNNING",
+        ),
+    )
+    PARSER_ENABLE_OCR: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("PARSER_ENABLE_OCR", "SIMPLS_PARSER_ENABLE_OCR"),
+    )
+    PARSER_DEBUG: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("PARSER_DEBUG", "SIMPLS_PARSER_DEBUG"),
+    )
 
     @field_validator("ALLOW_ORIGINS", mode="before")
     @classmethod

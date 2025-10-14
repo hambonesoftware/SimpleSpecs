@@ -1,0 +1,180 @@
+{
+  "headers": [
+    {
+      "section_number": "1",
+      "section_name": "Overview",
+      "page_number": 1,
+      "line_number": 1,
+      "chunk_text": "Overview"
+    },
+    {
+      "section_number": "1.1",
+      "section_name": "Layout",
+      "page_number": 1,
+      "line_number": 2,
+      "chunk_text": "Layout"
+    },
+    {
+      "section_number": "1.2",
+      "section_name": "Electrical",
+      "page_number": 1,
+      "line_number": 3,
+      "chunk_text": "Electrical"
+    },
+    {
+      "section_number": "B",
+      "section_name": "Mechanical",
+      "page_number": 1,
+      "line_number": 8,
+      "chunk_text": "Mechanical"
+    },
+    {
+      "section_number": "B.1",
+      "section_name": "Fasteners",
+      "page_number": 1,
+      "line_number": 9,
+      "chunk_text": "Fasteners"
+    },
+    {
+      "section_number": "2",
+      "section_name": "Testing",
+      "page_number": 2,
+      "line_number": 13,
+      "chunk_text": "Testing"
+    },
+    {
+      "section_number": "2.1",
+      "section_name": "Bench Tests",
+      "page_number": 2,
+      "line_number": 14,
+      "chunk_text": "Bench Tests"
+    },
+    {
+      "section_number": "C",
+      "section_name": "Field Trials",
+      "page_number": 2,
+      "line_number": 15,
+      "chunk_text": "Field Trials"
+    },
+    {
+      "section_number": "C.1",
+      "section_name": "Terrain",
+      "page_number": 2,
+      "line_number": 16,
+      "chunk_text": "Terrain"
+    },
+    {
+      "section_number": "2.1.1",
+      "section_name": "Voltage Sweep",
+      "page_number": 2,
+      "line_number": 18,
+      "chunk_text": "Voltage Sweep"
+    }
+  ],
+  "tree": [
+    {
+      "id": "f682e539-88d6-5fd3-b1c0-9de1bc0d05ec",
+      "title": "Overview",
+      "level": 1,
+      "page": 0,
+      "line_index": 1,
+      "number": "1",
+      "score": 1.6253,
+      "children": [
+        {
+          "id": "9735f35b-7a31-5eea-84ae-e2b45fbb075e",
+          "title": "Layout",
+          "level": 2,
+          "page": 0,
+          "line_index": 2,
+          "number": "1.1",
+          "score": 0.9427,
+          "children": []
+        },
+        {
+          "id": "89bc6539-a962-5635-8a47-9fe81759d136",
+          "title": "Electrical",
+          "level": 2,
+          "page": 0,
+          "line_index": 3,
+          "number": "1.2",
+          "score": 0.9427,
+          "children": []
+        },
+        {
+          "id": "06cff5b1-6ba6-5930-b17d-5d6f5056888c",
+          "title": "Mechanical",
+          "level": 2,
+          "page": 0,
+          "line_index": 8,
+          "number": "B",
+          "score": 0.9577,
+          "children": [
+            {
+              "id": "b3120b2f-0896-5015-be04-1bd4e2333b0b",
+              "title": "Fasteners",
+              "level": 3,
+              "page": 0,
+              "line_index": 9,
+              "number": "B.1",
+              "score": 0.6438,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a9f99674-3d34-5869-85f6-c655b11f76dd",
+      "title": "Testing",
+      "level": 1,
+      "page": 1,
+      "line_index": 13,
+      "number": "2",
+      "score": 1.2136,
+      "children": [
+        {
+          "id": "88e45174-0951-541a-8159-8ad7ce3268ab",
+          "title": "Bench Tests",
+          "level": 2,
+          "page": 1,
+          "line_index": 14,
+          "number": "2.1",
+          "score": 0.5795,
+          "children": []
+        },
+        {
+          "id": "07a4e033-7291-5127-bf7a-88a083a685a7",
+          "title": "Field Trials",
+          "level": 2,
+          "page": 1,
+          "line_index": 15,
+          "number": "C",
+          "score": 0.5795,
+          "children": [
+            {
+              "id": "d12676b3-6eb0-5fd0-aa2a-cc15d883738c",
+              "title": "Terrain",
+              "level": 3,
+              "page": 1,
+              "line_index": 16,
+              "number": "C.1",
+              "score": 0.305,
+              "children": []
+            },
+            {
+              "id": "241b77a9-7a3b-5076-8f8d-fac55ed9cb54",
+              "title": "Voltage Sweep",
+              "level": 3,
+              "page": 1,
+              "line_index": 18,
+              "number": "2.1.1",
+              "score": 0.305,
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

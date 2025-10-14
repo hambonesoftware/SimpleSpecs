@@ -28,6 +28,22 @@ Settings are loaded from environment variables (prefixed with `SIMPLS_` when des
 - `MINERU_MODEL_OPTS` — JSON/dict style mapping for MinerU models
 - `ALLOW_ORIGINS` — comma-separated origins for CORS (default `*`)
 - `MAX_FILE_MB` — maximum upload size (default `50`)
+- `PARSER_MULTI_COLUMN` — enable column clustering for reading order reconstruction (default `true`)
+- `HEADERS_SUPPRESS_TOC` — drop table-of-contents pages when evaluating headers (default `true`)
+- `HEADERS_SUPPRESS_RUNNING` — filter recurring running headers/footers (default `true`)
+- `PARSER_ENABLE_OCR` — invoke Tesseract OCR on text-light pages when available (default `false`)
+- `PARSER_DEBUG` — emit structured JSON debug logs during native parsing (default `false`)
+
+### Native header parsing CLI
+
+The layout-aware parser can be exercised locally without the API server:
+
+```bash
+python -m backend.cli.parse_headers path/to/document.pdf --json headers.json --debug
+```
+
+The optional `--debug` flag toggles `PARSER_DEBUG` logging and echoes the active
+feature flags for quick verification.
 
 ## Tests
 ```bash

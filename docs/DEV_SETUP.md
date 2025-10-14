@@ -74,3 +74,25 @@ uv sync --extra optional --dev
 ```
 
 Follow upstream installation docs for native binaries (e.g., Ghostscript, Tesseract) when enabling these features.
+
+## Native header parser quickstart
+
+The phase 1 parser introduces feature flags that can be toggled via environment
+variables (with or without the `SIMPLS_` prefix):
+
+- `PARSER_MULTI_COLUMN` — enable column-aware reading order heuristics (default `true`).
+- `HEADERS_SUPPRESS_TOC` — drop table-of-contents pages (default `true`).
+- `HEADERS_SUPPRESS_RUNNING` — hide running headers/footers (default `true`).
+- `PARSER_ENABLE_OCR` — call Tesseract when a page has little native text (default `false`).
+- `PARSER_DEBUG` — write structured JSON debug logs to the standard logger (default `false`).
+
+For rapid iteration run the CLI entry point directly:
+
+```bash
+python -m backend.cli.parse_headers path/to/document.pdf --json /tmp/headers.json --debug
+```
+
+The CLI respects the same environment variables and prints the resolved flag
+values when `--debug` is supplied. For synthetic fixtures, see
+`backend/tests/test_headers_native.py`, which constructs deterministic PDFs at
+runtime to validate the parser without committing binary assets.

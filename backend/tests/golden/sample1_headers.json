@@ -1,0 +1,147 @@
+{
+  "headers": [
+    {
+      "section_number": "1",
+      "section_name": "Introduction",
+      "page_number": 2,
+      "line_number": 12,
+      "chunk_text": "Introduction"
+    },
+    {
+      "section_number": "1.1",
+      "section_name": "Background",
+      "page_number": 2,
+      "line_number": 13,
+      "chunk_text": "Background"
+    },
+    {
+      "section_number": "1.1.1",
+      "section_name": "Scope",
+      "page_number": 2,
+      "line_number": 14,
+      "chunk_text": "Scope"
+    },
+    {
+      "section_number": "II",
+      "section_name": "Materials",
+      "page_number": 3,
+      "line_number": 19,
+      "chunk_text": "Materials"
+    },
+    {
+      "section_number": "A",
+      "section_name": "Metals",
+      "page_number": 3,
+      "line_number": 20,
+      "chunk_text": "Metals"
+    },
+    {
+      "section_number": "A.1",
+      "section_name": "Alloy Steel",
+      "page_number": 3,
+      "line_number": 21,
+      "chunk_text": "Alloy Steel"
+    },
+    {
+      "section_number": "III",
+      "section_name": "Conclusion",
+      "page_number": 3,
+      "line_number": 22,
+      "chunk_text": "Conclusion"
+    },
+    {
+      "section_number": "A.1.1",
+      "section_name": "Heat Treatment",
+      "page_number": 3,
+      "line_number": 24,
+      "chunk_text": "Heat Treatment"
+    }
+  ],
+  "tree": [
+    {
+      "id": "38a49f2a-0c51-5427-b942-b9bbedaf3273",
+      "title": "Introduction",
+      "level": 1,
+      "page": 1,
+      "line_index": 12,
+      "number": "1",
+      "score": 1.4025,
+      "children": [
+        {
+          "id": "b08f8869-7c8b-5c4f-a2ff-d71f37e1206c",
+          "title": "Background",
+          "level": 2,
+          "page": 1,
+          "line_index": 13,
+          "number": "1.1",
+          "score": 0.8688,
+          "children": [
+            {
+              "id": "d1980eb2-b2f7-5624-b59e-820b6c9ba11b",
+              "title": "Scope",
+              "level": 3,
+              "page": 1,
+              "line_index": 14,
+              "number": "1.1.1",
+              "score": 0.5994,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ea25b4f3-ae40-5751-a394-b66576e916a9",
+      "title": "Materials",
+      "level": 1,
+      "page": 2,
+      "line_index": 19,
+      "number": "II",
+      "score": 1.0341,
+      "children": [
+        {
+          "id": "02af2e22-9f05-5d06-a71c-c7931d3daddd",
+          "title": "Metals",
+          "level": 2,
+          "page": 2,
+          "line_index": 20,
+          "number": "A",
+          "score": 0.5497,
+          "children": [
+            {
+              "id": "f486de8f-d430-56f5-9944-27f0d5b540cc",
+              "title": "Alloy Steel",
+              "level": 3,
+              "page": 2,
+              "line_index": 21,
+              "number": "A.1",
+              "score": 0.305,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "d6b92f54-87d1-5418-8051-9851cbb3dacc",
+      "title": "Conclusion",
+      "level": 1,
+      "page": 2,
+      "line_index": 22,
+      "number": "III",
+      "score": 1.0341,
+      "children": [
+        {
+          "id": "31cf2a09-3269-57e9-9f8c-dbe60383b3eb",
+          "title": "Heat Treatment",
+          "level": 4,
+          "page": 2,
+          "line_index": 24,
+          "number": "A.1.1",
+          "score": 0.33,
+          "children": []
+        }
+      ]
+    }
+  ]
+}
