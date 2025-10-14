@@ -18,6 +18,7 @@ from ..text.toc_filters import (
     is_probably_toc_line,
     mark_toc_pages,
 )
+from .document_pipeline import HeaderNode, run_header_pipeline
 from .llm_client import LLMAdapter
 
 __all__ = ["build_headers_prompt", "parse_nested_list_to_tree"]
@@ -325,6 +326,37 @@ def _persist_sections(file_id: str, root: SectionNode, settings: Settings) -> No
         json.dump(root.model_dump(mode="json"), handle, indent=2)
 
 
+def _nodes_to_section_tree(file_id: str, nodes: Sequence[HeaderNode]) -> SectionNode:
+    root = SectionNode(
+        section_id=f"{file_id}-root",
+        file_id=file_id,
+        title="Document",
+        depth=0,
+        children=[],
+    )
+
+    counter = 1
+
+    def build(children: Sequence[HeaderNode], parent: SectionNode, parent_depth: int) -> None:
+        nonlocal counter
+        for child in children:
+            depth = max(parent_depth + 1, child.level)
+            section = SectionNode(
+                section_id=f"{file_id}-sec-{counter:04d}",
+                file_id=file_id,
+                title=child.title,
+                depth=depth,
+                number=child.number,
+                children=[],
+            )
+            counter += 1
+            parent.children.append(section)
+            build(child.children, section, depth)
+
+    build(nodes, root, 0)
+    return root
+
+
 class _FallbackAdapter:
     def generate(self, prompt: str) -> str:  # noqa: D401
         return _FALLBACK_NESTED_LIST
@@ -416,16 +448,24 @@ def run_header_discovery(file_id: str, llm_choice: str | None) -> SectionNode:
     with objects_path.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
     objects = [PARSED_OBJECT_ADAPTER.validate_python(item) for item in data]
-    prompt = build_headers_prompt(objects)
-    adapter = _select_adapter(llm_choice, settings)
-    try:
-        response_text = adapter.generate(prompt)
-    except Exception:
-        response_text = _FALLBACK_NESTED_LIST
-    logger.info("Header LM raw response (discovery): %s", response_text)
-    if not isinstance(response_text, str) or not response_text.strip():
-        response_text = _FALLBACK_NESTED_LIST
-    root = parse_nested_list_to_tree(file_id, response_text)
+    pdf_path = Path(settings.ARTIFACTS_DIR) / file_id / "source" / "document.pdf"
+    if pdf_path.exists():
+        result = run_header_pipeline(str(pdf_path))
+        root = _nodes_to_section_tree(file_id, result.tree)
+        logger.info(
+            "Header pipeline result: %d headers detected for %s", len(result.headers), file_id
+        )
+    else:
+        prompt = build_headers_prompt(objects)
+        adapter = _select_adapter(llm_choice, settings)
+        try:
+            response_text = adapter.generate(prompt)
+        except Exception:
+            response_text = _FALLBACK_NESTED_LIST
+        logger.info("Header LM raw response (discovery): %s", response_text)
+        if not isinstance(response_text, str) or not response_text.strip():
+            response_text = _FALLBACK_NESTED_LIST
+        root = parse_nested_list_to_tree(file_id, response_text)
     _assign_spans(root, objects)
     _persist_sections(file_id, root, settings)
     return root
