@@ -13,6 +13,6 @@ mammoth>=1.6,<2
 docx2python>=2.8,<4
 pdfplumber>=0.11,<0.12
 pdfminer.six>=20221105
-PyMuPDF>=1.23,<1.25
+PyMuPDF>=1.23,<1.27
 pikepdf>=8,<10
 pytest>=8,<9
