@@ -27,6 +27,6 @@
     "raw_value": "5 mm",
     "normalized_value": 5.0,
     "normalized_unit": "mm",
-    "category": "dimensional"
+    "category": "mechanical"
   }
 ]

@@ -39,7 +39,7 @@ _UNIT_CONVERSIONS: dict[str, tuple[str, float]] = {
 _TEMPERATURE_UNITS = {"°c", "degc", "c"}
 _TEMPERATURE_F_UNITS = {"°f", "degf", "f"}
 _CATEGORY_KEYWORDS: dict[str, tuple[str, ...]] = {
-    "dimensional": (
+    "mechanical": (
         "length",
         "width",
         "height",
@@ -49,6 +49,13 @@ _CATEGORY_KEYWORDS: dict[str, tuple[str, ...]] = {
         "clearance",
         "distance",
         "depth",
+        "weight",
+        "mass",
+        "torque",
+        "pressure",
+        "temperature",
+        "enclosure",
+        "ip",
     ),
     "electrical": (
         "voltage",
@@ -59,6 +66,7 @@ _CATEGORY_KEYWORDS: dict[str, tuple[str, ...]] = {
         "supply",
         "volts",
         "amps",
+        "frequency",
     ),
     "controls": (
         "controller",
@@ -70,6 +78,7 @@ _CATEGORY_KEYWORDS: dict[str, tuple[str, ...]] = {
         "modbus",
         "ethernet",
         "control",
+        "automation",
     ),
     "software": (
         "software",
@@ -78,8 +87,9 @@ _CATEGORY_KEYWORDS: dict[str, tuple[str, ...]] = {
         "api",
         "protocol",
         "ui",
+        "interface",
     ),
-    "project_management": (
+    "project_mgmt": (
         "training",
         "documentation",
         "schedule",
@@ -87,13 +97,14 @@ _CATEGORY_KEYWORDS: dict[str, tuple[str, ...]] = {
         "delivery",
         "commissioning",
         "maintenance",
+        "project",
     ),
 }
 _UNIT_CATEGORY_HINT = {
-    "mm": "dimensional",
-    "kg": "dimensional",
-    "lb": "dimensional",
-    "degc": "dimensional",
+    "mm": "mechanical",
+    "kg": "mechanical",
+    "lb": "mechanical",
+    "degc": "mechanical",
     "v": "electrical",
     "vdc": "electrical",
     "vac": "electrical",
@@ -148,7 +159,7 @@ def _classify(text: str, normalized_unit: str | None) -> str:
             else:
                 if keyword in lowered:
                     return category
-    return "general"
+    return "unknown"
 
 
 def _confidence(text: str, has_value: bool, category: str) -> float:
@@ -162,7 +173,7 @@ def _confidence(text: str, has_value: bool, category: str) -> float:
         base = 0.65
     if has_value:
         base += 0.05
-    if category != "general":
+    if category and category != "unknown":
         base += 0.05
     return round(min(base, 1.0), 2)
 

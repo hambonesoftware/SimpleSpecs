@@ -7,12 +7,16 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from ..config import Settings, get_settings
+from ..logging import get_logger
 from .embeddings import EmbeddingService
 from .index_store import IndexItem, IndexStore
 
 __all__ = ["ChunkRecord", "BM25Corpus", "HybridSearch"]
 
 _TOKEN_RE = re.compile(r"[\w%°\.]+", re.UNICODE)
+
+
+logger = get_logger(__name__)
 
 
 @dataclass(slots=True)
@@ -124,6 +128,15 @@ class HybridSearch:
             record = self._record_map.get(chunk_id)
             if not record:
                 continue
+            if self._settings.RAG_DEBUG:
+                logger.debug(
+                    "rag.hybrid_score chunk=%s score=%.4f bm25=%.4f vector=%.4f query=%s",
+                    chunk_id,
+                    score,
+                    bm25,
+                    dense,
+                    query,
+                )
             response.append(
                 {
                     "chunk_id": chunk_id,

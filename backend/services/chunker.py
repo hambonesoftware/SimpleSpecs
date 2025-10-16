@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 from ..config import Settings, get_settings
-from ..models import ParsedObject, SectionNode
+from ..models import PARSED_OBJECT_ADAPTER, ParsedObject, SectionNode
 
 __all__ = [
     "SectionChunk",
@@ -153,7 +153,7 @@ def compute_section_spans(root: SectionNode, objects: list[ParsedObject]) -> dic
 def _persist_chunks(file_id: str, chunks: Sequence[SectionChunk], settings: Settings) -> None:
     base = Path(settings.ARTIFACTS_DIR) / file_id / "chunks"
     base.mkdir(parents=True, exist_ok=True)
-    payload = [chunk.to_dict() for chunk in chunks]
+    payload = {chunk.section_id: list(chunk.object_ids) for chunk in chunks}
     with (base / "chunks.json").open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2)
 
@@ -167,16 +167,28 @@ def load_chunk_records(file_id: str, settings: Settings | None = None) -> list[S
         raise FileNotFoundError("chunks_missing")
     with target.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
-    if not isinstance(data, list):
-        raise ValueError("chunks_payload_invalid")
-    return [SectionChunk.from_payload(item) for item in data]
+    if isinstance(data, dict):
+        records: list[SectionChunk] = []
+        for section_id, object_ids in data.items():
+            records.append(
+                SectionChunk(
+                    section_id=section_id,
+                    header_path=section_id,
+                    depth=0,
+                    object_ids=[str(item) for item in object_ids],
+                )
+            )
+        return records
+    if isinstance(data, list):
+        return [SectionChunk.from_payload(item) for item in data]
+    raise ValueError("chunks_payload_invalid")
 
 
 def load_persisted_chunks(file_id: str, settings: Settings | None = None) -> dict[str, list[str]]:
-    """Load persisted chunks keyed by header path."""
+    """Load persisted chunks keyed by section identifier."""
 
     records = load_chunk_records(file_id, settings=settings)
-    return {record.header_path: list(record.object_ids) for record in records}
+    return {record.section_id: list(record.object_ids) for record in records}
 
 
 def run_chunking(file_id: str, settings: Settings | None = None) -> dict[str, list[str]]:
@@ -193,8 +205,8 @@ def run_chunking(file_id: str, settings: Settings | None = None) -> dict[str, li
         raw_objects = json.load(handle)
     with sections_path.open("r", encoding="utf-8") as handle:
         raw_sections = json.load(handle)
-    objects = [ParsedObject.model_validate(obj) for obj in raw_objects]
+    objects = [PARSED_OBJECT_ADAPTER.validate_python(obj) for obj in raw_objects]
     root = SectionNode.model_validate(raw_sections)
     chunks = build_section_chunks(root, objects)
     _persist_chunks(file_id, chunks, settings)
-    return {chunk.header_path: list(chunk.object_ids) for chunk in chunks}
+    return {chunk.section_id: list(chunk.object_ids) for chunk in chunks}

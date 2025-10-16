@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     RAG_INDEX_DIR: str = Field(default="./.rag_index")
     RAG_HYBRID_ALPHA: float = Field(default=0.5)
     RAG_LIGHT_MODE: int = Field(default=1, ge=0, le=1)
+    RAG_DEBUG: bool = Field(default=False)
 
     @field_validator("RAG_CHUNK_MODE", mode="before")
     @classmethod

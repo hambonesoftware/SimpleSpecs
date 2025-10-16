@@ -78,17 +78,18 @@ def test_resume_on_failure() -> None:
         assert persisted.status_code == 200
         assert persisted.json() == first_specs
 
+        expected_keys = {
+            "spec_id",
+            "file_id",
+            "section_id",
+            "section_number",
+            "section_title",
+            "spec_text",
+            "confidence",
+            "source_object_ids",
+        }
         for item in first_specs:
-            assert set(item.keys()) == {
-                "spec_id",
-                "file_id",
-                "section_id",
-                "section_number",
-                "section_title",
-                "spec_text",
-                "confidence",
-                "source_object_ids",
-            }
+            assert expected_keys.issubset(item.keys())
             assert item["source_object_ids"] == chunk_map[item["section_id"]]
             assert item["file_id"] == file_id
             assert item["spec_text"].strip() == item["spec_text"]

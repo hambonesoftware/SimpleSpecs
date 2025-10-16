@@ -45,7 +45,7 @@ def test_atomizer_normalizes_units_and_classifies() -> None:
     assert spacing.raw_value == "2 cm"
     assert spacing.normalized_unit == "mm"
     assert spacing.normalized_value == 20.0
-    assert spacing.category == "dimensional"
+    assert spacing.category == "mechanical"
     assert spacing.confidence == 1.0
 
     voltage = _find(items, "24 VDC")
@@ -61,4 +61,4 @@ def test_atomizer_normalizes_units_and_classifies() -> None:
     temperature = _find(items, "140 °F")
     assert temperature.normalized_unit == "degC"
     assert round(temperature.normalized_value or 0.0, 2) == 60.0
-    assert temperature.category == "dimensional"
+    assert temperature.category == "mechanical"

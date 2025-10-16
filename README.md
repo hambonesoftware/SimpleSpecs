@@ -39,6 +39,7 @@ Settings are loaded from environment variables (prefixed with `SIMPLS_` when des
 - `RAG_INDEX_DIR` — directory used for persisted RAG indices (default `./.rag_index`)
 - `RAG_LIGHT_MODE` — set to `1` for offline hashing stubs during CI/local smoke tests (default `1`)
 - `RAG_HYBRID_ALPHA` — blend weight between sparse and dense scores during hybrid search (default `0.5`)
+- `RAG_DEBUG` — when truthy, persist section/spec JSONL traces to `./debug` and emit fusion score logs
 
 > **Note**
 > When `RAG_CHUNK_MODE` is present it is locked to `section`, ensuring exactly one
@@ -66,11 +67,17 @@ index specifications for a processed upload, run:
 python -m backend.cli.specs_index <file_id_or_source_path> --rebuild
 ```
 
+Passing a PDF path with `--rebuild` stages the document under `ARTIFACTS_DIR`, reruns
+parsing, chunking, and atomization, and refreshes the hybrid index in one step.
+
 Query the indexed specifications locally without the API server:
 
 ```bash
 python -m backend.cli.specs_query --file-id <file_id> --q "24 VDC safety relay" --k 5
 ```
+
+If no index exists yet the query helper instructs you to rebuild first, rather than
+terminating with a traceback.
 
 The FastAPI layer also exposes additive endpoints:
 
