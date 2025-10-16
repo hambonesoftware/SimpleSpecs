@@ -98,6 +98,7 @@ variables configure it (all prefixed with `SIMPLS_` when exported globally):
 - `RAG_INDEX_DIR` — directory for persisted indices (default `./.rag_index`).
 - `RAG_LIGHT_MODE` — keep at `1` for offline deterministic hashing stubs during CI.
 - `RAG_HYBRID_ALPHA` — dense/sparse fusion weight (default `0.5`).
+- `RAG_DEBUG` — saves `./debug/sections_<file>.jsonl` + `specs_<file>.jsonl` and logs hybrid scores.
 
 > **Important**: section chunking is enforced irrespective of legacy token or
 > overlap toggles. A misconfigured value will raise during settings load so the
@@ -112,8 +113,10 @@ python -m backend.cli.specs_index backend/tests/resources/sample1.pdf --rebuild
 python -m backend.cli.specs_query --file-id sample1 --q "24 VDC safety relay" --k 5
 ```
 
-Both commands respect `SIMPLS_RAG_LIGHT_MODE=1`, using hash-based embeddings so
-no external models are required.
+The index command stages the PDF under `ARTIFACTS_DIR`, rebuilds headers/chunks,
+and refreshes the hybrid index in one run. Both commands respect
+`SIMPLS_RAG_LIGHT_MODE=1`, using hash-based embeddings so no external models are
+required.
 
 For rapid iteration run the CLI entry point directly:
 

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 from ..config import Settings, get_settings
+from ..logging import get_logger
 from ..models import PARSED_OBJECT_ADAPTER, ParsedObject, SectionNode, SpecItem
 from .chunker import SectionChunk, build_section_chunks
 from .headers import load_persisted_headers
@@ -22,6 +23,9 @@ __all__ = [
     "search_specs",
     "export_specs",
 ]
+
+
+logger = get_logger(__name__)
 
 
 @dataclass(slots=True)
@@ -45,6 +49,23 @@ def _persist_spec_items(file_id: str, specs: Sequence[SpecItem], settings: Setti
     payload = [spec.model_dump(mode="json") for spec in specs]
     with (target_dir / "specs.json").open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2)
+
+
+def _persist_debug_artifacts(
+    file_id: str,
+    sections_payload: Sequence[dict[str, object]],
+    specs_payload: Sequence[dict[str, object]],
+) -> None:
+    debug_dir = Path("debug")
+    debug_dir.mkdir(parents=True, exist_ok=True)
+    sections_path = debug_dir / f"sections_{file_id}.jsonl"
+    specs_path = debug_dir / f"specs_{file_id}.jsonl"
+    with sections_path.open("w", encoding="utf-8") as handle:
+        for record in sections_payload:
+            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+    with specs_path.open("w", encoding="utf-8") as handle:
+        for record in specs_payload:
+            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
 def _collect_section_info(root: SectionNode, objects: list[ParsedObject]) -> list[_SectionInfo]:
@@ -80,6 +101,8 @@ def extract_specs(
     object_map = {obj.object_id: obj for obj in objects}
 
     specs: list[SpecItem] = []
+    debug_sections: list[dict[str, object]] = []
+    debug_specs: list[dict[str, object]] = []
     for info in _collect_section_info(root, objects):
         if info.node.section_id == root.section_id:
             continue
@@ -102,11 +125,36 @@ def extract_specs(
             lines=lines,
             source_object_ids=info.chunk.object_ids,
         )
+        if resolved.RAG_DEBUG:
+            debug_sections.append(
+                {
+                    "section_id": info.node.section_id,
+                    "header_path": info.chunk.header_path,
+                    "section_title": info.node.title,
+                    "section_number": info.node.number,
+                    "object_ids": list(info.chunk.object_ids),
+                    "line_count": len(lines),
+                }
+            )
         for spec in extracted:
             spec.header_path = info.chunk.header_path
             specs.append(spec)
+            if resolved.RAG_DEBUG:
+                debug_specs.append(spec.model_dump(mode="json"))
     if persist:
         _persist_spec_items(file_id, specs, resolved)
+    if resolved.RAG_DEBUG:
+        _persist_debug_artifacts(file_id, debug_sections, debug_specs)
+        logger.debug(
+            "rag.extract_specs debug artifacts persisted for %s",
+            file_id,
+        )
+        logger.info(
+            "Spec extraction complete for %s: %d sections, %d specs",
+            file_id,
+            len(debug_sections),
+            len(debug_specs),
+        )
     return specs
 
 
@@ -160,6 +208,8 @@ def index_specs(
     index_store = IndexStore(embedding.dimension, index_name=f"specs_{file_id}", settings=resolved)
     searcher = HybridSearch(embedding_service=embedding, index_store=index_store, settings=resolved)
     searcher.index(records)
+    if resolved.RAG_DEBUG:
+        logger.info("Indexed %d spec records for %s", len(records), file_id)
     return searcher
 
 

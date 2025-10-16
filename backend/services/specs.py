@@ -9,6 +9,7 @@ from typing import Iterable
 
 from ..config import Settings, get_settings
 from ..models import LINE_KIND, PARAGRAPH_KIND, ParsedObject, SectionNode, SpecItem
+from .chunker import load_persisted_chunks
 from .llm_client import LLMAdapter
 
 __all__ = ["build_specs_prompt", "extract_specs_for_sections"]
@@ -24,12 +25,7 @@ _BULLET_PATTERN = re.compile(r"^\s*(?:[-\u2022*]|\d+(?:\.\d+)*[.)]?)")
 
 
 def _load_chunks(file_id: str, settings: Settings) -> dict[str, list[str]]:
-    target = Path(settings.ARTIFACTS_DIR) / file_id / "chunks" / "chunks.json"
-    if not target.exists():
-        raise FileNotFoundError("chunks_missing")
-    with target.open("r", encoding="utf-8") as handle:
-        data = json.load(handle)
-    return {key: list(value) for key, value in data.items()}
+    return load_persisted_chunks(file_id, settings=settings)
 
 
 def _persist_specs(file_id: str, specs: Iterable[SpecItem], settings: Settings) -> None:

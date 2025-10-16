@@ -17,6 +17,7 @@ def _prepare_artifacts(tmp_path: Path) -> str:
     os.environ["SIMPLS_ARTIFACTS_DIR"] = str(artifacts_dir)
     os.environ["SIMPLS_RAG_INDEX_DIR"] = str(index_dir)
     os.environ["SIMPLS_RAG_LIGHT_MODE"] = "1"
+    os.environ["SIMPLS_RAG_DEBUG"] = "1"
     get_settings.cache_clear()
     settings = get_settings()
 
@@ -139,6 +140,26 @@ def test_spec_endpoints_roundtrip(tmp_path) -> None:
     assert export_payload["file_id"] == file_id
     assert len(export_payload["specs"]) == 3
 
-    for key in ["SIMPLS_ARTIFACTS_DIR", "SIMPLS_RAG_INDEX_DIR", "SIMPLS_RAG_LIGHT_MODE"]:
+    debug_dir = Path("debug")
+    sections_debug = debug_dir / f"sections_{file_id}.jsonl"
+    specs_debug = debug_dir / f"specs_{file_id}.jsonl"
+    assert sections_debug.exists()
+    assert specs_debug.exists()
+    assert sections_debug.read_text(encoding="utf-8").strip()
+    assert specs_debug.read_text(encoding="utf-8").strip()
+
+    sections_debug.unlink(missing_ok=True)
+    specs_debug.unlink(missing_ok=True)
+    try:
+        debug_dir.rmdir()
+    except OSError:
+        pass
+
+    for key in [
+        "SIMPLS_ARTIFACTS_DIR",
+        "SIMPLS_RAG_INDEX_DIR",
+        "SIMPLS_RAG_LIGHT_MODE",
+        "SIMPLS_RAG_DEBUG",
+    ]:
         os.environ.pop(key, None)
     get_settings.cache_clear()
