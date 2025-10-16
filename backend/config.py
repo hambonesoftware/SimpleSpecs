@@ -47,6 +47,23 @@ class Settings(BaseSettings):
         default=False,
         validation_alias=AliasChoices("PARSER_DEBUG", "SIMPLS_PARSER_DEBUG"),
     )
+    RAG_ENABLE: bool = Field(default=True)
+    RAG_CHUNK_MODE: Literal["section"] = Field(default="section")
+    RAG_MODEL_PATH: str = Field(default="./models/all-MiniLM-L6-v2")
+    RAG_INDEX_DIR: str = Field(default="./.rag_index")
+    RAG_HYBRID_ALPHA: float = Field(default=0.5)
+    RAG_LIGHT_MODE: int = Field(default=1, ge=0, le=1)
+
+    @field_validator("RAG_CHUNK_MODE", mode="before")
+    @classmethod
+    def _enforce_section_chunk_mode(cls, value: Any) -> Literal["section"]:
+        """Ensure that only section chunking is permitted for RAG."""
+
+        if value != "section":
+            raise ValueError(
+                "RAG_CHUNK_MODE is hard-enforced to 'section' for Phase 2."
+            )
+        return "section"
 
     @field_validator("ALLOW_ORIGINS", mode="before")
     @classmethod

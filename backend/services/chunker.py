@@ -1,81 +1,165 @@
-"""Granular chunking helpers for section trees."""
+"""Section-aware chunking utilities."""
 from __future__ import annotations
 
 import json
-import logging
-import re
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterable, Sequence
 
 from ..config import Settings, get_settings
-from ..header_export import write_header_search_report
-from ..models import (
-    PARSED_OBJECT_ADAPTER,
-    HeaderItem,
-    ParsedObject,
-    SectionNode,
-    SectionSpan,
-)
-from ..store import headers_path, read_json
+from ..models import ParsedObject, SectionNode
 
-__all__ = ["compute_section_spans", "load_persisted_chunks", "run_chunking"]
-
-
-logger = logging.getLogger(__name__)
+__all__ = [
+    "SectionChunk",
+    "build_section_chunks",
+    "compute_section_spans",
+    "load_persisted_chunks",
+    "load_chunk_records",
+    "run_chunking",
+]
 
 
-def _extract_text(obj: ParsedObject) -> str:
-    """Return textual content for the parsed object if available."""
+@dataclass(slots=True)
+class SectionChunk:
+    """Single chunk produced for a document section."""
 
-    return (
-        getattr(obj, "text", None)
-        or getattr(obj, "content", None)
-        or ""
-    )
+    section_id: str
+    header_path: str
+    depth: int
+    object_ids: list[str]
 
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "section_id": self.section_id,
+            "header_path": self.header_path,
+            "depth": self.depth,
+            "object_ids": list(self.object_ids),
+        }
 
-def _normalize_heading_text(text: str) -> str:
-    """Normalize heading text for fuzzy comparisons."""
-
-    cleaned = re.sub(r"[\s]+", " ", text or "").strip().lower()
-    cleaned = re.sub(r"[^0-9a-z ]+", "", cleaned)
-    return cleaned
-
-
-def _sorted_objects(objects: list[ParsedObject]) -> list[ParsedObject]:
-    return sorted(
-        objects,
-        key=lambda obj: ((obj.page_index or 0), obj.order_index),
-    )
-
-
-def _load_parsed_objects(file_id: str, settings: Settings) -> list[ParsedObject]:
-    objects_path = Path(settings.ARTIFACTS_DIR) / file_id / "parsed" / "objects.json"
-    if not objects_path.exists():
-        raise FileNotFoundError("parsed_objects_missing")
-    with objects_path.open("r", encoding="utf-8") as handle:
-        payload = json.load(handle)
-    return [PARSED_OBJECT_ADAPTER.validate_python(item) for item in payload]
+    @classmethod
+    def from_payload(cls, payload: dict[str, object]) -> "SectionChunk":
+        section_id = str(payload.get("section_id") or "")
+        header_path = str(payload.get("header_path") or section_id or "")
+        depth = int(payload.get("depth") or 0)
+        object_ids = [str(item) for item in payload.get("object_ids", [])]
+        return cls(section_id=section_id or header_path, header_path=header_path, depth=depth, object_ids=object_ids)
 
 
-def _load_sections(file_id: str, settings: Settings) -> SectionNode:
-    sections_path = Path(settings.ARTIFACTS_DIR) / file_id / "headers" / "sections.json"
-    if not sections_path.exists():
-        raise FileNotFoundError("sections_missing")
-    with sections_path.open("r", encoding="utf-8") as handle:
-        payload = json.load(handle)
-    return SectionNode.model_validate(payload)
+def _sorted_objects(objects: Iterable[ParsedObject]) -> list[ParsedObject]:
+    return sorted(objects, key=lambda obj: ((obj.page_index or 0), obj.order_index))
 
 
-def _persist_chunks(file_id: str, mapping: dict[str, list[str]], settings: Settings) -> None:
+def _normalize(text: str | None) -> str:
+    if not text:
+        return ""
+    return " ".join(text.split()).strip().lower()
+
+
+def _segment_from_node(node: SectionNode) -> str:
+    number = (node.number or "").strip()
+    title = (node.title or "").strip()
+    if number and title:
+        return f"{number} {title}"
+    if title:
+        return title
+    if number:
+        return number
+    return node.section_id
+
+
+def _looks_like_heading(obj: ParsedObject, node: SectionNode) -> bool:
+    object_text = _normalize(getattr(obj, "text", ""))
+    title = _normalize(node.title)
+    if not object_text or not title:
+        return False
+    return object_text.startswith(title) or title.startswith(object_text)
+
+
+def _leaf_object_ids(
+    node: SectionNode,
+    ordered_objects: Sequence[ParsedObject],
+    index_map: dict[str, int],
+) -> list[str]:
+    span = node.span
+    if span is None or span.start_object is None:
+        return []
+    start = index_map.get(span.start_object)
+    if start is None:
+        return []
+    end = index_map.get(span.end_object) if span.end_object else start
+    if end is None:
+        end = start
+    if end < start:
+        start, end = end, start
+    result: list[str] = []
+    for idx in range(start, end + 1):
+        obj = ordered_objects[idx]
+        if idx == start and _looks_like_heading(obj, node):
+            continue
+        result.append(obj.object_id)
+    return result
+
+
+def _dedupe_by_order(object_ids: Iterable[str], index_map: dict[str, int]) -> list[str]:
+    seen: set[str] = set()
+    ordered = sorted(object_ids, key=lambda oid: index_map.get(oid, 10**9))
+    result: list[str] = []
+    for oid in ordered:
+        if oid in seen:
+            continue
+        seen.add(oid)
+        result.append(oid)
+    return result
+
+
+def build_section_chunks(root: SectionNode, objects: list[ParsedObject]) -> list[SectionChunk]:
+    """Return a ``SectionChunk`` for every section node."""
+
+    ordered_objects = _sorted_objects(objects)
+    index_map = {obj.object_id: idx for idx, obj in enumerate(ordered_objects)}
+    chunks: list[SectionChunk] = []
+
+    def visit(node: SectionNode, ancestors: list[str]) -> list[str]:
+        segment = _segment_from_node(node)
+        header_path_parts = ancestors + [segment]
+        header_path = " / ".join(part for part in header_path_parts if part)
+        if node.children:
+            aggregate: list[str] = []
+            for child in node.children:
+                aggregate.extend(visit(child, header_path_parts))
+            object_ids = _dedupe_by_order(aggregate, index_map)
+        else:
+            object_ids = _leaf_object_ids(node, ordered_objects, index_map)
+        chunk = SectionChunk(
+            section_id=node.section_id,
+            header_path=header_path or node.section_id,
+            depth=node.depth,
+            object_ids=object_ids,
+        )
+        chunks.append(chunk)
+        return list(chunk.object_ids)
+
+    visit(root, [])
+    return chunks
+
+
+def compute_section_spans(root: SectionNode, objects: list[ParsedObject]) -> dict[str, list[str]]:
+    """Backward compatible helper returning object ids keyed by section id."""
+
+    chunks = build_section_chunks(root, objects)
+    return {chunk.section_id: list(chunk.object_ids) for chunk in chunks}
+
+
+def _persist_chunks(file_id: str, chunks: Sequence[SectionChunk], settings: Settings) -> None:
     base = Path(settings.ARTIFACTS_DIR) / file_id / "chunks"
     base.mkdir(parents=True, exist_ok=True)
-    target = base / "chunks.json"
-    with target.open("w", encoding="utf-8") as handle:
-        json.dump(mapping, handle, indent=2)
+    payload = [chunk.to_dict() for chunk in chunks]
+    with (base / "chunks.json").open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2)
 
 
-def load_persisted_chunks(file_id: str, settings: Settings | None = None) -> dict[str, list[str]]:
-    """Load persisted chunk assignments from disk."""
+def load_chunk_records(file_id: str, settings: Settings | None = None) -> list[SectionChunk]:
+    """Return persisted ``SectionChunk`` entries for *file_id*."""
 
     settings = settings or get_settings()
     target = Path(settings.ARTIFACTS_DIR) / file_id / "chunks" / "chunks.json"
@@ -83,262 +167,34 @@ def load_persisted_chunks(file_id: str, settings: Settings | None = None) -> dic
         raise FileNotFoundError("chunks_missing")
     with target.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
-    return {key: list(value) for key, value in data.items()}
+    if not isinstance(data, list):
+        raise ValueError("chunks_payload_invalid")
+    return [SectionChunk.from_payload(item) for item in data]
+
+
+def load_persisted_chunks(file_id: str, settings: Settings | None = None) -> dict[str, list[str]]:
+    """Load persisted chunks keyed by header path."""
+
+    records = load_chunk_records(file_id, settings=settings)
+    return {record.header_path: list(record.object_ids) for record in records}
 
 
 def run_chunking(file_id: str, settings: Settings | None = None) -> dict[str, list[str]]:
     """Compute and persist section chunks for the provided file identifier."""
 
     settings = settings or get_settings()
-    objects = _load_parsed_objects(file_id, settings)
-    sections = _load_sections(file_id, settings)
-    mapping = compute_section_spans(sections, objects)
-    _persist_chunks(file_id, mapping, settings)
-    _export_header_report(file_id)
-    return mapping
-
-
-def _export_header_report(file_id: str) -> None:
-    path = headers_path(file_id)
-    if not path.exists():
-        return
-    try:
-        payload = read_json(path) or []
-    except Exception:  # pragma: no cover - best effort logging
-        logger.warning("Failed to read stored headers for report", exc_info=True)
-        return
-    if not isinstance(payload, list):
-        return
-    items: list[HeaderItem] = []
-    for entry in payload:
-        if not isinstance(entry, dict):
-            continue
-        try:
-            items.append(HeaderItem.model_validate(entry))
-        except Exception:  # pragma: no cover - skip invalid entries
-            logger.debug("Skipping malformed header entry while exporting report")
-    if not items:
-        return
-    try:
-        write_header_search_report(items)
-    except Exception:  # pragma: no cover - best effort logging
-        logger.warning("Failed to write header search report", exc_info=True)
-
-
-def compute_section_spans(root: SectionNode, objects: list[ParsedObject]) -> dict[str, list[str]]:
-    """Return ordered object identifiers for every section in the tree.
-
-    The function enforces non-overlapping assignments across leaf sections using
-    the deterministic tie-breaker described in the phase plan. Parent sections
-    receive the ordered concatenation of their descendant leaf chunks.
-    """
-
-    ordered_objects = _sorted_objects(list(objects))
-    object_index: dict[str, int] = {obj.object_id: idx for idx, obj in enumerate(ordered_objects)}
-
-    initial_nodes: list[SectionNode] = []
-
-    def _collect_initial(node: SectionNode) -> None:
-        initial_nodes.append(node)
-        for child in node.children:
-            _collect_initial(child)
-
-    _collect_initial(root)
-
-    def _span_bounds(node: SectionNode) -> tuple[int | None, int | None]:
-        span = node.span
-        if span is None or span.start_object is None:
-            return (None, None)
-        start = object_index.get(span.start_object)
-        if start is None:
-            return (None, None)
-        end = object_index.get(span.end_object) if span.end_object is not None else start
-        if end is None:
-            end = start
-        if end < start:
-            start, end = end, start
-        return (start, end)
-
-    span_indices: dict[str, tuple[int | None, int | None]] = {
-        node.section_id: _span_bounds(node) for node in initial_nodes
-    }
-
-    pending_children: dict[str, list[tuple[int, SectionNode]]] = {}
-    for node in initial_nodes:
-        start_idx, end_idx = span_indices.get(node.section_id, (None, None))
-        if start_idx is None or end_idx is None or not node.children:
-            continue
-        child_ranges: list[tuple[int, int, SectionNode]] = []
-        for child in node.children:
-            cstart, cend = span_indices.get(child.section_id, (None, None))
-            if cstart is None or cend is None:
-                continue
-            child_ranges.append((cstart, cend, child))
-        if not child_ranges:
-            continue
-        child_ranges.sort(key=lambda item: (item[0], item[1]))
-        cursor = start_idx
-        gaps: list[tuple[int, int]] = []
-        for cstart, cend, _child in child_ranges:
-            if cstart > cursor:
-                gap_start = cursor
-                gap_end = min(cstart - 1, end_idx)
-                if gap_end >= gap_start:
-                    gaps.append((gap_start, gap_end))
-            cursor = max(cursor, cend + 1)
-        if cursor <= end_idx:
-            gap_start, gap_end = cursor, end_idx
-            if gap_end >= gap_start:
-                gaps.append((gap_start, gap_end))
-        if not gaps:
-            continue
-        extras: list[tuple[int, SectionNode]] = pending_children.setdefault(node.section_id, [])
-        for gap_start, gap_end in gaps:
-            new_id = f"{node.section_id}::gap-{gap_start:06d}-{gap_end:06d}"
-            if any(child.section_id == new_id for child in node.children):
-                continue
-            title = f"{node.title} residual"
-            extra_node = SectionNode(
-                section_id=new_id,
-                file_id=node.file_id,
-                title=title,
-                depth=node.depth + 1,
-                number=None,
-                span=SectionSpan(
-                    start_object=ordered_objects[gap_start].object_id,
-                    end_object=ordered_objects[gap_end].object_id,
-                ),
-                children=[],
-            )
-            extras.append((gap_start, extra_node))
-
-    if pending_children:
-        for node in initial_nodes:
-            extras = pending_children.get(node.section_id)
-            if not extras:
-                continue
-            for _, extra in sorted(extras, key=lambda item: item[0]):
-                node.children.append(extra)
-
-    leaf_nodes: list[SectionNode] = []
-    all_nodes: list[SectionNode] = []
-
-    def _child_start(child: SectionNode) -> int:
-        start, _ = _span_bounds(child)
-        if start is not None:
-            return start
-        if child.span and child.span.start_object:
-            idx = object_index.get(child.span.start_object)
-            if idx is not None:
-                return idx
-        return len(ordered_objects)
-
-    def _collect(node: SectionNode) -> None:
-        all_nodes.append(node)
-        if not node.children:
-            leaf_nodes.append(node)
-            return
-        node.children.sort(key=_child_start)
-        for child in node.children:
-            _collect(child)
-
-    _collect(root)
-
-    leaf_ranges: dict[str, tuple[int, int]] = {}
-    anchor_index: dict[str, int] = {}
-    ordered_leaf_entries: list[tuple[int, int, str, SectionNode, int | None, int]] = []
-    for leaf in leaf_nodes:
-        span = leaf.span
-        if span is None or span.start_object is None:
-            continue
-        start_index = object_index.get(span.start_object)
-        if start_index is None:
-            continue
-        end_index = object_index.get(span.end_object) if span.end_object is not None else None
-        order_position = (
-            min(start_index, end_index)
-            if end_index is not None
-            else start_index
-        )
-        anchor_index[leaf.section_id] = start_index
-        ordered_leaf_entries.append(
-            (order_position, leaf.depth, leaf.section_id, leaf, end_index, start_index)
-        )
-
-    ordered_leaf_entries.sort(key=lambda item: (item[0], item[1], item[2]))
-
-    total_objects = len(ordered_objects)
-    for idx, (order_pos, _, section_id, leaf, explicit_end, anchor_pos) in enumerate(ordered_leaf_entries):
-        next_boundary = total_objects
-        for later_idx in range(idx + 1, len(ordered_leaf_entries)):
-            candidate_pos = ordered_leaf_entries[later_idx][0]
-            if candidate_pos > order_pos:
-                next_boundary = candidate_pos
-                break
-        effective_end = next_boundary - 1 if next_boundary > 0 else -1
-        if explicit_end is not None:
-            effective_end = min(effective_end, explicit_end)
-        anchor_obj = ordered_objects[anchor_pos] if 0 <= anchor_pos < total_objects else None
-        anchor_text = _normalize_heading_text(_extract_text(anchor_obj)) if anchor_obj else ""
-        title_text = _normalize_heading_text(leaf.title)
-        is_heading_anchor = bool(
-            anchor_text
-            and title_text
-            and (anchor_text.startswith(title_text) or title_text.startswith(anchor_text))
-        )
-        start_inclusive = anchor_pos + 1 if is_heading_anchor else anchor_pos
-        if start_inclusive > effective_end:
-            continue
-        leaf_ranges[section_id] = (start_inclusive, effective_end)
-
-    leaf_chunks: dict[str, list[str]] = {leaf.section_id: [] for leaf in leaf_nodes}
-
-    for index, obj in enumerate(ordered_objects):
-        candidates: list[tuple[int, int, str, SectionNode]] = []
-        for leaf in leaf_nodes:
-            span = leaf_ranges.get(leaf.section_id)
-            anchor_pos = anchor_index.get(leaf.section_id)
-            if span is None or anchor_pos is None:
-                continue
-            start_idx, end_idx = span
-            if index < start_idx or index > end_idx:
-                continue
-            distance = index - anchor_pos
-            candidates.append((distance, leaf.depth, leaf.section_id, leaf))
-        if not candidates:
-            continue
-        _, _, _, chosen_leaf = min(candidates, key=lambda item: (item[0], item[1], item[2]))
-        leaf_chunks[chosen_leaf.section_id].append(obj.object_id)
-
-    result: dict[str, list[str]] = {}
-
-    def _build(node: SectionNode) -> list[str]:
-        if not node.children:
-            chunk = list(leaf_chunks.get(node.section_id, []))
-            result[node.section_id] = chunk
-            return list(chunk)
-        aggregate: list[str] = []
-        for child in node.children:
-            aggregate.extend(_build(child))
-        chunk_copy = list(aggregate)
-        result[node.section_id] = chunk_copy
-        return aggregate
-
-    _build(root)
-
-    assigned_leaf_ids = {oid for chunk in leaf_chunks.values() for oid in chunk}
-    if root.section_id in result:
-        missing_ids = [
-            obj.object_id
-            for obj in ordered_objects
-            if obj.object_id not in assigned_leaf_ids
-        ]
-        if missing_ids:
-            combined = list(dict.fromkeys(result[root.section_id] + missing_ids))
-            combined.sort(key=lambda oid: object_index.get(oid, len(ordered_objects)))
-            result[root.section_id] = combined
-
-    for node in all_nodes:
-        result.setdefault(node.section_id, [])
-
-    return result
+    objects_path = Path(settings.ARTIFACTS_DIR) / file_id / "parsed" / "objects.json"
+    sections_path = Path(settings.ARTIFACTS_DIR) / file_id / "headers" / "sections.json"
+    if not objects_path.exists():
+        raise FileNotFoundError("parsed_objects_missing")
+    if not sections_path.exists():
+        raise FileNotFoundError("sections_missing")
+    with objects_path.open("r", encoding="utf-8") as handle:
+        raw_objects = json.load(handle)
+    with sections_path.open("r", encoding="utf-8") as handle:
+        raw_sections = json.load(handle)
+    objects = [ParsedObject.model_validate(obj) for obj in raw_objects]
+    root = SectionNode.model_validate(raw_sections)
+    chunks = build_section_chunks(root, objects)
+    _persist_chunks(file_id, chunks, settings)
+    return {chunk.header_path: list(chunk.object_ids) for chunk in chunks}

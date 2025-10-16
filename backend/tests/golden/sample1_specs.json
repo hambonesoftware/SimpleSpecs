@@ -1,0 +1,32 @@
+[
+  {
+    "spec_id": "sample1-spec-1",
+    "file_id": "sample1",
+    "section_id": "sec-1",
+    "section_title": "Electrical Requirements",
+    "spec_text": "The safety relay shall operate at 24 VDC supply.",
+    "source_object_ids": ["sample1-obj-1"],
+    "section_number": "1",
+    "confidence": 1.0,
+    "header_path": "Document / Electrical Requirements",
+    "raw_value": "24 VDC",
+    "normalized_value": 24.0,
+    "normalized_unit": "VDC",
+    "category": "electrical"
+  },
+  {
+    "spec_id": "sample1-spec-2",
+    "file_id": "sample1",
+    "section_id": "sec-1",
+    "section_title": "Electrical Requirements",
+    "spec_text": "Maintain 5 mm clearance around the enclosure.",
+    "source_object_ids": ["sample1-obj-2"],
+    "section_number": "1",
+    "confidence": 1.0,
+    "header_path": "Document / Electrical Requirements",
+    "raw_value": "5 mm",
+    "normalized_value": 5.0,
+    "normalized_unit": "mm",
+    "category": "dimensional"
+  }
+]

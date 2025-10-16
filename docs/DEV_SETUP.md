@@ -86,6 +86,35 @@ variables (with or without the `SIMPLS_` prefix):
 - `PARSER_ENABLE_OCR` — call Tesseract when a page has little native text (default `false`).
 - `PARSER_DEBUG` — write structured JSON debug logs to the standard logger (default `false`).
 
+### Retrieval-augmented specs flags
+
+Phase 2 introduces an opinionated RAG pipeline. The following environment
+variables configure it (all prefixed with `SIMPLS_` when exported globally):
+
+- `RAG_ENABLE` — gate the entire flow (default `true`).
+- `RAG_CHUNK_MODE` — locked to `section`; the app raises if another value is supplied.
+- `RAG_MODEL_PATH` — path to a local sentence-transformer model
+  (`./models/all-MiniLM-L6-v2` by default).
+- `RAG_INDEX_DIR` — directory for persisted indices (default `./.rag_index`).
+- `RAG_LIGHT_MODE` — keep at `1` for offline deterministic hashing stubs during CI.
+- `RAG_HYBRID_ALPHA` — dense/sparse fusion weight (default `0.5`).
+
+> **Important**: section chunking is enforced irrespective of legacy token or
+> overlap toggles. A misconfigured value will raise during settings load so the
+> behaviour is obvious at startup.
+
+#### Local CLI helpers
+
+The deterministic pipeline can be exercised end-to-end without the API:
+
+```bash
+python -m backend.cli.specs_index backend/tests/resources/sample1.pdf --rebuild
+python -m backend.cli.specs_query --file-id sample1 --q "24 VDC safety relay" --k 5
+```
+
+Both commands respect `SIMPLS_RAG_LIGHT_MODE=1`, using hash-based embeddings so
+no external models are required.
+
 For rapid iteration run the CLI entry point directly:
 
 ```bash

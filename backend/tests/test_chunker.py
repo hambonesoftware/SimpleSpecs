@@ -9,7 +9,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from backend.models import ParagraphObject, ParsedObject, SectionNode, SectionSpan
-from backend.services.chunker import compute_section_spans
+from backend.services.chunker import build_section_chunks, compute_section_spans
 
 
 def _make_object(file_id: str, index: int, text: str) -> ParsedObject:
@@ -24,8 +24,8 @@ def _make_object(file_id: str, index: int, text: str) -> ParsedObject:
     )
 
 
-def test_compute_section_spans() -> None:
-    """Objects after each header are grouped until the next header."""
+def test_build_section_chunks_respects_sections() -> None:
+    """Each section produces a single ordered chunk keyed by its header path."""
 
     file_id = "file"
     objects = [
@@ -86,20 +86,41 @@ def test_compute_section_spans() -> None:
         children=[section_alpha, section_parent],
     )
 
-    mapping = compute_section_spans(root, objects)
+    chunks = build_section_chunks(root, objects)
+    assert len(chunks) == 5
 
-    assert mapping["sec-alpha"] == [objects[1].object_id, objects[2].object_id]
-    assert mapping["sec-gamma"] == [objects[4].object_id]
-    assert mapping["sec-delta"] == [objects[6].object_id]
-    assert mapping["sec-parent"] == [
-        objects[4].object_id,
-        objects[6].object_id,
-    ]
-    assert mapping["root"] == [obj.object_id for obj in objects]
-    assert set(mapping.keys()) == {
+    section_index = {chunk.section_id: chunk for chunk in chunks}
+    assert set(section_index) == {
         "root",
         "sec-alpha",
-        "sec-delta",
-        "sec-gamma",
         "sec-parent",
+        "sec-gamma",
+        "sec-delta",
     }
+
+    assert section_index["sec-alpha"].object_ids == [
+        objects[1].object_id,
+        objects[2].object_id,
+    ]
+    assert section_index["sec-gamma"].object_ids == [objects[4].object_id]
+    assert section_index["sec-delta"].object_ids == [objects[6].object_id]
+
+    parent_ids = section_index["sec-parent"].object_ids
+    assert parent_ids == [objects[4].object_id, objects[6].object_id]
+
+    root_ids = section_index["root"].object_ids
+    expected_root = section_index["sec-alpha"].object_ids + parent_ids
+    assert root_ids == expected_root
+    assert objects[0].object_id not in root_ids  # heading excluded
+
+    header_paths = {chunk.header_path for chunk in chunks}
+    assert header_paths == {
+        "Document",
+        "Document / Alpha",
+        "Document / Parent",
+        "Document / Parent / Gamma",
+        "Document / Parent / Delta",
+    }
+
+    mapping = compute_section_spans(root, objects)
+    assert mapping["sec-alpha"] == section_index["sec-alpha"].object_ids
