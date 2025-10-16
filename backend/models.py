@@ -242,6 +242,11 @@ class SpecItem(BaseModel):
     source_object_ids: list[str] = Field(default_factory=list)
     section_number: str | None = None
     confidence: float | None = None
+    header_path: str | None = None
+    raw_value: str | None = None
+    normalized_value: float | None = None
+    normalized_unit: str | None = None
+    category: str | None = None
 
     @field_validator("source_object_ids", mode="before")
     @classmethod

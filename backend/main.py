@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
 from .database import init_db
+from .app.routers import specs as rag_specs
 from .routers import (
     export,
     files,
@@ -20,7 +21,7 @@ from .routers import (
     ingest,
     parse,
     settings,
-    specs,
+    specs as legacy_specs,
     system,
     upload,
 )
@@ -64,7 +65,8 @@ def _build_app() -> FastAPI:
     application.include_router(headers.router)
     application.include_router(headers_ollama.router)
     application.include_router(settings.router)
-    application.include_router(specs.router)
+    application.include_router(legacy_specs.router)
+    application.include_router(rag_specs.router)
     application.include_router(export.router)
     application.include_router(system.system_router)
 

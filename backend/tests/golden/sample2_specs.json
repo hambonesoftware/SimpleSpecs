@@ -1,0 +1,17 @@
+[
+  {
+    "spec_id": "sample2-spec-1",
+    "file_id": "sample2",
+    "section_id": "sec-2",
+    "section_title": "Software",
+    "spec_text": "Software version should be 1.2.0 or later.",
+    "source_object_ids": ["sample2-obj-1"],
+    "section_number": "2",
+    "confidence": 0.8,
+    "header_path": "Document / Software",
+    "raw_value": null,
+    "normalized_value": null,
+    "normalized_unit": null,
+    "category": "software"
+  }
+]
