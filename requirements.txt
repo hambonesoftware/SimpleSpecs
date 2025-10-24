@@ -1,0 +1,10 @@
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+sqlmodel==0.0.16
+PyMuPDF==1.23.26
+pdfplumber==0.11.3
+camelot-py[cv]==0.11.0
+pytesseract==0.3.10
+python-dotenv==1.0.1
+httpx==0.27.0
+pytest==8.2.2
