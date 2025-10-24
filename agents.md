@@ -1,7 +1,12 @@
-# SimpleSpecs — Agent Execution & Verification Guide (MinerU LLM Fallback Included)
+# SimpleSpecs — Agent Execution & Verification Guide (Repo-Ready, MinerU Fallback)
 
 This guide explains how to run every development phase of *SimpleSpecs* using the **agents_full** pack,
 including the **MinerU-style OpenRouter fallback** for parsing when native methods fail.
+
+> **Repo assumption:** This pack is extracted into the project at `./agents_full/` (no nested folder).
+> Your repo already includes two sample PDFs at the root:  
+> • `Epf, Co.pdf`  
+> • `MFC-5M_R2001_E1985.pdf`
 
 ---
 
@@ -62,6 +67,25 @@ export LLM_FALLBACK_PAGE_LIMIT=8
 
 3) **Fix & Merge**  
    Apply suggested fixes (files + tests). Re-run verify until all PASS. Merge PR. Next phase.
+
+---
+
+## 📄 Sample PDFs and Tests
+
+Your repo includes two PDFs at the root:
+- `Epf, Co.pdf`
+- `MFC-5M_R2001_E1985.pdf`
+
+During P1/P2, the Execute prompts instruct Codex to **copy** these into `backend/tests/resources/`
+as deterministic fixtures (renamed to avoid spaces):
+
+```bash
+mkdir -p backend/tests/resources
+cp "Epf, Co.pdf" backend/tests/resources/sample1.pdf
+cp MFC-5M_R2001_E1985.pdf backend/tests/resources/sample2.pdf
+```
+
+Then the CLI/test commands use `sample1.pdf` and `sample2.pdf` paths.
 
 ---
 

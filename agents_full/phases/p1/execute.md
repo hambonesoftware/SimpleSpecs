@@ -3,6 +3,17 @@
 Branch: p1-headers
 Non-negotiables: **API unchanged**.
 
+Repo Fixtures
+- Use the two PDFs at repo root as test resources:
+  - `Epf, Co.pdf`
+  - `MFC-5M_R2001_E1985.pdf`
+- Copy them into test resources with stable names:
+  ```bash
+  mkdir -p backend/tests/resources
+  cp "Epf, Co.pdf" backend/tests/resources/sample1.pdf
+  cp MFC-5M_R2001_E1985.pdf backend/tests/resources/sample2.pdf
+  ```
+
 Deliverables
 1) Layout-Aware Native Parsing
    - `backend/services/pdf_native.py` (PyMuPDF spans/blocks; bbox, font, flags)

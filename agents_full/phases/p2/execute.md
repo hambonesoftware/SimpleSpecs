@@ -3,6 +3,13 @@
 Branch: p2-specs-rag
 Override: `RAG_CHUNK_MODE=section` → exactly one chunk per section. Ignore token/overlap configs.
 
+Repo Fixtures
+```bash
+mkdir -p backend/tests/resources
+cp "Epf, Co.pdf" backend/tests/resources/sample1.pdf
+cp MFC-5M_R2001_E1985.pdf backend/tests/resources/sample2.pdf
+```
+
 Deliverables
 1) Section Chunker — `backend/services/chunker.py`
    - 1 chunk per `header_path`; exclude TOC/running headers; ignore token limits
