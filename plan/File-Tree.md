@@ -1,0 +1,37 @@
+# Target File Tree (High-Level)
+
+```
+backend/
+  config.py
+  main.py
+  routers/
+    files.py
+    headers.py
+    specs.py
+    compare.py
+  services/
+    files.py
+    pdf_native.py
+    spec_extraction.py
+    spec_compare.py
+    llm.py
+  models/
+    document.py
+    spec_record.py
+    schemas.py
+  resources/
+    terms/
+      asme_y14_terms.json
+      iso_9001_terms.json
+      iso_12100_terms.json
+      iec_60204_terms.json
+tests/
+  golden/
+    epf_headers.json
+    mfc_headers.json
+frontend/
+  index.html
+  css/style.css
+  js/api.js
+  js/ui.js
+```
