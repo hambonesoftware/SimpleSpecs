@@ -1,0 +1,21 @@
+version: 2
+project: SimpleSpecs
+default_repo: hambonesoftware/SimpleSpecs
+phases:
+  - id: p0
+    name: P0 — Bootstrap & Governance
+    execute: phases/p0/execute.md
+    verify: phases/p0/verify.md
+  - id: p1
+    name: P1 — Parsing & Headers (MinerU LLM Fallback)
+    execute: phases/p1/execute.md
+    verify: phases/p1/verify.md
+  - id: p2
+    name: P2 — Section Chunking + Spec Atomization + RAG
+    execute: phases/p2/execute.md
+    verify: phases/p2/verify.md
+common:
+  standard_agent: _common/standard_agent.md
+  guardrails: _common/guardrails.md
+  environment: _common/environment.md
+  verify_template: _common/verify_report_template.md
