@@ -9,6 +9,15 @@ from typing import Tuple
 from pydantic import BaseModel, Field, field_validator
 
 
+def _env_flag(name: str, default: bool) -> bool:
+    """Return a boolean flag derived from environment variables."""
+
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
 class Settings(BaseModel):
     """Application configuration loaded from environment variables."""
 
@@ -22,6 +31,11 @@ class Settings(BaseModel):
             if mime.strip()
         )
     )
+    parser_multi_column: bool = Field(default_factory=lambda: _env_flag("PARSER_MULTI_COLUMN", True))
+    parser_enable_ocr: bool = Field(default_factory=lambda: _env_flag("PARSER_ENABLE_OCR", False))
+    headers_suppress_toc: bool = Field(default_factory=lambda: _env_flag("HEADERS_SUPPRESS_TOC", True))
+    headers_suppress_running: bool = Field(default_factory=lambda: _env_flag("HEADERS_SUPPRESS_RUNNING", True))
+    mineru_fallback: bool = Field(default_factory=lambda: _env_flag("MINERU_FALLBACK", False))
 
     @field_validator("upload_dir", mode="after")
     @classmethod
