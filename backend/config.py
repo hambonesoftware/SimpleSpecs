@@ -36,6 +36,11 @@ class Settings(BaseModel):
     headers_suppress_toc: bool = Field(default_factory=lambda: _env_flag("HEADERS_SUPPRESS_TOC", True))
     headers_suppress_running: bool = Field(default_factory=lambda: _env_flag("HEADERS_SUPPRESS_RUNNING", True))
     mineru_fallback: bool = Field(default_factory=lambda: _env_flag("MINERU_FALLBACK", False))
+    llm_provider: str = Field(default_factory=lambda: os.getenv("LLM_PROVIDER", "openrouter"))
+    openrouter_api_key: str | None = Field(default_factory=lambda: os.getenv("OPENROUTER_API_KEY"))
+    openrouter_model: str = Field(default_factory=lambda: os.getenv("OPENROUTER_MODEL", "openrouter/auto"))
+    openrouter_http_referer: str | None = Field(default_factory=lambda: os.getenv("HTTP_REFERER"))
+    openrouter_title: str | None = Field(default_factory=lambda: os.getenv("X_TITLE"))
 
     @field_validator("upload_dir", mode="after")
     @classmethod

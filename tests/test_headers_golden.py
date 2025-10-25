@@ -1,0 +1,192 @@
+"""Golden tests validating header extraction heuristics and endpoint."""
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+from typing import Generator
+
+import pytest
+from fastapi.testclient import TestClient
+from sqlmodel import Session
+
+from backend.config import Settings, reset_settings_cache
+from backend.database import get_engine, init_db, reset_database_state
+from backend.models import Document
+from backend.services.headers import extract_headers
+from backend.services.pdf_native import ParsedBlock, ParsedPage, ParseResult
+
+
+def _sample_parse_result() -> ParseResult:
+    page0 = ParsedPage(
+        page_number=0,
+        width=612,
+        height=792,
+        blocks=[
+            ParsedBlock(
+                text="1 General Requirements",
+                bbox=(36.0, 72.0, 400.0, 88.0),
+                font="Helvetica-Bold",
+                font_size=14.0,
+            ),
+            ParsedBlock(
+                text="1.1 Scope",
+                bbox=(54.0, 96.0, 400.0, 110.0),
+                font="Helvetica-Bold",
+                font_size=12.0,
+            ),
+            ParsedBlock(
+                text="1.2 References",
+                bbox=(54.0, 120.0, 400.0, 134.0),
+                font="Helvetica",
+                font_size=12.0,
+            ),
+            ParsedBlock(
+                text="Body text that should be ignored for header extraction.",
+                bbox=(72.0, 144.0, 400.0, 160.0),
+                font="Helvetica",
+                font_size=10.0,
+            ),
+        ],
+    )
+    page1 = ParsedPage(
+        page_number=1,
+        width=612,
+        height=792,
+        blocks=[
+            ParsedBlock(
+                text="2 Materials",
+                bbox=(36.0, 72.0, 400.0, 88.0),
+                font="Helvetica-Bold",
+                font_size=14.0,
+            ),
+            ParsedBlock(
+                text="2.1 Steel Alloys",
+                bbox=(54.0, 96.0, 400.0, 112.0),
+                font="Helvetica",
+                font_size=12.0,
+            ),
+            ParsedBlock(
+                text="2.2 Aluminum",
+                bbox=(54.0, 120.0, 400.0, 134.0),
+                font="Helvetica",
+                font_size=12.0,
+            ),
+        ],
+    )
+    return ParseResult(pages=[page0, page1])
+
+
+def _toc_parse_result() -> ParseResult:
+    toc_page = ParsedPage(
+        page_number=0,
+        width=612,
+        height=792,
+        blocks=[
+            ParsedBlock(
+                text="Table of Contents",
+                bbox=(36.0, 72.0, 400.0, 88.0),
+                font="Helvetica-Bold",
+                font_size=16.0,
+            ),
+            ParsedBlock(
+                text="1 General Requirements",
+                bbox=(54.0, 96.0, 400.0, 112.0),
+                font="Helvetica",
+                font_size=12.0,
+            ),
+        ],
+        is_toc=True,
+    )
+    return ParseResult(pages=[toc_page])
+
+
+@pytest.fixture(autouse=True)
+def _isolate_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Generator[None, None, None]:
+    db_path = tmp_path / "headers.db"
+    upload_dir = tmp_path / "uploads"
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_path}")
+    monkeypatch.setenv("UPLOAD_DIR", str(upload_dir))
+    monkeypatch.setenv("LLM_PROVIDER", "disabled")
+    reset_settings_cache()
+    reset_database_state()
+    yield
+    reset_settings_cache()
+    reset_database_state()
+
+
+@pytest.fixture()
+def client() -> Generator[TestClient, None, None]:
+    from backend.main import app
+
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+def test_extract_headers_generates_expected_outline(tmp_path: Path) -> None:
+    parse_result = _sample_parse_result()
+    settings = Settings(upload_dir=tmp_path)
+    result = extract_headers(parse_result, settings=settings, llm_client=None)
+
+    expected_outline = [
+        {
+            "title": "General Requirements",
+            "numbering": "1",
+            "page": 0,
+            "children": [
+                {"title": "Scope", "numbering": "1.1", "page": 0, "children": []},
+                {"title": "References", "numbering": "1.2", "page": 0, "children": []},
+            ],
+        },
+        {
+            "title": "Materials",
+            "numbering": "2",
+            "page": 1,
+            "children": [
+                {"title": "Steel Alloys", "numbering": "2.1", "page": 1, "children": []},
+                {"title": "Aluminum", "numbering": "2.2", "page": 1, "children": []},
+            ],
+        },
+    ]
+
+    assert result.to_json() == expected_outline
+    assert result.fenced_text.splitlines()[0] == "#headers#"
+    assert result.fenced_text.splitlines()[-1] == "#headers#"
+
+
+def test_toc_pages_are_ignored(tmp_path: Path) -> None:
+    parse_result = _toc_parse_result()
+    settings = Settings(upload_dir=tmp_path)
+    result = extract_headers(parse_result, settings=settings, llm_client=None)
+    assert result.outline == []
+
+
+def test_headers_endpoint_returns_outline(client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    engine = get_engine()
+    init_db()
+
+    with Session(engine) as session:
+        document = Document(filename="sample.pdf", checksum=hashlib.sha256(b"sample").hexdigest())
+        session.add(document)
+        session.commit()
+        session.refresh(document)
+
+        doc_dir = Path(tmp_path / "uploads" / str(document.id))
+        doc_dir.mkdir(parents=True, exist_ok=True)
+        pdf_path = doc_dir / document.filename
+        pdf_path.write_bytes(b"%PDF-1.4\n%%EOF")
+
+    sample_result = _sample_parse_result()
+
+    def _mock_parse(document_path, *, settings):  # noqa: ANN001 - test helper
+        return sample_result
+
+    monkeypatch.setattr("backend.routers.headers.parse_pdf", _mock_parse)
+
+    response = client.post(f"/api/headers/{document.id}")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["source"] == "heuristic"
+    assert payload["document_id"] == document.id
+    assert payload["outline"][0]["title"] == "General Requirements"
+    assert payload["outline"][0]["children"][0]["title"] == "Scope"
+
