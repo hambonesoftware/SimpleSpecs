@@ -58,6 +58,12 @@ class Settings(BaseModel):
             os.getenv("RISK_BASELINES_PATH", str(DEFAULT_BASELINES_PATH))
         )
     )
+    export_dir: Path = Field(
+        default_factory=lambda: Path(os.getenv("EXPORT_DIR", "exported_reports"))
+    )
+    export_retention_days: int = Field(
+        default_factory=lambda: int(os.getenv("EXPORT_RETENTION_DAYS", "30"))
+    )
 
     @field_validator("upload_dir", mode="after")
     @classmethod
@@ -83,6 +89,17 @@ class Settings(BaseModel):
     def _ensure_baseline_file(cls, value: Path) -> Path:
         value.parent.mkdir(parents=True, exist_ok=True)
         return value
+
+    @field_validator("export_dir", mode="after")
+    @classmethod
+    def _ensure_export_dir(cls, value: Path) -> Path:
+        value.mkdir(parents=True, exist_ok=True)
+        return value
+
+    @field_validator("export_retention_days", mode="after")
+    @classmethod
+    def _normalise_retention(cls, value: int) -> int:
+        return max(0, value)
 
 
 @lru_cache()

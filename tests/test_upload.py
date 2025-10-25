@@ -2,48 +2,17 @@
 from __future__ import annotations
 
 import io
+import io
 import os
 from pathlib import Path
-from typing import Generator
 
-import pytest
 from fastapi.testclient import TestClient
-
-from backend.config import reset_settings_cache
-from backend.database import reset_database_state
 
 PDF_BYTES = (
     b"%PDF-1.4\n"
     b"1 0 obj\n<< /Type /Catalog >>\nendobj\n"
     b"trailer\n<< /Root 1 0 R >>\n%%EOF\n"
 )
-
-
-@pytest.fixture(autouse=True)
-def _isolate_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Generator[None, None, None]:
-    """Provide isolated database and upload directories per test."""
-
-    db_path = tmp_path / "test.db"
-    upload_dir = tmp_path / "uploads"
-    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_path}")
-    monkeypatch.setenv("UPLOAD_DIR", str(upload_dir))
-    monkeypatch.setenv("MAX_UPLOAD_SIZE", str(1024))
-    reset_settings_cache()
-    reset_database_state()
-    yield
-    reset_settings_cache()
-    reset_database_state()
-
-
-@pytest.fixture()
-def client() -> Generator[TestClient, None, None]:
-    """Return a test client for the FastAPI application."""
-
-    from backend.main import app
-
-    with TestClient(app) as test_client:
-        yield test_client
-
 
 def _post_pdf(client: TestClient, content: bytes, filename: str = "sample.pdf"):
     return client.post(
