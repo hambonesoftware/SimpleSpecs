@@ -5,8 +5,10 @@ import {
   fetchHeaders,
   fetchSpecifications,
   compareSpecifications,
-  toCsv,
   downloadBlob,
+  fetchSpecRecord,
+  approveSpecRecord,
+  downloadSpecExport,
 } from './api.js';
 import {
   initDropZone,
@@ -20,6 +22,7 @@ import {
   renderSpecsBuckets,
   renderRiskPanel,
   showToast,
+  formatDate,
 } from './ui.js';
 
 const state = {
@@ -30,6 +33,8 @@ const state = {
   specs: null,
   risk: null,
   approvedLines: new Set(),
+  specRecord: null,
+  approvalLoading: false,
 };
 
 const elements = {
@@ -46,6 +51,9 @@ const elements = {
   headersContent: document.querySelector('#headers-content'),
   specsContent: document.querySelector('#specs-content'),
   riskContent: document.querySelector('#risk-content'),
+  approveSpecs: document.querySelector('#approve-specs'),
+  approvalStatus: document.querySelector('#approval-status'),
+  reviewerInput: document.querySelector('#reviewer-name'),
 };
 
 initDropZone({
@@ -98,6 +106,14 @@ document.querySelectorAll('[data-export]').forEach((button) => {
   button.addEventListener('click', () => handleExport(button.dataset.export));
 });
 
+document.querySelectorAll('[data-server-export]').forEach((button) => {
+  button.addEventListener('click', () => handleServerExport(button.dataset.serverExport));
+});
+
+elements.approveSpecs?.addEventListener('click', () => {
+  void approveCurrentSpecs();
+});
+
 async function refreshDocuments() {
   try {
     elements.documentsStatus.textContent = 'Loading documents…';
@@ -124,6 +140,8 @@ async function selectDocument(documentId) {
   }
   state.selectedId = documentId;
   state.approvedLines.clear();
+  state.specRecord = null;
+  state.approvalLoading = true;
   renderDocumentList(elements.documentsList, state.documents, documentId);
   elements.documentsList?.setAttribute('aria-activedescendant', `document-${documentId}`);
 
@@ -138,13 +156,22 @@ async function selectDocument(documentId) {
   setPanelLoading(elements.headersContent, 'Generating outline…');
   setPanelLoading(elements.specsContent, 'Classifying specification lines…');
   setPanelLoading(elements.riskContent, 'Computing risk score…');
+  setApprovalStatus('Loading approval status…', 'muted');
+  updateApprovalUI({ busy: true });
 
   try {
-    const [parseResult, headersResult, specsResult, riskResult] = await Promise.allSettled([
+    const [
+      parseResult,
+      headersResult,
+      specsResult,
+      riskResult,
+      recordResult,
+    ] = await Promise.allSettled([
       parseDocument(documentId),
       fetchHeaders(documentId),
       fetchSpecifications(documentId),
       compareSpecifications(documentId),
+      fetchSpecRecord(documentId),
     ]);
 
     if (parseResult.status === 'fulfilled') {
@@ -165,15 +192,7 @@ async function selectDocument(documentId) {
 
     if (specsResult.status === 'fulfilled') {
       state.specs = specsResult.value;
-      renderSpecsBuckets(elements.specsContent, state.specs?.buckets ?? {}, {
-        documentId,
-        approvedLines: state.approvedLines,
-        onApproveToggle: ({ approved }) => {
-          if (approved) {
-            showToast('Specification approved.');
-          }
-        },
-      });
+      renderSpecsView();
     } else {
       state.specs = null;
       setPanelError(elements.specsContent, specsResult.reason?.message ?? 'Unable to classify specifications.');
@@ -185,6 +204,18 @@ async function selectDocument(documentId) {
     } else {
       state.risk = null;
       setPanelError(elements.riskContent, riskResult.reason?.message ?? 'Unable to compute risk score.');
+    }
+
+    if (recordResult.status === 'fulfilled') {
+      state.specRecord = recordResult.value;
+      state.approvalLoading = false;
+      updateApprovalUI();
+      renderSpecsView();
+    } else {
+      state.specRecord = null;
+      state.approvalLoading = false;
+      setApprovalStatus('Unable to load approval status.', 'error');
+      updateApprovalUI({ preserveStatus: true });
     }
   } finally {
     if (elements.workspaceSubtitle) {
@@ -217,24 +248,6 @@ function handleExport(kind) {
         downloadBlob(`specs-${documentId}.json`, JSON.stringify(state.specs, null, 2));
         break;
       }
-      case 'specs-csv': {
-        if (!state.specs?.buckets) throw new Error('No specification buckets to export.');
-        const rows = [];
-        for (const [discipline, lines] of Object.entries(state.specs.buckets)) {
-          lines.forEach((line) => {
-            rows.push({
-              discipline,
-              text: line.text,
-              page: typeof line.page === 'number' ? line.page + 1 : '',
-              header: Array.isArray(line.header_path) ? line.header_path.join(' > ') : '',
-              source: line.source ?? 'rule',
-            });
-          });
-        }
-        const csv = toCsv(rows);
-        downloadBlob(`specs-${documentId}.csv`, csv, 'text/csv');
-        break;
-      }
       case 'risk': {
         if (!state.risk) throw new Error('Risk report unavailable.');
         downloadBlob(`risk-${documentId}.json`, JSON.stringify(state.risk, null, 2));
@@ -247,6 +260,122 @@ function handleExport(kind) {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to export data.';
     showToast(message, 'error');
+  }
+}
+
+async function handleServerExport(format) {
+  const documentId = state.selectedId;
+  if (!documentId) {
+    showToast('Select a document first.', 'error');
+    return;
+  }
+  try {
+    const { blob, filename } = await downloadSpecExport(documentId, format);
+    downloadBlob(filename, blob);
+    showToast('Export ready for download.');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to export specifications.';
+    showToast(message, 'error');
+  }
+}
+
+async function approveCurrentSpecs() {
+  const documentId = state.selectedId;
+  if (!documentId) {
+    showToast('Select a document first.', 'error');
+    return;
+  }
+  if (!state.specs) {
+    showToast('Specifications not ready for approval.', 'error');
+    return;
+  }
+
+  const reviewer = elements.reviewerInput?.value?.trim() || 'web-user';
+  state.approvalLoading = true;
+  updateApprovalUI({ busy: true });
+  setApprovalStatus('Submitting approval…', 'muted');
+
+  try {
+    const response = await approveSpecRecord(documentId, {
+      reviewer,
+      payload: state.specs,
+    });
+    state.specRecord = response;
+    state.approvalLoading = false;
+    updateApprovalUI();
+    renderSpecsView();
+    showToast('Specifications approved.');
+  } catch (error) {
+    state.approvalLoading = false;
+    updateApprovalUI();
+    const message = error instanceof Error ? error.message : 'Unable to approve specifications.';
+    setApprovalStatus(message, 'error');
+    showToast(message, 'error');
+  }
+}
+
+function renderSpecsView() {
+  if (!elements.specsContent) {
+    return;
+  }
+  if (!state.specs) {
+    return;
+  }
+  const buckets = state.specs?.buckets ?? {};
+  const readOnly = state.specRecord?.record?.state === 'approved';
+  renderSpecsBuckets(elements.specsContent, buckets, {
+    documentId: state.selectedId,
+    approvedLines: state.approvedLines,
+    readOnly,
+    onApproveToggle: ({ approved }) => {
+      if (approved) {
+        showToast('Specification approved.');
+      }
+    },
+  });
+}
+
+function setApprovalStatus(message, tone = 'muted') {
+  if (!elements.approvalStatus) {
+    return;
+  }
+  elements.approvalStatus.textContent = message;
+  elements.approvalStatus.dataset.tone = tone;
+}
+
+function updateApprovalUI({ busy = false, preserveStatus = false } = {}) {
+  const record = state.specRecord?.record ?? null;
+  const isApproved = record?.state === 'approved';
+  const loading = busy || state.approvalLoading;
+
+  if (elements.approveSpecs) {
+    elements.approveSpecs.disabled = loading || isApproved || !state.specs;
+    if (loading) {
+      elements.approveSpecs.textContent = 'Working…';
+    } else if (isApproved) {
+      elements.approveSpecs.textContent = 'Approved';
+    } else {
+      elements.approveSpecs.textContent = 'Approve & Freeze';
+    }
+  }
+
+  if (elements.reviewerInput) {
+    if (record?.reviewer) {
+      elements.reviewerInput.value = record.reviewer;
+    }
+    elements.reviewerInput.disabled = loading || isApproved;
+  }
+
+  if (loading) {
+    return;
+  }
+
+  if (isApproved) {
+    const approvedDate = record?.approved_at ? formatDate(record.approved_at) : '—';
+    const reviewer = record?.reviewer || '—';
+    setApprovalStatus(`Approved by ${reviewer} on ${approvedDate}.`, 'success');
+  } else if (!preserveStatus) {
+    setApprovalStatus('Awaiting approval.', 'muted');
   }
 }
 

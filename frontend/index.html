@@ -71,10 +71,28 @@
             <h3 id="panel-specs-title">Specification buckets</h3>
             <div class="panel-actions">
               <button type="button" class="ghost-button" data-export="specs-json">Export JSON</button>
-              <button type="button" class="ghost-button" data-export="specs-csv">Export CSV</button>
             </div>
           </div>
-          <div class="panel-body" id="specs-content" aria-live="polite"></div>
+          <div class="panel-body">
+            <div class="approval-controls" id="approval-controls">
+              <label class="approval-controls__field" for="reviewer-name">
+                <span class="approval-controls__label">Reviewer</span>
+                <input
+                  id="reviewer-name"
+                  name="reviewer-name"
+                  type="text"
+                  placeholder="Quality engineer"
+                  autocomplete="name"
+                />
+              </label>
+              <button type="button" class="primary-button" id="approve-specs">Approve &amp; Freeze</button>
+              <div class="approval-controls__spacer" aria-hidden="true"></div>
+              <button type="button" class="ghost-button" data-server-export="csv">Download CSV bundle</button>
+              <button type="button" class="ghost-button" data-server-export="docx">Download DOCX</button>
+              <span id="approval-status" class="approval-status" role="status"></span>
+            </div>
+            <div id="specs-content" aria-live="polite"></div>
+          </div>
         </section>
 
         <section class="panel" id="panel-risk" aria-labelledby="panel-risk-title">

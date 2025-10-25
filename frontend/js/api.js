@@ -86,6 +86,48 @@ export async function deleteDocument(documentId) {
   return request(`/files/${documentId}`, { method: 'DELETE' });
 }
 
+export async function fetchSpecRecord(documentId) {
+  return request(`/specs/${documentId}`);
+}
+
+export async function approveSpecRecord(documentId, body) {
+  return request(`/specs/${documentId}/approve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
+export async function downloadSpecExport(documentId, format) {
+  const response = await fetch(`${apiBase}/specs/${documentId}/export?fmt=${encodeURIComponent(format)}`);
+  if (!response.ok) {
+    let detail;
+    try {
+      const payload = await response.json();
+      detail = payload?.detail ?? payload?.message;
+    } catch (error) {
+      detail = undefined;
+    }
+    const message = detail || `Export failed (${response.status})`;
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('content-disposition') ?? '';
+  let filename = `spec-${documentId}.${format === 'csv' ? 'zip' : 'docx'}`;
+  const match = disposition.match(/filename="?([^";]+)"?/i);
+  if (match?.[1]) {
+    filename = decodeURIComponent(match[1]);
+  }
+  return {
+    blob,
+    filename,
+    mediaType: response.headers.get('content-type') ?? 'application/octet-stream',
+  };
+}
+
 export function toCsv(rows) {
   if (!Array.isArray(rows) || !rows.length) {
     return '';
@@ -106,7 +148,7 @@ export function toCsv(rows) {
 }
 
 export function downloadBlob(filename, contents, type = 'application/json') {
-  const blob = new Blob([contents], { type });
+  const blob = contents instanceof Blob ? contents : new Blob([contents], { type });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;

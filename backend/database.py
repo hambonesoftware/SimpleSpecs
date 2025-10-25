@@ -32,7 +32,10 @@ def get_session() -> Generator[Session, None, None]:
 def init_db() -> None:
     """Initialise database tables."""
 
-    from .models import document  # noqa: F401  Ensures models are registered with SQLModel metadata.
+    from .models import (  # noqa: F401  Ensures models are registered with SQLModel metadata.
+        document,
+        spec_record,
+    )
 
     engine = get_engine()
     SQLModel.metadata.create_all(engine)

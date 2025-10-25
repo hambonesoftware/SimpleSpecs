@@ -239,7 +239,11 @@ function normaliseDiscipline(value) {
     .join(' ');
 }
 
-export function renderSpecsBuckets(container, buckets, { documentId, approvedLines, onApproveToggle } = {}) {
+export function renderSpecsBuckets(
+  container,
+  buckets,
+  { documentId, approvedLines, onApproveToggle, readOnly = false } = {},
+) {
   if (!container) return;
   const entries = Object.entries(buckets ?? {}).sort((a, b) => {
     const indexA = DISCIPLINE_ORDER.indexOf(a[0]);
@@ -299,7 +303,8 @@ export function renderSpecsBuckets(container, buckets, { documentId, approvedLin
       const item = document.createElement('article');
       item.className = 'spec-line';
       item.dataset.lineKey = key;
-      if (approvedLines?.has(key)) {
+      const initiallyApproved = approvedLines?.has(key) || readOnly;
+      if (initiallyApproved) {
         item.dataset.approved = 'true';
       }
 
@@ -320,8 +325,16 @@ export function renderSpecsBuckets(container, buckets, { documentId, approvedLin
       const approveButton = document.createElement('button');
       approveButton.type = 'button';
       approveButton.className = 'ghost-button';
-      approveButton.textContent = approvedLines?.has(key) ? 'Approved' : 'Approve';
+      if (readOnly) {
+        approveButton.textContent = 'Frozen';
+        approveButton.disabled = true;
+      } else {
+        approveButton.textContent = approvedLines?.has(key) ? 'Approved' : 'Approve';
+      }
       approveButton.addEventListener('click', () => {
+        if (readOnly) {
+          return;
+        }
         const approvedSet = approvedLines ?? null;
         const approved = !approvedSet?.has?.(key);
         if (approved) {
