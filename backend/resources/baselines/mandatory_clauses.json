@@ -1,0 +1,55 @@
+{
+  "version": "2024.10",
+  "source": "SimpleSpecs Baseline",
+  "clauses": [
+    {
+      "id": "asme-pressure-relief",
+      "discipline": "mechanical",
+      "text": "Pressure relief valves shall comply with ASME Section VIII sizing requirements.",
+      "mandatory": true,
+      "keywords": ["pressure", "relief", "valve", "section", "viii"]
+    },
+    {
+      "id": "asme-material-traceability",
+      "discipline": "mechanical",
+      "text": "Maintain full material traceability records for load bearing components.",
+      "mandatory": true,
+      "keywords": ["material", "traceability", "records"]
+    },
+    {
+      "id": "iec-grounding",
+      "discipline": "electrical",
+      "text": "All control cabinets shall provide protective earth bonding in accordance with IEC 60204-1.",
+      "mandatory": true,
+      "keywords": ["protective", "earth", "bonding", "iec", "60204"]
+    },
+    {
+      "id": "iec-cable-identification",
+      "discipline": "electrical",
+      "text": "Power and control conductors must be uniquely identified at both terminations.",
+      "mandatory": true,
+      "keywords": ["conductors", "identified", "terminations"]
+    },
+    {
+      "id": "iso-safety-integrity",
+      "discipline": "controls",
+      "text": "Safety functions shall meet ISO 13849 performance level calculations.",
+      "mandatory": true,
+      "keywords": ["safety", "iso", "13849", "performance", "level"]
+    },
+    {
+      "id": "iec-software-versioning",
+      "discipline": "software",
+      "text": "Firmware shall implement semantic versioning with rollback procedures.",
+      "mandatory": true,
+      "keywords": ["firmware", "semantic", "versioning", "rollback"]
+    },
+    {
+      "id": "pm-change-control",
+      "discipline": "project_management",
+      "text": "Change control board approval is required before releasing revisions to the customer.",
+      "mandatory": true,
+      "keywords": ["change", "control", "board", "approval"]
+    }
+  ]
+}

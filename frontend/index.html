@@ -2,73 +2,91 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="api-base" content="/api" />
     <title>SimpleSpecs</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <main>
-      <header class="page-header">
-        <h1>SimpleSpecs</h1>
-        <p>Upload specification PDFs and manage them in one place.</p>
-      </header>
-
-      <section class="uploader" aria-labelledby="uploader-title">
-        <h2 id="uploader-title">Upload documents</h2>
-        <div id="drop-zone" class="drop-zone" role="button" tabindex="0">
-          <p>Drag and drop PDF files here or <button id="browse-button" type="button">browse</button>.</p>
-          <input
-            id="file-input"
-            type="file"
-            accept="application/pdf"
-            multiple
-            aria-label="Select PDF files to upload"
-            hidden
-          />
-        </div>
-        <ul id="upload-progress" class="upload-progress" aria-live="polite"></ul>
-      </section>
-
-      <section class="documents" aria-labelledby="documents-title">
-        <h2 id="documents-title">Uploaded files</h2>
-        <p id="documents-status" class="status-message" role="status">Fetching files...</p>
-        <div class="table-wrapper">
-          <table id="files-table" class="documents-table">
-            <thead>
-              <tr>
-                <th scope="col">Filename</th>
-                <th scope="col">Status</th>
-                <th scope="col">Uploaded</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="specs" aria-labelledby="specs-title">
-        <h2 id="specs-title">Specification buckets</h2>
-        <form id="specs-form" class="specs-form">
-          <label for="specs-document-id">Document ID</label>
-          <div class="specs-form-inputs">
+    <div class="app-shell" data-theme="light">
+      <aside class="app-sidebar">
+        <header class="sidebar-header">
+          <h1 class="brand">SimpleSpecs</h1>
+          <p class="subtitle">Upload, analyse, and approve specification packages.</p>
+        </header>
+        <section class="upload-card" aria-labelledby="upload-title">
+          <h2 id="upload-title">Upload documents</h2>
+          <p id="upload-hint" class="muted">Drag and drop PDFs or browse your files.</p>
+          <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-describedby="upload-hint">
+            <span class="drop-zone__icon" aria-hidden="true">⇪</span>
+            <span class="drop-zone__text">Drop PDF files here</span>
+            <button id="browse-button" type="button" class="ghost-button">Browse</button>
             <input
-              id="specs-document-id"
-              name="documentId"
-              type="number"
-              min="1"
-              placeholder="Enter a document ID"
-              required
+              id="file-input"
+              type="file"
+              accept="application/pdf"
+              multiple
+              hidden
+              aria-hidden="true"
             />
-            <button type="submit">Load specifications</button>
           </div>
-        </form>
-        <p id="specs-status" class="status-message" role="status" aria-live="polite"></p>
-        <div id="specs-tabs" class="specs-tabs" hidden>
-          <nav class="specs-tablist" role="tablist" aria-label="Specification disciplines"></nav>
-          <div class="specs-panels"></div>
-        </div>
-      </section>
-    </main>
-    <script type="module" src="/main.js"></script>
+          <ul id="upload-progress" class="upload-progress" aria-live="polite"></ul>
+        </section>
+        <section class="documents-card" aria-labelledby="documents-title">
+          <div class="card-header">
+            <h2 id="documents-title">Documents</h2>
+            <button id="refresh-documents" type="button" class="ghost-button">Refresh</button>
+          </div>
+          <p id="documents-status" class="muted" role="status">Loading documents…</p>
+          <div id="documents-list" class="documents-list" role="listbox" aria-activedescendant=""></div>
+        </section>
+      </aside>
+      <main class="app-main">
+        <header class="app-main__header">
+          <div>
+            <h2 id="workspace-title">Document workspace</h2>
+            <p id="workspace-subtitle" class="muted">Select a document to view analysis results.</p>
+          </div>
+          <div class="document-meta" id="document-meta"></div>
+        </header>
+
+        <section class="panel" id="panel-parse" aria-labelledby="panel-parse-title">
+          <div class="panel-header">
+            <h3 id="panel-parse-title">Parse overview</h3>
+            <button type="button" class="ghost-button" data-export="parse">Download JSON</button>
+          </div>
+          <div class="panel-body" id="parse-content" aria-live="polite"></div>
+        </section>
+
+        <section class="panel" id="panel-headers" aria-labelledby="panel-headers-title">
+          <div class="panel-header">
+            <h3 id="panel-headers-title">Header outline</h3>
+            <button type="button" class="ghost-button" data-export="headers">Download JSON</button>
+          </div>
+          <div class="panel-body" id="headers-content" aria-live="polite"></div>
+        </section>
+
+        <section class="panel" id="panel-specs" aria-labelledby="panel-specs-title">
+          <div class="panel-header">
+            <h3 id="panel-specs-title">Specification buckets</h3>
+            <div class="panel-actions">
+              <button type="button" class="ghost-button" data-export="specs-json">Export JSON</button>
+              <button type="button" class="ghost-button" data-export="specs-csv">Export CSV</button>
+            </div>
+          </div>
+          <div class="panel-body" id="specs-content" aria-live="polite"></div>
+        </section>
+
+        <section class="panel" id="panel-risk" aria-labelledby="panel-risk-title">
+          <div class="panel-header">
+            <h3 id="panel-risk-title">Risk &amp; compliance</h3>
+            <button type="button" class="ghost-button" data-export="risk">Download report</button>
+          </div>
+          <div class="panel-body" id="risk-content" aria-live="polite"></div>
+        </section>
+      </main>
+    </div>
+    <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
+    <script type="module" src="/js/app.js"></script>
   </body>
 </html>

@@ -20,6 +20,7 @@ def _env_flag(name: str, default: bool) -> bool:
 
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_TERMS_DIR = BASE_DIR / "resources" / "terms"
+DEFAULT_BASELINES_PATH = BASE_DIR / "resources" / "baselines" / "mandatory_clauses.json"
 
 
 class Settings(BaseModel):
@@ -52,6 +53,11 @@ class Settings(BaseModel):
     spec_multi_label_margin: float = Field(
         default_factory=lambda: float(os.getenv("SPEC_MULTI_LABEL_MARGIN", "0.0"))
     )
+    risk_baselines_path: Path = Field(
+        default_factory=lambda: Path(
+            os.getenv("RISK_BASELINES_PATH", str(DEFAULT_BASELINES_PATH))
+        )
+    )
 
     @field_validator("upload_dir", mode="after")
     @classmethod
@@ -70,6 +76,12 @@ class Settings(BaseModel):
     @classmethod
     def _ensure_terms_dir(cls, value: Path) -> Path:
         value.mkdir(parents=True, exist_ok=True)
+        return value
+
+    @field_validator("risk_baselines_path", mode="after")
+    @classmethod
+    def _ensure_baseline_file(cls, value: Path) -> Path:
+        value.parent.mkdir(parents=True, exist_ok=True)
         return value
 
 
