@@ -1,0 +1,21 @@
+{
+  "discipline": "electrical",
+  "terms": [
+    "voltage",
+    "current",
+    "amperage",
+    "circuit",
+    "wiring",
+    "breaker",
+    "electrical",
+    "cable",
+    "transformer",
+    "power",
+    "supply",
+    "panel"
+  ],
+  "boost_terms": [
+    "iec",
+    "nfpa"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "discipline": "mechanical",
+  "terms": [
+    "pressure",
+    "torque",
+    "pump",
+    "bearing",
+    "compressor",
+    "valve",
+    "gear",
+    "flow rate",
+    "mechanical"
+  ],
+  "boost_terms": [
+    "asme",
+    "ansi"
+  ]
+}

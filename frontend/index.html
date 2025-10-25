@@ -45,6 +45,29 @@
           </table>
         </div>
       </section>
+
+      <section class="specs" aria-labelledby="specs-title">
+        <h2 id="specs-title">Specification buckets</h2>
+        <form id="specs-form" class="specs-form">
+          <label for="specs-document-id">Document ID</label>
+          <div class="specs-form-inputs">
+            <input
+              id="specs-document-id"
+              name="documentId"
+              type="number"
+              min="1"
+              placeholder="Enter a document ID"
+              required
+            />
+            <button type="submit">Load specifications</button>
+          </div>
+        </form>
+        <p id="specs-status" class="status-message" role="status" aria-live="polite"></p>
+        <div id="specs-tabs" class="specs-tabs" hidden>
+          <nav class="specs-tablist" role="tablist" aria-label="Specification disciplines"></nav>
+          <div class="specs-panels"></div>
+        </div>
+      </section>
     </main>
     <script type="module" src="/main.js"></script>
   </body>

@@ -1,0 +1,18 @@
+{
+  "discipline": "software",
+  "terms": [
+    "software",
+    "firmware",
+    "api",
+    "version",
+    "code",
+    "repository",
+    "deployment",
+    "update",
+    "patch"
+  ],
+  "boost_terms": [
+    "iec 61508",
+    "iso/iec"
+  ]
+}

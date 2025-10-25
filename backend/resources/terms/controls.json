@@ -1,0 +1,18 @@
+{
+  "discipline": "controls",
+  "terms": [
+    "plc",
+    "pid",
+    "controller",
+    "loop",
+    "sensor",
+    "actuator",
+    "hmi",
+    "scada",
+    "control system"
+  ],
+  "boost_terms": [
+    "isa",
+    "iec 61131"
+  ]
+}

@@ -18,6 +18,10 @@ def _env_flag(name: str, default: bool) -> bool:
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
+BASE_DIR = Path(__file__).resolve().parent
+DEFAULT_TERMS_DIR = BASE_DIR / "resources" / "terms"
+
+
 class Settings(BaseModel):
     """Application configuration loaded from environment variables."""
 
@@ -41,6 +45,13 @@ class Settings(BaseModel):
     openrouter_model: str = Field(default_factory=lambda: os.getenv("OPENROUTER_MODEL", "openrouter/auto"))
     openrouter_http_referer: str | None = Field(default_factory=lambda: os.getenv("HTTP_REFERER"))
     openrouter_title: str | None = Field(default_factory=lambda: os.getenv("X_TITLE"))
+    spec_terms_dir: Path = Field(
+        default_factory=lambda: Path(os.getenv("SPEC_TERMS_DIR", str(DEFAULT_TERMS_DIR)))
+    )
+    spec_rule_min_hits: int = Field(default_factory=lambda: int(os.getenv("SPEC_RULE_MIN_HITS", "1")))
+    spec_multi_label_margin: float = Field(
+        default_factory=lambda: float(os.getenv("SPEC_MULTI_LABEL_MARGIN", "0.0"))
+    )
 
     @field_validator("upload_dir", mode="after")
     @classmethod
@@ -54,6 +65,12 @@ class Settings(BaseModel):
         if not value:
             return ("application/pdf",)
         return tuple(dict.fromkeys(item.lower() for item in value))
+
+    @field_validator("spec_terms_dir", mode="after")
+    @classmethod
+    def _ensure_terms_dir(cls, value: Path) -> Path:
+        value.mkdir(parents=True, exist_ok=True)
+        return value
 
 
 @lru_cache()
