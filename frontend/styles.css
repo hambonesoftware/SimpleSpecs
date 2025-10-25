@@ -128,3 +128,140 @@ progress.upload-error::-moz-progress-bar {
 .documents-table tbody tr:hover {
   background-color: color-mix(in srgb, CanvasText 6%, transparent);
 }
+
+.specs {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.specs-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.specs-form-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.specs-form input[type="number"] {
+  flex: 1 1 160px;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, CanvasText 25%, transparent);
+  background-color: color-mix(in srgb, Canvas 94%, CanvasText 6%);
+  color: inherit;
+}
+
+.specs-form button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  background-color: color-mix(in srgb, CanvasText 10%, Canvas 90%);
+  color: inherit;
+  cursor: pointer;
+}
+
+.specs-form button:hover,
+.specs-form button:focus {
+  background-color: color-mix(in srgb, CanvasText 18%, Canvas 82%);
+}
+
+.specs-tabs {
+  border: 1px solid color-mix(in srgb, CanvasText 15%, transparent);
+  border-radius: 12px;
+  background-color: color-mix(in srgb, Canvas 97%, CanvasText 3%);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.specs-tablist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.specs-tablist button {
+  border: 1px solid color-mix(in srgb, CanvasText 20%, transparent);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  background-color: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.specs-tablist button[aria-selected="true"] {
+  background-color: color-mix(in srgb, CanvasText 12%, Canvas 88%);
+  border-color: color-mix(in srgb, CanvasText 35%, transparent);
+}
+
+.specs-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.specs-panel {
+  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.specs-panel-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.specs-download {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, CanvasText 25%, transparent);
+  background-color: color-mix(in srgb, CanvasText 8%, Canvas 92%);
+  color: inherit;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.specs-download:hover,
+.specs-download:focus {
+  background-color: color-mix(in srgb, CanvasText 15%, Canvas 85%);
+}
+
+.specs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.specs-list li {
+  border: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  background-color: color-mix(in srgb, Canvas 98%, CanvasText 2%);
+}
+
+.specs-text {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.specs-meta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: color-mix(in srgb, CanvasText 65%, transparent);
+}

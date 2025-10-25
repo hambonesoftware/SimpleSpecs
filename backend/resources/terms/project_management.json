@@ -1,0 +1,18 @@
+{
+  "discipline": "project_management",
+  "terms": [
+    "schedule",
+    "milestone",
+    "risk",
+    "deliverable",
+    "report",
+    "budget",
+    "timeline",
+    "meeting",
+    "stakeholder"
+  ],
+  "boost_terms": [
+    "pmi",
+    "iso 21500"
+  ]
+}

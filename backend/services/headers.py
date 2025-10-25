@@ -8,9 +8,8 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Sequence
 
-import httpx
-
 from ..config import Settings
+from .llm import LLMProviderError, LLMCircuitOpenError, LLMService
 from .pdf_native import ParsedBlock, ParseResult
 
 LOGGER = logging.getLogger(__name__)
@@ -307,82 +306,64 @@ def _split_numbering(text: str) -> tuple[str | None, str]:
 
 
 class HeadersLLMClient:
-    """Client responsible for refining outlines with OpenRouter."""
+    """Client responsible for refining outlines using the shared LLM service."""
 
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, llm_service: LLMService | None = None) -> None:
         self._settings = settings
+        self._llm = llm_service or LLMService(settings)
 
     @property
     def is_enabled(self) -> bool:
         """Return True when LLM refinement should be attempted."""
 
-        return bool(
-            self._settings.llm_provider.lower() == "openrouter"
-            and self._settings.openrouter_api_key
-        )
+        return self._llm.is_enabled
 
     def refine_outline(
         self,
         parse_result: ParseResult,
         heuristic_result: HeaderExtractionResult,
     ) -> HeaderExtractionResult | None:
-        """Call OpenRouter and validate fenced outline output."""
+        """Call the LLM service and validate fenced outline output."""
 
-        payload = self._build_payload(parse_result, heuristic_result)
-        if payload is None:
+        if not self.is_enabled:
             return None
 
-        headers = {
-            "Authorization": f"Bearer {self._settings.openrouter_api_key}",
-            "Content-Type": "application/json",
-        }
-        if self._settings.openrouter_http_referer:
-            headers["HTTP-Referer"] = self._settings.openrouter_http_referer
-        if self._settings.openrouter_title:
-            headers["X-Title"] = self._settings.openrouter_title
+        messages = self._build_messages(parse_result, heuristic_result)
+        try:
+            result = self._llm.generate(
+                messages=messages,
+                fence="#headers#",
+                metadata={"task": "headers"},
+            )
+        except (LLMCircuitOpenError, LLMProviderError) as exc:  # pragma: no cover - network path
+            LOGGER.warning("LLM refinement failed: %s", exc)
+            return None
 
-        response = httpx.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=30.0,
-        )
-        response.raise_for_status()
-        data = response.json()
-        content = data["choices"][0]["message"]["content"]
-        lines = _parse_llm_headers(content)
+        fenced_text = result.fenced or result.content
+        lines = _parse_llm_headers(fenced_text)
         if not lines:
             return None
 
         outline = _build_outline_from_lines(lines)
-        fenced = "\n".join(["#headers#", *lines, "#headers#"])
-        return HeaderExtractionResult(outline=outline, fenced_text=fenced, source="openrouter")
+        cleaned_fenced = "\n".join(["#headers#", *lines, "#headers#"])
+        return HeaderExtractionResult(outline=outline, fenced_text=cleaned_fenced, source=self._llm.get_provider())
 
-    def _build_payload(
+    def _build_messages(
         self,
         parse_result: ParseResult,
         heuristic_result: HeaderExtractionResult,
-    ) -> dict | None:
-        """Assemble the chat completion payload applying hardening rules."""
-
+    ) -> list[dict[str, str]]:
         prompt_body = _render_prompt(parse_result, heuristic_result)
-        params = {"max_tokens": 4096}
-        payload = {
-            "model": self._settings.openrouter_model,
-            "messages": [
-                {"role": "user", "content": prompt_body},
-            ],
-        }
-        payload.update(_apply_hardening(params))
-        return payload
-
-
-def _apply_hardening(params: dict) -> dict:
-    """Augment params with hardened defaults for OpenRouter."""
-
-    bigger = dict(params)
-    bigger["max_tokens"] = max(int(bigger.get("max_tokens", 2048)), 4096)
-    return bigger
+        return [
+            {
+                "role": "system",
+                "content": (
+                    "You are a document structure extractor. Return a complete numbered outline "
+                    "enclosed in #headers# fences."
+                ),
+            },
+            {"role": "user", "content": prompt_body},
+        ]
 
 
 def _render_prompt(parse_result: ParseResult, heuristic_result: HeaderExtractionResult) -> str:
