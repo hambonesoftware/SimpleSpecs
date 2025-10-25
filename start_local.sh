@@ -5,4 +5,12 @@ if [ -f .env ]; then
   export $(grep -v '^#' .env | xargs)
 fi
 
-exec uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+HOST_VALUE=${HOST:-0.0.0.0}
+PORT_VALUE=${PORT:-8000}
+LOG_LEVEL_VALUE=${LOG_LEVEL:-info}
+
+exec uvicorn backend.main:app \
+  --host "${HOST_VALUE}" \
+  --port "${PORT_VALUE}" \
+  --log-level "${LOG_LEVEL_VALUE}" \
+  --reload
