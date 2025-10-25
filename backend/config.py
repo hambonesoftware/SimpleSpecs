@@ -23,10 +23,20 @@ DEFAULT_TERMS_DIR = BASE_DIR / "resources" / "terms"
 DEFAULT_BASELINES_PATH = BASE_DIR / "resources" / "baselines" / "mandatory_clauses.json"
 
 
+def _database_url_default() -> str:
+    """Return the configured database URL using legacy fallbacks."""
+
+    return (
+        os.getenv("DATABASE_URL")
+        or os.getenv("DB_URL")
+        or "sqlite:///./simplespecs.db"
+    )
+
+
 class Settings(BaseModel):
     """Application configuration loaded from environment variables."""
 
-    database_url: str = Field(default_factory=lambda: os.getenv("DATABASE_URL", "sqlite:///./simplespecs.db"))
+    database_url: str = Field(default_factory=_database_url_default)
     upload_dir: Path = Field(default_factory=lambda: Path(os.getenv("UPLOAD_DIR", "upload_objects_path")))
     max_upload_size: int = Field(default_factory=lambda: int(os.getenv("MAX_UPLOAD_SIZE", str(25 * 1024 * 1024))))
     allowed_mimetypes: Tuple[str, ...] = Field(
@@ -36,6 +46,9 @@ class Settings(BaseModel):
             if mime.strip()
         )
     )
+    host: str = Field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
+    port: int = Field(default_factory=lambda: int(os.getenv("PORT", "8000")))
+    log_level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "info"))
     parser_multi_column: bool = Field(default_factory=lambda: _env_flag("PARSER_MULTI_COLUMN", True))
     parser_enable_ocr: bool = Field(default_factory=lambda: _env_flag("PARSER_ENABLE_OCR", False))
     headers_suppress_toc: bool = Field(default_factory=lambda: _env_flag("HEADERS_SUPPRESS_TOC", True))
