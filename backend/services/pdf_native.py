@@ -1,12 +1,13 @@
 """Native PDF parsing service with multi-column and suppression heuristics."""
 from __future__ import annotations
 
-from collections import Counter
-from dataclasses import dataclass, field
 import io
 import logging
 import re
 from pathlib import Path
+import warnings
+from collections import Counter
+from dataclasses import dataclass, field
 
 import fitz  # type: ignore
 import pdfplumber  # type: ignore
@@ -15,6 +16,8 @@ try:  # pragma: no cover - optional dependency
     import camelot  # type: ignore
 except Exception:  # pragma: no cover - optional dependency
     camelot = None  # type: ignore
+
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pytesseract")
 
 try:  # pragma: no cover - optional dependency
     import pytesseract  # type: ignore
