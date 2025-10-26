@@ -1,4 +1,5 @@
 """Parsing endpoints for PDF documents."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -62,15 +63,26 @@ async def parse_document(
 
     document = session.get(Document, document_id)
     if document is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+        )
 
-    document_path = settings.upload_dir / str(document.id) / document.filename
+    if document.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Document is missing a primary key",
+        )
+
+    doc_id = document.id
+    document_path = settings.upload_dir / str(doc_id) / document.filename
     if not document_path.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing"
+        )
 
     result: ParseResult = parse_pdf(document_path, settings=settings)
     payload = result.to_dict()
-    return ParseResponse(document_id=document.id, **payload)
+    return ParseResponse(document_id=doc_id, **payload)
 
 
 __all__ = ["router"]

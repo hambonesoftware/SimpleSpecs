@@ -1,4 +1,5 @@
 """Test configuration for SimpleSpecs."""
+
 from __future__ import annotations
 
 import sys
@@ -9,16 +10,18 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-import pytest
-from fastapi.testclient import TestClient
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
 
-from backend.config import reset_settings_cache
-from backend.database import reset_database_state
-from backend.observability import metrics_registry
+from backend.config import reset_settings_cache  # noqa: E402
+from backend.database import reset_database_state  # noqa: E402
+from backend.observability import metrics_registry  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
-def _isolate_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Generator[None, None, None]:
+def _isolate_environment(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> Generator[None, None, None]:
     """Provide isolated configuration for each test."""
 
     db_path = tmp_path / "test.db"

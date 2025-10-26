@@ -1,4 +1,5 @@
 """Specification extraction service for classifying requirements by discipline."""
+
 from __future__ import annotations
 
 import json
@@ -16,7 +17,9 @@ from .pdf_native import ParseResult
 LOGGER = logging.getLogger(__name__)
 
 LINE_BREAK_RE = re.compile(r"[\r\n]+")
-HEADER_NUMBER_RE = re.compile(r"^(?P<number>(?:\d+|[A-Z])(?:[.][\dA-Z]+)*)[.)]?\s+(?P<title>.+)$")
+HEADER_NUMBER_RE = re.compile(
+    r"^(?P<number>(?:\d+|[A-Z])(?:[.][\dA-Z]+)*)[.)]?\s+(?P<title>.+)$"
+)
 WORD_RE = re.compile(r"\w+")
 
 
@@ -91,7 +94,9 @@ class SpecExtractionResult:
     def to_dict(self) -> dict[str, list[dict]]:
         """Return the result grouped per discipline plus an unknown bucket."""
 
-        buckets: dict[str, list[dict]] = {discipline: [] for discipline in self.disciplines}
+        buckets: dict[str, list[dict]] = {
+            discipline: [] for discipline in self.disciplines
+        }
         buckets[self.unknown_label] = []
 
         for line in self.lines:
@@ -175,7 +180,10 @@ class SpecLLMClient:
                 fence="#classes#",
                 metadata={"task": "spec-classification"},
             )
-        except (LLMCircuitOpenError, LLMProviderError) as exc:  # pragma: no cover - network path
+        except (
+            LLMCircuitOpenError,
+            LLMProviderError,
+        ) as exc:  # pragma: no cover - network path
             LOGGER.warning("Specification classification LLM failed: %s", exc)
             return None
 
@@ -259,8 +267,8 @@ def extract_specifications(
                 )
                 lines.append(spec_line)
 
-    disciplines = tuple(lexicon.discipline for lexicon in lexicons)
-    return SpecExtractionResult(lines=lines, disciplines=disciplines)
+    available_disciplines = tuple(lexicon.discipline for lexicon in lexicons)
+    return SpecExtractionResult(lines=lines, disciplines=available_disciplines)
 
 
 def _split_block(text: str) -> list[str]:
@@ -391,7 +399,9 @@ def _classify_line(
             candidates = disciplines or [
                 discipline for discipline, score in scores.items() if score > 0
             ]
-            llm_result = llm_client.classify(text, header_path, scores, candidates=candidates)
+            llm_result = llm_client.classify(
+                text, header_path, scores, candidates=candidates
+            )
             if llm_result:
                 disciplines = list(llm_result)
                 source = "llm"
@@ -404,7 +414,9 @@ def _load_lexicons(path: Path) -> tuple[TermLexicon, ...]:
     """Load and cache term lexicons from JSON files."""
 
     if not path.exists():
-        LOGGER.warning("Spec terms directory %s missing; using default %s", path, DEFAULT_TERMS_DIR)
+        LOGGER.warning(
+            "Spec terms directory %s missing; using default %s", path, DEFAULT_TERMS_DIR
+        )
         path = DEFAULT_TERMS_DIR
     lexicons: list[TermLexicon] = []
     for json_path in sorted(path.glob("*.json")):
@@ -415,11 +427,17 @@ def _load_lexicons(path: Path) -> tuple[TermLexicon, ...]:
             continue
         discipline = data.get("discipline")
         terms = tuple(item.strip() for item in data.get("terms", []) if item.strip())
-        boost_terms = tuple(item.strip() for item in data.get("boost_terms", []) if item.strip())
+        boost_terms = tuple(
+            item.strip() for item in data.get("boost_terms", []) if item.strip()
+        )
         if not discipline or not terms:
-            LOGGER.warning("Skipping lexicon %s due to missing discipline/terms", json_path)
+            LOGGER.warning(
+                "Skipping lexicon %s due to missing discipline/terms", json_path
+            )
             continue
-        lexicons.append(TermLexicon(discipline=discipline, terms=terms, boost_terms=boost_terms))
+        lexicons.append(
+            TermLexicon(discipline=discipline, terms=terms, boost_terms=boost_terms)
+        )
 
     if not lexicons:
         raise RuntimeError("No specification term lexicons available")

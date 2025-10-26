@@ -1,4 +1,5 @@
 """SimpleSpecs backend entrypoint."""
+
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
@@ -57,10 +58,3 @@ if FRONTEND_DIR.exists():
         """Return the compiled frontend entrypoint."""
 
         return FileResponse(FRONTEND_DIR / "index.html")
-
-
-@app.get("/api/health")
-def read_health() -> dict[str, bool]:
-    """Health check endpoint returning a simple ok response."""
-
-    return {"ok": True}

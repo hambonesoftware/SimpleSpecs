@@ -1,7 +1,7 @@
 """Tests covering document upload functionality."""
+
 from __future__ import annotations
 
-import io
 import io
 import os
 from pathlib import Path
@@ -13,6 +13,7 @@ PDF_BYTES = (
     b"1 0 obj\n<< /Type /Catalog >>\nendobj\n"
     b"trailer\n<< /Root 1 0 R >>\n%%EOF\n"
 )
+
 
 def _post_pdf(client: TestClient, content: bytes, filename: str = "sample.pdf"):
     return client.post(
@@ -32,7 +33,9 @@ def test_upload_creates_document_and_persists_file(client: TestClient) -> None:
     assert "uploaded_at" in payload
 
     document_id = payload["id"]
-    stored_path = Path(os.environ["UPLOAD_DIR"]) / str(document_id) / payload["filename"]
+    stored_path = (
+        Path(os.environ["UPLOAD_DIR"]) / str(document_id) / payload["filename"]
+    )
     assert stored_path.exists()
     assert stored_path.read_bytes() == PDF_BYTES
 

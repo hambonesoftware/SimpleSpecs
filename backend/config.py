@@ -1,4 +1,5 @@
 """Configuration utilities for the SimpleSpecs backend."""
+
 from __future__ import annotations
 
 import os
@@ -27,9 +28,7 @@ def _database_url_default() -> str:
     """Return the configured database URL using legacy fallbacks."""
 
     return (
-        os.getenv("DATABASE_URL")
-        or os.getenv("DB_URL")
-        or "sqlite:///./simplespecs.db"
+        os.getenv("DATABASE_URL") or os.getenv("DB_URL") or "sqlite:///./simplespecs.db"
     )
 
 
@@ -37,8 +36,12 @@ class Settings(BaseModel):
     """Application configuration loaded from environment variables."""
 
     database_url: str = Field(default_factory=_database_url_default)
-    upload_dir: Path = Field(default_factory=lambda: Path(os.getenv("UPLOAD_DIR", "upload_objects_path")))
-    max_upload_size: int = Field(default_factory=lambda: int(os.getenv("MAX_UPLOAD_SIZE", str(25 * 1024 * 1024))))
+    upload_dir: Path = Field(
+        default_factory=lambda: Path(os.getenv("UPLOAD_DIR", "upload_objects_path"))
+    )
+    max_upload_size: int = Field(
+        default_factory=lambda: int(os.getenv("MAX_UPLOAD_SIZE", str(25 * 1024 * 1024)))
+    )
     allowed_mimetypes: Tuple[str, ...] = Field(
         default_factory=lambda: tuple(
             mime.strip()
@@ -59,20 +62,42 @@ class Settings(BaseModel):
     host: str = Field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
     port: int = Field(default_factory=lambda: int(os.getenv("PORT", "7600")))
     log_level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "info"))
-    parser_multi_column: bool = Field(default_factory=lambda: _env_flag("PARSER_MULTI_COLUMN", True))
-    parser_enable_ocr: bool = Field(default_factory=lambda: _env_flag("PARSER_ENABLE_OCR", False))
-    headers_suppress_toc: bool = Field(default_factory=lambda: _env_flag("HEADERS_SUPPRESS_TOC", True))
-    headers_suppress_running: bool = Field(default_factory=lambda: _env_flag("HEADERS_SUPPRESS_RUNNING", True))
-    mineru_fallback: bool = Field(default_factory=lambda: _env_flag("MINERU_FALLBACK", False))
-    llm_provider: str = Field(default_factory=lambda: os.getenv("LLM_PROVIDER", "openrouter"))
-    openrouter_api_key: str | None = Field(default_factory=lambda: os.getenv("OPENROUTER_API_KEY"))
-    openrouter_model: str = Field(default_factory=lambda: os.getenv("OPENROUTER_MODEL", "openrouter/auto"))
-    openrouter_http_referer: str | None = Field(default_factory=lambda: os.getenv("HTTP_REFERER"))
+    parser_multi_column: bool = Field(
+        default_factory=lambda: _env_flag("PARSER_MULTI_COLUMN", True)
+    )
+    parser_enable_ocr: bool = Field(
+        default_factory=lambda: _env_flag("PARSER_ENABLE_OCR", False)
+    )
+    headers_suppress_toc: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_SUPPRESS_TOC", True)
+    )
+    headers_suppress_running: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_SUPPRESS_RUNNING", True)
+    )
+    mineru_fallback: bool = Field(
+        default_factory=lambda: _env_flag("MINERU_FALLBACK", False)
+    )
+    llm_provider: str = Field(
+        default_factory=lambda: os.getenv("LLM_PROVIDER", "openrouter")
+    )
+    openrouter_api_key: str | None = Field(
+        default_factory=lambda: os.getenv("OPENROUTER_API_KEY")
+    )
+    openrouter_model: str = Field(
+        default_factory=lambda: os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+    )
+    openrouter_http_referer: str | None = Field(
+        default_factory=lambda: os.getenv("HTTP_REFERER")
+    )
     openrouter_title: str | None = Field(default_factory=lambda: os.getenv("X_TITLE"))
     spec_terms_dir: Path = Field(
-        default_factory=lambda: Path(os.getenv("SPEC_TERMS_DIR", str(DEFAULT_TERMS_DIR)))
+        default_factory=lambda: Path(
+            os.getenv("SPEC_TERMS_DIR", str(DEFAULT_TERMS_DIR))
+        )
     )
-    spec_rule_min_hits: int = Field(default_factory=lambda: int(os.getenv("SPEC_RULE_MIN_HITS", "1")))
+    spec_rule_min_hits: int = Field(
+        default_factory=lambda: int(os.getenv("SPEC_RULE_MIN_HITS", "1"))
+    )
     spec_multi_label_margin: float = Field(
         default_factory=lambda: float(os.getenv("SPEC_MULTI_LABEL_MARGIN", "0.0"))
     )

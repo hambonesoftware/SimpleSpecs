@@ -1,4 +1,5 @@
 """Unit tests for the specification extraction service."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -73,7 +74,10 @@ def test_spec_extraction_precision_recall(tmp_path) -> None:
     expected_labels = {
         "Maintain pressure at 120 psi.": {"mechanical"},
         "Motor shall deliver torque not less than 300 Nm.": {"mechanical"},
-        "Coordinate mechanical and electrical interfaces.": {"mechanical", "electrical"},
+        "Coordinate mechanical and electrical interfaces.": {
+            "mechanical",
+            "electrical",
+        },
         "Provide 24V supply to the control cabinet.": {"electrical"},
         "Route wiring through shielded cable.": {"electrical"},
         "PLC shall coordinate the PID loop.": {"controls"},

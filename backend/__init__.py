@@ -1,4 +1,5 @@
 """Backend package for SimpleSpecs."""
+
 from __future__ import annotations
 
 from functools import wraps
@@ -27,7 +28,9 @@ def _patch_testclient() -> None:
     except Exception:  # pragma: no cover - fastapi is an optional dependency
         return
 
-    if getattr(TestClient, "_simplespecs_patch", False):  # pragma: no cover - idempotent
+    if getattr(
+        TestClient, "_simplespecs_patch", False
+    ):  # pragma: no cover - idempotent
         return
 
     original_exit = TestClient.__exit__

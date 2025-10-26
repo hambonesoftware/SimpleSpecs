@@ -1,7 +1,9 @@
 """Request metrics collection utilities."""
+
 from __future__ import annotations
 
 from collections import Counter
+from dataclasses import dataclass
 from threading import Lock
 from time import perf_counter
 from typing import Dict
@@ -9,6 +11,16 @@ from typing import Dict
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
+
+
+@dataclass
+class RouteStats:
+    """Mutable statistics for a single route."""
+
+    count: int = 0
+    total_duration_ms: float = 0.0
+    min_duration_ms: float | None = None
+    max_duration_ms: float | None = None
 
 
 class MetricsRegistry:
@@ -19,7 +31,7 @@ class MetricsRegistry:
         self._in_flight = 0
         self._requests_total = 0
         self._status_families: Counter[str] = Counter()
-        self._routes: Dict[str, Dict[str, float | int | None]] = {}
+        self._routes: Dict[str, RouteStats] = {}
 
     def reset(self) -> None:
         """Reset all counters (useful for tests)."""
@@ -54,29 +66,18 @@ class MetricsRegistry:
             self._requests_total += 1
             self._status_families[status_family] += 1
 
-            stats = self._routes.setdefault(
-                route_key,
-                {
-                    "count": 0,
-                    "total_duration_ms": 0.0,
-                    "min_duration_ms": None,
-                    "max_duration_ms": None,
-                },
-            )
-            stats["count"] = int(stats["count"]) + 1
-            stats["total_duration_ms"] = float(stats["total_duration_ms"]) + duration_ms
-
-            minimum = stats["min_duration_ms"]
-            maximum = stats["max_duration_ms"]
-            stats["min_duration_ms"] = (
+            stats = self._routes.setdefault(route_key, RouteStats())
+            stats.count += 1
+            stats.total_duration_ms += duration_ms
+            stats.min_duration_ms = (
                 duration_ms
-                if minimum is None
-                else min(float(minimum), duration_ms)
+                if stats.min_duration_ms is None
+                else min(stats.min_duration_ms, duration_ms)
             )
-            stats["max_duration_ms"] = (
+            stats.max_duration_ms = (
                 duration_ms
-                if maximum is None
-                else max(float(maximum), duration_ms)
+                if stats.max_duration_ms is None
+                else max(stats.max_duration_ms, duration_ms)
             )
 
     def snapshot(self) -> Dict[str, object]:
@@ -84,15 +85,14 @@ class MetricsRegistry:
 
         with self._lock:
             routes: Dict[str, Dict[str, float | int | None]] = {}
-            for key, value in self._routes.items():
-                count = int(value["count"]) or 1
-                total_duration = float(value["total_duration_ms"])
-                average = total_duration / count
+            for key, stats in self._routes.items():
+                count = stats.count or 1
+                average = stats.total_duration_ms / count
                 routes[key] = {
-                    "count": int(value["count"]),
+                    "count": stats.count,
                     "avg_duration_ms": average,
-                    "min_duration_ms": value["min_duration_ms"],
-                    "max_duration_ms": value["max_duration_ms"],
+                    "min_duration_ms": stats.min_duration_ms,
+                    "max_duration_ms": stats.max_duration_ms,
                 }
 
             return {
@@ -122,7 +122,9 @@ class RequestMetricsMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
         except Exception:  # pragma: no cover - re-raise after recording metrics
             duration = perf_counter() - start
-            self._registry.request_finished(request.method, request.url.path, 500, duration)
+            self._registry.request_finished(
+                request.method, request.url.path, 500, duration
+            )
             raise
         else:
             duration = perf_counter() - start

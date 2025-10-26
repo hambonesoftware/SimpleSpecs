@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Utility for processing a PDF document through the SimpleSpecs API stack."""
+
 from __future__ import annotations
 
 import argparse
@@ -26,7 +27,9 @@ def _set_environment(work_dir: Path) -> None:
 
     os.environ.setdefault("UPLOAD_DIR", str(upload_dir))
     os.environ.setdefault("EXPORT_DIR", str(export_dir))
-    os.environ.setdefault("DB_URL", f"sqlite:///{(work_dir / 'simplespecs.db').resolve()}")
+    os.environ.setdefault(
+        "DB_URL", f"sqlite:///{(work_dir / 'simplespecs.db').resolve()}"
+    )
 
 
 def _initialise_app() -> TestClient:
@@ -62,7 +65,9 @@ def _write_json(target: Path, payload: Any) -> None:
     """Serialise *payload* to ``target`` with UTF-8 encoding."""
 
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    target.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
 
 
 def main(argv: list[str] | None = None) -> int:

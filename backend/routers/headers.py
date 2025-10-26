@@ -1,4 +1,5 @@
 """Endpoints for header extraction and outline delivery."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,7 +9,12 @@ from sqlmodel import Session
 from ..config import Settings, get_settings
 from ..database import get_session
 from ..models import Document
-from ..services.headers import HeaderExtractionResult, HeaderNode, HeadersLLMClient, extract_headers
+from ..services.headers import (
+    HeaderExtractionResult,
+    HeaderNode,
+    HeadersLLMClient,
+    extract_headers,
+)
 from ..services.pdf_native import parse_pdf
 
 router = APIRouter(prefix="/api", tags=["headers"])
@@ -44,7 +50,9 @@ class HeadersResponse(BaseModel):
     outline: list[HeaderNodePayload]
 
     @classmethod
-    def from_result(cls, document_id: int, result: HeaderExtractionResult) -> "HeadersResponse":
+    def from_result(
+        cls, document_id: int, result: HeaderExtractionResult
+    ) -> "HeadersResponse":
         return cls(
             document_id=document_id,
             source=result.source,
@@ -64,17 +72,27 @@ async def generate_headers(
 
     document = session.get(Document, document_id)
     if document is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+        )
 
-    document_path = settings.upload_dir / str(document.id) / document.filename
+    if document.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Document is missing a primary key",
+        )
+
+    doc_id = document.id
+    document_path = settings.upload_dir / str(doc_id) / document.filename
     if not document_path.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing"
+        )
 
     parse_result = parse_pdf(document_path, settings=settings)
     llm_client = HeadersLLMClient(settings)
     result = extract_headers(parse_result, settings=settings, llm_client=llm_client)
-    return HeadersResponse.from_result(document.id, result)
+    return HeadersResponse.from_result(doc_id, result)
 
 
 __all__ = ["router"]
-

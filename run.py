@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Convenience launcher for the SimpleSpecs frontend and backend services."""
+
 from __future__ import annotations
 
 import argparse
@@ -107,17 +108,23 @@ def launch_backend(host: str, port: int, log_level: str) -> subprocess.Popen[str
         log_level,
     ]
     process = subprocess.Popen(command, env=env, cwd=str(PROJECT_ROOT))
-    sys.stdout.write(f"[backend] Started uvicorn on {host}:{port} (PID {process.pid}).\n")
+    sys.stdout.write(
+        f"[backend] Started uvicorn on {host}:{port} (PID {process.pid}).\n"
+    )
     return process
 
 
-def launch_frontend(host: str, port: int, directory: Path) -> Tuple[ThreadingHTTPServer, threading.Thread]:
+def launch_frontend(
+    host: str, port: int, directory: Path
+) -> Tuple[ThreadingHTTPServer, threading.Thread]:
     """Start the static frontend HTTP server in a background thread."""
 
     handler = _create_frontend_handler(directory)
     server = ThreadingHTTPServer((host, port), handler)
 
-    thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.5}, daemon=True)
+    thread = threading.Thread(
+        target=server.serve_forever, kwargs={"poll_interval": 0.5}, daemon=True
+    )
     thread.start()
     sys.stdout.write(f"[frontend] Serving {directory} on {host}:{port}.\n")
     return server, thread
@@ -159,8 +166,12 @@ def main() -> None:
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, _request_shutdown)
 
-    backend_process = launch_backend(args.backend_host, args.backend_port, args.log_level)
-    frontend_server, frontend_thread = launch_frontend(args.frontend_host, args.frontend_port, frontend_dir)
+    backend_process = launch_backend(
+        args.backend_host, args.backend_port, args.log_level
+    )
+    frontend_server, frontend_thread = launch_frontend(
+        args.frontend_host, args.frontend_port, frontend_dir
+    )
 
     sys.stdout.write("[run] Application started. Press Ctrl+C to stop.\n")
 

@@ -1,4 +1,5 @@
 """Ensure security middleware applies hardened headers."""
+
 from __future__ import annotations
 
 

@@ -1,4 +1,5 @@
 """File service helpers for uploads and listings."""
+
 from __future__ import annotations
 
 import hashlib
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Tuple
 
 from fastapi import HTTPException, UploadFile, status
+from sqlalchemy import desc
 from sqlmodel import Session, select
 
 from ..config import Settings
@@ -32,8 +34,13 @@ async def handle_upload(
 ) -> Tuple[Document, bool]:
     """Persist an uploaded file and return the stored document with a creation flag."""
 
-    if upload.content_type and upload.content_type.lower() not in settings.allowed_mimetypes:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported file type")
+    if (
+        upload.content_type
+        and upload.content_type.lower() not in settings.allowed_mimetypes
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported file type"
+        )
 
     filename = _secure_filename(upload.filename or "")
     temp_dir = settings.upload_dir / "_incoming"
@@ -65,7 +72,9 @@ async def handle_upload(
         await upload.close()
 
     checksum = file_hash.hexdigest()
-    existing_document = session.exec(select(Document).where(Document.checksum == checksum)).first()
+    existing_document = session.exec(
+        select(Document).where(Document.checksum == checksum)
+    ).first()
     if existing_document:
         if temp_path.exists():
             temp_path.unlink()
@@ -92,5 +101,7 @@ async def handle_upload(
 def list_documents(*, session: Session) -> list[Document]:
     """Return a list of stored documents ordered by upload date (newest first)."""
 
-    statement = select(Document).order_by(Document.uploaded_at.desc())
+    statement = select(Document).order_by(
+        desc(Document.__table__.c.uploaded_at)  # type: ignore[attr-defined]
+    )
     return list(session.exec(statement))
