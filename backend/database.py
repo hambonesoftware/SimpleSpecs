@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Generator
 
+from sqlalchemy.engine import make_url
 from sqlmodel import Session, SQLModel, create_engine
 
-from .config import get_settings
+from .config import PROJECT_ROOT, get_settings
 
 _engine = None
 
@@ -17,12 +19,21 @@ def get_engine():
     global _engine
     if _engine is None:
         settings = get_settings()
-        connect_args = (
-            {"check_same_thread": False}
-            if settings.database_url.startswith("sqlite")
-            else {}
-        )
-        _engine = create_engine(settings.database_url, connect_args=connect_args)
+        database_url = settings.database_url
+        url = make_url(database_url)
+        connect_args = {"check_same_thread": False} if url.get_backend_name() == "sqlite" else {}
+
+        if url.get_backend_name() == "sqlite":
+            database = url.database
+            if database and database != ":memory:":
+                db_path = Path(database)
+                if not db_path.is_absolute():
+                    db_path = (PROJECT_ROOT / db_path).resolve()
+                db_path.parent.mkdir(parents=True, exist_ok=True)
+                url = url.set(database=str(db_path))
+                database_url = url.render_as_string(hide_password=False)
+
+        _engine = create_engine(database_url, connect_args=connect_args)
     return _engine
 
 
