@@ -14,6 +14,7 @@ from docx import Document as DocxDocument
 from sqlmodel import Session, select
 
 from ..config import Settings
+from ..middleware import get_request_id
 from ..models import Document, SpecAuditEntry, SpecRecord
 
 
@@ -67,6 +68,9 @@ def approve_specifications(
     record = session.exec(record_stmt).first()
 
     detail: dict[str, Any] = {"content_hash": payload_hash}
+    request_id = get_request_id()
+    if request_id:
+        detail["request_id"] = request_id
     if notes:
         detail["notes"] = notes
 
@@ -107,13 +111,14 @@ def approve_specifications(
         session.add(record)
         session.flush()
 
+    audit_detail = detail.copy()
     audit = SpecAuditEntry(
         document_id=document.id,
         record_id=record.id,
         action="approve",
         actor=reviewer,
         summary=summary,
-        detail=detail,
+        detail=audit_detail,
     )
     session.add(audit)
     session.commit()
@@ -153,6 +158,7 @@ def export_spec_record(
     _cleanup_exports(export_dir, settings.export_retention_days)
 
     suffix = (record.content_hash or "unhashed")[:12]
+    request_id = get_request_id()
     if fmt == "csv":
         path = export_dir / f"spec-{record.document_id}-{suffix}.zip"
         media_type = "application/zip"
@@ -164,13 +170,17 @@ def export_spec_record(
     else:
         raise SpecRecordError(f"Unsupported export format: {fmt}")
 
+    detail = {"format": fmt, "filename": path.name}
+    if request_id:
+        detail["request_id"] = request_id
+
     audit = SpecAuditEntry(
         document_id=record.document_id,
         record_id=record.id,
         action="export",
         actor=actor,
         summary=f"Specification export generated ({fmt})",
-        detail={"format": fmt, "filename": path.name},
+        detail=detail,
     )
     session.add(audit)
     session.commit()

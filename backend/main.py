@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .database import init_db
 from .routers import api_router
+from .middleware import RequestIdMiddleware
 
 
 @asynccontextmanager
@@ -21,6 +22,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="SimpleSpecs", version="0.1.0", lifespan=lifespan)
+app.add_middleware(RequestIdMiddleware)
 app.include_router(api_router)
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
