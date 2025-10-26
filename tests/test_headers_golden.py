@@ -158,7 +158,7 @@ def test_extract_headers_generates_expected_outline(tmp_path: Path) -> None:
 
     assert result.to_json() == expected_outline
     assert result.fenced_text.splitlines()[0] == "#headers#"
-    assert result.fenced_text.splitlines()[-1] == "#headers#"
+    assert result.fenced_text.splitlines()[-1] == "#/headers#"
 
 
 def test_toc_pages_are_ignored(tmp_path: Path) -> None:

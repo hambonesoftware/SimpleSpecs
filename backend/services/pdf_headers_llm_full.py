@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from pathlib import Path
@@ -9,7 +10,7 @@ from typing import Dict, Iterable, List, Sequence
 
 from backend.config import Settings
 
-from .openrouter_client import openrouter_chat
+from .openrouter_client import chat
 from .token_chunk import split_by_token_limit
 
 FENCE_START = "-----BEGIN SIMPLEHEADERS JSON-----"
@@ -121,12 +122,16 @@ async def get_headers_llm_full(
             },
         ]
 
-        content = await openrouter_chat(
-            api_key=settings.openrouter_api_key or "",
-            model=settings.headers_llm_model,
-            messages=messages,
-            timeout=settings.headers_llm_timeout_s,
-            params=client_params,
+        loop = asyncio.get_running_loop()
+        content = await loop.run_in_executor(
+            None,
+            lambda: chat(
+                [dict(message) for message in messages],
+                model=settings.headers_llm_model,
+                temperature=0.2,
+                params=client_params,
+                timeout_read=settings.headers_llm_timeout_s,
+            ),
         )
         data = _extract_fenced_json(content)
         merged.extend(data.get("headers", []))

@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import math
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from ..config import Settings
-from .llm import LLMProviderError, LLMCircuitOpenError, LLMService
+from .openrouter_client import OpenRouterError, chat as openrouter_chat
 from .pdf_native import ParsedBlock, ParseResult
 
 LOGGER = logging.getLogger(__name__)
@@ -22,6 +23,23 @@ NUMBERING_PATTERNS: tuple[re.Pattern[str], ...] = (
         r"^(?P<number>[IVXLCDM]+(?:\.\d+)*)(?:[.)])?\s+(?P<title>.+)$", re.IGNORECASE
     ),
 )
+
+
+def _format_openrouter_error(exc: OpenRouterError) -> str:
+    """Return a human-friendly description for OpenRouter failures."""
+
+    status = getattr(exc, "status_code", None)
+    if status == 401:
+        return "LLM unavailable (401). Check OpenRouter API key configuration."
+    if status == 403:
+        return "LLM unavailable (403). Check API key / Referer headers."
+    if status == 429:
+        return "LLM unavailable (429). Rate limit exceeded; using heuristics."
+    if status == 500:
+        return "LLM unavailable (500). OpenRouter server error; using heuristics."
+    if isinstance(status, int):
+        return f"LLM unavailable ({status}). Using heuristic headers."
+    return "LLM unavailable. Using heuristic headers."
 
 
 @dataclass(slots=True)
@@ -64,6 +82,7 @@ class HeaderExtractionResult:
     outline: list[HeaderNode]
     fenced_text: str
     source: str
+    messages: list[str] = field(default_factory=list)
 
     def to_json(self) -> list[dict]:
         """Return outline as JSON-compatible list."""
@@ -92,7 +111,10 @@ def extract_headers(
             llm_result = llm_client.refine_outline(parse_result, heuristic_result)
             if llm_result is not None:
                 return llm_result
-        except Exception as exc:  # pragma: no cover - network exceptions
+        except OpenRouterError as exc:  # pragma: no cover - network path
+            LOGGER.warning("LLM refinement failed: %s", exc)
+            heuristic_result.messages.append(_format_openrouter_error(exc))
+        except Exception as exc:  # pragma: no cover - other runtime issues
             LOGGER.warning("LLM refinement failed: %s", exc)
 
     return heuristic_result
@@ -289,7 +311,7 @@ def _outline_to_fenced_text(nodes: Sequence[HeaderNode]) -> str:
     for node in nodes:
         _emit(node, 0)
 
-    lines.append("#headers#")
+    lines.append("#/headers#")
     return "\n".join(lines)
 
 
@@ -335,71 +357,77 @@ def _split_numbering(text: str) -> tuple[str | None, str]:
 
 
 class HeadersLLMClient:
-    """Client responsible for refining outlines using the shared LLM service."""
+    """Client responsible for refining outlines using the OpenRouter chat API."""
 
     def __init__(
-        self, settings: Settings, llm_service: LLMService | None = None
+        self,
+        settings: Settings,
+        *,
+        chat_func: Callable[..., str] | None = None,
     ) -> None:
         self._settings = settings
-        self._llm = llm_service or LLMService(settings)
+        self._chat = chat_func or openrouter_chat
 
     @property
     def is_enabled(self) -> bool:
         """Return True when LLM refinement should be attempted."""
 
-        return self._llm.is_enabled
+        return bool(self._settings.openrouter_api_key)
 
     def refine_outline(
         self,
         parse_result: ParseResult,
         heuristic_result: HeaderExtractionResult,
     ) -> HeaderExtractionResult | None:
-        """Call the LLM service and validate fenced outline output."""
+        """Call OpenRouter and merge the returned headers with heuristics."""
 
         if not self.is_enabled:
             return None
 
-        messages = self._build_messages(parse_result, heuristic_result)
+        prompt = _render_prompt(parse_result, heuristic_result)
+        messages = [{"role": "user", "content": prompt}]
+
+        headers: dict[str, str] = {}
+        if self._settings.openrouter_http_referer:
+            referer = self._settings.openrouter_http_referer.strip()
+            if referer:
+                headers["HTTP-Referer"] = referer
+                headers["Referer"] = referer
+        if self._settings.openrouter_title:
+            title = self._settings.openrouter_title.strip()
+            if title:
+                headers["X-Title"] = title
+
         try:
-            result = self._llm.generate(
-                messages=messages,
-                fence="#headers#",
-                metadata={"task": "headers"},
+            response_text = self._chat(
+                messages,
+                model=self._settings.headers_llm_model,
+                temperature=0.2,
+                params={},
+                headers=headers,
+                timeout_read=self._settings.headers_llm_timeout_s,
             )
-        except (
-            LLMCircuitOpenError,
-            LLMProviderError,
-        ) as exc:  # pragma: no cover - network path
+        except OpenRouterError:
+            raise
+        except Exception as exc:  # pragma: no cover - runtime issues
             LOGGER.warning("LLM refinement failed: %s", exc)
             return None
 
-        fenced_text = result.fenced or result.content
-        lines = _parse_llm_headers(fenced_text)
-        if not lines:
+        payload = _parse_llm_headers(response_text)
+        if payload is None:
             return None
 
-        outline = _build_outline_from_lines(lines)
-        cleaned_fenced = "\n".join(["#headers#", *lines, "#headers#"])
-        return HeaderExtractionResult(
-            outline=outline, fenced_text=cleaned_fenced, source=self._llm.get_provider()
-        )
+        outline = _build_outline_from_payload(payload.get("headers", []))
+        if not outline:
+            return None
 
-    def _build_messages(
-        self,
-        parse_result: ParseResult,
-        heuristic_result: HeaderExtractionResult,
-    ) -> list[dict[str, str]]:
-        prompt_body = _render_prompt(parse_result, heuristic_result)
-        return [
-            {
-                "role": "system",
-                "content": (
-                    "You are a document structure extractor. Return a complete numbered outline "
-                    "enclosed in #headers# fences."
-                ),
-            },
-            {"role": "user", "content": prompt_body},
-        ]
+        serialised = json.dumps(payload, ensure_ascii=False, indent=2)
+        fenced_text = "\n".join(["#headers#", serialised, "#/headers#"])
+        return HeaderExtractionResult(
+            outline=outline,
+            fenced_text=fenced_text,
+            source="openrouter",
+        )
 
 
 def _render_prompt(
@@ -407,72 +435,181 @@ def _render_prompt(
 ) -> str:
     """Render the header extraction prompt with heuristic hints."""
 
-    sample_lines = [
+    heuristic_lines = [
         line
         for line in heuristic_result.fenced_text.splitlines()
-        if line not in {"#headers#"}
+        if line not in {"#headers#", "#/headers#"}
     ]
-    sample = "\n".join(sample_lines)
-    pages_summary = []
+    heuristic_block = "\n".join(heuristic_lines) or "<no heuristic headers>"
+
+    page_summaries: list[str] = []
     for page in parse_result.pages[:3]:
-        page_lines = [
+        sample_lines = [
             _normalise_text(block.text)
             for block in page.blocks[:15]
             if _normalise_text(block.text)
         ]
-        pages_summary.append(f"Page {page.page_number}:\n" + "\n".join(page_lines))
+        if sample_lines:
+            page_summaries.append(
+                f"Page {page.page_number}:\n" + "\n".join(sample_lines)
+            )
 
-    context = "\n\n".join(pages_summary)
+    context_block = "\n\n".join(page_summaries) or "(No preview text available)"
+
     prompt = (
-        "You are a document structure extractor.\n"
-        "Goal: produce a complete numbered nested list of all headers/subheaders.\n\n"
-        "Return ONLY the list enclosed in #headers# fences, e.g.:\n\n"
-        "#headers#\n1. Top Level\n   1.1 Sub\n      1.1.1 Sub-sub\n2. Another Top\n#headers#\n\n"
+        "Return ONLY this fence:\n\n"
+        "#headers#\n"
+        "{\"headers\": [{\"title\": \"...\", \"number\": \"...\" | null, \"level\": 1}]}\n"
+        "#/headers#\n\n"
         "Rules:\n"
-        "- Include annexes/appendices where relevant.\n"
-        "- Ignore page headers/footers and running titles.\n"
-        "- DO NOT include table-of-contents sections.\n"
-        "- Preserve document-native numbering if present (1, 1.1, I, A, A.1, etc.).\n"
-        "- If unnumbered, infer stable outline numbering.\n\n"
-        "Context extracted from PDF pages:\n"
-        f"{context}\n\n"
+        "- No prose before or after the fence.\n"
+        "- Every header must include \"title\" and integer \"level\" (1 = top level).\n"
+        "- Include \"number\" when the source shows one; otherwise use null.\n"
+        "- Preserve document order and exclude tables of contents or running headers.\n"
+        "- If no headers exist, return {\"headers\": []}.\n\n"
         "Heuristic outline (may be incomplete):\n"
-        f"{sample}"
+        f"{heuristic_block}\n\n"
+        "Context:\n"
+        f"{context_block}"
     )
     return prompt
 
 
-def _parse_llm_headers(content: str) -> list[str]:
-    """Validate that the LLM response obeys the #headers# fence."""
+def _parse_llm_headers(content: str) -> dict[str, Any] | None:
+    """Extract JSON payload from the LLM response with fallback sniffing."""
 
-    match = re.search(r"#headers#(.*?)#headers#", content, re.DOTALL)
-    if not match:
+    start_token = "#headers#"
+    end_token = "#/headers#"
+    start = content.find(start_token)
+    end = content.rfind(end_token)
+    if start != -1 and end != -1 and end > start:
+        candidate = content[start + len(start_token) : end].strip()
+    else:
         LOGGER.warning("LLM response missing #headers# fence")
-        return []
+        match = re.search(r"\{.*\}", content, re.S)
+        if not match:
+            return None
+        candidate = match.group(0)
 
-    body = match.group(1).strip()
-    lines = [line.strip() for line in body.splitlines() if line.strip()]
-    return lines
+    try:
+        data = json.loads(candidate)
+    except json.JSONDecodeError:
+        LOGGER.warning("LLM headers response was not valid JSON")
+        return None
+
+    if isinstance(data, list):
+        data = {"headers": data}
+
+    if not isinstance(data, dict):
+        return None
+
+    headers_payload = data.get("headers") or []
+    if not isinstance(headers_payload, list):
+        return None
+
+    normalised: list[dict[str, Any]] = []
+    for entry in headers_payload:
+        normalised_entry = _normalise_header_entry(entry)
+        if normalised_entry:
+            normalised.append(normalised_entry)
+
+    return {"headers": normalised}
 
 
-def _build_outline_from_lines(lines: Sequence[str]) -> list[HeaderNode]:
-    """Construct outline nodes from fenced text lines."""
+def _normalise_header_entry(entry: Any) -> dict[str, Any] | None:
+    """Return a normalised header mapping or ``None`` if invalid."""
 
+    if not isinstance(entry, Mapping):
+        return None
+
+    title = str(entry.get("title") or entry.get("text") or "").strip()
+    if not title:
+        return None
+
+    number = entry.get("number") or entry.get("label") or entry.get("heading_number")
+    if number is not None:
+        number = str(number).strip()
+        if not number:
+            number = None
+
+    raw_level = entry.get("level")
+    try:
+        level = int(raw_level)
+    except (TypeError, ValueError):
+        level = 1
+    level = max(1, level)
+
+    page = entry.get("page")
+    if not isinstance(page, int):
+        page = None
+
+    children_entries = entry.get("children") if isinstance(entry, Mapping) else None
+    children: list[dict[str, Any]] = []
+    if isinstance(children_entries, list):
+        for child in children_entries:
+            normalised_child = _normalise_header_entry(child)
+            if normalised_child:
+                children.append(normalised_child)
+
+    result: dict[str, Any] = {
+        "title": title,
+        "number": number,
+        "level": level,
+    }
+    if page is not None:
+        result["page"] = page
+    if children:
+        result["children"] = children
+
+    return result
+
+
+def _build_outline_from_payload(entries: Sequence[Mapping[str, Any]]) -> list[HeaderNode]:
+    """Convert normalised header entries into ``HeaderNode`` objects."""
+
+    if any(entry.get("children") for entry in entries):
+        return [_build_outline_recursive(entry) for entry in entries]
+
+    return _build_outline_from_flat_entries(entries)
+
+
+def _build_outline_recursive(entry: Mapping[str, Any]) -> HeaderNode:
+    title = str(entry.get("title", ""))
+    number = str(entry.get("number") or "")
+    page = entry.get("page") if isinstance(entry.get("page"), int) else None
+    node = HeaderNode(title=title, numbering=number, page=page)
+    children = entry.get("children")
+    if isinstance(children, list):
+        for child in children:
+            normalised = _normalise_header_entry(child)
+            if normalised:
+                node.children.append(_build_outline_recursive(normalised))
+    return node
+
+
+def _build_outline_from_flat_entries(
+    entries: Sequence[Mapping[str, Any]]
+) -> list[HeaderNode]:
     nodes: list[HeaderNode] = []
     stack: list[tuple[int, HeaderNode]] = []
 
-    for raw_line in lines:
-        number, title = _split_numbering(raw_line)
-        if not number:
+    for entry in entries:
+        title = str(entry.get("title", ""))
+        if not title:
             continue
-        level = len(number.split("."))
-        node = HeaderNode(title=title, numbering=number, page=None)
+        number = str(entry.get("number") or "")
+        level = int(entry.get("level") or 1)
+        page = entry.get("page") if isinstance(entry.get("page"), int) else None
+        node = HeaderNode(title=title, numbering=number, page=page)
+
         while stack and stack[-1][0] >= level:
             stack.pop()
+
         if stack:
             stack[-1][1].children.append(node)
         else:
             nodes.append(node)
+
         stack.append((level, node))
 
     return nodes

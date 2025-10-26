@@ -15,6 +15,7 @@ from typing import Any, Callable, Mapping, MutableMapping, Sequence
 import httpx
 
 from ..config import Settings
+from .openrouter_client import OpenRouterError, chat as openrouter_chat
 
 LOGGER = logging.getLogger(__name__)
 
@@ -290,33 +291,30 @@ class LLMService:
         raise LLMProviderError(f"Unsupported LLM provider: {provider}")
 
     def call_openrouter(self, request: LLMTransportRequest) -> LLMTransportResponse:
-        payload = {
-            "model": request.model,
-            "messages": request.messages,
-            "stream": False,
-        }
-        payload.update(request.params)
+        params = dict(request.params)
+        raw_temperature = params.pop("temperature", None)
+        try:
+            temperature = float(raw_temperature) if raw_temperature is not None else 0.6
+        except (TypeError, ValueError):
+            temperature = 0.6
 
         try:
-            response = httpx.post(
-                "https://openrouter.ai/api/v1/chat/completions",
+            content = openrouter_chat(
+                [dict(message) for message in request.messages],
+                model=request.model,
+                temperature=temperature,
+                params=params,
                 headers=request.headers,
-                json=payload,
-                timeout=30.0,
             )
-            response.raise_for_status()
-        except httpx.HTTPStatusError as exc:
-            status = exc.response.status_code
+        except OpenRouterError as exc:
+            status = exc.status_code
             if status in {429, 500, 502, 503, 504}:
-                raise LLMRetryableError(f"OpenRouter HTTP {status}") from exc
-            raise LLMProviderError(f"OpenRouter HTTP {status}") from exc
-        except httpx.RequestError as exc:  # pragma: no cover - network failure
-            raise LLMRetryableError(f"OpenRouter request failed: {exc}") from exc
+                raise LLMRetryableError(
+                    f"OpenRouter HTTP {status or 'error'}"
+                ) from exc
+            raise LLMProviderError(str(exc)) from exc
 
-        data = response.json()
-        content = data["choices"][0]["message"]["content"]
-        usage = data.get("usage")
-        return LLMTransportResponse(content=content, usage=usage, raw=data)
+        return LLMTransportResponse(content=content, usage=None, raw=None)
 
     def call_ollama(self, request: LLMTransportRequest) -> LLMTransportResponse:
         payload = {
