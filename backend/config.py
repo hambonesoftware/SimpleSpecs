@@ -32,6 +32,19 @@ def _database_url_default() -> str:
     )
 
 
+def _cors_origin_regex_default() -> str | None:
+    """Return the default CORS origin regex allowing local network hosts."""
+
+    raw = os.getenv(
+        "CORS_ALLOW_ORIGIN_REGEX",
+        r"http://(?:localhost|127\.0\.0\.1|0\.0\.0\.0|(?:\d{1,3}\.){3}\d)(?::\d{1,5})?",
+    )
+    if raw is None:
+        return None
+    raw = raw.strip()
+    return raw or None
+
+
 class Settings(BaseModel):
     """Application configuration loaded from environment variables."""
 
@@ -59,6 +72,7 @@ class Settings(BaseModel):
             if origin.strip()
         )
     )
+    cors_allow_origin_regex: str | None = Field(default_factory=_cors_origin_regex_default)
     host: str = Field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
     port: int = Field(default_factory=lambda: int(os.getenv("PORT", "7600")))
     log_level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "info"))

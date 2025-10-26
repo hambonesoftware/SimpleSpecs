@@ -45,6 +45,7 @@ app.add_middleware(
     allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_origin_regex=settings.cors_allow_origin_regex,
 )
 app.include_router(api_router)
 
