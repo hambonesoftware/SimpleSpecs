@@ -5,16 +5,18 @@ from __future__ import annotations
 import hashlib
 import re
 import secrets
+import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Tuple
 
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy import desc
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, select
 
 from ..config import Settings
 from ..models import Document
+from ..models.spec_record import SpecAuditEntry, SpecRecord
 
 CHUNK_SIZE = 1024 * 1024  # 1MB
 
@@ -105,3 +107,36 @@ def list_documents(*, session: Session) -> list[Document]:
         desc(Document.__table__.c.uploaded_at)  # type: ignore[attr-defined]
     )
     return list(session.exec(statement))
+
+
+def delete_document(
+    *, session: Session, document_id: int, settings: Settings
+) -> bool:
+    """Remove a stored document and its related artifacts.
+
+    Returns ``True`` if the document existed and was removed, otherwise ``False``.
+    """
+
+    document = session.get(Document, document_id)
+    if document is None:
+        return False
+
+    session.exec(
+        delete(SpecAuditEntry).where(SpecAuditEntry.document_id == document_id)
+    )
+    session.exec(delete(SpecRecord).where(SpecRecord.document_id == document_id))
+    session.delete(document)
+    session.commit()
+
+    document_dir = settings.upload_dir / str(document_id)
+    shutil.rmtree(document_dir, ignore_errors=True)
+
+    export_dir = settings.export_dir
+    for pattern in (f"spec-{document_id}-*", f"spec-{document_id}.*"):
+        for path in export_dir.glob(pattern):
+            try:
+                path.unlink()
+            except FileNotFoundError:  # pragma: no cover - race condition guard
+                continue
+
+    return True
