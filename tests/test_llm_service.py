@@ -31,7 +31,7 @@ def test_llm_service_uses_cache(tmp_path: Path) -> None:
 
     def fake_transport(request: LLMTransportRequest) -> LLMTransportResponse:
         calls["count"] += 1
-        assert int(request.params["max_tokens"]) >= 4096
+        assert int(request.params["max_tokens"]) >= 120_000
         content = "#headers#\nMechanical\n#headers#"
         usage = {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
         return LLMTransportResponse(content=content, usage=usage)

@@ -76,7 +76,7 @@ def _merge_payload(
     params: Mapping[str, Any] | None,
 ) -> Dict[str, Any]:
     bigger: MutableMapping[str, Any] = dict(params or {})
-    bigger["max_tokens"] = max(_extract_max_tokens(params) or 2048, 4096)
+    bigger["max_tokens"] = max(_extract_max_tokens(params) or 2048, 120_000)
 
     payload: Dict[str, Any] = {
         "model": model or _resolve_default_model(),
