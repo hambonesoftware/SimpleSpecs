@@ -69,3 +69,32 @@ def test_large_file_is_rejected(client: TestClient) -> None:
 
     upload_dir = Path(os.environ["UPLOAD_DIR"])
     assert not any(upload_dir.rglob("large.pdf"))
+
+
+def test_delete_document_removes_artifacts(client: TestClient) -> None:
+    """Deleting a document should remove database records and stored files."""
+
+    response = _post_pdf(client, PDF_BYTES, filename="delete-me.pdf")
+    assert response.status_code == 201
+    payload = response.json()
+    document_id = payload["id"]
+
+    upload_path = (
+        Path(os.environ["UPLOAD_DIR"]) / str(document_id) / payload["filename"]
+    )
+    assert upload_path.exists()
+
+    delete_response = client.delete(f"/api/files/{document_id}")
+    assert delete_response.status_code == 204
+    assert delete_response.content == b""
+
+    assert not upload_path.exists()
+
+    list_response = client.get("/api/files")
+    assert list_response.status_code == 200
+    remaining_ids = {item["id"] for item in list_response.json()}
+    assert document_id not in remaining_ids
+
+    second_delete = client.delete(f"/api/files/{document_id}")
+    assert second_delete.status_code == 404
+    assert second_delete.json()["detail"] == "Document not found"
