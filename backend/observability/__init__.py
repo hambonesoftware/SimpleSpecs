@@ -1,4 +1,5 @@
 """Observability helpers for SimpleSpecs."""
+
 from .metrics import MetricsRegistry, RequestMetricsMiddleware, metrics_registry
 
 __all__ = [

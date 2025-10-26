@@ -1,13 +1,15 @@
 """Native PDF parsing service with multi-column and suppression heuristics."""
+
 from __future__ import annotations
 
 import io
+
 import logging
 import re
-from pathlib import Path
 import warnings
 from collections import Counter
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import fitz  # type: ignore
 import pdfplumber  # type: ignore
@@ -16,8 +18,6 @@ try:  # pragma: no cover - optional dependency
     import camelot  # type: ignore
 except Exception:  # pragma: no cover - optional dependency
     camelot = None  # type: ignore
-
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="pytesseract")
 
 try:  # pragma: no cover - optional dependency
     import pytesseract  # type: ignore
@@ -30,6 +30,8 @@ except Exception:  # pragma: no cover - optional dependency
     Image = None  # type: ignore
 
 from ..config import Settings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pytesseract")
 
 LOGGER = logging.getLogger(__name__)
 
@@ -125,7 +127,9 @@ def parse_pdf(document_path: Path, *, settings: Settings) -> ParseResult:
     used_ocr = False
     used_mineru = False
 
-    with fitz.open(document_path) as pdf_document, pdfplumber.open(document_path) as plumber_document:
+    with fitz.open(document_path) as pdf_document, pdfplumber.open(
+        document_path
+    ) as plumber_document:
         plumber_pages = list(plumber_document.pages)
         for index, page in enumerate(pdf_document):
             plumber_page = plumber_pages[index] if index < len(plumber_pages) else None
@@ -157,12 +161,16 @@ def parse_pdf(document_path: Path, *, settings: Settings) -> ParseResult:
             pages = mineru_pages
             used_mineru = True
         else:  # pragma: no cover - optional path
-            LOGGER.warning("MinerU fallback enabled but produced no output for %s", document_path)
+            LOGGER.warning(
+                "MinerU fallback enabled but produced no output for %s", document_path
+            )
 
     return ParseResult(pages=pages, has_ocr=used_ocr, used_mineru=used_mineru)
 
 
-def _parse_page(*, page: fitz.Page, plumber_page, settings: Settings) -> tuple[ParsedPage, bool]:
+def _parse_page(
+    *, page: fitz.Page, plumber_page, settings: Settings
+) -> tuple[ParsedPage, bool]:
     rect = page.rect
     blocks = _extract_pymupdf_blocks(page)
 
@@ -241,17 +249,24 @@ def _extract_pdfplumber_blocks(plumber_page) -> list[ParsedBlock]:
         text = None
     if not text:
         return []
-    bbox = (0.0, 0.0, float(getattr(plumber_page, "width", 0.0)), float(getattr(plumber_page, "height", 0.0)))
+    bbox = (
+        0.0,
+        0.0,
+        float(getattr(plumber_page, "width", 0.0)),
+        float(getattr(plumber_page, "height", 0.0)),
+    )
     return [ParsedBlock(text=text.strip(), bbox=bbox, source="pdfplumber")]
 
 
-def _extract_ocr_blocks(page: fitz.Page) -> list[ParsedBlock]:  # pragma: no cover - depends on tesseract
+def _extract_ocr_blocks(
+    page: fitz.Page,
+) -> list[ParsedBlock]:  # pragma: no cover - depends on tesseract
     if pytesseract is None or Image is None:
         LOGGER.warning("OCR requested but pytesseract/Pillow not available")
         return []
     pixmap = page.get_pixmap()
     mode = "RGBA" if pixmap.alpha else "RGB"
-    image = Image.frombytes(mode, [pixmap.width, pixmap.height], pixmap.samples)
+    image = Image.frombytes(mode, (pixmap.width, pixmap.height), pixmap.samples)
     buffer = io.BytesIO()
     image.save(buffer, format="PNG")
     buffer.seek(0)
@@ -268,7 +283,9 @@ def _extract_ocr_blocks(page: fitz.Page) -> list[ParsedBlock]:  # pragma: no cov
     ]
 
 
-def _order_blocks_by_columns(blocks: list[ParsedBlock], page_width: float) -> list[ParsedBlock]:
+def _order_blocks_by_columns(
+    blocks: list[ParsedBlock], page_width: float
+) -> list[ParsedBlock]:
     if not blocks:
         return []
     tolerance = max(page_width * 0.02, 5.0)
@@ -330,15 +347,21 @@ def _is_toc_page(page: ParsedPage) -> bool:
     text_blob = " ".join(block.text.lower() for block in page.blocks)
     if "table of contents" in text_blob or text_blob.strip().startswith("contents"):
         return True
-    dotted_entries = sum(1 for block in page.blocks if re.search(r"\.{2,}\s*\d+$", block.text))
+    dotted_entries = sum(
+        1 for block in page.blocks if re.search(r"\.{2,}\s*\d+$", block.text)
+    )
     return dotted_entries >= max(4, len(page.blocks) // 2)
 
 
-def _detect_tables(document_path: Path, page_count: int) -> list[ParsedTable]:  # pragma: no cover - heavy dependency
+def _detect_tables(
+    document_path: Path, page_count: int
+) -> list[ParsedTable]:  # pragma: no cover - heavy dependency
     if camelot is None or page_count == 0:
         return []
     try:
-        tables = camelot.read_pdf(str(document_path), pages=f"1-{page_count}", flavor="stream")
+        tables = camelot.read_pdf(
+            str(document_path), pages=f"1-{page_count}", flavor="stream"
+        )
     except Exception:
         LOGGER.debug("Camelot table detection failed", exc_info=True)
         return []
@@ -363,7 +386,9 @@ def _detect_tables(document_path: Path, page_count: int) -> list[ParsedTable]:  
     return markers
 
 
-def _run_mineru_fallback(document_path: Path) -> list[ParsedPage]:  # pragma: no cover - placeholder
+def _run_mineru_fallback(
+    document_path: Path,
+) -> list[ParsedPage]:  # pragma: no cover - placeholder
     try:
         from mineru import parse as mineru_parse  # type: ignore
     except Exception:
@@ -387,7 +412,12 @@ def _run_mineru_fallback(document_path: Path) -> list[ParsedPage]:  # pragma: no
                 blocks=[
                     ParsedBlock(
                         text=str(text),
-                        bbox=(0.0, 0.0, float(page.get("width", 0.0)), float(page.get("height", 0.0))),
+                        bbox=(
+                            0.0,
+                            0.0,
+                            float(page.get("width", 0.0)),
+                            float(page.get("height", 0.0)),
+                        ),
                         source="mineru",
                     )
                 ],

@@ -1,4 +1,5 @@
 """File upload and listing endpoints."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, Response, UploadFile, status
@@ -22,7 +23,9 @@ async def upload_file(
 ) -> Document:
     """Handle PDF uploads and return the stored document."""
 
-    document, created = await handle_upload(session=session, upload=file, settings=settings)
+    document, created = await handle_upload(
+        session=session, upload=file, settings=settings
+    )
     response.status_code = status.HTTP_201_CREATED if created else status.HTTP_200_OK
     return document
 

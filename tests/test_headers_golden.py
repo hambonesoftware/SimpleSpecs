@@ -1,4 +1,5 @@
 """Golden tests validating header extraction heuristics and endpoint."""
+
 from __future__ import annotations
 
 import hashlib
@@ -101,7 +102,9 @@ def _toc_parse_result() -> ParseResult:
 
 
 @pytest.fixture(autouse=True)
-def _isolate_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Generator[None, None, None]:
+def _isolate_environment(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> Generator[None, None, None]:
     db_path = tmp_path / "headers.db"
     upload_dir = tmp_path / "uploads"
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_path}")
@@ -142,7 +145,12 @@ def test_extract_headers_generates_expected_outline(tmp_path: Path) -> None:
             "numbering": "2",
             "page": 1,
             "children": [
-                {"title": "Steel Alloys", "numbering": "2.1", "page": 1, "children": []},
+                {
+                    "title": "Steel Alloys",
+                    "numbering": "2.1",
+                    "page": 1,
+                    "children": [],
+                },
                 {"title": "Aluminum", "numbering": "2.2", "page": 1, "children": []},
             ],
         },
@@ -160,12 +168,16 @@ def test_toc_pages_are_ignored(tmp_path: Path) -> None:
     assert result.outline == []
 
 
-def test_headers_endpoint_returns_outline(client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_headers_endpoint_returns_outline(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     engine = get_engine()
     init_db()
 
     with Session(engine) as session:
-        document = Document(filename="sample.pdf", checksum=hashlib.sha256(b"sample").hexdigest())
+        document = Document(
+            filename="sample.pdf", checksum=hashlib.sha256(b"sample").hexdigest()
+        )
         session.add(document)
         session.commit()
         session.refresh(document)
@@ -189,4 +201,3 @@ def test_headers_endpoint_returns_outline(client: TestClient, tmp_path: Path, mo
     assert payload["document_id"] == document.id
     assert payload["outline"][0]["title"] == "General Requirements"
     assert payload["outline"][0]["children"][0]["title"] == "Scope"
-

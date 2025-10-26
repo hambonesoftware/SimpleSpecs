@@ -1,4 +1,5 @@
 """Services for persisting specification approvals and exports."""
+
 from __future__ import annotations
 
 import csv
@@ -11,6 +12,7 @@ from pathlib import Path
 from typing import Any, Iterable, Tuple
 
 from docx import Document as DocxDocument
+from sqlalchemy import asc
 from sqlmodel import Session, select
 
 from ..config import Settings
@@ -46,7 +48,9 @@ def _serialise_payload(payload: Any) -> dict[str, Any]:
 def _payload_hash(payload: dict[str, Any]) -> str:
     """Return a stable hash for the payload."""
 
-    canonical = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+    canonical = json.dumps(
+        payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+    )
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
@@ -59,6 +63,9 @@ def approve_specifications(
     notes: str | None = None,
 ) -> SpecRecord:
     """Create or update the frozen specification payload for a document."""
+
+    if document.id is None:
+        raise SpecRecordError("Document must be persisted before approval")
 
     data = _serialise_payload(payload)
     payload_hash = _payload_hash(data)
@@ -112,6 +119,11 @@ def approve_specifications(
         session.flush()
 
     audit_detail = detail.copy()
+    if record.id is None:
+        session.refresh(record)
+    if record.id is None:
+        raise SpecRecordError("Specification record failed to persist")
+
     audit = SpecAuditEntry(
         document_id=document.id,
         record_id=record.id,
@@ -137,7 +149,9 @@ def fetch_spec_record(
     audit_stmt = (
         select(SpecAuditEntry)
         .where(SpecAuditEntry.document_id == document_id)
-        .order_by(SpecAuditEntry.created_at.asc())
+        .order_by(
+            asc(SpecAuditEntry.__table__.c.created_at)  # type: ignore[attr-defined]
+        )
     )
     audit_entries = list(session.exec(audit_stmt))
     return record, audit_entries
@@ -165,7 +179,9 @@ def export_spec_record(
         _write_csv_bundle(record, path)
     elif fmt == "docx":
         path = export_dir / f"spec-{record.document_id}-{suffix}.docx"
-        media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        media_type = (
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
         _write_docx_report(record, path)
     else:
         raise SpecRecordError(f"Unsupported export format: {fmt}")
@@ -208,7 +224,9 @@ def _cleanup_exports(export_dir: Path, retention_days: int) -> None:
                 continue
 
 
-def _iter_bucket_items(record: SpecRecord) -> Iterable[tuple[str, list[dict[str, Any]]]]:
+def _iter_bucket_items(
+    record: SpecRecord,
+) -> Iterable[tuple[str, list[dict[str, Any]]]]:
     payload = record.payload or {}
     buckets = payload.get("buckets", {})
     if not isinstance(buckets, dict):

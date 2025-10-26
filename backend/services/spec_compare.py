@@ -1,4 +1,5 @@
 """Specification comparison and risk scoring utilities."""
+
 from __future__ import annotations
 
 import json
@@ -102,18 +103,23 @@ class RiskReport:
             "document_id": self.document_id,
             "overall_score": round(self.overall_score, 3),
             "coverage_by_discipline": {
-                discipline: round(score, 3) for discipline, score in self.coverage_by_discipline.items()
+                discipline: round(score, 3)
+                for discipline, score in self.coverage_by_discipline.items()
             },
             "missing_clause_ids": list(self.missing_clause_ids),
             "findings": [match.to_dict() for match in self.findings],
-            "compliance_notes": list(self.compliance_notes) if self.compliance_notes is not None else None,
+            "compliance_notes": list(self.compliance_notes)
+            if self.compliance_notes is not None
+            else None,
         }
 
 
 class ComplianceLLMClient:
     """LLM client responsible for generating compliance guidance."""
 
-    def __init__(self, settings: Settings, llm_service: LLMService | None = None) -> None:
+    def __init__(
+        self, settings: Settings, llm_service: LLMService | None = None
+    ) -> None:
         self._settings = settings
         self._llm = llm_service or LLMService(settings)
 
@@ -121,7 +127,9 @@ class ComplianceLLMClient:
     def is_enabled(self) -> bool:
         return self._llm.is_enabled
 
-    def analyse(self, document_id: int, missing: Sequence[ClauseMatch]) -> Sequence[Mapping[str, object]] | None:
+    def analyse(
+        self, document_id: int, missing: Sequence[ClauseMatch]
+    ) -> Sequence[Mapping[str, object]] | None:
         """Return structured compliance guidance when the provider is enabled."""
 
         if not self.is_enabled:
@@ -158,7 +166,10 @@ class ComplianceLLMClient:
                 fence="#compliance#",
                 metadata={"task": "risk-compliance"},
             )
-        except (LLMCircuitOpenError, LLMProviderError) as exc:  # pragma: no cover - network path
+        except (
+            LLMCircuitOpenError,
+            LLMProviderError,
+        ) as exc:  # pragma: no cover - network path
             LOGGER.warning("Compliance LLM failed: %s", exc)
             return None
 
@@ -221,7 +232,11 @@ def _evaluate_clause(
 
     for line in lines:
         line_tokens = tokenise(line.text)
-        coverage = (len(clause_tokens & line_tokens) / len(clause_tokens)) if clause_tokens else 0.0
+        coverage = (
+            (len(clause_tokens & line_tokens) / len(clause_tokens))
+            if clause_tokens
+            else 0.0
+        )
         similarity = _jaccard_similarity(clause_tokens, line_tokens)
         score = max(coverage, similarity)
         if score > best_score:
@@ -230,7 +245,9 @@ def _evaluate_clause(
             best_tokens = line_tokens
 
     matched = best_score >= threshold
-    missing_terms = tuple(sorted(clause_tokens - best_tokens)) if clause_tokens else tuple()
+    missing_terms = (
+        tuple(sorted(clause_tokens - best_tokens)) if clause_tokens else tuple()
+    )
     return ClauseMatch(
         clause=clause,
         score=best_score,
@@ -257,8 +274,12 @@ def load_baseline_clauses(path: Path) -> tuple[RiskClause, ...]:
         mandatory = bool(entry.get("mandatory", True))
         keywords_raw = entry.get("keywords")
         keywords: tuple[str, ...]
-        if isinstance(keywords_raw, Sequence) and not isinstance(keywords_raw, (str, bytes)):
-            keywords = tuple(str(item).strip() for item in keywords_raw if str(item).strip())
+        if isinstance(keywords_raw, Sequence) and not isinstance(
+            keywords_raw, (str, bytes)
+        ):
+            keywords = tuple(
+                str(item).strip() for item in keywords_raw if str(item).strip()
+            )
         else:
             keywords = tuple()
         clauses.append(
@@ -303,7 +324,9 @@ def generate_risk_report(
 
     mandatory_clauses = [clause for clause in clauses if clause.mandatory]
     mandatory_total = len(mandatory_clauses)
-    matched_mandatory = sum(1 for match in findings if match.clause.mandatory and match.matched)
+    matched_mandatory = sum(
+        1 for match in findings if match.clause.mandatory and match.matched
+    )
     overall_score = matched_mandatory / mandatory_total if mandatory_total else 1.0
 
     coverage_by_discipline: dict[str, float] = {}
@@ -311,18 +334,26 @@ def generate_risk_report(
     for clause in clauses:
         clauses_by_discipline.setdefault(clause.discipline.lower(), []).append(clause)
     for discipline, discipline_clauses in clauses_by_discipline.items():
-        discipline_mandatory = [clause for clause in discipline_clauses if clause.mandatory]
+        discipline_mandatory = [
+            clause for clause in discipline_clauses if clause.mandatory
+        ]
         if not discipline_mandatory:
             continue
         discipline_matches = sum(
             1
             for match in findings
-            if match.clause.mandatory and match.clause.discipline.lower() == discipline and match.matched
+            if match.clause.mandatory
+            and match.clause.discipline.lower() == discipline
+            and match.matched
         )
-        coverage_by_discipline[discipline] = discipline_matches / len(discipline_mandatory)
+        coverage_by_discipline[discipline] = discipline_matches / len(
+            discipline_mandatory
+        )
 
     missing_clause_ids = tuple(
-        match.clause.id for match in findings if match.clause.mandatory and not match.matched
+        match.clause.id
+        for match in findings
+        if match.clause.mandatory and not match.matched
     )
 
     compliance_notes: Sequence[Mapping[str, object]] | None = None
@@ -342,7 +373,9 @@ def generate_risk_report(
         report_path = settings.upload_dir / str(document_id) / "risk_report.json"
         try:
             report_path.parent.mkdir(parents=True, exist_ok=True)
-            report_path.write_text(json.dumps(report.to_dict(), indent=2), encoding="utf-8")
+            report_path.write_text(
+                json.dumps(report.to_dict(), indent=2), encoding="utf-8"
+            )
         except OSError as exc:  # pragma: no cover - filesystem failure
             LOGGER.warning("Unable to persist risk report: %s", exc)
 

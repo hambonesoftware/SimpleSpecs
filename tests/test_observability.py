@@ -1,4 +1,5 @@
 """Tests for observability endpoints and metrics."""
+
 from __future__ import annotations
 
 from backend.observability import metrics_registry

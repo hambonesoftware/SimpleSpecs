@@ -1,4 +1,5 @@
 """Risk comparison endpoint."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -34,8 +35,17 @@ class ClauseMatchPayload(BaseModel):
 
     @classmethod
     def from_match(cls, match: ClauseMatch) -> "ClauseMatchPayload":
-        payload = match.to_dict()
-        return cls(**payload)
+        best_line = match.best_line.to_dict() if match.best_line else None
+        return cls(
+            clause_id=match.clause.id,
+            discipline=match.clause.discipline,
+            text=match.clause.text,
+            mandatory=match.clause.mandatory,
+            matched=match.matched,
+            score=round(match.score, 3),
+            missing_terms=list(match.missing_terms),
+            best_line=best_line,
+        )
 
 
 class RiskReportPayload(BaseModel):
@@ -50,14 +60,22 @@ class RiskReportPayload(BaseModel):
 
     @classmethod
     def from_report(cls, report: RiskReport) -> "RiskReportPayload":
-        data = report.to_dict()
+        findings = [ClauseMatchPayload.from_match(match) for match in report.findings]
+        compliance_notes = (
+            [dict(note) for note in report.compliance_notes]
+            if report.compliance_notes is not None
+            else None
+        )
         return cls(
-            document_id=data["document_id"],
-            overall_score=data["overall_score"],
-            coverage_by_discipline=data["coverage_by_discipline"],
-            missing_clause_ids=data["missing_clause_ids"],
-            findings=[ClauseMatchPayload.from_match(match) for match in report.findings],
-            compliance_notes=data.get("compliance_notes"),
+            document_id=report.document_id,
+            overall_score=round(report.overall_score, 3),
+            coverage_by_discipline={
+                key: round(value, 3)
+                for key, value in report.coverage_by_discipline.items()
+            },
+            missing_clause_ids=list(report.missing_clause_ids),
+            findings=findings,
+            compliance_notes=compliance_notes,
         )
 
 
@@ -72,18 +90,32 @@ async def compare_specifications(
 
     document = session.get(Document, document_id)
     if document is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+        )
 
-    document_path = settings.upload_dir / str(document.id) / document.filename
+    if document.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Document is missing a primary key",
+        )
+
+    doc_id = document.id
+    document_path = settings.upload_dir / str(doc_id) / document.filename
     if not document_path.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing"
+        )
 
     parse_result = parse_pdf(document_path, settings=settings)
     spec_llm = SpecLLMClient(settings)
-    extraction = extract_specifications(parse_result, settings=settings, llm_client=spec_llm)
+    extraction = extract_specifications(
+        parse_result, settings=settings, llm_client=spec_llm
+    )
     compliance_client = ComplianceLLMClient(settings)
+
     report = generate_risk_report(
-        document.id,
+        doc_id,
         extraction,
         settings=settings,
         compliance_client=compliance_client,

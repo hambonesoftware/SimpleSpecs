@@ -1,4 +1,5 @@
 """LLM integration layer providing provider abstraction, caching, and retries."""
+
 from __future__ import annotations
 
 import hashlib
@@ -68,7 +69,10 @@ class LLMService:
         settings: Settings,
         *,
         cache_dir: Path | None = None,
-        transport_overrides: Mapping[str, Callable[[LLMTransportRequest], LLMTransportResponse]] | None = None,
+        transport_overrides: Mapping[
+            str, Callable[[LLMTransportRequest], LLMTransportResponse]
+        ]
+        | None = None,
         sleep: Callable[[float], None] = time.sleep,
         time_func: Callable[[], float] = time.time,
     ) -> None:
@@ -121,13 +125,17 @@ class LLMService:
 
         base_model = model or self._settings.openrouter_model
         base_params: MutableMapping[str, Any] = dict(params or {})
-        base_params["max_tokens"] = self._ensure_max_tokens(base_params.get("max_tokens"))
+        base_params["max_tokens"] = self._ensure_max_tokens(
+            base_params.get("max_tokens")
+        )
 
         cache_key = self._build_cache_key(provider, base_model, messages, base_params)
         cached = self._read_cache(cache_key)
         if cached is not None:
             LOGGER.debug("LLM cache hit provider=%s model=%s", provider, base_model)
-            fenced_text = self._extract_fence(cached["content"], fence) if fence else None
+            fenced_text = (
+                self._extract_fence(cached["content"], fence) if fence else None
+            )
             if cached.get("usage"):
                 self._log_usage(provider, base_model, cached.get("usage"), cached=True)
             return LLMResult(
@@ -270,7 +278,9 @@ class LLMService:
                 headers["X-Title"] = self._settings.openrouter_title.strip()
         return headers
 
-    def _call_provider(self, provider: str, request: LLMTransportRequest) -> LLMTransportResponse:
+    def _call_provider(
+        self, provider: str, request: LLMTransportRequest
+    ) -> LLMTransportResponse:
         if provider in self._transports:
             return self._transports[provider](request)
         if provider == "openrouter":
@@ -342,7 +352,9 @@ class LLMService:
     def _extract_fence(self, content: str, fence: str | None) -> str | None:
         if not fence:
             return None
-        pattern = re.compile(rf"{re.escape(fence)}\s*(.*?)\s*{re.escape(fence)}", re.DOTALL)
+        pattern = re.compile(
+            rf"{re.escape(fence)}\s*(.*?)\s*{re.escape(fence)}", re.DOTALL
+        )
         match = pattern.search(content)
         if not match:
             return None

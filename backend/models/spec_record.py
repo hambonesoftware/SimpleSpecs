@@ -1,4 +1,5 @@
 """Specification approval persistence models."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime

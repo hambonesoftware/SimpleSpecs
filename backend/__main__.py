@@ -1,4 +1,5 @@
 """Command-line entrypoint for running the SimpleSpecs backend."""
+
 from __future__ import annotations
 
 import uvicorn

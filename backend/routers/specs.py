@@ -1,4 +1,5 @@
 """Specification extraction and approval endpoints."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -28,6 +29,17 @@ from ..services.spec_records import (
 )
 
 router = APIRouter(prefix="/api", tags=["specifications"])
+
+
+def _document_id(document: Document) -> int:
+    """Return the document id or raise an internal error if missing."""
+
+    if document.id is None:
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Document is missing a primary key",
+        )
+    return document.id
 
 
 class SpecProvenancePayload(BaseModel):
@@ -92,9 +104,12 @@ async def extract_specs_endpoint(
 
     document = session.get(Document, document_id)
     if document is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+        )
 
-    document_path = settings.upload_dir / str(document.id) / document.filename
+    doc_id = _document_id(document)
+    document_path = settings.upload_dir / str(doc_id) / document.filename
     if not document_path.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing"
@@ -102,8 +117,10 @@ async def extract_specs_endpoint(
 
     parse_result = parse_pdf(document_path, settings=settings)
     llm_client = SpecLLMClient(settings)
-    extraction = extract_specifications(parse_result, settings=settings, llm_client=llm_client)
-    return SpecExtractionResponse.from_result(document.id, extraction)
+    extraction = extract_specifications(
+        parse_result, settings=settings, llm_client=llm_client
+    )
+    return SpecExtractionResponse.from_result(doc_id, extraction)
 
 
 class SpecAuditEntryPayload(BaseModel):
@@ -152,9 +169,7 @@ class SpecApprovalRequest(BaseModel):
     notes: str | None = Field(default=None, max_length=2000)
 
 
-def _serialize_envelope(
-    *, document_id: int, record, audit: list
-) -> SpecRecordEnvelope:
+def _serialize_envelope(*, document_id: int, record, audit: list) -> SpecRecordEnvelope:
     record_payload = (
         SpecRecordPayload.model_validate(record, from_attributes=True)
         if record is not None
@@ -166,7 +181,9 @@ def _serialize_envelope(
         SpecAuditEntryPayload.model_validate(entry, from_attributes=True)
         for entry in audit
     ]
-    return SpecRecordEnvelope(document_id=document_id, record=record_payload, audit=audit_payload)
+    return SpecRecordEnvelope(
+        document_id=document_id, record=record_payload, audit=audit_payload
+    )
 
 
 @router.get("/specs/{document_id}", response_model=SpecRecordEnvelope)
@@ -180,9 +197,12 @@ async def get_spec_record(
     try:
         document = ensure_document(session, document_id)
     except SpecRecordError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
-    record, audit_entries = fetch_spec_record(session, document_id=document.id)
-    return _serialize_envelope(document_id=document.id, record=record, audit=audit_entries)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
+    doc_id = _document_id(document)
+    record, audit_entries = fetch_spec_record(session, document_id=doc_id)
+    return _serialize_envelope(document_id=doc_id, record=record, audit=audit_entries)
 
 
 @router.post("/specs/{document_id}/approve", response_model=SpecRecordEnvelope)
@@ -197,11 +217,15 @@ async def approve_spec_record(
     try:
         document = ensure_document(session, document_id)
     except SpecRecordError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
     reviewer = request.reviewer.strip()
     if not reviewer:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Reviewer is required")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Reviewer is required"
+        )
 
     try:
         approve_specifications(
@@ -212,10 +236,13 @@ async def approve_spec_record(
             notes=request.notes.strip() if request.notes else None,
         )
     except SpecRecordError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+        ) from exc
 
-    record, audit_entries = fetch_spec_record(session, document_id=document.id)
-    return _serialize_envelope(document_id=document.id, record=record, audit=audit_entries)
+    doc_id = _document_id(document)
+    record, audit_entries = fetch_spec_record(session, document_id=doc_id)
+    return _serialize_envelope(document_id=doc_id, record=record, audit=audit_entries)
 
 
 @router.get("/specs/{document_id}/export")
@@ -231,9 +258,12 @@ async def export_spec_record_endpoint(
     try:
         document = ensure_document(session, document_id)
     except SpecRecordError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
 
-    record, _ = fetch_spec_record(session, document_id=document.id)
+    doc_id = _document_id(document)
+    record, _ = fetch_spec_record(session, document_id=doc_id)
     if record is None or record.state != "approved":
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -249,7 +279,9 @@ async def export_spec_record_endpoint(
             actor="api",
         )
     except SpecRecordError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+        ) from exc
 
     return FileResponse(path, media_type=media_type, filename=path.name)
 

@@ -1,4 +1,5 @@
 """Header extraction service combining heuristics with optional LLM refinement."""
+
 from __future__ import annotations
 
 import logging
@@ -17,7 +18,9 @@ LOGGER = logging.getLogger(__name__)
 NUMBERING_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^(?P<number>\d+(?:\.\d+)*)(?:[.)])?\s+(?P<title>.+)$"),
     re.compile(r"^(?P<number>[A-Z](?:\.\d+)*)[.)]?\s+(?P<title>.+)$"),
-    re.compile(r"^(?P<number>[IVXLCDM]+(?:\.\d+)*)(?:[.)])?\s+(?P<title>.+)$", re.IGNORECASE),
+    re.compile(
+        r"^(?P<number>[IVXLCDM]+(?:\.\d+)*)(?:[.)])?\s+(?P<title>.+)$", re.IGNORECASE
+    ),
 )
 
 
@@ -136,7 +139,9 @@ def _collect_candidates(parse_result: ParseResult) -> list[HeaderCandidate]:
     return candidates
 
 
-def _score_block(block: ParsedBlock, avg_font_size: float, has_numbering: bool) -> float:
+def _score_block(
+    block: ParsedBlock, avg_font_size: float, has_numbering: bool
+) -> float:
     """Calculate a heuristic score for a block."""
 
     score = 0.0
@@ -192,7 +197,9 @@ def _build_outline(candidates: Sequence[HeaderCandidate]) -> list[HeaderNode]:
             numbering = candidate.numbering
         else:
             numbering = _auto_number(level, counters)
-        node = HeaderNode(title=candidate.title, numbering=numbering, page=candidate.page_number)
+        node = HeaderNode(
+            title=candidate.title, numbering=numbering, page=candidate.page_number
+        )
 
         while stack and stack[-1][0] >= level:
             stack.pop()
@@ -308,7 +315,9 @@ def _split_numbering(text: str) -> tuple[str | None, str]:
 class HeadersLLMClient:
     """Client responsible for refining outlines using the shared LLM service."""
 
-    def __init__(self, settings: Settings, llm_service: LLMService | None = None) -> None:
+    def __init__(
+        self, settings: Settings, llm_service: LLMService | None = None
+    ) -> None:
         self._settings = settings
         self._llm = llm_service or LLMService(settings)
 
@@ -335,7 +344,10 @@ class HeadersLLMClient:
                 fence="#headers#",
                 metadata={"task": "headers"},
             )
-        except (LLMCircuitOpenError, LLMProviderError) as exc:  # pragma: no cover - network path
+        except (
+            LLMCircuitOpenError,
+            LLMProviderError,
+        ) as exc:  # pragma: no cover - network path
             LOGGER.warning("LLM refinement failed: %s", exc)
             return None
 
@@ -346,7 +358,9 @@ class HeadersLLMClient:
 
         outline = _build_outline_from_lines(lines)
         cleaned_fenced = "\n".join(["#headers#", *lines, "#headers#"])
-        return HeaderExtractionResult(outline=outline, fenced_text=cleaned_fenced, source=self._llm.get_provider())
+        return HeaderExtractionResult(
+            outline=outline, fenced_text=cleaned_fenced, source=self._llm.get_provider()
+        )
 
     def _build_messages(
         self,
@@ -366,10 +380,16 @@ class HeadersLLMClient:
         ]
 
 
-def _render_prompt(parse_result: ParseResult, heuristic_result: HeaderExtractionResult) -> str:
+def _render_prompt(
+    parse_result: ParseResult, heuristic_result: HeaderExtractionResult
+) -> str:
     """Render the header extraction prompt with heuristic hints."""
 
-    sample_lines = [line for line in heuristic_result.fenced_text.splitlines() if line not in {"#headers#"}]
+    sample_lines = [
+        line
+        for line in heuristic_result.fenced_text.splitlines()
+        if line not in {"#headers#"}
+    ]
     sample = "\n".join(sample_lines)
     pages_summary = []
     for page in parse_result.pages[:3]:
@@ -442,4 +462,3 @@ __all__ = [
     "HeadersLLMClient",
     "extract_headers",
 ]
-

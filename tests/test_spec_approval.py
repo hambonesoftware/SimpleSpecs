@@ -54,7 +54,11 @@ def test_spec_approval_flow_and_exports(client: TestClient) -> None:
 
     first = client.post(
         f"/api/specs/{document_id}/approve",
-        json={"reviewer": "qa@example.com", "payload": payload, "notes": "Initial pass"},
+        json={
+            "reviewer": "qa@example.com",
+            "payload": payload,
+            "notes": "Initial pass",
+        },
         headers={"X-Request-ID": "approve-1"},
     )
     assert first.status_code == 200

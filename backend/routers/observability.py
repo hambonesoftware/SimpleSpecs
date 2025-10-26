@@ -1,8 +1,9 @@
 """Routes that expose operational observability data."""
+
 from __future__ import annotations
 from fastapi import APIRouter
 from sqlalchemy.exc import SQLAlchemyError
-from sqlmodel import Session, text
+from sqlmodel import Session, select
 
 from backend import __version__
 from ..database import get_engine
@@ -17,7 +18,7 @@ def _database_ok() -> bool:
     engine = get_engine()
     try:
         with Session(engine) as session:
-            session.exec(text("SELECT 1")).one()
+            session.exec(select(1)).one()
     except SQLAlchemyError:
         return False
     return True

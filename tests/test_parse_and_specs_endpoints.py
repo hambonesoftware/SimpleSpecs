@@ -1,4 +1,5 @@
 """Integration tests covering parse and specification-related endpoints."""
+
 from __future__ import annotations
 
 import io
@@ -51,7 +52,9 @@ def _sample_spec_result() -> SpecExtractionResult:
     return SpecExtractionResult(lines=[line], disciplines=("mechanical", "electrical"))
 
 
-def test_parse_endpoint_returns_stubbed_payload(client: TestClient, monkeypatch) -> None:
+def test_parse_endpoint_returns_stubbed_payload(
+    client: TestClient, monkeypatch
+) -> None:
     document_id = _upload_sample(client)
     sample_result = _sample_parse_result()
 
@@ -69,13 +72,20 @@ def test_parse_endpoint_returns_stubbed_payload(client: TestClient, monkeypatch)
     assert payload["pages"][0]["blocks"][0]["text"] == "Section 1\n- Requirement line"
 
 
-def test_spec_extraction_endpoint_returns_buckets(client: TestClient, monkeypatch) -> None:
+def test_spec_extraction_endpoint_returns_buckets(
+    client: TestClient, monkeypatch
+) -> None:
     document_id = _upload_sample(client)
     sample_parse = _sample_parse_result()
     sample_spec = _sample_spec_result()
 
-    monkeypatch.setattr("backend.routers.specs.parse_pdf", lambda *args, **kwargs: sample_parse)
-    monkeypatch.setattr("backend.routers.specs.extract_specifications", lambda *args, **kwargs: sample_spec)
+    monkeypatch.setattr(
+        "backend.routers.specs.parse_pdf", lambda *args, **kwargs: sample_parse
+    )
+    monkeypatch.setattr(
+        "backend.routers.specs.extract_specifications",
+        lambda *args, **kwargs: sample_spec,
+    )
 
     response = client.post(f"/api/specs/extract/{document_id}")
     assert response.status_code == 200
@@ -113,9 +123,16 @@ def test_spec_compare_endpoint_returns_report(client: TestClient, monkeypatch) -
         compliance_notes=({"clause_id": "mech-1", "action": "ok"},),
     )
 
-    monkeypatch.setattr("backend.routers.compare.parse_pdf", lambda *args, **kwargs: sample_parse)
-    monkeypatch.setattr("backend.routers.compare.extract_specifications", lambda *args, **kwargs: sample_spec)
-    monkeypatch.setattr("backend.routers.compare.generate_risk_report", lambda *args, **kwargs: report)
+    monkeypatch.setattr(
+        "backend.routers.compare.parse_pdf", lambda *args, **kwargs: sample_parse
+    )
+    monkeypatch.setattr(
+        "backend.routers.compare.extract_specifications",
+        lambda *args, **kwargs: sample_spec,
+    )
+    monkeypatch.setattr(
+        "backend.routers.compare.generate_risk_report", lambda *args, **kwargs: report
+    )
 
     response = client.post(f"/api/specs/compare/{document_id}")
     assert response.status_code == 200

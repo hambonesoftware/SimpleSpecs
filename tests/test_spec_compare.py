@@ -1,4 +1,5 @@
 """Tests for the risk comparison service."""
+
 from __future__ import annotations
 
 import json
@@ -62,7 +63,9 @@ def test_risk_report_detects_missing_clause(tmp_path) -> None:
         disciplines=("mechanical", "electrical"),
     )
 
-    report = generate_risk_report(41, extraction, settings=settings, clauses=clauses, persist=False)
+    report = generate_risk_report(
+        41, extraction, settings=settings, clauses=clauses, persist=False
+    )
 
     assert "mech-traceability" in report.missing_clause_ids
     assert report.coverage_by_discipline["mechanical"] == pytest.approx(0.5)
@@ -94,8 +97,14 @@ def test_risk_report_detects_removed_clauses(tmp_path) -> None:
         disciplines=("controls",),
     )
 
-    report = generate_risk_report(55, extraction, settings=settings, clauses=clauses, persist=False)
-    missing = [clause_id for clause_id in report.missing_clause_ids if clause_id.startswith("ctrl-")]
+    report = generate_risk_report(
+        55, extraction, settings=settings, clauses=clauses, persist=False
+    )
+    missing = [
+        clause_id
+        for clause_id in report.missing_clause_ids
+        if clause_id.startswith("ctrl-")
+    ]
     denominator = max(len(clauses) - 1, 1)
     detection_rate = len(missing) / denominator
     assert detection_rate >= 0.95
@@ -123,11 +132,12 @@ def test_risk_report_persists_to_disk(tmp_path) -> None:
         disciplines=("project_management",),
     )
 
-    report = generate_risk_report(72, extraction, settings=settings, clauses=clauses, persist=True)
+    report = generate_risk_report(
+        72, extraction, settings=settings, clauses=clauses, persist=True
+    )
     report_path = tmp_path / "72" / "risk_report.json"
     assert report_path.exists()
     payload = json.loads(report_path.read_text(encoding="utf-8"))
     assert payload["document_id"] == 72
     assert payload["missing_clause_ids"] == []
     assert report.overall_score == 1.0
-

@@ -1,4 +1,5 @@
 """Tests for the shared LLM service abstraction."""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -43,11 +44,15 @@ def test_llm_service_uses_cache(tmp_path: Path) -> None:
         time_func=lambda: 0.0,
     )
 
-    result_first = service.generate(messages=[{"role": "user", "content": "hello"}], fence="#headers#")
+    result_first = service.generate(
+        messages=[{"role": "user", "content": "hello"}], fence="#headers#"
+    )
     assert result_first.fenced == "Mechanical"
     assert not result_first.cached
 
-    result_second = service.generate(messages=[{"role": "user", "content": "hello"}], fence="#headers#")
+    result_second = service.generate(
+        messages=[{"role": "user", "content": "hello"}], fence="#headers#"
+    )
     assert result_second.cached
     assert result_second.fenced == "Mechanical"
     assert calls["count"] == 1
@@ -58,7 +63,7 @@ def test_llm_service_retries_missing_fence(tmp_path: Path) -> None:
 
     responses = [
         LLMTransportResponse(content="no fences here"),
-        LLMTransportResponse(content="#classes#\n[\"mechanical\"]\n#classes#"),
+        LLMTransportResponse(content='#classes#\n["mechanical"]\n#classes#'),
     ]
     requests: list[LLMTransportRequest] = []
 
@@ -74,8 +79,10 @@ def test_llm_service_retries_missing_fence(tmp_path: Path) -> None:
         time_func=lambda: 0.0,
     )
 
-    result = service.generate(messages=[{"role": "user", "content": "classify"}], fence="#classes#")
-    assert result.fenced == "[\"mechanical\"]"
+    result = service.generate(
+        messages=[{"role": "user", "content": "classify"}], fence="#classes#"
+    )
+    assert result.fenced == '["mechanical"]'
     assert len(requests) == 2
     assert "ONLY FENCED OUTPUT" in requests[1].messages[0]["content"]
 
@@ -102,13 +109,19 @@ def test_llm_service_circuit_breaker(tmp_path: Path) -> None:
     )
 
     with pytest.raises(LLMRetryableError):
-        service.generate(messages=[{"role": "user", "content": "outline"}], fence="#headers#")
+        service.generate(
+            messages=[{"role": "user", "content": "outline"}], fence="#headers#"
+        )
     assert attempts["count"] == service._max_retries + 1  # type: ignore[attr-defined]
 
     with pytest.raises(LLMCircuitOpenError):
-        service.generate(messages=[{"role": "user", "content": "outline"}], fence="#headers#")
+        service.generate(
+            messages=[{"role": "user", "content": "outline"}], fence="#headers#"
+        )
 
     current_time["value"] = 100.0
     with pytest.raises(LLMRetryableError):
-        service.generate(messages=[{"role": "user", "content": "outline"}], fence="#headers#")
+        service.generate(
+            messages=[{"role": "user", "content": "outline"}], fence="#headers#"
+        )
     assert attempts["count"] == 2 * (service._max_retries + 1)  # type: ignore[attr-defined]

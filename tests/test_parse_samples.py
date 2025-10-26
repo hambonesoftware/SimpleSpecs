@@ -1,4 +1,5 @@
 """Integration tests for the native PDF parser using bundled samples."""
+
 from __future__ import annotations
 
 from pathlib import Path
