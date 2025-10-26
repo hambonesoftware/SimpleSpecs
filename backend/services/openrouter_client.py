@@ -135,6 +135,19 @@ def chat(
     payload = _merge_payload(messages, model, temperature, params)
     request_headers = _merge_headers(headers)
 
+    raw_request = {
+        "url": OPENROUTER_URL,
+        "headers": request_headers,
+        "payload": payload,
+    }
+
+    try:
+        raw_request_text = json.dumps(raw_request, ensure_ascii=False, indent=2, sort_keys=True)
+    except (TypeError, ValueError):
+        raw_request_text = str(raw_request)
+
+    print("[SimpleSpecs] OpenRouter raw request:\n" + raw_request_text)
+
     safe_headers = dict(request_headers)
     if "Authorization" in safe_headers:
         safe_headers["Authorization"] = "***REDACTED***"
