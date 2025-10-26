@@ -47,7 +47,7 @@ class Settings(BaseModel):
         )
     )
     host: str = Field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
-    port: int = Field(default_factory=lambda: int(os.getenv("PORT", "8000")))
+    port: int = Field(default_factory=lambda: int(os.getenv("PORT", "7600")))
     log_level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "info"))
     parser_multi_column: bool = Field(default_factory=lambda: _env_flag("PARSER_MULTI_COLUMN", True))
     parser_enable_ocr: bool = Field(default_factory=lambda: _env_flag("PARSER_ENABLE_OCR", False))
