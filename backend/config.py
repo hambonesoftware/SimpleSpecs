@@ -88,6 +88,27 @@ class Settings(BaseModel):
     headers_suppress_running: bool = Field(
         default_factory=lambda: _env_flag("HEADERS_SUPPRESS_RUNNING", True)
     )
+    headers_mode: str = Field(
+        default_factory=lambda: os.getenv("HEADERS_MODE", "llm_full")
+    )
+    headers_llm_model: str = Field(
+        default_factory=lambda: os.getenv(
+            "HEADERS_LLM_MODEL", "anthropic/claude-3.5-sonnet"
+        )
+    )
+    headers_llm_max_input_tokens: int = Field(
+        default_factory=lambda: int(
+            os.getenv("HEADERS_LLM_MAX_INPUT_TOKENS", "120000")
+        )
+    )
+    headers_llm_timeout_s: int = Field(
+        default_factory=lambda: int(os.getenv("HEADERS_LLM_TIMEOUT_S", "120"))
+    )
+    headers_llm_cache_dir: Path = Field(
+        default_factory=lambda: Path(
+            os.getenv("HEADERS_LLM_CACHE_DIR", "./.cache/headers")
+        )
+    )
     mineru_fallback: bool = Field(
         default_factory=lambda: _env_flag("MINERU_FALLBACK", False)
     )
@@ -155,6 +176,12 @@ class Settings(BaseModel):
     @field_validator("export_dir", mode="after")
     @classmethod
     def _ensure_export_dir(cls, value: Path) -> Path:
+        value.mkdir(parents=True, exist_ok=True)
+        return value
+
+    @field_validator("headers_llm_cache_dir", mode="after")
+    @classmethod
+    def _ensure_headers_cache_dir(cls, value: Path) -> Path:
         value.mkdir(parents=True, exist_ok=True)
         return value
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 from sqlmodel import Session
 
@@ -14,8 +15,11 @@ from ..services.headers import (
     HeaderNode,
     HeadersLLMClient,
     extract_headers,
+    flatten_outline,
 )
+from ..services.headers_orchestrator import extract_headers_and_chunks
 from ..services.pdf_native import parse_pdf
+from ..services.simpleheaders_state import SimpleHeadersState
 
 router = APIRouter(prefix="/api", tags=["headers"])
 
@@ -41,6 +45,29 @@ class HeaderNodePayload(BaseModel):
 HeaderNodePayload.model_rebuild()
 
 
+class SimpleHeaderPayload(BaseModel):
+    """Flat header entry mapped to precise line indices."""
+
+    text: str
+    number: str | None = None
+    level: int
+    page: int
+    line_idx: int
+    global_idx: int
+
+
+class SectionPayload(BaseModel):
+    """Chunk describing the line range belonging to a header."""
+
+    header_text: str
+    header_number: str | None = None
+    level: int
+    start_global_idx: int
+    end_global_idx: int
+    start_page: int
+    end_page: int
+
+
 class HeadersResponse(BaseModel):
     """API response structure for header extraction."""
 
@@ -48,16 +75,28 @@ class HeadersResponse(BaseModel):
     source: str
     fenced_text: str
     outline: list[HeaderNodePayload]
+    simpleheaders: list[SimpleHeaderPayload] = Field(default_factory=list)
+    sections: list[SectionPayload] = Field(default_factory=list)
+    mode: str | None = None
 
     @classmethod
     def from_result(
-        cls, document_id: int, result: HeaderExtractionResult
+        cls,
+        document_id: int,
+        result: HeaderExtractionResult,
+        *,
+        simpleheaders: list[SimpleHeaderPayload] | None = None,
+        sections: list[SectionPayload] | None = None,
+        mode: str | None = None,
     ) -> "HeadersResponse":
         return cls(
             document_id=document_id,
             source=result.source,
             fenced_text=result.fenced_text,
             outline=[HeaderNodePayload.from_node(node) for node in result.outline],
+            simpleheaders=simpleheaders or [],
+            sections=sections or [],
+            mode=mode,
         )
 
 
@@ -89,10 +128,93 @@ async def generate_headers(
             status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing"
         )
 
+    document_bytes = document_path.read_bytes()
+
     parse_result = parse_pdf(document_path, settings=settings)
     llm_client = HeadersLLMClient(settings)
     result = extract_headers(parse_result, settings=settings, llm_client=llm_client)
-    return HeadersResponse.from_result(doc_id, result)
+
+    native_flat = flatten_outline(result.outline)
+    orchestrated = await extract_headers_and_chunks(
+        document_bytes,
+        settings=settings,
+        native_headers=native_flat,
+        metadata={"filename": document.filename},
+    )
+
+    SimpleHeadersState.set(doc_id, orchestrated["doc_hash"], orchestrated["lines"])
+
+    simpleheaders_payload = [
+        SimpleHeaderPayload(
+            text=item.get("text", ""),
+            number=item.get("number"),
+            level=int(item.get("level", 1)),
+            page=int(item.get("page", 0)),
+            line_idx=int(item.get("line_idx", 0)),
+            global_idx=int(item.get("global_idx", 0)),
+        )
+        for item in orchestrated.get("headers", [])
+    ]
+
+    sections_payload = [
+        SectionPayload(
+            header_text=section.get("header_text", ""),
+            header_number=section.get("header_number"),
+            level=int(section.get("level", 1)),
+            start_global_idx=int(section.get("start_global_idx", 0)),
+            end_global_idx=int(section.get("end_global_idx", 0)),
+            start_page=int(section.get("start_page", 0)),
+            end_page=int(section.get("end_page", 0)),
+        )
+        for section in orchestrated.get("sections", [])
+    ]
+
+    return HeadersResponse.from_result(
+        doc_id,
+        result,
+        simpleheaders=simpleheaders_payload,
+        sections=sections_payload,
+        mode=orchestrated.get("mode"),
+    )
+
+
+@router.get("/headers/{document_id}/section-text", response_class=PlainTextResponse)
+async def section_text(
+    document_id: int,
+    start: int,
+    end: int,
+    *,
+    session: Session = Depends(get_session),
+) -> PlainTextResponse:
+    """Return the plain text for a section bounded by global indices."""
+
+    if start < 0 or end < 0 or end < start:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid section bounds",
+        )
+
+    document = session.get(Document, document_id)
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+        )
+
+    cached = SimpleHeadersState.get(document_id)
+    if cached is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No section data available for this document",
+        )
+
+    _, lines = cached
+    text_lines = [
+        str(line.get("text", ""))
+        for line in lines
+        if start <= int(line.get("global_idx", -1)) <= end
+    ]
+
+    return PlainTextResponse("\n".join(text_lines))
 
 
 __all__ = ["router"]

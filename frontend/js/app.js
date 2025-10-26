@@ -3,6 +3,7 @@ import {
   uploadDocument,
   parseDocument,
   fetchHeaders,
+  fetchSectionText,
   fetchSpecifications,
   compareSpecifications,
   downloadBlob,
@@ -184,7 +185,10 @@ async function selectDocument(documentId) {
 
     if (headersResult.status === 'fulfilled') {
       state.headers = headersResult.value;
-      renderHeaderOutline(elements.headersContent, state.headers);
+      renderHeaderOutline(elements.headersContent, state.headers, {
+        documentId,
+        fetchSection: fetchSectionText,
+      });
     } else {
       state.headers = null;
       setPanelError(elements.headersContent, headersResult.reason?.message ?? 'Unable to load headers.');

@@ -192,7 +192,83 @@ def test_headers_endpoint_returns_outline(
     def _mock_parse(document_path, *, settings):  # noqa: ANN001 - test helper
         return sample_result
 
+    async def _mock_extract_headers_and_chunks(
+        document_bytes: bytes,
+        *,
+        settings,
+        native_headers,
+        metadata,
+    ) -> dict:
+        lines = [
+            {
+                "text": "General Requirements",
+                "page": 0,
+                "line_idx": 0,
+                "global_idx": 0,
+                "is_running": False,
+                "is_toc": False,
+                "is_index": False,
+            },
+            {
+                "text": "Scope",
+                "page": 0,
+                "line_idx": 1,
+                "global_idx": 1,
+                "is_running": False,
+                "is_toc": False,
+                "is_index": False,
+            },
+        ]
+        return {
+            "headers": [
+                {
+                    "text": "General Requirements",
+                    "number": "1",
+                    "level": 1,
+                    "page": 0,
+                    "line_idx": 0,
+                    "global_idx": 0,
+                },
+                {
+                    "text": "Scope",
+                    "number": "1.1",
+                    "level": 2,
+                    "page": 0,
+                    "line_idx": 1,
+                    "global_idx": 1,
+                },
+            ],
+            "sections": [
+                {
+                    "header_text": "General Requirements",
+                    "header_number": "1",
+                    "level": 1,
+                    "start_global_idx": 0,
+                    "end_global_idx": 0,
+                    "start_page": 0,
+                    "end_page": 0,
+                },
+                {
+                    "header_text": "Scope",
+                    "header_number": "1.1",
+                    "level": 2,
+                    "start_global_idx": 1,
+                    "end_global_idx": 1,
+                    "start_page": 0,
+                    "end_page": 0,
+                },
+            ],
+            "mode": "llm_full",
+            "lines": lines,
+            "doc_hash": "abc123",
+            "excluded_pages": [],
+        }
+
     monkeypatch.setattr("backend.routers.headers.parse_pdf", _mock_parse)
+    monkeypatch.setattr(
+        "backend.routers.headers.extract_headers_and_chunks",
+        _mock_extract_headers_and_chunks,
+    )
 
     response = client.post(f"/api/headers/{document.id}")
     assert response.status_code == 200
@@ -201,3 +277,6 @@ def test_headers_endpoint_returns_outline(
     assert payload["document_id"] == document.id
     assert payload["outline"][0]["title"] == "General Requirements"
     assert payload["outline"][0]["children"][0]["title"] == "Scope"
+    assert payload["mode"] == "llm_full"
+    assert payload["simpleheaders"][0]["text"] == "General Requirements"
+    assert payload["sections"][0]["start_global_idx"] == 0

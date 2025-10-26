@@ -91,6 +91,18 @@ export async function fetchHeaders(documentId) {
   return request(`/headers/${documentId}`, { method: 'POST' });
 }
 
+export async function fetchSectionText(documentId, start, end) {
+  const params = new URLSearchParams({ start: String(start), end: String(end) });
+  const response = await fetch(`${apiBase}/headers/${documentId}/section-text?${params}`);
+  if (!response.ok) {
+    const message = `Section fetch failed (${response.status})`;
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
+  }
+  return response.text();
+}
+
 export async function fetchSpecifications(documentId) {
   return request(`/specs/extract/${documentId}`, { method: 'POST' });
 }

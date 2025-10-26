@@ -293,6 +293,28 @@ def _outline_to_fenced_text(nodes: Sequence[HeaderNode]) -> str:
     return "\n".join(lines)
 
 
+def flatten_outline(nodes: Sequence[HeaderNode]) -> list[dict[str, object]]:
+    """Flatten a header outline into a list suitable for LLM alignment."""
+
+    flattened: list[dict[str, object]] = []
+
+    def _walk(node: HeaderNode, depth: int) -> None:
+        flattened.append(
+            {
+                "text": node.title,
+                "number": node.numbering or None,
+                "level": max(1, depth),
+            }
+        )
+        for child in node.children:
+            _walk(child, depth + 1)
+
+    for root in nodes:
+        _walk(root, 1)
+
+    return flattened
+
+
 def _normalise_text(text: str) -> str:
     """Normalise whitespace within a block."""
 
@@ -461,4 +483,5 @@ __all__ = [
     "HeaderNode",
     "HeadersLLMClient",
     "extract_headers",
+    "flatten_outline",
 ]
