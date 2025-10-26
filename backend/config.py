@@ -46,6 +46,16 @@ class Settings(BaseModel):
             if mime.strip()
         )
     )
+    cors_allow_origins: Tuple[str, ...] = Field(
+        default_factory=lambda: tuple(
+            origin.strip()
+            for origin in os.getenv(
+                "CORS_ALLOW_ORIGINS",
+                "http://localhost:3600,http://127.0.0.1:3600",
+            ).split(",")
+            if origin.strip()
+        )
+    )
     host: str = Field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
     port: int = Field(default_factory=lambda: int(os.getenv("PORT", "7600")))
     log_level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "info"))
