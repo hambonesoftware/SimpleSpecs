@@ -195,8 +195,12 @@ export function renderParseSummary(container, payload) {
   container.append(grid);
 }
 
-export function renderHeaderOutline(container, payload) {
+export function renderHeaderOutline(container, payload, options = {}) {
   if (!container) return;
+  if (Array.isArray(payload?.simpleheaders) && payload.simpleheaders.length && Array.isArray(payload.sections) && payload.sections.length) {
+    renderSimpleHeaders(container, payload, options);
+    return;
+  }
   if (!payload?.outline?.length) {
     setPanelError(container, 'No headers detected.');
     return;
@@ -208,6 +212,95 @@ export function renderHeaderOutline(container, payload) {
 
   container.innerHTML = '';
   container.append(list);
+}
+
+function renderSimpleHeaders(container, payload, { documentId, fetchSection } = {}) {
+  const headers = Array.isArray(payload.simpleheaders) ? payload.simpleheaders : [];
+  const sections = Array.isArray(payload.sections) ? payload.sections : [];
+  if (!headers.length || !sections.length) {
+    setPanelError(container, 'No headers detected.');
+    return;
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'simpleheaders';
+
+  const list = document.createElement('div');
+  list.className = 'simpleheaders__list';
+  const viewer = document.createElement('pre');
+  viewer.className = 'simpleheaders__viewer';
+  viewer.textContent = 'Select a section to preview its text.';
+
+  let activeIndex = -1;
+  let requestToken = 0;
+
+  const items = headers.map((header, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'simpleheaders__item';
+    button.dataset.index = String(index);
+    const label = header.number ? `${header.number} ${header.text}` : header.text;
+    button.textContent = label;
+    button.style.paddingLeft = `${Math.max(0, Number(header.level || 1) - 1) * 12}px`;
+    button.title = `Page ${Number(header.page ?? 0) + 1}`;
+    button.addEventListener('click', () => selectIndex(index));
+    list.append(button);
+    return button;
+  });
+
+  async function selectIndex(index) {
+    if (index === activeIndex) return;
+    activeIndex = index;
+    const section = sections[index];
+    items.forEach((item, idx) => {
+      if (idx === index) {
+        item.dataset.active = 'true';
+        item.setAttribute('aria-current', 'true');
+      } else {
+        delete item.dataset.active;
+        item.removeAttribute('aria-current');
+      }
+    });
+
+    if (!section || typeof fetchSection !== 'function' || !documentId) {
+      viewer.textContent = 'Section data unavailable.';
+      return;
+    }
+
+    const token = ++requestToken;
+    viewer.dataset.loading = 'true';
+    viewer.textContent = 'Loading section…';
+
+    try {
+      const text = await fetchSection(
+        documentId,
+        section.start_global_idx,
+        section.end_global_idx,
+      );
+      if (token !== requestToken) {
+        return;
+      }
+      viewer.textContent = text?.trim() ? text : '(Empty section)';
+    } catch (error) {
+      if (token !== requestToken) {
+        return;
+      }
+      const message = error instanceof Error ? error.message : 'Unable to load section.';
+      viewer.textContent = message;
+    } finally {
+      if (token === requestToken) {
+        delete viewer.dataset.loading;
+      }
+    }
+  }
+
+  wrapper.append(list, viewer);
+  container.innerHTML = '';
+  container.append(wrapper);
+
+  if (headers.length) {
+    selectIndex(0);
+  }
 }
 
 function renderTreeNode(node) {

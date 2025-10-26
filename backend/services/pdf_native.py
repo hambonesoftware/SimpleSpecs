@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import hashlib
 
 import logging
 import re
@@ -351,6 +352,140 @@ def _is_toc_page(page: ParsedPage) -> bool:
         1 for block in page.blocks if re.search(r"\.{2,}\s*\d+$", block.text)
     )
     return dotted_entries >= max(4, len(page.blocks) // 2)
+
+
+_INDEX_ENTRY_RE = re.compile(
+    r"^[A-Z][A-Za-z0-9\s'’\-(),/]+\s+\.{2,}\s*\d+(?:\s*,\s*\d+)*$"
+)
+
+
+def _is_toc_like(lines: list[str], page_number: int) -> bool:
+    if page_number > 4 or not lines:
+        return False
+    blob = " ".join(line.lower() for line in lines)
+    if "table of contents" in blob or blob.strip().startswith("contents"):
+        return True
+    dotted_entries = sum(1 for line in lines if re.search(r"\.{2,}\s*\d+$", line))
+    return dotted_entries >= max(4, len(lines) // 2)
+
+
+def _is_index_like(lines: list[str]) -> bool:
+    cleaned = [line.strip() for line in lines if line.strip()]
+    if not cleaned:
+        return False
+    first = cleaned[0].lower()
+    if first in {"index", "glossary"}:
+        return True
+    hits = sum(1 for line in cleaned if _INDEX_ENTRY_RE.match(line))
+    return hits >= max(6, len(cleaned) // 2)
+
+
+def collect_line_metrics(
+    document_bytes: bytes,
+    metadata: dict | None,
+    *,
+    suppress_toc: bool = True,
+    suppress_running: bool = True,
+) -> tuple[list[dict], set[int], str]:
+    """Return flattened line metrics for the provided PDF bytes."""
+
+    doc_hash = hashlib.sha256(document_bytes).hexdigest()
+    excluded_pages: set[int] = set()
+    pages: list[dict] = []
+    header_counter: Counter[str] = Counter()
+    footer_counter: Counter[str] = Counter()
+
+    with fitz.open(stream=document_bytes, filetype="pdf") as pdf_document:
+        for page in pdf_document:
+            page_number = int(page.number)
+            text_dict = page.get_text("dict") or {}
+            raw_blocks = text_dict.get("blocks") or []
+            page_lines: list[dict] = []
+
+            for block in raw_blocks:
+                if block.get("type", 0) != 0:
+                    continue
+                for line in block.get("lines", []):
+                    spans = line.get("spans", [])
+                    text = "".join(span.get("text", "") for span in spans).replace("\r", "")
+                    if not text or not text.strip():
+                        continue
+                    bbox = line.get("bbox") or block.get("bbox")
+                    if not bbox:
+                        continue
+                    left, top, right, bottom = (float(value) for value in bbox)
+                    sizes = [float(span.get("size", 0.0)) for span in spans if span.get("size")]
+                    size = sum(sizes) / len(sizes) if sizes else 0.0
+                    fonts = [str(span.get("font", "")) for span in spans if span.get("font")]
+                    bold = any("bold" in font.lower() for font in fonts)
+                    is_caps = text.strip().isupper()
+                    entry = {
+                        "global_idx": -1,
+                        "page": page_number,
+                        "line_idx": len(page_lines),
+                        "text": text,
+                        "size": size,
+                        "bold": bold,
+                        "is_caps": is_caps,
+                        "left": left,
+                        "right": right,
+                        "top": top,
+                        "bottom": bottom,
+                        "is_toc": False,
+                        "is_index": False,
+                        "is_running": False,
+                    }
+                    page_lines.append(entry)
+
+            height = float(page.rect.height)
+            top_threshold = height * 0.18
+            bottom_threshold = height * 0.85
+            for entry in page_lines:
+                normalised = _normalise_text(entry.get("text", ""))
+                if not normalised:
+                    continue
+                if entry["top"] <= top_threshold:
+                    header_counter[normalised] += 1
+                elif entry["bottom"] >= bottom_threshold:
+                    footer_counter[normalised] += 1
+
+            pages.append(
+                {
+                    "number": page_number,
+                    "height": height,
+                    "lines": page_lines,
+                }
+            )
+
+    running_markers: set[str] = set()
+    if suppress_running:
+        running_markers = {
+            text for text, count in header_counter.items() if count > 1
+        } | {text for text, count in footer_counter.items() if count > 1}
+
+    all_lines: list[dict] = []
+    global_idx = 0
+
+    for page in pages:
+        page_number = page["number"]
+        page_lines = page["lines"]
+        texts = [line.get("text", "") for line in page_lines]
+        is_toc_page = _is_toc_like(texts, page_number)
+        is_index_page = _is_index_like(texts)
+        if suppress_toc and (is_toc_page or is_index_page):
+            excluded_pages.add(page_number)
+
+        for entry in page_lines:
+            normalised = _normalise_text(entry.get("text", ""))
+            if suppress_running and normalised in running_markers:
+                entry["is_running"] = True
+            entry["is_toc"] = is_toc_page
+            entry["is_index"] = is_index_page
+            entry["global_idx"] = global_idx
+            all_lines.append(entry)
+            global_idx += 1
+
+    return all_lines, excluded_pages, doc_hash
 
 
 def _detect_tables(
