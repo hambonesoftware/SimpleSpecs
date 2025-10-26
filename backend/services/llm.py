@@ -363,7 +363,7 @@ class LLMService:
             numeric = int(value)
         except Exception:
             numeric = 2048
-        return max(numeric, 4096)
+        return max(numeric, 120_000)
 
     def _log_usage(
         self,
