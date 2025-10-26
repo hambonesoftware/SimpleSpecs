@@ -60,7 +60,10 @@
 
         <section class="panel" id="panel-headers" aria-labelledby="panel-headers-title">
           <div class="panel-header">
-            <h3 id="panel-headers-title">Header outline</h3>
+            <div class="panel-header__title">
+              <h3 id="panel-headers-title">Header outline</h3>
+              <span id="header-mode-tag" class="panel-tag" hidden></span>
+            </div>
             <button type="button" class="ghost-button" data-export="headers">Download JSON</button>
           </div>
           <div class="panel-body" id="headers-content" aria-live="polite"></div>

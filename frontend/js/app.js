@@ -55,7 +55,41 @@ const elements = {
   approveSpecs: document.querySelector('#approve-specs'),
   approvalStatus: document.querySelector('#approval-status'),
   reviewerInput: document.querySelector('#reviewer-name'),
+  headerModeTag: document.querySelector('#header-mode-tag'),
 };
+
+function updateHeaderModeTag(mode) {
+  const tag = elements.headerModeTag;
+  if (!tag) {
+    return;
+  }
+
+  if (!mode) {
+    tag.hidden = true;
+    tag.textContent = '';
+    tag.removeAttribute('data-variant');
+    tag.removeAttribute('aria-label');
+    tag.removeAttribute('title');
+    return;
+  }
+
+  const normalised = String(mode).toLowerCase();
+  let label = 'Huer';
+  let variant = 'heuristic';
+  let description = 'Headers derived via heuristic extraction.';
+
+  if (normalised === 'llm_full') {
+    label = 'LLM';
+    variant = 'llm';
+    description = 'Headers derived via LLM extraction.';
+  }
+
+  tag.textContent = label;
+  tag.dataset.variant = variant;
+  tag.setAttribute('aria-label', description);
+  tag.setAttribute('title', description);
+  tag.hidden = false;
+}
 
 initDropZone({
   zone: elements.dropZone,
@@ -157,6 +191,7 @@ async function selectDocument(documentId) {
   setPanelLoading(elements.headersContent, 'Generating outline…');
   setPanelLoading(elements.specsContent, 'Classifying specification lines…');
   setPanelLoading(elements.riskContent, 'Computing risk score…');
+  updateHeaderModeTag(null);
   setApprovalStatus('Loading approval status…', 'muted');
   updateApprovalUI({ busy: true });
 
@@ -189,9 +224,11 @@ async function selectDocument(documentId) {
         documentId,
         fetchSection: fetchSectionText,
       });
+      updateHeaderModeTag(state.headers?.mode ?? null);
     } else {
       state.headers = null;
       setPanelError(elements.headersContent, headersResult.reason?.message ?? 'Unable to load headers.');
+      updateHeaderModeTag(null);
     }
 
     if (specsResult.status === 'fulfilled') {
