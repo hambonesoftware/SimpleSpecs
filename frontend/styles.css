@@ -317,9 +317,43 @@ body {
   gap: 1rem;
 }
 
+.panel-header__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .panel-header h3 {
   margin: 0;
   font-size: 1.1rem;
+}
+
+.panel-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--accent-strong) 16%, transparent);
+  color: var(--accent-strong);
+}
+
+.panel-tag[data-variant='llm'] {
+  background: color-mix(in srgb, var(--accent-strong) 24%, transparent);
+  border-color: color-mix(in srgb, var(--accent-strong) 55%, transparent);
+  color: var(--accent-strong);
+}
+
+.panel-tag[data-variant='heuristic'] {
+  background: color-mix(in srgb, var(--success) 22%, transparent);
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+  color: var(--success);
 }
 
 .panel-actions {
