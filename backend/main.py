@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -25,7 +26,46 @@ async def lifespan(app: FastAPI):
     yield
 
 
+logger = logging.getLogger("uvicorn.error")
+
+
+def _mask_api_key(value: str | None) -> str:
+    """Return a masked representation of the OpenRouter API key."""
+
+    if not value:
+        return "<missing>"
+
+    stripped = value.strip()
+    if not stripped:
+        return "<missing>"
+
+    if len(stripped) <= 8:
+        middle = "…" * max(len(stripped) - 2, 1)
+        return f"{stripped[0]}{middle}{stripped[-1]}"
+
+    return f"{stripped[:4]}…{stripped[-4:]}"
+
+
+def _announce_openrouter_api_key(value: str | None) -> None:
+    """Log the OpenRouter API key status to the command window."""
+
+    if value and value.strip():
+        masked = _mask_api_key(value)
+        message = (
+            "[SimpleSpecs] OpenRouter API key loaded from environment (.env): "
+            f"{masked}"
+        )
+    else:
+        message = (
+            "[SimpleSpecs] OpenRouter API key not found in environment (.env); "
+            "OpenRouter-dependent features are disabled."
+        )
+
+    logger.info(message)
+
+
 settings = get_settings()
+_announce_openrouter_api_key(settings.openrouter_api_key)
 
 cors_allow_origins = list(settings.cors_allow_origins)
 allow_credentials = True
