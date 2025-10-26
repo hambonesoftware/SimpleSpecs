@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import json
+import logging
 from typing import Any, Mapping, MutableMapping, Sequence
 
 import httpx
 
+LOGGER = logging.getLogger(__name__)
 BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
@@ -67,10 +70,48 @@ async def openrouter_chat(
         **payload_params,
     }
 
+    log_headers = dict(headers)
+    if "Authorization" in log_headers:
+        log_headers["Authorization"] = "***REDACTED***"
+
+    LOGGER.info(
+        "OpenRouter request",
+        extra={
+            "openrouter": {
+                "url": BASE_URL,
+                "headers": log_headers,
+                "payload": payload,
+            }
+        },
+    )
+
     async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.post(BASE_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        data = response.json()
+        response_text = response.text
+
+        if response.status_code >= 400:
+            LOGGER.error(
+                "OpenRouter error response",
+                extra={
+                    "openrouter": {
+                        "status": response.status_code,
+                        "raw": response_text,
+                    }
+                },
+            )
+            response.raise_for_status()
+
+        LOGGER.info(
+            "OpenRouter response",
+            extra={
+                "openrouter": {
+                    "status": response.status_code,
+                    "raw": response_text,
+                }
+            },
+        )
+
+        data = json.loads(response_text)
         choices = data.get("choices") or []
         if not choices:
             raise RuntimeError("OpenRouter response missing choices array")

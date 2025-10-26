@@ -18,18 +18,41 @@ const apiBase = (() => {
 })();
 
 async function request(path, options = {}) {
-  const response = await fetch(`${apiBase}${path}`, {
+  const url = `${apiBase}${path}`;
+  const config = {
     headers: { 'Accept': 'application/json', ...(options.headers ?? {}) },
     ...options,
+  };
+
+  const requestLog = {
+    url,
+    method: config.method ?? 'GET',
+    headers: config.headers,
+  };
+  if (config.body && typeof config.body === 'string') {
+    requestLog.body = config.body;
+  }
+  console.debug('[API] Request', requestLog);
+
+  const response = await fetch(url, config);
+  const raw = await response.clone().text();
+
+  console.debug('[API] Response', {
+    url,
+    status: response.status,
+    ok: response.ok,
+    raw,
   });
 
   if (!response.ok) {
     let detail;
-    try {
-      const payload = await response.json();
-      detail = payload?.detail ?? payload?.message;
-    } catch (error) {
-      detail = undefined;
+    if (raw) {
+      try {
+        const payload = JSON.parse(raw);
+        detail = payload?.detail ?? payload?.message;
+      } catch (error) {
+        detail = undefined;
+      }
     }
     const message = detail || `Request failed (${response.status})`;
     const error = new Error(message);
@@ -43,9 +66,17 @@ async function request(path, options = {}) {
 
   const contentType = response.headers.get('content-type') ?? '';
   if (contentType.includes('application/json')) {
-    return response.json();
+    if (!raw) {
+      return null;
+    }
+    try {
+      return JSON.parse(raw);
+    } catch (error) {
+      console.warn('[API] Failed to parse JSON response', { url, raw, error });
+      return JSON.parse(await response.text());
+    }
   }
-  return response.text();
+  return raw;
 }
 
 export async function listDocuments() {
@@ -58,6 +89,12 @@ export function uploadDocument(file, onProgress) {
     xhr.open('POST', `${apiBase}/upload`);
     xhr.responseType = 'json';
 
+    console.debug('[API] Request', {
+      url: `${apiBase}/upload`,
+      method: 'POST',
+      body: file?.name,
+    });
+
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable && typeof onProgress === 'function') {
         onProgress(Math.round((event.loaded / event.total) * 100));
@@ -65,6 +102,12 @@ export function uploadDocument(file, onProgress) {
     };
 
     xhr.onload = () => {
+      console.debug('[API] Response', {
+        url: `${apiBase}/upload`,
+        status: xhr.status,
+        ok: xhr.status >= 200 && xhr.status < 300,
+        raw: typeof xhr.response === 'string' ? xhr.response : JSON.stringify(xhr.response),
+      });
       if (xhr.status === 200 || xhr.status === 201) {
         resolve(xhr.response);
       } else {
@@ -93,14 +136,23 @@ export async function fetchHeaders(documentId) {
 
 export async function fetchSectionText(documentId, start, end) {
   const params = new URLSearchParams({ start: String(start), end: String(end) });
-  const response = await fetch(`${apiBase}/headers/${documentId}/section-text?${params}`);
+  const url = `${apiBase}/headers/${documentId}/section-text?${params}`;
+  console.debug('[API] Request', { url, method: 'GET' });
+  const response = await fetch(url);
+  const raw = await response.clone().text();
+  console.debug('[API] Response', {
+    url,
+    status: response.status,
+    ok: response.ok,
+    raw,
+  });
   if (!response.ok) {
     const message = `Section fetch failed (${response.status})`;
     const error = new Error(message);
     error.status = response.status;
     throw error;
   }
-  return response.text();
+  return raw;
 }
 
 export async function fetchSpecifications(documentId) {
@@ -128,11 +180,20 @@ export async function approveSpecRecord(documentId, body) {
 }
 
 export async function downloadSpecExport(documentId, format) {
-  const response = await fetch(`${apiBase}/specs/${documentId}/export?fmt=${encodeURIComponent(format)}`);
+  const url = `${apiBase}/specs/${documentId}/export?fmt=${encodeURIComponent(format)}`;
+  console.debug('[API] Request', { url, method: 'GET' });
+  const response = await fetch(url);
+  const raw = await response.clone().text();
+  console.debug('[API] Response', {
+    url,
+    status: response.status,
+    ok: response.ok,
+    raw,
+  });
   if (!response.ok) {
     let detail;
     try {
-      const payload = await response.json();
+      const payload = JSON.parse(raw);
       detail = payload?.detail ?? payload?.message;
     } catch (error) {
       detail = undefined;
