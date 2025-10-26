@@ -132,20 +132,20 @@ export function formatDate(value) {
   return Number.isNaN(date.getTime()) ? '-' : date.toLocaleString();
 }
 
-export function setDocumentMeta(container, document) {
+export function setDocumentMeta(container, documentRecord) {
   if (!container) return;
-  if (!document) {
+  if (!documentRecord) {
     container.innerHTML = '<p class="panel-status">No document selected.</p>';
     return;
   }
 
   container.innerHTML = '';
   const id = document.createElement('span');
-  id.textContent = `ID: ${document.id}`;
+  id.textContent = `ID: ${documentRecord.id}`;
   const status = document.createElement('span');
-  status.textContent = `Status: ${document.status}`;
+  status.textContent = `Status: ${documentRecord.status}`;
   const uploaded = document.createElement('span');
-  uploaded.textContent = `Uploaded: ${formatDate(document.uploaded_at)}`;
+  uploaded.textContent = `Uploaded: ${formatDate(documentRecord.uploaded_at)}`;
   container.append(id, status, uploaded);
 }
 
