@@ -1,4 +1,21 @@
-const apiBase = document.querySelector('meta[name="api-base"]')?.content ?? '/api';
+const apiBase = (() => {
+  const configured = document.querySelector('meta[name="api-base"]')?.content?.trim();
+  const normalised = configured && configured.length > 0 ? configured : '/api';
+
+  if (/^https?:\/\//i.test(normalised)) {
+    return normalised;
+  }
+
+  if (normalised.startsWith('/')) {
+    const url = new URL(window.location.href);
+    if (url.port === '3600' && normalised === '/api') {
+      url.port = '7600';
+    }
+    return `${url.origin}${normalised}`;
+  }
+
+  return normalised;
+})();
 
 async function request(path, options = {}) {
   const response = await fetch(`${apiBase}${path}`, {
