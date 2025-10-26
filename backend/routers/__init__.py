@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from .compare import router as compare_router
 from .files import router as files_router
 from .headers import router as headers_router
+from .observability import router as observability_router
 from .parse import router as parse_router
 from .specs import router as specs_router
 
@@ -13,5 +14,6 @@ api_router.include_router(headers_router)
 api_router.include_router(parse_router)
 api_router.include_router(specs_router)
 api_router.include_router(compare_router)
+api_router.include_router(observability_router)
 
 __all__ = ["api_router"]
