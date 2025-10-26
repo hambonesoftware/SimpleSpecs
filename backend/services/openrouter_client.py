@@ -15,11 +15,36 @@ OPENROUTER_URL = os.getenv(
     "OPENROUTER_URL", "https://openrouter.ai/api/v1/chat/completions"
 ).strip()
 OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
-OPENROUTER_MODEL = os.getenv(
-    "OPENROUTER_MODEL", "deepseek/deepseek-chat-v3-0324:free"
-).strip()
+_DEFAULT_OPENROUTER_MODEL = "deepseek/deepseek-chat-v3-0324:free"
 SITE_URL = os.getenv("OPENROUTER_SITE_URL", "http://localhost:3600").strip()
 X_TITLE = os.getenv("OPENROUTER_X_TITLE", "SimpleSpecs (Dev)").strip()
+
+try:  # Import lazily to avoid optional dependency issues during packaging.
+    from ..config import get_settings
+except Exception:  # pragma: no cover - fallback when config import fails
+    get_settings = None  # type: ignore[assignment]
+
+
+def _resolve_default_model() -> str:
+    """Return the configured default model from settings or environment."""
+
+    env_model = os.getenv("OPENROUTER_MODEL")
+    if env_model and env_model.strip():
+        return env_model.strip()
+
+    if get_settings is not None:
+        try:
+            settings = get_settings()
+        except Exception:  # pragma: no cover - defensive cache failure
+            settings = None
+        if settings:
+            configured = getattr(settings, "openrouter_model", "")
+            if configured and isinstance(configured, str):
+                configured = configured.strip()
+                if configured:
+                    return configured
+
+    return _DEFAULT_OPENROUTER_MODEL
 
 
 class OpenRouterError(RuntimeError):
@@ -54,7 +79,7 @@ def _merge_payload(
     bigger["max_tokens"] = max(_extract_max_tokens(params) or 2048, 4096)
 
     payload: Dict[str, Any] = {
-        "model": model or OPENROUTER_MODEL,
+        "model": model or _resolve_default_model(),
         "messages": messages,
         "temperature": temperature,
     }
