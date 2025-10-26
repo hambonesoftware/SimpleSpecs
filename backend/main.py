@@ -13,6 +13,7 @@ from .database import init_db
 from .routers import api_router
 from .middleware import RequestIdMiddleware, SecurityHeadersMiddleware
 from .observability import RequestMetricsMiddleware
+from .config import get_settings
 
 
 @asynccontextmanager
@@ -23,17 +24,24 @@ async def lifespan(app: FastAPI):
     yield
 
 
+settings = get_settings()
+
+cors_allow_origins = list(settings.cors_allow_origins)
+allow_credentials = True
+if "*" in cors_allow_origins:
+    cors_allow_origins = ["*"]
+    allow_credentials = False
+if not cors_allow_origins:
+    cors_allow_origins = ["http://localhost:3600", "http://127.0.0.1:3600"]
+
 app = FastAPI(title="SimpleSpecs", version="0.1.0", lifespan=lifespan)
 app.add_middleware(RequestIdMiddleware)
 app.add_middleware(RequestMetricsMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3600",
-        "http://127.0.0.1:3600",
-    ],
-    allow_credentials=True,
+    allow_origins=cors_allow_origins,
+    allow_credentials=allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
