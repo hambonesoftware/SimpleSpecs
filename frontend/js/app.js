@@ -74,7 +74,7 @@ function updateHeaderModeTag(mode) {
   }
 
   const normalised = String(mode).toLowerCase();
-  let label = 'Huer';
+  let label = 'Heur';
   let variant = 'heuristic';
   let description = 'Headers derived via heuristic extraction.';
 
@@ -225,6 +225,14 @@ async function selectDocument(documentId) {
         fetchSection: fetchSectionText,
       });
       updateHeaderModeTag(state.headers?.mode ?? null);
+      if (Array.isArray(state.headers?.messages)) {
+        state.headers.messages.forEach((message) => {
+          if (!message) {
+            return;
+          }
+          showToast(message, 'warning', 6000);
+        });
+      }
     } else {
       state.headers = null;
       setPanelError(elements.headersContent, headersResult.reason?.message ?? 'Unable to load headers.');

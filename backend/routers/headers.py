@@ -78,6 +78,7 @@ class HeadersResponse(BaseModel):
     simpleheaders: list[SimpleHeaderPayload] = Field(default_factory=list)
     sections: list[SectionPayload] = Field(default_factory=list)
     mode: str | None = None
+    messages: list[str] = Field(default_factory=list)
 
     @classmethod
     def from_result(
@@ -88,6 +89,7 @@ class HeadersResponse(BaseModel):
         simpleheaders: list[SimpleHeaderPayload] | None = None,
         sections: list[SectionPayload] | None = None,
         mode: str | None = None,
+        messages: list[str] | None = None,
     ) -> "HeadersResponse":
         return cls(
             document_id=document_id,
@@ -97,6 +99,7 @@ class HeadersResponse(BaseModel):
             simpleheaders=simpleheaders or [],
             sections=sections or [],
             mode=mode,
+            messages=list(messages or []),
         )
 
 
@@ -175,6 +178,7 @@ async def generate_headers(
         simpleheaders=simpleheaders_payload,
         sections=sections_payload,
         mode=orchestrated.get("mode"),
+        messages=orchestrated.get("messages"),
     )
 
 
