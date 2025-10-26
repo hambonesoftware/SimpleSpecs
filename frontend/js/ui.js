@@ -602,6 +602,8 @@ export function showToast(message, variant = 'info', timeout = 3500) {
   toast.className = 'toast';
   if (variant === 'error') {
     toast.classList.add('toast--error');
+  } else if (variant === 'warning') {
+    toast.classList.add('toast--warning');
   }
   toast.textContent = message;
   region.append(toast);
