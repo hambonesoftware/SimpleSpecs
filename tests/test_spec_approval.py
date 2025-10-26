@@ -55,8 +55,10 @@ def test_spec_approval_flow_and_exports(client: TestClient) -> None:
     first = client.post(
         f"/api/specs/{document_id}/approve",
         json={"reviewer": "qa@example.com", "payload": payload, "notes": "Initial pass"},
+        headers={"X-Request-ID": "approve-1"},
     )
     assert first.status_code == 200
+    assert first.headers["X-Request-ID"] == "approve-1"
     first_data = first.json()
     assert first_data["record"]["state"] == "approved"
     assert first_data["record"]["approved_at"] is not None
@@ -66,34 +68,50 @@ def test_spec_approval_flow_and_exports(client: TestClient) -> None:
     second = client.post(
         f"/api/specs/{document_id}/approve",
         json={"reviewer": "qa@example.com", "payload": payload},
+        headers={"X-Request-ID": "approve-2"},
     )
     assert second.status_code == 200
+    assert second.headers["X-Request-ID"] == "approve-2"
     second_data = second.json()
     assert second_data["record"]["content_hash"] == hash_one
     assert second_data["record"]["id"] == first_data["record"]["id"]
 
-    status = client.get(f"/api/specs/{document_id}")
+    status = client.get(
+        f"/api/specs/{document_id}", headers={"X-Request-ID": "status-1"}
+    )
     assert status.status_code == 200
     snapshot = status.json()
     assert snapshot["record"]["content_hash"] == hash_one
     assert len(snapshot["audit"]) >= 2
     assert snapshot["audit"][0]["action"] == "approve"
     assert snapshot["audit"][-1]["detail"]["changed"] is False
+    assert snapshot["audit"][0]["detail"]["request_id"] == "approve-1"
+    assert snapshot["audit"][1]["detail"]["request_id"] == "approve-2"
 
-    csv_response = client.get(f"/api/specs/{document_id}/export", params={"fmt": "csv"})
+    csv_response = client.get(
+        f"/api/specs/{document_id}/export",
+        params={"fmt": "csv"},
+        headers={"X-Request-ID": "export-csv"},
+    )
     assert csv_response.status_code == 200
     assert csv_response.headers["content-type"].startswith("application/zip")
+    assert csv_response.headers["X-Request-ID"] == "export-csv"
     with zipfile.ZipFile(io.BytesIO(csv_response.content)) as archive:
         members = archive.namelist()
         assert "mechanical.csv" in members
         csv_payload = archive.read("mechanical.csv").decode()
         assert "Pump shall be rated for 100 psi." in csv_payload
 
-    docx_response = client.get(f"/api/specs/{document_id}/export", params={"fmt": "docx"})
+    docx_response = client.get(
+        f"/api/specs/{document_id}/export",
+        params={"fmt": "docx"},
+        headers={"X-Request-ID": "export-docx"},
+    )
     assert docx_response.status_code == 200
     assert docx_response.headers["content-type"].startswith(
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+    assert docx_response.headers["X-Request-ID"] == "export-docx"
     document = DocxDocument(io.BytesIO(docx_response.content))
     combined_text = "\n".join(paragraph.text for paragraph in document.paragraphs)
     assert "Pump shall be rated for 100 psi." in combined_text
@@ -101,3 +119,12 @@ def test_spec_approval_flow_and_exports(client: TestClient) -> None:
     export_dir = Path(os.environ["EXPORT_DIR"])
     saved = list(export_dir.glob("spec-*.docx"))
     assert saved, "DOCX export should be written to disk"
+
+    final_status = client.get(
+        f"/api/specs/{document_id}", headers={"X-Request-ID": "status-2"}
+    )
+    assert final_status.status_code == 200
+    audit_entries = final_status.json()["audit"]
+    export_entries = [entry for entry in audit_entries if entry["action"] == "export"]
+    assert export_entries[-2]["detail"]["request_id"] == "export-csv"
+    assert export_entries[-1]["detail"]["request_id"] == "export-docx"
