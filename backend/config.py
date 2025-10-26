@@ -110,6 +110,10 @@ class Settings(BaseModel):
     headers_suppress_running: bool = Field(
         default_factory=lambda: _env_flag("HEADERS_SUPPRESS_RUNNING", True)
     )
+    headers_llm_strict: bool = Field(
+        default_factory=lambda: os.getenv("HEADERS_LLM_STRICT", "false").lower()
+        == "true"
+    )
     headers_mode: str = Field(
         default_factory=lambda: os.getenv("HEADERS_MODE", "llm_full")
     )

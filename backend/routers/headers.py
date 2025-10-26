@@ -17,8 +17,10 @@ from ..services.headers import (
     extract_headers,
     flatten_outline,
 )
+from ..services.headers_llm_strict import extract_headers_and_sections_strict
 from ..services.headers_orchestrator import extract_headers_and_chunks
-from ..services.pdf_native import parse_pdf
+from ..services.llm import LLMService
+from ..services.pdf_native import collect_line_metrics, parse_pdf
 from ..services.simpleheaders_state import SimpleHeadersState
 
 router = APIRouter(prefix="/api", tags=["headers"])
@@ -132,6 +134,63 @@ async def generate_headers(
         )
 
     document_bytes = document_path.read_bytes()
+
+    if settings.headers_llm_strict:
+        llm_service = LLMService(settings)
+        if llm_service.is_enabled:
+            lines, _, doc_hash = collect_line_metrics(
+                document_bytes,
+                {"filename": document.filename},
+                suppress_toc=settings.headers_suppress_toc,
+                suppress_running=settings.headers_suppress_running,
+            )
+            strict_output = extract_headers_and_sections_strict(
+                llm=llm_service,
+                lines=lines,
+            )
+
+            SimpleHeadersState.set(doc_id, doc_hash, lines)
+
+            simpleheaders_payload = [
+                SimpleHeaderPayload(
+                    text=item.get("text", ""),
+                    number=item.get("number"),
+                    level=int(item.get("level", 1)),
+                    page=int(item.get("start_page", 0)),
+                    line_idx=int(item.get("line_index", 0)),
+                    global_idx=int(item.get("start_global_index", 0)),
+                )
+                for item in strict_output.get("headers", [])
+            ]
+
+            sections_payload = [
+                SectionPayload(
+                    header_text=section.get("text", ""),
+                    header_number=section.get("number"),
+                    level=int(section.get("level", 1)),
+                    start_global_idx=int(section.get("start_global_index", 0)),
+                    end_global_idx=int(
+                        section.get(
+                            "end_global_index", section.get("start_global_index", 0)
+                        )
+                    ),
+                    start_page=int(section.get("start_page", 0)),
+                    end_page=int(
+                        section.get("end_page", section.get("start_page", 0))
+                    ),
+                )
+                for section in strict_output.get("sections", [])
+            ]
+
+            return HeadersResponse(
+                document_id=doc_id,
+                source="llm_strict",
+                fenced_text=strict_output.get("fenced_text", ""),
+                outline=[],
+                simpleheaders=simpleheaders_payload,
+                sections=sections_payload,
+                mode="llm_strict",
+            )
 
     parse_result = parse_pdf(document_path, settings=settings)
     llm_client = HeadersLLMClient(settings)
