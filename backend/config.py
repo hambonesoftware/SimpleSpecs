@@ -7,6 +7,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Tuple
 
+from dotenv import load_dotenv
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -20,8 +21,29 @@ def _env_flag(name: str, default: bool) -> bool:
 
 
 BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent
 DEFAULT_TERMS_DIR = BASE_DIR / "resources" / "terms"
 DEFAULT_BASELINES_PATH = BASE_DIR / "resources" / "baselines" / "mandatory_clauses.json"
+
+
+def _load_environment() -> None:
+    """Load environment variables from a ``.env`` file if present."""
+
+    explicit_path = os.getenv("SIMPLESPECS_ENV_FILE")
+    candidates = []
+
+    if explicit_path:
+        candidates.append(Path(explicit_path))
+
+    candidates.append(PROJECT_ROOT / ".env")
+
+    for candidate in candidates:
+        try_path = candidate.expanduser()
+        if try_path.exists():
+            load_dotenv(try_path, override=False)
+
+
+_load_environment()
 
 
 def _database_url_default() -> str:
