@@ -18,6 +18,7 @@ DEFAULT_BACKEND_HOST = "0.0.0.0"
 DEFAULT_BACKEND_PORT = 7600
 DEFAULT_FRONTEND_HOST = "0.0.0.0"
 DEFAULT_FRONTEND_PORT = 3600
+PROJECT_ROOT = Path(__file__).resolve().parent
 
 
 def _create_frontend_handler(directory: Path) -> Type[SimpleHTTPRequestHandler]:
@@ -86,6 +87,12 @@ def launch_backend(host: str, port: int, log_level: str) -> subprocess.Popen[str
     env.setdefault("HOST", host)
     env.setdefault("PORT", str(port))
     env.setdefault("LOG_LEVEL", log_level)
+    existing_pythonpath = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = (
+        str(PROJECT_ROOT)
+        if not existing_pythonpath
+        else str(PROJECT_ROOT) + os.pathsep + existing_pythonpath
+    )
 
     command = [
         sys.executable,
@@ -99,7 +106,7 @@ def launch_backend(host: str, port: int, log_level: str) -> subprocess.Popen[str
         "--log-level",
         log_level,
     ]
-    process = subprocess.Popen(command, env=env)
+    process = subprocess.Popen(command, env=env, cwd=str(PROJECT_ROOT))
     sys.stdout.write(f"[backend] Started uvicorn on {host}:{port} (PID {process.pid}).\n")
     return process
 
@@ -139,7 +146,7 @@ def shutdown_frontend(server: ThreadingHTTPServer, thread: threading.Thread) -> 
 
 def main() -> None:
     args = parse_args()
-    frontend_dir = Path(__file__).resolve().parent / "frontend"
+    frontend_dir = PROJECT_ROOT / "frontend"
     if not frontend_dir.exists():
         raise SystemExit(f"Frontend directory not found: {frontend_dir}")
 
