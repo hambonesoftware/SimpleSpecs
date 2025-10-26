@@ -7,6 +7,8 @@ import sys
 import python_multipart
 import python_multipart.multipart
 
+__version__ = "0.1.0"
+
 # ---------------------------------------------------------------------------
 # Compatibility shim: Starlette currently imports the legacy ``multipart``
 # package which emits a ``PendingDeprecationWarning``. Register the modern
@@ -59,4 +61,4 @@ def _patch_testclient() -> None:
 
 _patch_testclient()
 
-__all__ = ["python_multipart"]
+__all__ = ["python_multipart", "__version__"]

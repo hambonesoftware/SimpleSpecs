@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 
 from backend.config import reset_settings_cache
 from backend.database import reset_database_state
+from backend.observability import metrics_registry
 
 
 @pytest.fixture(autouse=True)
@@ -30,9 +31,11 @@ def _isolate_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Gen
     monkeypatch.setenv("MAX_UPLOAD_SIZE", str(1024))
     reset_settings_cache()
     reset_database_state()
+    metrics_registry.reset()
     yield
     reset_settings_cache()
     reset_database_state()
+    metrics_registry.reset()
 
 
 @pytest.fixture()

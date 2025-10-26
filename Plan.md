@@ -8,7 +8,7 @@ This archive provides a **complete, actionable build plan** for your SimpleSpecs
 - **Goal:** Parse customer PDFs, extract **full header trees** and **departmental specifications** hardened by **ASME/ISO** terms, produce exports, and track compliance/risk.
 
 ## What’s inside
-- `plan/Phase-00-Foundations.md` through `plan/Phase-10-Deployment.md` — **one file per phase** with objectives, tasks, prompts, endpoints, checklists, and exit criteria.
+- `plan/Phase-00-Foundations.md` through `plan/Phase-13-Operational-Readiness-&-Runbooks.md` — **one file per phase** with objectives, tasks, prompts, endpoints, checklists, and exit criteria.
 - `plan/Standards-ASME-ISO.md` — the standards hardening reference used throughout.
 - `plan/Prompts-Library.md` — canonical LLM prompts (headers, classification, red-team checks).
 - `plan/Testing-Strategy.md` — consolidated test plan across phases.
