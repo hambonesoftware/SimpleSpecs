@@ -1,20 +1,36 @@
-"""Thin OpenRouter chat client with hardened parameter handling."""
+"""Synchronous OpenRouter chat client used across the backend."""
 
 from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Mapping, MutableMapping, Sequence
+import os
+from typing import Any, Dict, List, Mapping, MutableMapping, Optional
 
-import httpx
+import requests
 
-LOGGER = logging.getLogger(__name__)
-BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
+log = logging.getLogger("openrouter")
+
+OPENROUTER_URL = os.getenv(
+    "OPENROUTER_URL", "https://openrouter.ai/api/v1/chat/completions"
+).strip()
+OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
+OPENROUTER_MODEL = os.getenv(
+    "OPENROUTER_MODEL", "deepseek/deepseek-chat-v3-0324:free"
+).strip()
+SITE_URL = os.getenv("OPENROUTER_SITE_URL", "http://localhost:3600").strip()
+X_TITLE = os.getenv("OPENROUTER_X_TITLE", "SimpleSpecs (Dev)").strip()
+
+
+class OpenRouterError(RuntimeError):
+    """Raised when the OpenRouter API request fails."""
+
+    def __init__(self, message: str, *, status_code: int | None = None) -> None:
+        super().__init__(message)
+        self.status_code = status_code
 
 
 def _extract_max_tokens(params: Mapping[str, Any] | None) -> int | None:
-    """Return an integer max token value from the provided params mapping."""
-
     if not params:
         return None
     for key in ("max_tokens", "max_new_tokens"):
@@ -28,98 +44,145 @@ def _extract_max_tokens(params: Mapping[str, Any] | None) -> int | None:
     return None
 
 
-async def openrouter_chat(
-    *,
-    api_key: str,
-    model: str,
-    messages: Sequence[Mapping[str, str]],
-    timeout: float,
-    params: Mapping[str, Any] | None = None,
-) -> str:
-    """Send a chat completion request to OpenRouter and return the response text."""
-
-    if not api_key:
-        raise RuntimeError("OPENROUTER_API_KEY not set")
-
-    headers: MutableMapping[str, str] = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-
+def _merge_payload(
+    messages: List[Dict[str, str]],
+    model: Optional[str],
+    temperature: float,
+    params: Mapping[str, Any] | None,
+) -> Dict[str, Any]:
     bigger: MutableMapping[str, Any] = dict(params or {})
     bigger["max_tokens"] = max(_extract_max_tokens(params) or 2048, 4096)
 
-    if params:
-        referer = params.get("http_referer") or params.get("HTTP-Referer")
-        if isinstance(referer, str) and referer.strip():
-            headers["HTTP-Referer"] = referer.strip()
-        x_title = params.get("x_title") or params.get("X-Title")
-        if isinstance(x_title, str) and x_title.strip():
-            headers["X-Title"] = x_title.strip()
-
-    payload_params = {
-        key: value
-        for key, value in bigger.items()
-        if key not in {"http_referer", "HTTP-Referer", "x_title", "X-Title"}
-        and value is not None
+    payload: Dict[str, Any] = {
+        "model": model or OPENROUTER_MODEL,
+        "messages": messages,
+        "temperature": temperature,
     }
 
-    payload = {
-        "model": model,
-        "messages": [dict(message) for message in messages],
-        **payload_params,
+    for key, value in bigger.items():
+        if key in {"http_referer", "HTTP-Referer", "x_title", "X-Title"}:
+            continue
+        if value is not None:
+            payload[key] = value
+
+    return payload
+
+
+def _merge_headers(headers: Mapping[str, str] | None) -> Dict[str, str]:
+    merged: Dict[str, str] = {
+        "Content-Type": "application/json",
+        "HTTP-Referer": SITE_URL,
+        "Referer": SITE_URL,
+        "X-Title": X_TITLE,
     }
 
-    log_headers = dict(headers)
-    if "Authorization" in log_headers:
-        log_headers["Authorization"] = "***REDACTED***"
+    auth_header = None
+    if headers:
+        auth_header = headers.get("Authorization") or headers.get("authorization")
+    if auth_header and auth_header.strip():
+        token = auth_header.strip()
+        if not token.lower().startswith("bearer "):
+            token = f"Bearer {token}"
+        merged["Authorization"] = token
+    elif OPENROUTER_KEY:
+        merged["Authorization"] = f"Bearer {OPENROUTER_KEY}"
+    else:
+        raise OpenRouterError("Missing OPENROUTER_API_KEY")
 
-    LOGGER.info(
-        "OpenRouter request",
+    for key, value in (headers or {}).items():
+        if key.lower() == "authorization":
+            continue
+        if not value:
+            continue
+        merged[key] = value.strip() if isinstance(value, str) else value
+
+    referer = merged.get("HTTP-Referer") or merged.get("http_referer")
+    if isinstance(referer, str) and referer.strip():
+        merged["HTTP-Referer"] = referer.strip()
+        merged.setdefault("Referer", referer.strip())
+    else:
+        merged["HTTP-Referer"] = SITE_URL
+        merged.setdefault("Referer", SITE_URL)
+
+    plain_referer = merged.get("Referer")
+    if not isinstance(plain_referer, str) or not plain_referer.strip():
+        merged["Referer"] = merged["HTTP-Referer"]
+
+    x_title = merged.get("X-Title") or merged.get("x_title")
+    if isinstance(x_title, str) and x_title.strip():
+        merged["X-Title"] = x_title.strip()
+    else:
+        merged["X-Title"] = X_TITLE
+
+    return merged
+
+
+def chat(
+    messages: List[Dict[str, str]],
+    *,
+    model: Optional[str] = None,
+    temperature: float = 0.6,
+    params: Mapping[str, Any] | None = None,
+    headers: Mapping[str, str] | None = None,
+    timeout_connect: int = 10,
+    timeout_read: int = 120,
+) -> str:
+    """Send a chat completion request to OpenRouter and return the content."""
+
+    if not OPENROUTER_URL.startswith("http"):
+        raise OpenRouterError(f"Invalid OPENROUTER_URL: {OPENROUTER_URL!r}")
+
+    payload = _merge_payload(messages, model, temperature, params)
+    request_headers = _merge_headers(headers)
+
+    safe_headers = dict(request_headers)
+    if "Authorization" in safe_headers:
+        safe_headers["Authorization"] = "***REDACTED***"
+
+    log.debug(
+        "OpenRouter request prepared",
         extra={
             "openrouter": {
-                "url": BASE_URL,
-                "headers": log_headers,
+                "url": OPENROUTER_URL,
+                "headers": safe_headers,
                 "payload": payload,
             }
         },
     )
 
-    async with httpx.AsyncClient(timeout=timeout) as client:
-        response = await client.post(BASE_URL, headers=headers, json=payload)
-        response_text = response.text
+    try:
+        response = requests.post(
+            OPENROUTER_URL,
+            headers=request_headers,
+            json=payload,
+            timeout=(timeout_connect, timeout_read),
+        )
+    except requests.RequestException as exc:  # pragma: no cover - network failure
+        log.error("OpenRouter request failed: %s", exc)
+        raise OpenRouterError("OpenRouter request failed") from exc
 
-        if response.status_code >= 400:
-            LOGGER.error(
-                "OpenRouter error response",
-                extra={
-                    "openrouter": {
-                        "status": response.status_code,
-                        "raw": response_text,
-                    }
-                },
-            )
-            response.raise_for_status()
-
-        LOGGER.info(
-            "OpenRouter response",
-            extra={
-                "openrouter": {
-                    "status": response.status_code,
-                    "raw": response_text,
-                }
-            },
+    if response.status_code != 200:
+        snippet = response.text[:500]
+        log.error(
+            "OpenRouter error %s: %s", response.status_code, snippet
+        )
+        raise OpenRouterError(
+            f"{response.status_code} {response.reason}",
+            status_code=response.status_code,
         )
 
-        data = json.loads(response_text)
-        choices = data.get("choices") or []
-        if not choices:
-            raise RuntimeError("OpenRouter response missing choices array")
-        message = choices[0].get("message") or {}
-        content = message.get("content")
-        if not isinstance(content, str):
-            raise RuntimeError("OpenRouter response missing message content")
-        return content
+    try:
+        data = response.json()
+    except json.JSONDecodeError as exc:  # pragma: no cover - unexpected payload
+        log.error("OpenRouter invalid JSON: %s", response.text[:500])
+        raise OpenRouterError("Invalid JSON from OpenRouter") from exc
+
+    try:
+        return data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, TypeError) as exc:
+        log.error("OpenRouter bad shape: %s / %s", exc, data)
+        raise OpenRouterError("No choices in OpenRouter response") from exc
 
 
-__all__ = ["openrouter_chat"]
+__all__ = ["chat", "OpenRouterError"]
+

@@ -67,7 +67,7 @@ def test_single_chunks_from_headers_produces_ranges() -> None:
 def test_get_headers_llm_full_uses_cache(monkeypatch, tmp_path) -> None:
     calls = 0
 
-    async def _fake_chat(**kwargs):  # noqa: ANN001 - test stub
+    def _fake_chat(messages, **kwargs):  # noqa: ANN001 - test stub
         nonlocal calls
         calls += 1
         payload = {
@@ -83,9 +83,7 @@ def test_get_headers_llm_full_uses_cache(monkeypatch, tmp_path) -> None:
             "-----END SIMPLEHEADERS JSON-----"
         )
 
-    monkeypatch.setattr(
-        "backend.services.pdf_headers_llm_full.openrouter_chat", _fake_chat
-    )
+    monkeypatch.setattr("backend.services.pdf_headers_llm_full.chat", _fake_chat)
 
     settings = Settings(
         upload_dir=tmp_path,

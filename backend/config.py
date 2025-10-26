@@ -144,9 +144,13 @@ class Settings(BaseModel):
         default_factory=lambda: os.getenv("OPENROUTER_MODEL", "openrouter/auto")
     )
     openrouter_http_referer: str | None = Field(
-        default_factory=lambda: os.getenv("HTTP_REFERER")
+        default_factory=lambda: os.getenv("OPENROUTER_SITE_URL")
+        or os.getenv("HTTP_REFERER")
     )
-    openrouter_title: str | None = Field(default_factory=lambda: os.getenv("X_TITLE"))
+    openrouter_title: str | None = Field(
+        default_factory=lambda: os.getenv("OPENROUTER_X_TITLE")
+        or os.getenv("X_TITLE")
+    )
     spec_terms_dir: Path = Field(
         default_factory=lambda: Path(
             os.getenv("SPEC_TERMS_DIR", str(DEFAULT_TERMS_DIR))

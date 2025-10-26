@@ -99,7 +99,7 @@ class HeadersResponse(BaseModel):
             simpleheaders=simpleheaders or [],
             sections=sections or [],
             mode=mode,
-            messages=list(messages or []),
+            messages=[*result.messages, *(messages or [])],
         )
 
 
