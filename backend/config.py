@@ -37,7 +37,7 @@ def _cors_origin_regex_default() -> str | None:
 
     raw = os.getenv(
         "CORS_ALLOW_ORIGIN_REGEX",
-        r"http://(?:localhost|127\.0\.0\.1|0\.0\.0\.0|(?:\d{1,3}\.){3}\d)(?::\d{1,5})?",
+        r"http://(?:localhost|127\.0\.0\.1|0\.0\.0\.0|(?:\d{1,3}\.){3}\d{1,3})(?::\d{1,5})?",
     )
     if raw is None:
         return None

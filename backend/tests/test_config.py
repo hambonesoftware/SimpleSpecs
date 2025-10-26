@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from backend.config import Settings
 
 
@@ -13,8 +15,19 @@ def test_default_cors_regex_allows_local_network(monkeypatch):
 
     assert (
         settings.cors_allow_origin_regex
-        == r"http://(?:localhost|127\.0\.0\.1|0\.0\.0\.0|(?:\d{1,3}\.){3}\d)(?::\d{1,5})?"
+        == r"http://(?:localhost|127\.0\.0\.1|0\.0\.0\.0|(?:\d{1,3}\.){3}\d{1,3})(?::\d{1,5})?"
     )
+
+
+def test_default_cors_regex_matches_private_ipv4_origin(monkeypatch):
+    """The default regex should match private IPv4 origins with custom ports."""
+
+    monkeypatch.delenv("CORS_ALLOW_ORIGIN_REGEX", raising=False)
+    settings = Settings()
+
+    pattern = re.compile(settings.cors_allow_origin_regex)
+
+    assert pattern.fullmatch("http://192.168.68.136:3600")
 
 
 def test_blank_cors_regex_disables_pattern(monkeypatch):
