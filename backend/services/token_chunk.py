@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Iterable, List
+from typing import Iterable, Iterator, List
 
 
 def rough_token_count(text: str) -> int:
@@ -12,6 +12,28 @@ def rough_token_count(text: str) -> int:
     if not text:
         return 1
     return max(1, math.ceil(len(text) / 4))
+
+
+def _split_block(text: str, limit_tokens: int) -> Iterator[str]:
+    """Yield sub-sections of *text* that respect the token limit."""
+
+    if not text:
+        yield ""
+        return
+
+    if rough_token_count(text) <= limit_tokens:
+        yield text
+        return
+
+    # Use the inverse of ``rough_token_count`` to avoid overshooting the limit.
+    char_limit = max(1, limit_tokens * 4)
+    start = 0
+    text_length = len(text)
+
+    while start < text_length:
+        end = min(start + char_limit, text_length)
+        yield text[start:end]
+        start = end
 
 
 def split_by_token_limit(blocks: Iterable[str], limit_tokens: int) -> List[str]:
@@ -26,13 +48,15 @@ def split_by_token_limit(blocks: Iterable[str], limit_tokens: int) -> List[str]:
 
     for block in blocks:
         text = block or ""
-        tokens = rough_token_count(text)
-        if current and current_tokens + tokens > limit_tokens:
-            groups.append(current)
-            current = []
-            current_tokens = 0
-        current.append(text)
-        current_tokens += tokens
+
+        for segment in _split_block(text, limit_tokens):
+            tokens = rough_token_count(segment)
+            if current and current_tokens + tokens > limit_tokens:
+                groups.append(current)
+                current = []
+                current_tokens = 0
+            current.append(segment)
+            current_tokens += tokens
 
     if current:
         groups.append(current)
