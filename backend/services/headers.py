@@ -1,18 +1,16 @@
-"""Header extraction service combining heuristics with optional LLM refinement."""
+"""Header extraction service backed exclusively by the LLM pipeline."""
 
 from __future__ import annotations
 
 import json
 import logging
-import math
 import re
-from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping, Sequence
 
 from ..config import Settings
 from .openrouter_client import OpenRouterError, chat as openrouter_chat
-from .pdf_native import ParsedBlock, ParsedPage, ParseResult
+from .pdf_native import ParsedPage, ParseResult
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,25 +37,12 @@ def _format_openrouter_error(exc: OpenRouterError) -> str:
     if status == 403:
         return "LLM unavailable (403). Check API key / Referer headers."
     if status == 429:
-        return "LLM unavailable (429). Rate limit exceeded; using heuristics."
+        return "LLM unavailable (429). Rate limit exceeded; retry later."
     if status == 500:
-        return "LLM unavailable (500). OpenRouter server error; using heuristics."
+        return "LLM unavailable (500). OpenRouter server error."
     if isinstance(status, int):
-        return f"LLM unavailable ({status}). Using heuristic headers."
-    return "LLM unavailable. Using heuristic headers."
-
-
-@dataclass(slots=True)
-class HeaderCandidate:
-    """Potential header extracted from PDF text blocks."""
-
-    title: str
-    numbering: str | None
-    page_number: int
-    level_hint: int
-    indent: float
-    top: float
-    score: float
+        return f"LLM unavailable ({status})."
+    return "LLM unavailable."
 
 
 @dataclass(slots=True)
@@ -101,228 +86,32 @@ def extract_headers(
     settings: Settings,
     llm_client: "HeadersLLMClient | None" = None,
 ) -> HeaderExtractionResult:
-    """Extract a hierarchical header outline from a parse result."""
+    """Extract a hierarchical header outline using the configured LLM."""
 
-    candidates = _collect_candidates(parse_result)
-    outline = _build_outline(candidates)
-    heuristic_result = HeaderExtractionResult(
-        outline=outline,
-        fenced_text=_outline_to_fenced_text(outline),
-        source="heuristic",
+    fenced_empty = "\n".join(["#headers#", "#/headers#"])
+    default_result = HeaderExtractionResult(
+        outline=[],
+        fenced_text=fenced_empty,
+        source="openrouter",
     )
 
-    if llm_client and llm_client.is_enabled:
-        try:
-            llm_result = llm_client.refine_outline(parse_result, heuristic_result)
-            if llm_result is not None:
-                return llm_result
-        except OpenRouterError as exc:  # pragma: no cover - network path
-            LOGGER.warning("LLM refinement failed: %s", exc)
-            heuristic_result.messages.append(_format_openrouter_error(exc))
-        except Exception as exc:  # pragma: no cover - other runtime issues
-            LOGGER.warning("LLM refinement failed: %s", exc)
-
-    return heuristic_result
-
-
-def _collect_candidates(parse_result: ParseResult) -> list[HeaderCandidate]:
-    """Return sorted header candidates based on heuristics."""
-
-    font_sizes: list[float] = []
-    for page in parse_result.pages:
-        for block in page.blocks:
-            if block.font_size:
-                font_sizes.append(block.font_size)
-
-    avg_font_size = sum(font_sizes) / len(font_sizes) if font_sizes else 0.0
-
-    candidates: list[HeaderCandidate] = []
-    for page in parse_result.pages:
-        if page.is_toc:
-            continue
-        for block in page.blocks:
-            text = _normalise_text(block.text)
-            if not text:
-                continue
-
-            numbering, title = _split_numbering(text)
-            score = _score_block(block, avg_font_size, bool(numbering))
-            if not numbering and score < 1.5:
-                continue
-
-            level_hint = _infer_level(numbering, block)
-            candidate = HeaderCandidate(
-                title=title,
-                numbering=numbering,
-                page_number=page.page_number,
-                level_hint=level_hint,
-                indent=block.bbox[0],
-                top=block.bbox[1],
-                score=score,
-            )
-            candidates.append(candidate)
-
-    candidates.sort(key=lambda c: (c.page_number, c.top))
-    return candidates
-
-
-def _score_block(
-    block: ParsedBlock, avg_font_size: float, has_numbering: bool
-) -> float:
-    """Calculate a heuristic score for a block."""
-
-    score = 0.0
-    if has_numbering:
-        score += 2.5
-
-    if block.font_size and avg_font_size:
-        diff = block.font_size - avg_font_size
-        if diff > 1.0:
-            score += 1.5
-        elif diff > 0.5:
-            score += 0.5
-
-    text = _normalise_text(block.text)
-    lowercase = text.lower()
-
-    if lowercase.startswith("appendix"):
-        score += 1.5
-
-    if text.isupper() and len(text.split()) <= 6:
-        score += 1.0
-    elif text.istitle():
-        score += 0.5
-
-    return score
-
-
-def _infer_level(numbering: str | None, block: ParsedBlock) -> int:
-    """Determine the likely nesting level for a candidate."""
-
-    if numbering:
-        segments = re.split(r"[.]+", numbering.strip(".) "))
-        segments = [seg for seg in segments if seg]
-        if segments:
-            return len(segments)
-
-    indent = block.bbox[0]
-    if indent <= 10:
-        return 1
-    return min(1 + int(math.floor(indent / 40.0)), 6)
-
-
-def _build_outline(candidates: Sequence[HeaderCandidate]) -> list[HeaderNode]:
-    """Build a tree from the candidate list."""
-
-    if not candidates:
-        return []
-
-    indent_buckets = _cluster_indents(candidates)
-    outline: list[HeaderNode] = []
-    stack: list[tuple[int, HeaderNode]] = []
-    counters: dict[int, int] = defaultdict(int)
-
-    for candidate in candidates:
-        level = _resolve_level(candidate, indent_buckets)
-        if candidate.numbering:
-            _sync_counters(candidate.numbering, counters)
-            numbering = candidate.numbering
-        else:
-            numbering = _auto_number(level, counters)
-        node = HeaderNode(
-            title=candidate.title, numbering=numbering, page=candidate.page_number
-        )
-
-        while stack and stack[-1][0] >= level:
-            stack.pop()
-
-        if stack:
-            stack[-1][1].children.append(node)
-        else:
-            outline.append(node)
-
-        stack.append((level, node))
-
-    return outline
-
-
-def _cluster_indents(candidates: Sequence[HeaderCandidate]) -> list[float]:
-    """Group indent values into discrete buckets to stabilise level inference."""
-
-    values = sorted({round(candidate.indent, 2) for candidate in candidates})
-    if not values:
-        return [0.0]
-
-    buckets = [values[0]]
-    for value in values[1:]:
-        if abs(value - buckets[-1]) > 12.0:
-            buckets.append(value)
-    return buckets
-
-
-def _resolve_level(candidate: HeaderCandidate, indent_buckets: Sequence[float]) -> int:
-    """Resolve a final level using indentation and hints."""
-
-    level = candidate.level_hint
-    indent = candidate.indent
-    for index, bucket in enumerate(indent_buckets, start=1):
-        if indent <= bucket + 1e-3:
-            level = min(level, index)
-            break
-    return max(1, level)
-
-
-def _auto_number(level: int, counters: dict[int, int]) -> str:
-    """Assign synthetic numbering for unnumbered headers."""
-
-    counters[level] = counters.get(level, 0) + 1
-    for deeper_level in list(counters.keys()):
-        if deeper_level > level:
-            counters[deeper_level] = 0
-
-    parts: list[str] = []
-    for depth in range(1, level + 1):
-        value = counters.get(depth)
-        if not value:
-            value = 1
-            counters[depth] = value
-        parts.append(str(value))
-    return ".".join(parts)
-
-
-def _sync_counters(numbering: str, counters: dict[int, int]) -> None:
-    """Align numeric counters with explicit numbering from the document."""
+    if not llm_client or not llm_client.is_enabled:
+        default_result.messages.append("LLM header extraction is disabled.")
+        return default_result
 
     try:
-        parts = [int(part) for part in numbering.split(".")]
-    except ValueError:
-        return
+        llm_result = llm_client.refine_outline(parse_result)
+        if llm_result is not None:
+            return llm_result
+        default_result.messages.append("LLM did not return any headers.")
+    except OpenRouterError as exc:  # pragma: no cover - network path
+        LOGGER.warning("LLM extraction failed: %s", exc)
+        default_result.messages.append(_format_openrouter_error(exc))
+    except Exception as exc:  # pragma: no cover - other runtime issues
+        LOGGER.warning("LLM extraction failed: %s", exc)
+        default_result.messages.append("LLM header extraction failed.")
 
-    for index, value in enumerate(parts, start=1):
-        counters[index] = value
-
-    for deeper_level in list(counters.keys()):
-        if deeper_level > len(parts):
-            counters[deeper_level] = 0
-
-
-def _outline_to_fenced_text(nodes: Sequence[HeaderNode]) -> str:
-    """Render the outline as fenced text."""
-
-    lines = ["#headers#"]
-
-    def _emit(node: HeaderNode, depth: int) -> None:
-        indent = "  " * depth
-        label = f"{node.numbering} {node.title}".strip()
-        lines.append(f"{indent}{label}")
-        for child in node.children:
-            _emit(child, depth + 1)
-
-    for node in nodes:
-        _emit(node, 0)
-
-    lines.append("#/headers#")
-    return "\n".join(lines)
+    return default_result
 
 
 def flatten_outline(nodes: Sequence[HeaderNode]) -> list[dict[str, object]]:
@@ -379,7 +168,7 @@ def _split_numbering(text: str) -> tuple[str | None, str]:
 
 
 class HeadersLLMClient:
-    """Client responsible for refining outlines using the OpenRouter chat API."""
+    """Client responsible for extracting outlines using the OpenRouter chat API."""
 
     def __init__(
         self,
@@ -399,14 +188,13 @@ class HeadersLLMClient:
     def refine_outline(
         self,
         parse_result: ParseResult,
-        heuristic_result: HeaderExtractionResult,
     ) -> HeaderExtractionResult | None:
-        """Call OpenRouter and merge the returned headers with heuristics."""
+        """Call OpenRouter and return the extracted headers."""
 
         if not self.is_enabled:
             return None
 
-        prompt = _render_prompt(parse_result, heuristic_result)
+        prompt = _render_prompt(parse_result)
         messages = [{"role": "user", "content": prompt}]
 
         headers: dict[str, str] = {}
@@ -453,16 +241,9 @@ class HeadersLLMClient:
 
 
 def _render_prompt(
-    parse_result: ParseResult, heuristic_result: HeaderExtractionResult
+    parse_result: ParseResult,
 ) -> str:
-    """Render the header extraction prompt with heuristic hints."""
-
-    heuristic_lines = [
-        line
-        for line in heuristic_result.fenced_text.splitlines()
-        if line not in {"#headers#", "#/headers#"}
-    ]
-    heuristic_block = "\n".join(heuristic_lines) or "<no heuristic headers>"
+    """Render the header extraction prompt using parse context only."""
 
     def _sample_page(page: ParsedPage, *, limit: int = 15) -> list[str]:
         lines: list[str] = []
@@ -522,8 +303,6 @@ def _render_prompt(
         "- Preserve document order and exclude tables of contents or running headers.\n"
         "- Do not omit appendices; include them as headers when present.\n"
         "- If no headers exist, return {\"headers\": []}.\n\n"
-        "Heuristic outline (may be incomplete):\n"
-        f"{heuristic_block}\n\n"
         "Context:\n"
         f"{context_block}"
     )

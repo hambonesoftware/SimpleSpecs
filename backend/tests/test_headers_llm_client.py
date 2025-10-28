@@ -3,12 +3,7 @@ from __future__ import annotations
 import pytest
 
 from backend.config import Settings
-from backend.services.headers import (
-    HeaderExtractionResult,
-    HeaderNode,
-    HeadersLLMClient,
-    extract_headers,
-)
+from backend.services.headers import HeadersLLMClient, extract_headers
 from backend.services.openrouter_client import OpenRouterError
 from backend.services.pdf_native import ParsedBlock, ParsedPage, ParseResult
 
@@ -22,14 +17,6 @@ def _sample_parse_result() -> ParseResult:
     )
     page = ParsedPage(page_number=1, width=612.0, height=792.0, blocks=[block])
     return ParseResult(pages=[page])
-
-
-def _heuristic_result() -> HeaderExtractionResult:
-    node = HeaderNode(title="Scope", numbering="1", page=1)
-    fenced = "\n".join(["#headers#", "1 Scope", "#/headers#"])
-    return HeaderExtractionResult(outline=[node], fenced_text=fenced, source="heuristic")
-
-
 def test_llm_client_parses_json_fallback(
     tmp_path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -44,7 +31,7 @@ def test_llm_client_parses_json_fallback(
     settings = Settings(upload_dir=tmp_path)
     client = HeadersLLMClient(settings, chat_func=fake_chat)
 
-    result = client.refine_outline(_sample_parse_result(), _heuristic_result())
+    result = client.refine_outline(_sample_parse_result())
 
     assert result is not None
     assert result.outline[0].title == "Scope"
@@ -60,7 +47,7 @@ def test_extract_headers_includes_message_on_openrouter_error(
     class FailingClient:
         is_enabled = True
 
-        def refine_outline(self, *args, **kwargs):  # type: ignore[no-untyped-def]
+        def refine_outline(self, *_args, **_kwargs):  # type: ignore[no-untyped-def]
             raise OpenRouterError("403 Forbidden", status_code=403)
 
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
@@ -71,5 +58,5 @@ def test_extract_headers_includes_message_on_openrouter_error(
         llm_client=FailingClient(),
     )
 
-    assert result.source == "heuristic"
+    assert result.source == "openrouter"
     assert any("403" in message for message in result.messages)

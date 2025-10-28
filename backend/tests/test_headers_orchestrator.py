@@ -38,6 +38,8 @@ async def _run_extract(monkeypatch, tmp_path, *, llm_exception: Exception | None
         ]
 
     def _fake_chunks(headers, _lines):  # noqa: ANN001 - test stub
+        if not headers:
+            return []
         return [
             {
                 "header_text": headers[0]["text"],
@@ -82,7 +84,7 @@ def test_extract_headers_llm_failure_emits_message(monkeypatch, tmp_path) -> Non
         )
     )
 
-    assert result["mode"] == "native"
+    assert result["mode"] == "llm_full_error"
     assert result["messages"]
     assert "HTTP 403" in result["messages"][0]
 

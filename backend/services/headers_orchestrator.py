@@ -29,19 +29,16 @@ def _format_llm_failure(exc: Exception) -> str:
         if code in {"401", "403"}:
             return (
                 "LLM header extraction unavailable (HTTP {code}). "
-                "Using heuristic results. Verify the OpenRouter API key and referer configuration."
+                "Verify the OpenRouter API key and referer configuration."
             ).format(code=code)
         if code == "429":
             return (
                 "LLM header extraction temporarily unavailable (HTTP 429). "
-                "Rate limit exceeded; retry later. Falling back to heuristic results."
+                "Rate limit exceeded; retry later."
             )
-        return (
-            "LLM header extraction unavailable (HTTP {code}). "
-            "Using heuristic results."
-        ).format(code=code)
+        return "LLM header extraction unavailable (HTTP {code}).".format(code=code)
 
-    return "LLM header extraction unavailable. Using heuristic results."
+    return "LLM header extraction unavailable."
 
 
 async def extract_headers_and_chunks(
@@ -61,7 +58,7 @@ async def extract_headers_and_chunks(
     )
 
     located_headers: list[dict] = []
-    mode_used = "native"
+    mode_used = "llm_full"
     messages: list[str] = []
 
     if settings.headers_mode.lower() == "llm_full":
@@ -77,20 +74,14 @@ async def extract_headers_and_chunks(
                 lines,
                 excluded_pages=excluded_pages,
             )
-            if located_headers:
-                mode_used = "llm_full"
         except Exception as exc:  # pragma: no cover - network/runtime dependent
             LOGGER.warning("LLM header extraction failed: %s", exc)
             located_headers = []
             messages.append(_format_llm_failure(exc))
-
-    if not located_headers and native_headers:
-        located_headers = locate_headers_in_lines(
-            native_headers,
-            lines,
-            excluded_pages=excluded_pages,
-        )
-        mode_used = "native"
+            mode_used = "llm_full_error"
+    else:
+        mode_used = "llm_disabled"
+        messages.append("LLM header extraction is disabled by configuration.")
 
     sections = single_chunks_from_headers(located_headers, lines)
 
