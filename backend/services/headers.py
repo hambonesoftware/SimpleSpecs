@@ -12,7 +12,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from ..config import Settings
 from .openrouter_client import OpenRouterError, chat as openrouter_chat
-from .pdf_native import ParsedBlock, ParseResult
+from .pdf_native import ParsedBlock, ParsedPage, ParseResult
 
 LOGGER = logging.getLogger(__name__)
 
@@ -22,6 +22,11 @@ NUMBERING_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(
         r"^(?P<number>[IVXLCDM]+(?:\.\d+)*)(?:[.)])?\s+(?P<title>.+)$", re.IGNORECASE
     ),
+)
+
+APPENDIX_PATTERN = re.compile(
+    r"^(?P<prefix>appendix|appendices)\s+(?P<identifier>[A-Z0-9]+(?:\.[A-Z0-9]+)*)\b(?P<rest>.*)$",
+    re.IGNORECASE,
 )
 
 
@@ -178,6 +183,11 @@ def _score_block(
             score += 0.5
 
     text = _normalise_text(block.text)
+    lowercase = text.lower()
+
+    if lowercase.startswith("appendix"):
+        score += 1.5
+
     if text.isupper() and len(text.split()) <= 6:
         score += 1.0
     elif text.istitle():
@@ -347,6 +357,18 @@ def _normalise_text(text: str) -> str:
 def _split_numbering(text: str) -> tuple[str | None, str]:
     """Split a heading into numbering and title components."""
 
+    appendix_match = APPENDIX_PATTERN.match(text)
+    if appendix_match:
+        prefix = appendix_match.group("prefix") or "Appendix"
+        identifier = appendix_match.group("identifier") or ""
+        remainder = appendix_match.group("rest") or ""
+        cleaned_remainder = remainder.lstrip(" .:-–—)\t")
+        numbering = f"{prefix.upper()} {identifier.upper()}".strip()
+        title = cleaned_remainder.strip()
+        if not title:
+            title = f"{prefix.title()} {identifier.upper()}".strip()
+        return numbering, title
+
     for pattern in NUMBERING_PATTERNS:
         match = pattern.match(text)
         if match:
@@ -442,19 +464,51 @@ def _render_prompt(
     ]
     heuristic_block = "\n".join(heuristic_lines) or "<no heuristic headers>"
 
+    def _sample_page(page: ParsedPage, *, limit: int = 15) -> list[str]:
+        lines: list[str] = []
+        for block in page.blocks:
+            normalised = _normalise_text(block.text)
+            if normalised:
+                lines.append(normalised)
+            if len(lines) >= limit:
+                break
+        return lines
+
     page_summaries: list[str] = []
+    included_pages: set[int] = set()
     for page in parse_result.pages[:3]:
-        sample_lines = [
-            _normalise_text(block.text)
-            for block in page.blocks[:15]
-            if _normalise_text(block.text)
-        ]
+        sample_lines = _sample_page(page)
         if sample_lines:
             page_summaries.append(
                 f"Page {page.page_number}:\n" + "\n".join(sample_lines)
             )
+            included_pages.add(page.page_number)
 
-    context_block = "\n\n".join(page_summaries) or "(No preview text available)"
+    appendix_summaries: list[str] = []
+    for page in parse_result.pages:
+        if len(appendix_summaries) >= 2:
+            break
+        if page.page_number in included_pages:
+            continue
+        sample_lines = _sample_page(page)
+        if not sample_lines:
+            continue
+        if not any("appendix" in line.lower() for line in sample_lines):
+            continue
+        appendix_summaries.append(
+            f"Appendix preview (Page {page.page_number}):\n" + "\n".join(sample_lines)
+        )
+        included_pages.add(page.page_number)
+
+    context_sections: list[str] = []
+    if page_summaries:
+        context_sections.append("\n\n".join(page_summaries))
+    if appendix_summaries:
+        context_sections.append("\n\n".join(appendix_summaries))
+
+    context_block = (
+        "\n\n".join(context_sections) if context_sections else "(No preview text available)"
+    )
 
     prompt = (
         "Return ONLY this fence:\n\n"
@@ -466,6 +520,7 @@ def _render_prompt(
         "- Every header must include \"title\" and integer \"level\" (1 = top level).\n"
         "- Include \"number\" when the source shows one; otherwise use null.\n"
         "- Preserve document order and exclude tables of contents or running headers.\n"
+        "- Do not omit appendices; include them as headers when present.\n"
         "- If no headers exist, return {\"headers\": []}.\n\n"
         "Heuristic outline (may be incomplete):\n"
         f"{heuristic_block}\n\n"
