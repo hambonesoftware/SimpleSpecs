@@ -1,4 +1,4 @@
-"""Golden tests validating header extraction heuristics and endpoint."""
+"""Golden tests validating LLM-driven header extraction and endpoint."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from sqlmodel import Session
 from backend.config import Settings, reset_settings_cache
 from backend.database import get_engine, init_db, reset_database_state
 from backend.models import Document
-from backend.services.headers import extract_headers
+from backend.services.headers import HeaderExtractionResult, HeaderNode, extract_headers
 from backend.services.pdf_native import ParsedBlock, ParsedPage, ParseResult
 
 
@@ -127,8 +127,30 @@ def client() -> Generator[TestClient, None, None]:
 
 def test_extract_headers_generates_expected_outline(tmp_path: Path) -> None:
     parse_result = _sample_parse_result()
+    class StubLLM:
+        is_enabled = True
+
+        def refine_outline(self, *_args, **_kwargs):  # type: ignore[no-untyped-def]
+            root1 = HeaderNode(title="General Requirements", numbering="1", page=0)
+            root1.children.extend(
+                [
+                    HeaderNode(title="Scope", numbering="1.1", page=0),
+                    HeaderNode(title="References", numbering="1.2", page=0),
+                ]
+            )
+            root2 = HeaderNode(title="Materials", numbering="2", page=1)
+            root2.children.extend(
+                [
+                    HeaderNode(title="Steel Alloys", numbering="2.1", page=1),
+                    HeaderNode(title="Aluminum", numbering="2.2", page=1),
+                ]
+            )
+            outline = [root1, root2]
+            fenced = "#headers#\n{\"headers\": []}\n#/headers#"
+            return HeaderExtractionResult(outline=outline, fenced_text=fenced, source="openrouter")
+
     settings = Settings(upload_dir=tmp_path)
-    result = extract_headers(parse_result, settings=settings, llm_client=None)
+    result = extract_headers(parse_result, settings=settings, llm_client=StubLLM())
 
     expected_outline = [
         {
@@ -166,6 +188,7 @@ def test_toc_pages_are_ignored(tmp_path: Path) -> None:
     settings = Settings(upload_dir=tmp_path)
     result = extract_headers(parse_result, settings=settings, llm_client=None)
     assert result.outline == []
+    assert "disabled" in result.messages[0].lower()
 
 
 def test_headers_endpoint_returns_outline(
@@ -264,16 +287,33 @@ def test_headers_endpoint_returns_outline(
             "excluded_pages": [],
         }
 
+    class StubHeadersClient:
+        def __init__(self, *_args, **_kwargs) -> None:
+            self.is_enabled = True
+
+        def refine_outline(self, *_args, **_kwargs):  # type: ignore[no-untyped-def]
+            root = HeaderNode(title="General Requirements", numbering="1", page=0)
+            root.children.append(
+                HeaderNode(title="Scope", numbering="1.1", page=0)
+            )
+            fenced = "#headers#\n{\"headers\": []}\n#/headers#"
+            return HeaderExtractionResult(
+                outline=[root], fenced_text=fenced, source="openrouter"
+            )
+
     monkeypatch.setattr("backend.routers.headers.parse_pdf", _mock_parse)
     monkeypatch.setattr(
         "backend.routers.headers.extract_headers_and_chunks",
         _mock_extract_headers_and_chunks,
     )
+    monkeypatch.setattr(
+        "backend.routers.headers.HeadersLLMClient", lambda settings: StubHeadersClient()
+    )
 
     response = client.post(f"/api/headers/{document.id}")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["source"] == "heuristic"
+    assert payload["source"] == "openrouter"
     assert payload["document_id"] == document.id
     assert payload["outline"][0]["title"] == "General Requirements"
     assert payload["outline"][0]["children"][0]["title"] == "Scope"

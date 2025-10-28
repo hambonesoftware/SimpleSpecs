@@ -74,14 +74,22 @@ function updateHeaderModeTag(mode) {
   }
 
   const normalised = String(mode).toLowerCase();
-  let label = 'Heur';
-  let variant = 'heuristic';
-  let description = 'Headers derived via heuristic extraction.';
+  let label = 'LLM';
+  let variant = 'openrouter';
+  let description = 'Headers derived from the OpenRouter LLM.';
 
   if (normalised === 'llm_full') {
     label = 'LLM';
     variant = 'llm';
     description = 'Headers derived via LLM extraction.';
+  } else if (normalised === 'llm_full_error') {
+    label = 'LLM';
+    variant = 'llm';
+    description = 'LLM header extraction failed; see logs for details.';
+  } else if (normalised === 'llm_disabled') {
+    label = 'Off';
+    variant = 'openrouter';
+    description = 'LLM header extraction is disabled.';
   }
 
   tag.textContent = label;

@@ -29,15 +29,15 @@ SimpleSpecs parses engineering specification PDFs and structures the extracted d
 
 ### Header extraction configuration
 
-SimpleSpecs can run header detection heuristically or send the full document text to OpenRouter for a high-fidelity outline. Configure behaviour via the following environment variables (also available in `.env.template`):
+SimpleSpecs sends the full document text to OpenRouter for a high-fidelity outline. Configure behaviour via the following environment variables (also available in `.env.template`):
 
-- `HEADERS_MODE`: set to `llm_full` to enable the OpenRouter pipeline or `native` to force heuristic extraction.
+- `HEADERS_MODE`: keep `llm_full` to enable the OpenRouter pipeline.
 - `HEADERS_LLM_MODEL`: fully qualified OpenRouter model identifier (default `anthropic/claude-3.5-sonnet`).
 - `HEADERS_LLM_MAX_INPUT_TOKENS`: approximate token budget per request chunk (default `120000`).
 - `HEADERS_LLM_TIMEOUT_S`: request timeout in seconds (default `120`).
 - `HEADERS_LLM_CACHE_DIR`: on-disk cache for previously processed documents.
 
-The pipeline requires `OPENROUTER_API_KEY` and will fall back to the heuristic outline if a call fails. Cached responses avoid repeated model invocations for unchanged documents.
+The pipeline requires `OPENROUTER_API_KEY`. Cached responses avoid repeated model invocations for unchanged documents.
 
 ## Running with Docker
 1. Copy the production environment example and update secrets:

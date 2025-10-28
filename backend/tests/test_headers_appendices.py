@@ -1,8 +1,9 @@
-"""Tests for appendix-aware header extraction heuristics and prompts."""
+"""Tests for appendix-aware header extraction prompts and helpers."""
 
 from backend.config import Settings
 from backend.services.headers import (
     HeaderExtractionResult,
+    HeaderNode,
     extract_headers,
     _render_prompt,
     _split_numbering,
@@ -35,8 +36,8 @@ def test_split_numbering_handles_appendix_label() -> None:
     assert title_b == "Appendix B"
 
 
-def test_extract_headers_includes_appendix(tmp_path) -> None:
-    """Heuristic extraction should emit appendix headers without LLM help."""
+def test_extract_headers_returns_llm_outline(tmp_path) -> None:
+    """The extractor should return outlines supplied by the LLM client."""
 
     parse_result = ParseResult(
         pages=[
@@ -52,37 +53,26 @@ def test_extract_headers_includes_appendix(tmp_path) -> None:
                     ),
                 ],
             ),
-            ParsedPage(
-                page_number=5,
-                width=612,
-                height=792,
-                blocks=[
-                    ParsedBlock(
-                        text="Appendix A Data Tables",
-                        bbox=(36.0, 72.0, 540.0, 90.0),
-                        font_size=14.5,
-                    ),
-                    ParsedBlock(
-                        text="Additional context",
-                        bbox=(36.0, 96.0, 540.0, 112.0),
-                        font_size=11.0,
-                    ),
-                ],
-            ),
         ]
     )
 
+    appendix_node = HeaderNode(title="Appendix A", numbering="APPENDIX A", page=5)
+    llm_result = HeaderExtractionResult(
+        outline=[appendix_node],
+        fenced_text="#headers#\n{\"headers\": []}\n#/headers#",
+        source="openrouter",
+    )
+
+    class StubClient:
+        is_enabled = True
+
+        def refine_outline(self, *_args, **_kwargs):  # type: ignore[no-untyped-def]
+            return llm_result
+
     settings = _settings(tmp_path)
-    result = extract_headers(parse_result, settings=settings, llm_client=None)
+    result = extract_headers(parse_result, settings=settings, llm_client=StubClient())
 
-    appendix_nodes = [
-        node
-        for node in result.outline
-        if node.numbering.upper().startswith("APPENDIX")
-    ]
-
-    assert appendix_nodes, "Expected at least one appendix header"
-    assert any("Data Tables" in node.title for node in appendix_nodes)
+    assert result is llm_result
 
 
 def test_render_prompt_highlights_appendix_context(tmp_path) -> None:
@@ -124,11 +114,8 @@ def test_render_prompt_highlights_appendix_context(tmp_path) -> None:
     )
 
     parse_result = ParseResult(pages=pages)
-    heuristic_result = HeaderExtractionResult(
-        outline=[], fenced_text="#headers#\n#/headers#", source="heuristic"
-    )
 
-    prompt = _render_prompt(parse_result, heuristic_result)
+    prompt = _render_prompt(parse_result)
 
     assert "Do not omit appendices" in prompt
     assert "Appendix preview (Page 3)" in prompt

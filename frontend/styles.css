@@ -350,7 +350,7 @@ body {
   color: var(--accent-strong);
 }
 
-.panel-tag[data-variant='heuristic'] {
+.panel-tag[data-variant='openrouter'] {
   background: color-mix(in srgb, var(--success) 22%, transparent);
   border-color: color-mix(in srgb, var(--success) 45%, transparent);
   color: var(--success);
