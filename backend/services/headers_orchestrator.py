@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Mapping, Sequence
+from typing import Iterable, Mapping, Sequence
 
 from backend.config import Settings
 
@@ -83,7 +83,7 @@ async def extract_headers_and_chunks(
         mode_used = "llm_disabled"
         messages.append("LLM header extraction is disabled by configuration.")
 
-    sections = single_chunks_from_headers(located_headers, lines)
+    located_headers, sections = _enforce_header_sequence(located_headers, lines)
 
     return {
         "headers": located_headers,
@@ -94,6 +94,346 @@ async def extract_headers_and_chunks(
         "excluded_pages": sorted(excluded_pages),
         "messages": messages,
     }
+
+
+def _enforce_header_sequence(
+    headers: Sequence[Mapping[str, object]],
+    lines: Sequence[Mapping[str, object]],
+) -> tuple[list[dict], list[dict]]:
+    """Ensure located headers follow sequential numbering when possible."""
+
+    if not headers:
+        return [], []
+
+    working_headers = [
+        {
+            "text": str(header.get("text", "")).strip(),
+            "number": (header.get("number") or None),
+            "level": int(header.get("level") or 1),
+            "page": int(header.get("page") or 0),
+            "line_idx": int(header.get("line_idx") or 0),
+            "global_idx": int(header.get("global_idx") or 0),
+        }
+        for header in headers
+    ]
+    working_headers.sort(key=lambda item: item.get("global_idx", 0))
+
+    sections = single_chunks_from_headers(working_headers, lines)
+
+    while True:
+        gaps = _identify_missing_headers(working_headers)
+        if not gaps:
+            break
+
+        index_by_global = {
+            int(line.get("global_idx", -1)): idx for idx, line in enumerate(lines)
+        }
+        inserted = False
+
+        for gap in gaps:
+            after_index = gap.get("after_index")
+            if after_index is None or after_index < 0:
+                continue
+            if after_index >= len(sections):
+                continue
+
+            chunk = sections[after_index]
+            candidate = _find_header_in_chunk(
+                chunk,
+                lines,
+                gap.get("components", ()),
+                index_by_global,
+                gap.get("level"),
+            )
+
+            if not candidate:
+                continue
+
+            if any(
+                int(existing.get("global_idx", -1))
+                == candidate.get("global_idx", -2)
+                for existing in working_headers
+            ):
+                continue
+
+            insert_position = int(gap.get("insert_position", after_index + 1))
+            insert_position = max(0, min(insert_position, len(working_headers)))
+            working_headers.insert(insert_position, candidate)
+            working_headers.sort(key=lambda item: item.get("global_idx", 0))
+            sections = single_chunks_from_headers(working_headers, lines)
+            inserted = True
+            break
+
+        if not inserted:
+            break
+
+    return working_headers, sections
+
+
+def _identify_missing_headers(headers: Sequence[Mapping[str, object]]) -> list[dict]:
+    """Return metadata about numbering gaps detected in located headers."""
+
+    missing: list[dict] = []
+    expected_by_key: dict[tuple, int] = {}
+    last_index_by_key: dict[tuple, int] = {}
+    components_cache: dict[int, list[dict]] = {}
+
+    for idx, header in enumerate(headers):
+        components = _extract_components(header.get("number"))
+        components_cache[idx] = components
+        if not components:
+            continue
+
+        prefix_components = components[:-1]
+        last_component = components[-1]
+        kind = last_component.get("kind")
+        value = last_component.get("value")
+
+        if kind not in {"numeric", "alpha"} or value is None:
+            key = (_prefix_key(prefix_components), kind)
+            last_index_by_key[key] = idx
+            continue
+
+        key = (_prefix_key(prefix_components), kind)
+        expected = expected_by_key.get(key)
+        last_index = last_index_by_key.get(key)
+
+        if expected is not None and value > expected:
+            template_component = None
+            if last_index is not None:
+                previous_components = components_cache.get(last_index) or []
+                if previous_components:
+                    template_component = previous_components[-1]
+            if template_component is None:
+                template_component = last_component
+
+            prefix = [dict(component) for component in prefix_components]
+            prev_level = (
+                int(headers[last_index].get("level") or 1)
+                if last_index is not None
+                else int(header.get("level") or 1)
+            )
+
+            for missing_value in _value_range(expected, value):
+                missing_component = _build_component(
+                    missing_value,
+                    kind,
+                    template_component,
+                )
+                missing.append(
+                    {
+                        "components": prefix + [missing_component],
+                        "after_index": last_index,
+                        "insert_position": (last_index + 1) if last_index is not None else 0,
+                        "level": prev_level,
+                    }
+                )
+
+        expected_by_key[key] = value + 1
+        last_index_by_key[key] = idx
+
+    return missing
+
+
+def _value_range(start: int, stop: int) -> Iterable[int]:
+    """Yield the integer values that should appear between start and stop."""
+
+    for value in range(start, stop):
+        yield value
+
+
+def _prefix_key(components: Sequence[Mapping[str, object]]) -> tuple:
+    """Create a hashable key for a sequence prefix."""
+
+    return tuple((component.get("kind"), component.get("value")) for component in components)
+
+
+def _build_component(
+    value: int,
+    kind: str,
+    template: Mapping[str, object] | None,
+) -> dict:
+    """Create a component description following the provided template."""
+
+    template_raw = str(template.get("raw", "")) if template else ""
+
+    if kind == "numeric":
+        width = len(template_raw) if template_raw.isdigit() else 0
+        raw = str(value).zfill(width) if width else str(value)
+        normalized = str(value)
+    elif kind == "alpha":
+        normalized = _int_to_alpha(value)
+        raw = normalized
+        if template_raw.islower():
+            raw = raw.lower()
+            normalized = normalized.upper()
+    else:
+        raw = str(value)
+        normalized = raw
+
+    return {
+        "raw": raw,
+        "normalized": normalized,
+        "kind": kind,
+        "value": value,
+    }
+
+
+def _extract_components(number: object | None) -> list[dict]:
+    """Split a header number into comparable components."""
+
+    if not number:
+        return []
+
+    text = str(number)
+    raw_components = re.findall(r"[A-Za-z]+|\d+", text)
+    components: list[dict] = []
+
+    for component in raw_components:
+        if component.isdigit():
+            value = int(component)
+            components.append(
+                {
+                    "raw": component,
+                    "normalized": str(value),
+                    "kind": "numeric",
+                    "value": value,
+                }
+            )
+            continue
+
+        if component.isalpha():
+            value = _alpha_to_int(component)
+            components.append(
+                {
+                    "raw": component,
+                    "normalized": _int_to_alpha(value),
+                    "kind": "alpha",
+                    "value": value,
+                }
+            )
+            continue
+
+        components.append(
+            {
+                "raw": component,
+                "normalized": component,
+                "kind": None,
+                "value": None,
+            }
+        )
+
+    return components
+
+
+def _alpha_to_int(value: str) -> int:
+    """Convert alphabetical enumeration to its integer representation."""
+
+    total = 0
+    for char in value.upper():
+        if "A" <= char <= "Z":
+            total = total * 26 + (ord(char) - ord("A") + 1)
+    return total
+
+
+def _int_to_alpha(value: int) -> str:
+    """Convert an integer to alphabetical enumeration (A, B, ..., AA)."""
+
+    if value <= 0:
+        return "A"
+
+    chars: list[str] = []
+    remaining = value
+    while remaining > 0:
+        remaining -= 1
+        remaining, remainder = divmod(remaining, 26)
+        chars.append(chr(ord("A") + remainder))
+    return "".join(reversed(chars))
+
+
+def _find_header_in_chunk(
+    chunk: Mapping[str, object],
+    lines: Sequence[Mapping[str, object]],
+    components: Sequence[Mapping[str, object]],
+    index_by_global: Mapping[int, int],
+    fallback_level: int | None,
+) -> dict | None:
+    """Search a section chunk for a header matching the expected numbering."""
+
+    if not components:
+        return None
+
+    pattern = _build_number_pattern(components)
+    if pattern is None:
+        return None
+
+    start_global = int(chunk.get("start_global_idx", 0))
+    end_global = int(chunk.get("end_global_idx", start_global))
+    start_idx = index_by_global.get(start_global, 0)
+    end_idx = index_by_global.get(end_global, start_idx)
+
+    for idx in range(start_idx, end_idx + 1):
+        line = lines[idx]
+        text = str(line.get("text", ""))
+        stripped = text.lstrip()
+        match = pattern.match(stripped)
+        if not match:
+            continue
+
+        remainder = stripped[match.end() :].lstrip(" -.):\t")
+        header_text = remainder or stripped
+
+        level = int(chunk.get("level") or fallback_level or 1)
+
+        return {
+            "text": header_text,
+            "number": _components_to_number(components),
+            "level": level,
+            "page": int(line.get("page") or 0),
+            "line_idx": int(line.get("line_idx") or 0),
+            "global_idx": int(line.get("global_idx") or 0),
+        }
+
+    return None
+
+
+def _build_number_pattern(
+    components: Sequence[Mapping[str, object]]
+) -> re.Pattern[str] | None:
+    """Compile a regex pattern matching the expected numbering."""
+
+    if not components:
+        return None
+
+    parts: list[str] = []
+    for component in components:
+        raw = str(component.get("raw", ""))
+        normalized = str(component.get("normalized", raw))
+        kind = component.get("kind")
+
+        if kind == "numeric":
+            parts.append(rf"0*{re.escape(normalized)}")
+        else:
+            token = raw or normalized
+            parts.append(re.escape(token))
+
+    separator = r"(?:[\s\.\-\)\(]*?)"
+    joined = separator.join(parts)
+    pattern = rf"^\s*[\(\[]?\s*{joined}(?:\b|[\.).\-\s:])"
+
+    return re.compile(pattern, re.IGNORECASE)
+
+
+def _components_to_number(components: Sequence[Mapping[str, object]]) -> str:
+    """Convert components back into a dotted numbering string."""
+
+    values: list[str] = []
+    for component in components:
+        normalized = str(component.get("normalized") or "")
+        if not normalized:
+            continue
+        values.append(normalized)
+    return ".".join(values) if values else ""
 
 
 __all__ = ["extract_headers_and_chunks"]
