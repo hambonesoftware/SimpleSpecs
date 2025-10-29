@@ -195,6 +195,21 @@ export function renderParseSummary(container, payload) {
   container.append(grid);
 }
 
+export function renderHeaderRawResponse(container, text) {
+  if (!container) return;
+  if (!text || !String(text).trim()) {
+    container.innerHTML = '<p class="panel-status">Raw response unavailable.</p>';
+    return;
+  }
+
+  const pre = document.createElement('pre');
+  pre.className = 'raw-response';
+  pre.textContent = String(text);
+
+  container.innerHTML = '';
+  container.append(pre);
+}
+
 export function renderHeaderOutline(container, payload, options = {}) {
   if (!container) return;
   if (Array.isArray(payload?.simpleheaders) && payload.simpleheaders.length && Array.isArray(payload.sections) && payload.sections.length) {
