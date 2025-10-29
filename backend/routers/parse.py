@@ -9,6 +9,7 @@ from sqlmodel import Session
 from ..config import Settings, get_settings
 from ..database import get_session
 from ..models import Document
+from ..services.artifact_store import persist_parse_result
 from ..services.pdf_native import ParseResult, parse_pdf
 
 router = APIRouter(prefix="/api", tags=["parse"])
@@ -81,6 +82,7 @@ async def parse_document(
         )
 
     result: ParseResult = parse_pdf(document_path, settings=settings)
+    persist_parse_result(session=session, document=document, parse_result=result)
     payload = result.to_dict()
     return ParseResponse(document_id=doc_id, **payload)
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import inspect
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
@@ -197,11 +199,21 @@ async def generate_headers(
     result = extract_headers(parse_result, settings=settings, llm_client=llm_client)
 
     native_flat = flatten_outline(result.outline)
+    orchestrator_kwargs = {
+        "settings": settings,
+        "native_headers": native_flat,
+        "metadata": {"filename": document.filename},
+    }
+
+    signature = inspect.signature(extract_headers_and_chunks)
+    if "session" in signature.parameters:
+        orchestrator_kwargs["session"] = session
+    if "document" in signature.parameters:
+        orchestrator_kwargs["document"] = document
+
     orchestrated = await extract_headers_and_chunks(
         document_bytes,
-        settings=settings,
-        native_headers=native_flat,
-        metadata={"filename": document.filename},
+        **orchestrator_kwargs,
     )
 
     SimpleHeadersState.set(doc_id, orchestrated["doc_hash"], orchestrated["lines"])
