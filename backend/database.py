@@ -9,6 +9,7 @@ from sqlalchemy.engine import make_url
 from sqlmodel import Session, SQLModel, create_engine
 
 from .config import PROJECT_ROOT, get_settings
+from .migrations import run_migrations
 
 _engine = None
 
@@ -56,6 +57,7 @@ def init_db() -> None:
 
     engine = get_engine()
     SQLModel.metadata.create_all(engine)
+    run_migrations(engine)
 
 
 def reset_database_state() -> None:
