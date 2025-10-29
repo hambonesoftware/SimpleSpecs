@@ -302,7 +302,9 @@ function setHeaderRefreshBusy(busy) {
     return;
   }
 
-  const defaultLabel = button.dataset.defaultLabel ?? button.textContent.trim() || 'Refresh';
+  const labelFromText = (button.textContent || '').trim();
+  const defaultLabel =
+    button.dataset.defaultLabel ?? (labelFromText || 'Refresh');
   button.dataset.defaultLabel = defaultLabel;
 
   if (busy) {
