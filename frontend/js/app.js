@@ -58,6 +58,7 @@ const elements = {
   approvalStatus: document.querySelector('#approval-status'),
   reviewerInput: document.querySelector('#reviewer-name'),
   headerModeTag: document.querySelector('#header-mode-tag'),
+  refreshHeaders: document.querySelector('#refresh-headers'),
 };
 
 function updateHeaderModeTag(mode) {
@@ -123,6 +124,10 @@ initDropZone({
 
 elements.refreshDocuments?.addEventListener('click', () => {
   void refreshDocuments();
+});
+
+elements.refreshHeaders?.addEventListener('click', () => {
+  void refreshHeaders();
 });
 
 elements.documentsList?.addEventListener('click', (event) => {
@@ -197,6 +202,7 @@ async function selectDocument(documentId) {
     elements.workspaceSubtitle.textContent = 'Loading analysis results…';
   }
 
+  setHeaderRefreshBusy(true);
   setPanelLoading(elements.parseContent, 'Parsing document…');
   setPanelLoading(elements.headersContent, 'Generating outline…');
   setPanelLoading(elements.headersRawContent, 'Fetching raw LLM response…');
@@ -286,8 +292,89 @@ async function selectDocument(documentId) {
     if (elements.workspaceSubtitle) {
       elements.workspaceSubtitle.textContent = `Document ${documentId} ready.`;
     }
+    setHeaderRefreshBusy(false);
   }
 }
+
+function setHeaderRefreshBusy(busy) {
+  const button = elements.refreshHeaders;
+  if (!button) {
+    return;
+  }
+
+  const defaultLabel = button.dataset.defaultLabel ?? button.textContent.trim() || 'Refresh';
+  button.dataset.defaultLabel = defaultLabel;
+
+  if (busy) {
+    button.disabled = true;
+    button.dataset.loading = 'true';
+    button.textContent = 'Refreshing…';
+    button.setAttribute('aria-busy', 'true');
+    return;
+  }
+
+  button.textContent = defaultLabel;
+  delete button.dataset.loading;
+  button.removeAttribute('aria-busy');
+  button.disabled = !state.selectedId;
+}
+
+async function refreshHeaders() {
+  const documentId = state.selectedId;
+  if (!documentId) {
+    showToast('Select a document first.', 'error');
+    return;
+  }
+
+  const previousHeaders = state.headers;
+  setHeaderRefreshBusy(true);
+  setPanelLoading(elements.headersContent, 'Refreshing outline…');
+  setPanelLoading(elements.headersRawContent, 'Refreshing raw response…');
+  updateHeaderModeTag(null);
+
+  try {
+    const headersResult = await fetchHeaders(documentId);
+    state.headers = headersResult;
+    renderHeaderRawResponse(elements.headersRawContent, state.headers?.fenced_text ?? '');
+    renderHeaderOutline(elements.headersContent, state.headers, {
+      documentId,
+      fetchSection: fetchSectionText,
+    });
+    updateHeaderModeTag(state.headers?.mode ?? null);
+    if (Array.isArray(state.headers?.messages)) {
+      state.headers.messages.forEach((message) => {
+        if (!message) {
+          return;
+        }
+        showToast(message, 'warning', 6000);
+      });
+    }
+    showToast('Header outline refreshed.');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to refresh headers.';
+    showToast(message, 'error');
+    if (previousHeaders) {
+      state.headers = previousHeaders;
+      renderHeaderRawResponse(
+        elements.headersRawContent,
+        previousHeaders?.fenced_text ?? '',
+      );
+      renderHeaderOutline(elements.headersContent, previousHeaders, {
+        documentId,
+        fetchSection: fetchSectionText,
+      });
+      updateHeaderModeTag(previousHeaders?.mode ?? null);
+    } else {
+      setPanelError(elements.headersRawContent, message);
+      setPanelError(elements.headersContent, message);
+      updateHeaderModeTag(null);
+    }
+  } finally {
+    setHeaderRefreshBusy(false);
+  }
+}
+
+setHeaderRefreshBusy(false);
 
 function handleExport(kind) {
   const documentId = state.selectedId;
