@@ -19,6 +19,7 @@ import {
   setPanelLoading,
   setPanelError,
   renderParseSummary,
+  renderHeaderRawResponse,
   renderHeaderOutline,
   renderSpecsBuckets,
   renderRiskPanel,
@@ -50,6 +51,7 @@ const elements = {
   workspaceSubtitle: document.querySelector('#workspace-subtitle'),
   parseContent: document.querySelector('#parse-content'),
   headersContent: document.querySelector('#headers-content'),
+  headersRawContent: document.querySelector('#headers-raw-content'),
   specsContent: document.querySelector('#specs-content'),
   riskContent: document.querySelector('#risk-content'),
   approveSpecs: document.querySelector('#approve-specs'),
@@ -197,6 +199,7 @@ async function selectDocument(documentId) {
 
   setPanelLoading(elements.parseContent, 'Parsing document…');
   setPanelLoading(elements.headersContent, 'Generating outline…');
+  setPanelLoading(elements.headersRawContent, 'Fetching raw LLM response…');
   setPanelLoading(elements.specsContent, 'Classifying specification lines…');
   setPanelLoading(elements.riskContent, 'Computing risk score…');
   updateHeaderModeTag(null);
@@ -228,6 +231,7 @@ async function selectDocument(documentId) {
 
     if (headersResult.status === 'fulfilled') {
       state.headers = headersResult.value;
+      renderHeaderRawResponse(elements.headersRawContent, state.headers?.fenced_text ?? '');
       renderHeaderOutline(elements.headersContent, state.headers, {
         documentId,
         fetchSection: fetchSectionText,
@@ -243,6 +247,10 @@ async function selectDocument(documentId) {
       }
     } else {
       state.headers = null;
+      setPanelError(
+        elements.headersRawContent,
+        headersResult.reason?.message ?? 'Unable to load raw response.',
+      );
       setPanelError(elements.headersContent, headersResult.reason?.message ?? 'Unable to load headers.');
       updateHeaderModeTag(null);
     }

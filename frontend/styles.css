@@ -369,6 +369,21 @@ body {
   min-height: 120px;
 }
 
+.raw-response {
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  background: color-mix(in srgb, var(--bg-panel) 98%, CanvasText 2%);
+  font-family: ui-monospace, SFMono-Regular, SFMono, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  max-height: 320px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
 .simpleheaders {
   display: grid;
   gap: 1.25rem;
