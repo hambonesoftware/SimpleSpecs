@@ -6,8 +6,12 @@ import logging
 import re
 from typing import Iterable, Mapping, Sequence
 
-from backend.config import Settings
+from sqlmodel import Session
 
+from backend.config import Settings
+from backend.models import Document, DocumentArtifactType
+
+from .artifact_store import PARSER_VERSION, get_cached_artifact, store_artifact
 from .header_locator import locate_headers_in_lines
 from .pdf_headers_llm_full import get_headers_llm_full
 from .pdf_native import collect_line_metrics
@@ -47,6 +51,8 @@ async def extract_headers_and_chunks(
     settings: Settings,
     native_headers: Sequence[Mapping[str, object]] | None = None,
     metadata: Mapping[str, object] | None = None,
+    session: Session | None = None,
+    document: Document | None = None,
 ) -> dict:
     """Return located headers and section ranges for the provided document."""
 
@@ -60,6 +66,36 @@ async def extract_headers_and_chunks(
     located_headers: list[dict] = []
     mode_used = "llm_full"
     messages: list[str] = []
+
+    doc_id = document.id if document and document.id is not None else None
+    cache_inputs = {
+        "doc_hash": doc_hash,
+        "parser_version": PARSER_VERSION,
+        "headers_mode": settings.headers_mode.lower(),
+        "suppress_toc": settings.headers_suppress_toc,
+        "suppress_running": settings.headers_suppress_running,
+        "metadata": dict(metadata or {}),
+    }
+
+    if session is not None and doc_id is not None:
+        cached = get_cached_artifact(
+            session=session,
+            document_id=doc_id,
+            artifact_type=DocumentArtifactType.HEADER_TREE,
+            key=settings.headers_mode.lower(),
+            inputs=cache_inputs,
+        )
+        if cached is not None:
+            payload = dict(cached.body)
+            return {
+                "headers": payload.get("headers", []),
+                "sections": payload.get("sections", []),
+                "mode": payload.get("mode", "cache"),
+                "lines": lines,
+                "doc_hash": doc_hash,
+                "excluded_pages": sorted(excluded_pages),
+                "messages": payload.get("messages", []),
+            }
 
     if settings.headers_mode.lower() == "llm_full":
         try:
@@ -84,6 +120,22 @@ async def extract_headers_and_chunks(
         messages.append("LLM header extraction is disabled by configuration.")
 
     located_headers, sections = _enforce_header_sequence(located_headers, lines)
+
+    if session is not None and doc_id is not None:
+        store_artifact(
+            session=session,
+            document_id=doc_id,
+            artifact_type=DocumentArtifactType.HEADER_TREE,
+            key=settings.headers_mode.lower(),
+            inputs=cache_inputs,
+            body={
+                "headers": located_headers,
+                "sections": sections,
+                "mode": mode_used,
+                "messages": messages,
+                "doc_hash": doc_hash,
+            },
+        )
 
     return {
         "headers": located_headers,

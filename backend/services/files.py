@@ -15,7 +15,16 @@ from sqlalchemy import desc
 from sqlmodel import Session, delete, select
 
 from ..config import Settings
-from ..models import Document
+from ..models import (
+    Document,
+    DocumentArtifact,
+    DocumentEmbedding,
+    DocumentEntity,
+    DocumentFigure,
+    DocumentPage,
+    DocumentTable,
+    PromptResponse,
+)
 from ..models.spec_record import SpecAuditEntry, SpecRecord
 
 CHUNK_SIZE = 1024 * 1024  # 1MB
@@ -78,6 +87,16 @@ async def handle_upload(
         select(Document).where(Document.checksum == checksum)
     ).first()
     if existing_document:
+        updated = False
+        if not existing_document.mime_type and upload.content_type:
+            existing_document.mime_type = upload.content_type
+            updated = True
+        if existing_document.byte_size == 0:
+            existing_document.byte_size = total_bytes
+            updated = True
+        if updated:
+            session.add(existing_document)
+            session.commit()
         if temp_path.exists():
             temp_path.unlink()
         return existing_document, False
@@ -87,6 +106,8 @@ async def handle_upload(
         checksum=checksum,
         uploaded_at=datetime.now(UTC),
         status="uploaded",
+        mime_type=upload.content_type,
+        byte_size=total_bytes,
     )
     session.add(document)
     session.commit()
@@ -125,6 +146,17 @@ def delete_document(
         delete(SpecAuditEntry).where(SpecAuditEntry.document_id == document_id)
     )
     session.exec(delete(SpecRecord).where(SpecRecord.document_id == document_id))
+    session.exec(delete(DocumentPage).where(DocumentPage.document_id == document_id))
+    session.exec(delete(DocumentTable).where(DocumentTable.document_id == document_id))
+    session.exec(delete(DocumentFigure).where(DocumentFigure.document_id == document_id))
+    session.exec(delete(DocumentEntity).where(DocumentEntity.document_id == document_id))
+    session.exec(
+        delete(DocumentEmbedding).where(DocumentEmbedding.document_id == document_id)
+    )
+    session.exec(delete(DocumentArtifact).where(DocumentArtifact.document_id == document_id))
+    session.exec(
+        delete(PromptResponse).where(PromptResponse.document_id == document_id)
+    )
     session.delete(document)
     session.commit()
 

@@ -49,6 +49,7 @@ def init_db() -> None:
     """Initialise database tables."""
 
     from .models import (  # noqa: F401  Ensures models are registered with SQLModel metadata.
+        artifacts,
         document,
         spec_record,
     )
