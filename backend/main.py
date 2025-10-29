@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import logging
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .database import init_db
@@ -75,10 +76,13 @@ if "*" in cors_allow_origins:
 if not cors_allow_origins:
     cors_allow_origins = ["http://localhost:3600", "http://127.0.0.1:3600"]
 
+_cors_origin_pattern = (
+    re.compile(settings.cors_allow_origin_regex)
+    if settings.cors_allow_origin_regex
+    else None
+)
+
 app = FastAPI(title="SimpleSpecs", version="0.1.0", lifespan=lifespan)
-app.add_middleware(RequestIdMiddleware)
-app.add_middleware(RequestMetricsMiddleware)
-app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_allow_origins,
@@ -87,7 +91,45 @@ app.add_middleware(
     allow_headers=["*"],
     allow_origin_regex=settings.cors_allow_origin_regex,
 )
+app.add_middleware(RequestIdMiddleware)
+app.add_middleware(RequestMetricsMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 app.include_router(api_router)
+
+
+@app.exception_handler(Exception)
+async def handle_unexpected_exception(
+    request: Request, exc: Exception
+) -> JSONResponse:
+    """Ensure unexpected exceptions return a JSON payload and preserve CORS headers."""
+
+    logger.exception(
+        "Unhandled exception while processing %s %s", request.method, request.url.path
+    )
+    origin = request.headers.get("origin")
+    headers: dict[str, str] = {}
+
+    if origin:
+        allowed_origin: str | None = None
+
+        if cors_allow_origins == ["*"]:
+            allowed_origin = "*"
+        elif origin in cors_allow_origins:
+            allowed_origin = origin
+        elif _cors_origin_pattern and _cors_origin_pattern.fullmatch(origin):
+            allowed_origin = origin
+
+        if allowed_origin:
+            headers["Access-Control-Allow-Origin"] = allowed_origin
+            headers.setdefault("Vary", "Origin")
+            if allow_credentials and allowed_origin != "*":
+                headers["Access-Control-Allow-Credentials"] = "true"
+
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error"},
+        headers=headers or None,
+    )
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
