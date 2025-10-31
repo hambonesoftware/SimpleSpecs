@@ -59,7 +59,7 @@ HEADERS_NORMALIZE_CONFUSABLES: bool = os.getenv(
 ) in ("1", "true", "True", "YES", "yes")
 HEADERS_FUZZY_THRESHOLD: int = int(os.getenv("HEADERS_FUZZY_THRESHOLD", "80"))
 HEADERS_WINDOW_PAD_LINES: int = int(os.getenv("HEADERS_WINDOW_PAD_LINES", "40"))
-HEADERS_BAND_LINES: int = int(os.getenv("HEADERS_BAND_LINES", "3"))
+HEADERS_BAND_LINES: int = int(os.getenv("HEADERS_BAND_LINES", "5"))
 HEADERS_L1_REQUIRE_NUMERIC: bool = os.getenv("HEADERS_L1_REQUIRE_NUMERIC", "1") in (
     "1",
     "true",
@@ -84,6 +84,22 @@ HEADERS_REANCHOR_PASS: bool = os.getenv("HEADERS_REANCHOR_PASS", "1") in (
     "YES",
     "yes",
 )
+HEADERS_STRICT_INVARIANTS: bool = os.getenv("HEADERS_STRICT_INVARIANTS", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
+HEADERS_TITLE_ONLY_REANCHOR: bool = os.getenv("HEADERS_TITLE_ONLY_REANCHOR", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
+HEADERS_RESCAN_PASSES: int = int(os.getenv("HEADERS_RESCAN_PASSES", "2"))
+HEADERS_DEDUPE_POLICY: str = os.getenv("HEADERS_DEDUPE_POLICY", "best")
 
 
 def _load_environment() -> None:
