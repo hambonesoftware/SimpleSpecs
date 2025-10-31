@@ -169,6 +169,7 @@ async def extract_headers_and_chunks(
     if settings.headers_mode.lower() == "llm_full":
         try:
             llm_headers = await get_headers_llm_full(
+                document_bytes,
                 lines,
                 doc_hash,
                 settings=settings,
