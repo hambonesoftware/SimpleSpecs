@@ -15,7 +15,15 @@ async def _run_extract(monkeypatch, tmp_path, *, llm_exception: Exception | None
         }
     ]
 
-    def _fake_collect(*args, **kwargs):  # noqa: ANN001 - test stub
+    def _fake_collect(*args, tracer=None, **kwargs):  # noqa: ANN001 - test stub
+        if tracer is not None:
+            tracer.ev(
+                "doc_stats",
+                pages=1,
+                lines=len(lines),
+                bytes=len(args[0]) if args else 0,
+                excluded_pages=[],
+            )
         return lines, set(), "hash-value"
 
     async def _fake_llm(*args, **kwargs):  # noqa: ANN001 - test stub
@@ -25,7 +33,17 @@ async def _run_extract(monkeypatch, tmp_path, *, llm_exception: Exception | None
             {"text": "Intro", "number": "1", "level": 1},
         ]
 
-    def _fake_locate(headers, *_args, **_kwargs):  # noqa: ANN001 - test stub
+    def _fake_locate(headers, *_args, tracer=None, **_kwargs):  # noqa: ANN001 - test stub
+        if tracer is not None:
+            tracer.ev(
+                "candidate_found",
+                target=headers[0]["text"] if headers else "",
+                page=0,
+                line_idx=0,
+                snippet=headers[0]["text"] if headers else "",
+                score=1.0,
+                before_prev_anchor=False,
+            )
         return [
             {
                 "text": headers[0]["text"],
@@ -67,12 +85,13 @@ async def _run_extract(monkeypatch, tmp_path, *, llm_exception: Exception | None
 
     settings = Settings(upload_dir=tmp_path, headers_mode="llm_full")
 
-    return await headers_orchestrator.extract_headers_and_chunks(
+    result, _ = await headers_orchestrator.extract_headers_and_chunks(
         b"pdf-bytes",
         settings=settings,
         native_headers=[{"text": "Intro", "number": "1", "level": 1}],
         metadata={"filename": "doc.pdf"},
     )
+    return result
 
 
 def test_extract_headers_llm_failure_emits_message(monkeypatch, tmp_path) -> None:

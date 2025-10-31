@@ -221,7 +221,8 @@ def test_headers_endpoint_returns_outline(
         settings,
         native_headers,
         metadata,
-    ) -> dict:
+        want_trace=False,
+    ) -> tuple[dict, None]:
         lines = [
             {
                 "text": "General Requirements",
@@ -242,7 +243,7 @@ def test_headers_endpoint_returns_outline(
                 "is_index": False,
             },
         ]
-        return {
+        payload = {
             "headers": [
                 {
                     "text": "General Requirements",
@@ -286,6 +287,7 @@ def test_headers_endpoint_returns_outline(
             "doc_hash": "abc123",
             "excluded_pages": [],
         }
+        return payload, None
 
     class StubHeadersClient:
         def __init__(self, *_args, **_kwargs) -> None:

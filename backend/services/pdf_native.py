@@ -31,6 +31,7 @@ except Exception:  # pragma: no cover - optional dependency
     Image = None  # type: ignore
 
 from ..config import Settings
+from ..utils.trace import HeaderTracer
 
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pytesseract")
 
@@ -386,6 +387,7 @@ def collect_line_metrics(
     *,
     suppress_toc: bool = True,
     suppress_running: bool = True,
+    tracer: HeaderTracer | None = None,
 ) -> tuple[list[dict], set[int], str]:
     """Return flattened line metrics for the provided PDF bytes."""
 
@@ -396,6 +398,7 @@ def collect_line_metrics(
     footer_counter: Counter[str] = Counter()
 
     with fitz.open(stream=document_bytes, filetype="pdf") as pdf_document:
+        sample_budget = 10
         for page in pdf_document:
             page_number = int(page.number)
             text_dict = page.get_text("dict") or {}
@@ -435,6 +438,14 @@ def collect_line_metrics(
                         "is_index": False,
                         "is_running": False,
                     }
+                    if tracer and sample_budget > 0:
+                        tracer.ev(
+                            "pre_normalize_sample",
+                            page=page_number,
+                            line_idx=entry["line_idx"],
+                            text=text,
+                        )
+                        sample_budget -= 1
                     page_lines.append(entry)
 
             height = float(page.rect.height)
@@ -444,6 +455,14 @@ def collect_line_metrics(
                 normalised = _normalise_text(entry.get("text", ""))
                 if not normalised:
                     continue
+                if tracer and entry.get("line_idx", 0) < 5:
+                    tracer.ev(
+                        "normalized_line",
+                        page=page_number,
+                        line_idx=entry.get("line_idx", 0),
+                        raw=entry.get("text", ""),
+                        normalised=normalised,
+                    )
                 if entry["top"] <= top_threshold:
                     header_counter[normalised] += 1
                 elif entry["bottom"] >= bottom_threshold:
@@ -462,6 +481,14 @@ def collect_line_metrics(
         running_markers = {
             text for text, count in header_counter.items() if count > 1
         } | {text for text, count in footer_counter.items() if count > 1}
+        if tracer and running_markers:
+            for text in sorted(running_markers):
+                tracer.ev(
+                    "running_header_filtered",
+                    text=text,
+                    header_hits=header_counter.get(text, 0),
+                    footer_hits=footer_counter.get(text, 0),
+                )
 
     all_lines: list[dict] = []
     global_idx = 0
@@ -474,6 +501,13 @@ def collect_line_metrics(
         is_index_page = _is_index_like(texts)
         if suppress_toc and (is_toc_page or is_index_page):
             excluded_pages.add(page_number)
+            if tracer:
+                tracer.ev(
+                    "toc_detected",
+                    page=page_number,
+                    reason="index" if is_index_page else "toc",
+                    sample=texts[:6],
+                )
 
         for entry in page_lines:
             normalised = _normalise_text(entry.get("text", ""))
@@ -484,6 +518,15 @@ def collect_line_metrics(
             entry["global_idx"] = global_idx
             all_lines.append(entry)
             global_idx += 1
+
+    if tracer:
+        tracer.ev(
+            "doc_stats",
+            pages=len(pages),
+            lines=len(all_lines),
+            bytes=len(document_bytes),
+            excluded_pages=sorted(excluded_pages),
+        )
 
     return all_lines, excluded_pages, doc_hash
 

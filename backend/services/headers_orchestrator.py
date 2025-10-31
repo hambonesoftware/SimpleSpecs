@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import logging
 import re
+import time
 from typing import Iterable, Mapping, Sequence
 
 from sqlmodel import Session
 
+import backend.config as app_config
 from backend.config import Settings
 from backend.models import Document, DocumentArtifactType
 
@@ -16,8 +18,10 @@ from .header_locator import locate_headers_in_lines
 from .pdf_headers_llm_full import get_headers_llm_full
 from .pdf_native import collect_line_metrics
 from .section_chunking import single_chunks_from_headers
+from ..utils.logging import configure_logging
+from ..utils.trace import HeaderTracer
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = configure_logging().getChild(__name__)
 
 
 def _format_llm_failure(exc: Exception) -> str:
@@ -53,14 +57,34 @@ async def extract_headers_and_chunks(
     metadata: Mapping[str, object] | None = None,
     session: Session | None = None,
     document: Document | None = None,
-) -> dict:
+    want_trace: bool = False,
+) -> tuple[dict, HeaderTracer | None]:
     """Return located headers and section ranges for the provided document."""
+
+    tracer: HeaderTracer | None = None
+    trace_requested = app_config.HEADERS_TRACE or want_trace
+    if trace_requested:
+        tracer = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR)
+
+    start_time = time.perf_counter()
+    if tracer:
+        tracer.ev(
+            "start_run",
+            mode=settings.headers_mode,
+            file_id=getattr(document, "id", None),
+            cfg={
+                "suppress_toc": settings.headers_suppress_toc,
+                "suppress_running": settings.headers_suppress_running,
+            },
+            metadata=dict(metadata or {}),
+        )
 
     lines, excluded_pages, doc_hash = collect_line_metrics(
         document_bytes,
         metadata,
         suppress_toc=settings.headers_suppress_toc,
         suppress_running=settings.headers_suppress_running,
+        tracer=tracer,
     )
 
     located_headers: list[dict] = []
@@ -87,6 +111,17 @@ async def extract_headers_and_chunks(
         )
         if cached is not None:
             payload = dict(cached.body)
+            if tracer:
+                tracer.ev(
+                    "end_run",
+                    elapsed_s=time.perf_counter() - start_time,
+                    total_headers=len(payload.get("headers", [])),
+                    unresolved=[],
+                    mode="cache",
+                    doc_hash=doc_hash,
+                )
+                tracer.flush_jsonl()
+                LOGGER.info("[headers] Trace written: %s", tracer.path)
             return {
                 "headers": payload.get("headers", []),
                 "sections": payload.get("sections", []),
@@ -95,7 +130,7 @@ async def extract_headers_and_chunks(
                 "doc_hash": doc_hash,
                 "excluded_pages": sorted(excluded_pages),
                 "messages": payload.get("messages", []),
-            }
+            }, tracer
 
     if settings.headers_mode.lower() == "llm_full":
         try:
@@ -105,21 +140,44 @@ async def extract_headers_and_chunks(
                 settings=settings,
                 excluded_pages=excluded_pages,
             )
+            llm_headers = llm_headers or []
             located_headers = locate_headers_in_lines(
                 llm_headers,
                 lines,
                 excluded_pages=excluded_pages,
+                tracer=tracer,
             )
+            if tracer:
+                tracer.ev(
+                    "llm_outline_received",
+                    count=len(llm_headers),
+                    sample=[entry.get("text") for entry in llm_headers[:5]],
+                )
         except Exception as exc:  # pragma: no cover - network/runtime dependent
             LOGGER.warning("LLM header extraction failed: %s", exc)
             located_headers = []
             messages.append(_format_llm_failure(exc))
             mode_used = "llm_full_error"
+            if tracer:
+                tracer.ev(
+                    "fallback_triggered",
+                    method="llm_full",
+                    reason="exception",
+                    message=str(exc),
+                )
     else:
         mode_used = "llm_disabled"
         messages.append("LLM header extraction is disabled by configuration.")
+        if tracer:
+            tracer.ev(
+                "fallback_triggered",
+                method="llm_disabled",
+                reason="configuration",
+            )
 
-    located_headers, sections = _enforce_header_sequence(located_headers, lines)
+    located_headers, sections = _enforce_header_sequence(
+        located_headers, lines, tracer=tracer
+    )
 
     if session is not None and doc_id is not None:
         store_artifact(
@@ -137,6 +195,23 @@ async def extract_headers_and_chunks(
             },
         )
 
+    matched_titles = {str(item.get("text", "")).strip() for item in located_headers}
+    expected_titles = [str(item.get("text", "")) for item in (native_headers or [])]
+    unresolved = [title for title in expected_titles if title and title not in matched_titles]
+
+    elapsed = time.perf_counter() - start_time
+    if tracer:
+        tracer.ev(
+            "end_run",
+            elapsed_s=elapsed,
+            total_headers=len(located_headers),
+            unresolved=unresolved,
+            mode=mode_used,
+            doc_hash=doc_hash,
+        )
+        trace_path = tracer.flush_jsonl()
+        LOGGER.info("[headers] Trace written: %s", trace_path)
+
     return {
         "headers": located_headers,
         "sections": sections,
@@ -145,12 +220,14 @@ async def extract_headers_and_chunks(
         "doc_hash": doc_hash,
         "excluded_pages": sorted(excluded_pages),
         "messages": messages,
-    }
+    }, tracer
 
 
 def _enforce_header_sequence(
     headers: Sequence[Mapping[str, object]],
     lines: Sequence[Mapping[str, object]],
+    *,
+    tracer: HeaderTracer | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """Ensure located headers follow sequential numbering when possible."""
 
@@ -172,10 +249,25 @@ def _enforce_header_sequence(
 
     sections = single_chunks_from_headers(working_headers, lines)
 
+    iteration = 0
     while True:
         gaps = _identify_missing_headers(working_headers)
         if not gaps:
             break
+        iteration += 1
+        if tracer:
+            tracer.ev(
+                "monotonic_violation",
+                iteration=iteration,
+                gaps=[
+                    {
+                        "after_index": gap.get("after_index"),
+                        "components": gap.get("components"),
+                        "level": gap.get("level"),
+                    }
+                    for gap in gaps
+                ],
+            )
 
         index_by_global = {
             int(line.get("global_idx", -1)): idx for idx, line in enumerate(lines)
@@ -214,9 +306,25 @@ def _enforce_header_sequence(
             working_headers.sort(key=lambda item: item.get("global_idx", 0))
             sections = single_chunks_from_headers(working_headers, lines)
             inserted = True
+            if tracer:
+                tracer.ev(
+                    "anchor_resolved",
+                    target=candidate.get("text"),
+                    page=candidate.get("page"),
+                    line_idx=candidate.get("line_idx"),
+                    global_idx=candidate.get("global_idx"),
+                    monotonic_ok=True,
+                    method="gap_fill",
+                )
             break
 
         if not inserted:
+            if tracer:
+                tracer.ev(
+                    "fallback_triggered",
+                    method="gap_fill",
+                    reason="unresolved",
+                )
             break
 
     return working_headers, sections
