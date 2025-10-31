@@ -55,6 +55,25 @@ HEADERS_SUPPRESS_RUNNING=1        # filter repeated running headers/footers
 HEADERS_NORMALIZE_CONFUSABLES=1   # normalise numeric lookalikes (I/l → 1)
 HEADERS_FUZZY_THRESHOLD=80        # token-set similarity for title matching
 HEADERS_WINDOW_PAD_LINES=40       # expand parent search windows by ±N lines
+HEADERS_BAND_LINES=3              # top/bottom lines per page considered a running band
+HEADERS_L1_REQUIRE_NUMERIC=1      # insist on numeric prefixes for L1 anchors before fallback
+HEADERS_L1_LOOKAHEAD_CHILD_HINT=30  # scan ahead for 1.1-style hints when ranking anchors
+HEADERS_MONOTONIC_STRICT=1        # enforce forward-only anchoring with duplicate retries
+HEADERS_REANCHOR_PASS=1           # repair parents that landed after their children
+```
+
+Recent hardening adds:
+
+- Numeric-first anchoring for level-1 chapters with optional text fallback.
+- A strict monotonic gate that re-tries later duplicates when a candidate appears too early.
+- Page-band and running-header suppression so top/bottom banners never win.
+- A coherence re-anchor sweep that repositions parents ahead of their children.
+
+Enable tracing to inspect the sequential decisions end-to-end:
+
+```
+HEADERS_ALIGN_STRATEGY=sequential HEADERS_TRACE=1 \
+curl -X POST "http://localhost:8000/api/headers/{document_id}?align=sequential&trace=1"
 ```
 
 Clients can override the active strategy per request with `POST /api/headers/{document_id}?align=sequential` (or `align=legacy`). When tracing is enabled the sequential locator emits events such as `anchor_candidate_top`, `window_top`, and `anchor_resolved_child` to aid debugging.
