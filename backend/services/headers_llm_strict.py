@@ -7,6 +7,8 @@ import logging
 import re
 from typing import Any, Dict, Iterable, List, Mapping, Protocol, Sequence, Tuple
 
+from ..utils.trace import HeaderTracer
+
 log = logging.getLogger(__name__)
 
 FENCE = "#headers#"
@@ -159,6 +161,7 @@ def extract_headers_and_sections_strict(
     *,
     llm: _SupportsGenerate,
     lines: Sequence[BodyLine],
+    tracer: HeaderTracer | None = None,
 ) -> Dict[str, Any]:
     """Locate headers and construct contiguous section ranges."""
 
@@ -176,14 +179,34 @@ def extract_headers_and_sections_strict(
         log.error("Failed to decode headers JSON: %s", exc)
         payload = {}
 
+    llm_headers = list(_extract_headers(payload))
+    if tracer is not None:
+        tracer.ev(
+            "llm_outline_received",
+            count=len(llm_headers),
+            headers=[{**header} for header in llm_headers],
+        )
+
     located: List[Dict[str, Any]] = []
 
-    for header in _extract_headers(payload):
+    for header in llm_headers:
         position = _find_header_line(header["text"], lines)
         if not position:
             log.debug("Header not located in body: %s", header["text"])
+            if tracer is not None:
+                tracer.ev("candidate_missing", header={**header})
             continue
         list_index, global_idx, page = position
+        if tracer is not None:
+            tracer.ev(
+                "candidate_found",
+                header_text=header["text"],
+                header_number=header["number"],
+                level=header["level"],
+                page=page,
+                line_index=list_index,
+                global_idx=global_idx,
+            )
         located.append(
             {
                 "text": header["text"],
