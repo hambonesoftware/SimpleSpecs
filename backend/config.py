@@ -37,6 +37,20 @@ HEADERS_TRACE_EMBED_RESPONSE: bool = (
     in {"1", "true", "yes", "on"}
 )
 HEADERS_TRACE_DIR: str = os.getenv("HEADERS_TRACE_DIR", "backend/logs/headers")
+HEADERS_DEV_VERBOSE: bool = os.getenv("HEADERS_DEV_VERBOSE", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
+HEADERS_STRICT_ABORT_ON_NO_LINES: bool = os.getenv(
+    "HEADERS_STRICT_ABORT_ON_NO_LINES", "1"
+) in ("1", "true", "True", "YES", "yes")
+HEADERS_STRICT_FAIL_ON_EMPTY_OUTLINE: bool = os.getenv(
+    "HEADERS_STRICT_FAIL_ON_EMPTY_OUTLINE", "1"
+) in ("1", "true", "True", "YES", "yes")
+HEADERS_MAX_DOC_TOKENS: int = int(os.getenv("HEADERS_MAX_DOC_TOKENS", "120000"))
 HEADERS_LOG_LEVEL: str = os.getenv("HEADERS_LOG_LEVEL", "DEBUG")
 
 HEADERS_ALIGN_STRATEGY: str = os.getenv("HEADERS_ALIGN_STRATEGY", "best")

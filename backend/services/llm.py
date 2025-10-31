@@ -19,6 +19,31 @@ from .openrouter_client import OpenRouterError, chat as openrouter_chat
 
 LOGGER = logging.getLogger(__name__)
 
+_HEADERS_OUTLINE_FENCE = "#headers#"
+_HEADERS_OUTLINE_PROMPT = """Return ONLY the fenced JSON below.
+
+{fence}
+{{
+  "headers": [
+    {{"text":"<exact printed heading text>","number": "<printed number like 1, 1.2.3, A, A.1 or null>", "level": <positive integer>}}
+  ]
+}}
+{fence}
+
+Rules (non-negotiable):
+- Include ONLY headings/subheadings that appear in the MAIN BODY.
+- EXCLUDE anything from a Contents/Table of Contents, any Index, any Glossary, and any running headers/footers.
+- Copy numbering EXACTLY as printed when present; if none, set "number": null. Do not infer or normalize.
+- Preserve the original document order.
+- No prose outside the fenced JSON.
+- If unsure, omit the item.
+
+Document:
+<BEGIN>
+{doc_text}
+<END>
+"""
+
 
 class LLMProviderError(RuntimeError):
     """Raised when the LLM provider returns an unrecoverable error."""
@@ -389,6 +414,40 @@ class LLMService:
         )
 
 
+def get_outline_for_headers(
+    *,
+    file_id: int,
+    lines: Sequence[Mapping[str, Any]],
+    provider: str,
+    model: str,
+) -> str:
+    """Return the raw outline content for strict header alignment."""
+
+    settings = get_settings()
+    llm_service = LLMService(settings)
+
+    if provider and provider.lower() != llm_service.get_provider():
+        LOGGER.debug(
+            "Strict headers outline requested provider=%s but service configured=%s",
+            provider,
+            llm_service.get_provider(),
+        )
+
+    doc_text = "\n".join(str(entry.get("text", "")) for entry in lines)
+    prompt = _HEADERS_OUTLINE_PROMPT.format(
+        fence=_HEADERS_OUTLINE_FENCE,
+        doc_text=doc_text,
+    )
+
+    result = llm_service.generate(
+        messages=[{"role": "user", "content": prompt}],
+        model=model,
+        fence=_HEADERS_OUTLINE_FENCE,
+        metadata={"file_id": file_id, "mode": "headers_strict"},
+    )
+    return result.content
+
+
 __all__ = [
     "LLMCircuitOpenError",
     "LLMProviderError",
@@ -397,4 +456,5 @@ __all__ = [
     "LLMService",
     "LLMTransportRequest",
     "LLMTransportResponse",
+    "get_outline_for_headers",
 ]
