@@ -61,10 +61,7 @@ async def extract_headers_and_chunks(
 ) -> tuple[dict, HeaderTracer | None]:
     """Return located headers and section ranges for the provided document."""
 
-    tracer: HeaderTracer | None = None
-    trace_requested = app_config.HEADERS_TRACE or want_trace
-    if trace_requested:
-        tracer = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR)
+    tracer: HeaderTracer | None = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR)
 
     start_time = time.perf_counter()
     if tracer:
@@ -78,6 +75,19 @@ async def extract_headers_and_chunks(
             },
             metadata=dict(metadata or {}),
         )
+        if native_headers:
+            tracer.ev(
+                "native_expectations",
+                expected=[
+                    {
+                        "text": str(entry.get("text", "")).strip(),
+                        "number": (entry.get("number") or None),
+                        "level": int(entry.get("level") or 1),
+                    }
+                    for entry in native_headers
+                ],
+                count=len(native_headers),
+            )
 
     lines, excluded_pages, doc_hash = collect_line_metrics(
         document_bytes,
@@ -111,25 +121,49 @@ async def extract_headers_and_chunks(
         )
         if cached is not None:
             payload = dict(cached.body)
+            located = list(payload.get("headers", []))
+            sections = list(payload.get("sections", []))
+            messages = list(payload.get("messages", []))
+            mode_used = payload.get("mode", "cache")
+            matched_titles = {str(item.get("text", "")).strip() for item in located}
+            expected_titles = [str(item.get("text", "")) for item in (native_headers or [])]
+            unresolved = [
+                title for title in expected_titles if title and title not in matched_titles
+            ]
+            elapsed = time.perf_counter() - start_time
             if tracer:
                 tracer.ev(
+                    "llm_outline_received",
+                    count=len(located),
+                    headers=list(payload.get("headers", [])),
+                )
+                tracer.ev(
+                    "final_outline",
+                    headers=located,
+                    sections=sections,
+                    mode=mode_used,
+                    messages=messages,
+                    elapsed_s=elapsed,
+                )
+                tracer.ev(
                     "end_run",
-                    elapsed_s=time.perf_counter() - start_time,
-                    total_headers=len(payload.get("headers", [])),
-                    unresolved=[],
+                    elapsed_s=elapsed,
+                    total_headers=len(located),
+                    unresolved=unresolved,
                     mode="cache",
                     doc_hash=doc_hash,
                 )
                 tracer.flush_jsonl()
                 LOGGER.info("[headers] Trace written: %s", tracer.path)
+                LOGGER.info("[headers] Summary written: %s", tracer.summary_path)
             return {
-                "headers": payload.get("headers", []),
-                "sections": payload.get("sections", []),
-                "mode": payload.get("mode", "cache"),
+                "headers": located,
+                "sections": sections,
+                "mode": mode_used,
                 "lines": lines,
                 "doc_hash": doc_hash,
                 "excluded_pages": sorted(excluded_pages),
-                "messages": payload.get("messages", []),
+                "messages": messages,
             }, tracer
 
     if settings.headers_mode.lower() == "llm_full":
@@ -151,7 +185,7 @@ async def extract_headers_and_chunks(
                 tracer.ev(
                     "llm_outline_received",
                     count=len(llm_headers),
-                    sample=[entry.get("text") for entry in llm_headers[:5]],
+                    headers=llm_headers,
                 )
         except Exception as exc:  # pragma: no cover - network/runtime dependent
             LOGGER.warning("LLM header extraction failed: %s", exc)
@@ -159,6 +193,7 @@ async def extract_headers_and_chunks(
             messages.append(_format_llm_failure(exc))
             mode_used = "llm_full_error"
             if tracer:
+                tracer.ev("llm_outline_received", count=0, headers=[])
                 tracer.ev(
                     "fallback_triggered",
                     method="llm_full",
@@ -174,6 +209,7 @@ async def extract_headers_and_chunks(
                 method="llm_disabled",
                 reason="configuration",
             )
+            tracer.ev("llm_outline_received", count=0, headers=[])
 
     located_headers, sections = _enforce_header_sequence(
         located_headers, lines, tracer=tracer
@@ -202,6 +238,14 @@ async def extract_headers_and_chunks(
     elapsed = time.perf_counter() - start_time
     if tracer:
         tracer.ev(
+            "final_outline",
+            headers=located_headers,
+            sections=sections,
+            mode=mode_used,
+            messages=messages,
+            elapsed_s=elapsed,
+        )
+        tracer.ev(
             "end_run",
             elapsed_s=elapsed,
             total_headers=len(located_headers),
@@ -211,6 +255,7 @@ async def extract_headers_and_chunks(
         )
         trace_path = tracer.flush_jsonl()
         LOGGER.info("[headers] Trace written: %s", trace_path)
+        LOGGER.info("[headers] Summary written: %s", tracer.summary_path)
 
     return {
         "headers": located_headers,
