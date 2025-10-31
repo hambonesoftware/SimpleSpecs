@@ -1,7 +1,78 @@
-const API_BASE = "";
+const SAME_ORIGIN_KEYS = new Set(["", "/", ".", "auto", "same-origin"]);
+
+function normaliseBase(value) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  const lower = trimmed.toLowerCase();
+  if (SAME_ORIGIN_KEYS.has(lower)) {
+    return "";
+  }
+
+  if (trimmed.startsWith("//")) {
+    return `${window.location.protocol}${trimmed}`.replace(/\/+$/, "");
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed.replace(/\/+$/, "");
+  }
+
+  if (trimmed.startsWith("/")) {
+    return `${window.location.origin}${trimmed}`.replace(/\/+$/, "");
+  }
+
+  return trimmed.replace(/\/+$/, "");
+}
+
+function resolveApiBase() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const candidates = [
+    typeof window.API_BASE === "string" ? window.API_BASE : null,
+    document?.querySelector?.('meta[name="api-base"]')?.getAttribute("content") ?? null,
+  ];
+
+  for (const candidate of candidates) {
+    const normalised = normaliseBase(candidate);
+    if (typeof normalised === "string") {
+      return normalised;
+    }
+  }
+
+  return "";
+}
+
+export const API_BASE = resolveApiBase();
+
+function buildUrl(path) {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+
+  const normalisedPath = path.startsWith("/") ? path : `/${path}`;
+
+  if (!API_BASE) {
+    return normalisedPath;
+  }
+
+  const base = API_BASE.replace(/\/+$/, "");
+
+  if (/^https?:\/\//i.test(base)) {
+    if (normalisedPath.startsWith("/api/") && base.endsWith("/api")) {
+      return `${base}${normalisedPath.slice(4)}`;
+    }
+    return `${base}${normalisedPath}`;
+  }
+
+  return `${base}${normalisedPath}`;
+}
 
 async function request(path, options = {}) {
-  const url = `${API_BASE}${path}`;
+  const url = buildUrl(path);
   const config = {
     headers: { Accept: "application/json", ...(options.headers ?? {}) },
     ...options,
@@ -39,7 +110,7 @@ export async function listDocuments() {
 export function uploadDocument(file, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${API_BASE}/api/upload`);
+    xhr.open("POST", buildUrl("/api/upload"));
     xhr.responseType = "json";
 
     xhr.upload.onprogress = (event) => {
@@ -77,7 +148,9 @@ export async function fetchHeaders(documentId) {
 
 export async function fetchSectionText(documentId, start, end) {
   const params = new URLSearchParams({ start: String(start), end: String(end) });
-  const response = await fetch(`${API_BASE}/api/headers/${documentId}/section-text?${params}`);
+  const response = await fetch(
+    buildUrl(`/api/headers/${documentId}/section-text?${params}`)
+  );
   const text = await response.text();
 
   if (!response.ok) {
@@ -113,7 +186,7 @@ export async function approveSpecRecord(documentId, body) {
 
 export async function downloadSpecExport(documentId, format) {
   const response = await fetch(
-    `${API_BASE}/api/specs/${documentId}/export?fmt=${encodeURIComponent(format)}`
+    buildUrl(`/api/specs/${documentId}/export?fmt=${encodeURIComponent(format)}`)
   );
   const clone = response.clone();
   const text = await clone.text();
