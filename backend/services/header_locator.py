@@ -11,8 +11,6 @@ from backend.config import (
     HEADERS_ALIGN_STRATEGY,
     HEADERS_FUZZY_THRESHOLD,
     HEADERS_NORMALIZE_CONFUSABLES,
-    HEADERS_SUPPRESS_RUNNING,
-    HEADERS_SUPPRESS_TOC,
     HEADERS_WINDOW_PAD_LINES,
 )
 
@@ -173,8 +171,6 @@ def locate_headers_in_lines(
             confusables=HEADERS_NORMALIZE_CONFUSABLES,
             threshold=HEADERS_FUZZY_THRESHOLD,
             window_pad=HEADERS_WINDOW_PAD_LINES,
-            suppress_toc=HEADERS_SUPPRESS_TOC,
-            suppress_running=HEADERS_SUPPRESS_RUNNING,
             tracer=tracer,
         )
 

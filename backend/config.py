@@ -59,6 +59,31 @@ HEADERS_NORMALIZE_CONFUSABLES: bool = os.getenv(
 ) in ("1", "true", "True", "YES", "yes")
 HEADERS_FUZZY_THRESHOLD: int = int(os.getenv("HEADERS_FUZZY_THRESHOLD", "80"))
 HEADERS_WINDOW_PAD_LINES: int = int(os.getenv("HEADERS_WINDOW_PAD_LINES", "40"))
+HEADERS_BAND_LINES: int = int(os.getenv("HEADERS_BAND_LINES", "3"))
+HEADERS_L1_REQUIRE_NUMERIC: bool = os.getenv("HEADERS_L1_REQUIRE_NUMERIC", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
+HEADERS_L1_LOOKAHEAD_CHILD_HINT: int = int(
+    os.getenv("HEADERS_L1_LOOKAHEAD_CHILD_HINT", "30")
+)
+HEADERS_MONOTONIC_STRICT: bool = os.getenv("HEADERS_MONOTONIC_STRICT", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
+HEADERS_REANCHOR_PASS: bool = os.getenv("HEADERS_REANCHOR_PASS", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
 
 
 def _load_environment() -> None:

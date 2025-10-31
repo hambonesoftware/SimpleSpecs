@@ -73,11 +73,26 @@ def test_sequential_orders_chapters_and_children(
         confusables=True,
         threshold=80,
         window_pad=40,
-        suppress_toc=True,
-        suppress_running=True,
         tracer=None,
     )
 
     numbers = [item["number"] for item in out]
     assert numbers == ["1", "1.1", "2", "2.1"]
     assert all(item["page"] != 0 for item in out)
+
+
+def test_l1_numeric_precedes_children(
+    sample_llm_headers: list[dict[str, str]], sample_lines: list[dict[str, object]]
+) -> None:
+    out = align_headers_sequential(
+        sample_llm_headers,
+        sample_lines,
+        confusables=True,
+        threshold=80,
+        window_pad=40,
+        tracer=None,
+    )
+
+    positions = {entry["number"]: idx for idx, entry in enumerate(out)}
+    if "1" in positions and "1.1" in positions:
+        assert positions["1"] < positions["1.1"]
