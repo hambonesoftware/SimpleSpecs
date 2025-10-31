@@ -86,3 +86,112 @@ def test_strict_headers_skip_toc_lines() -> None:
     assert result["sections"][0]["end_global_index"] == 3
     assert result["sections"][1]["start_global_index"] == 4
     assert result["sections"][1]["end_global_index"] == 5
+
+
+def test_strict_handles_confusable_numbers_and_spacing() -> None:
+    lines = [
+        {
+            "text": "Intro text",
+            "global_idx": 0,
+            "page": 0,
+            "line_idx": 0,
+            "is_toc": False,
+            "is_index": False,
+            "is_running": False,
+        },
+        {
+            "text": "1 \u2024 I\u00A0Purpose",
+            "global_idx": 10,
+            "page": 0,
+            "line_idx": 1,
+            "is_toc": False,
+            "is_index": False,
+            "is_running": False,
+        },
+    ]
+
+    payload = {
+        "headers": [
+            {"text": "1.1 Purpose", "number": "1.1", "level": 2},
+        ]
+    }
+
+    llm = DummyLLM(payload)
+    result = extract_headers_and_sections_strict(llm=llm, lines=lines)
+
+    assert [header["start_global_index"] for header in result["headers"]] == [10]
+
+
+def test_strict_matches_appendix_split_across_two_lines() -> None:
+    lines = [
+        {
+            "text": "APPENDIX A",
+            "global_idx": 20,
+            "page": 3,
+            "line_idx": 0,
+            "is_toc": False,
+            "is_index": False,
+            "is_running": False,
+        },
+        {
+            "text": "SUBMITTALS AND FORMS",
+            "global_idx": 21,
+            "page": 3,
+            "line_idx": 1,
+            "is_toc": False,
+            "is_index": False,
+            "is_running": False,
+        },
+    ]
+
+    payload = {
+        "headers": [
+            {
+                "text": "Appendix A Submittals and Forms",
+                "number": "APPENDIX A",
+                "level": 1,
+            }
+        ]
+    }
+
+    llm = DummyLLM(payload)
+    result = extract_headers_and_sections_strict(llm=llm, lines=lines)
+
+    assert [header["start_global_index"] for header in result["headers"]] == [20]
+
+
+def test_strict_title_only_fallback_when_number_missing() -> None:
+    lines = []
+    for idx, text in enumerate(
+        [
+            "Preface",
+            "General",
+            "Summary",
+            "FOREWORD",
+            "Details",
+            "More details",
+            "Closing",
+        ]
+    ):
+        lines.append(
+            {
+                "text": text,
+                "global_idx": idx + 100,
+                "page": 0,
+                "line_idx": idx,
+                "is_toc": False,
+                "is_index": False,
+                "is_running": False,
+            }
+        )
+
+    payload = {
+        "headers": [
+            {"text": "FOREWORD", "number": "1", "level": 1},
+        ]
+    }
+
+    llm = DummyLLM(payload)
+    result = extract_headers_and_sections_strict(llm=llm, lines=lines)
+
+    assert [header["start_global_index"] for header in result["headers"]] == [103]
