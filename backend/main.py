@@ -10,7 +10,7 @@ import re
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
@@ -169,11 +169,25 @@ async def handle_unexpected_exception(
 
 
 if FRONTEND_DIR.exists():
-    app.mount(
-        "/",
-        StaticFiles(directory=str(FRONTEND_DIR), html=True),
-        name="frontend",
-    )
+    static_dir = FRONTEND_DIR / "static"
+    if static_dir.exists():
+        app.mount(
+            "/static",
+            StaticFiles(directory=str(static_dir), html=False),
+            name="frontend-static",
+        )
+    else:
+        app.mount(
+            "/static",
+            StaticFiles(directory=str(FRONTEND_DIR), html=False),
+            name="frontend-static",
+        )
+
+    @app.get("/", include_in_schema=False)
+    async def serve_frontend() -> FileResponse:
+        """Return the compiled frontend HTML shell."""
+
+        return FileResponse(FRONTEND_DIR / "index.html")
 
 
 __all__ = ["app", "UPLOAD_DIR", "EXPORT_DIR", "FRONTEND_DIR"]
