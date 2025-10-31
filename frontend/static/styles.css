@@ -470,6 +470,17 @@ body {
   color: var(--text-muted);
 }
 
+.panel-status--actionable {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.panel-status__message {
+  margin: 0;
+}
+
 .panel-error {
   margin: 0;
   color: var(--danger);

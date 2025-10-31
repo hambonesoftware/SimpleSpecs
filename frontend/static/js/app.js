@@ -64,6 +64,35 @@ const elements = {
   startSpecs: document.querySelector('#start-specs'),
 };
 
+function renderPanelStartPrompt(container, { message, buttonLabel, onStart }) {
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = '';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'panel-status panel-status--actionable';
+
+  const text = document.createElement('p');
+  text.className = 'panel-status__message';
+  text.textContent = message;
+  wrapper.append(text);
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'primary-button';
+  button.textContent = buttonLabel;
+  button.addEventListener('click', () => {
+    if (typeof onStart === 'function') {
+      onStart();
+    }
+  });
+  wrapper.append(button);
+
+  container.append(wrapper);
+}
+
 function updateHeaderModeTag(mode) {
   const tag = elements.headerModeTag;
   if (!tag) {
@@ -353,10 +382,13 @@ async function refreshHeaders() {
 }
 
 function showHeaderSearchPrompt() {
-  if (elements.headersContent) {
-    elements.headersContent.innerHTML =
-      '<p class="panel-status">Click "Start search" to generate the header outline.</p>';
-  }
+  renderPanelStartPrompt(elements.headersContent, {
+    message: 'Press Start to generate the header outline.',
+    buttonLabel: 'Start search',
+    onStart: () => {
+      void refreshHeaders();
+    },
+  });
   if (elements.headersRawContent) {
     elements.headersRawContent.innerHTML =
       '<p class="panel-status">Run the header search to view the raw response.</p>';
@@ -391,10 +423,13 @@ function setSpecsSearchBusy(busy) {
 }
 
 function showSpecsSearchPrompt() {
-  if (elements.specsContent) {
-    elements.specsContent.innerHTML =
-      '<p class="panel-status">Click "Start search" to classify specification lines.</p>';
-  }
+  renderPanelStartPrompt(elements.specsContent, {
+    message: 'Press Start to classify specification lines into buckets.',
+    buttonLabel: 'Start search',
+    onStart: () => {
+      void runSpecsSearch();
+    },
+  });
 }
 
 async function runSpecsSearch() {
