@@ -2,18 +2,29 @@
 
 from __future__ import annotations
 
+import os
 import re
 from difflib import SequenceMatcher
 from typing import Dict, Iterable, List, Sequence
 
+from backend.config import (
+    HEADERS_ALIGN_STRATEGY,
+    HEADERS_FUZZY_THRESHOLD,
+    HEADERS_NORMALIZE_CONFUSABLES,
+    HEADERS_SUPPRESS_RUNNING,
+    HEADERS_SUPPRESS_TOC,
+    HEADERS_WINDOW_PAD_LINES,
+)
+
 from ..utils.trace import HeaderTracer
+from .headers_sequential import align_headers_sequential
 
 
 def _normalise(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip()).lower()
 
 
-def locate_headers_in_lines(
+def _locate_headers_legacy(
     headers: Sequence[Dict],
     lines: Sequence[Dict],
     *,
@@ -21,8 +32,6 @@ def locate_headers_in_lines(
     similarity_threshold: float = 0.88,
     tracer: HeaderTracer | None = None,
 ) -> List[Dict]:
-    """Return located headers with page and line metadata."""
-
     excluded = set(excluded_pages)
     usable: list[dict] = []
     for line in lines:
@@ -145,6 +154,77 @@ def locate_headers_in_lines(
 
     located.sort(key=lambda item: item.get("global_idx", 0))
     return located
+
+
+def locate_headers_in_lines(
+    headers: Sequence[Dict],
+    lines: Sequence[Dict],
+    *,
+    excluded_pages: Iterable[int] = (),
+    similarity_threshold: float = 0.88,
+    tracer: HeaderTracer | None = None,
+) -> List[Dict]:
+    strategy = os.getenv("HEADERS_ALIGN_STRATEGY", HEADERS_ALIGN_STRATEGY).strip().lower()
+
+    if strategy == "sequential":
+        sequential_headers = align_headers_sequential(
+            headers,
+            lines,
+            confusables=HEADERS_NORMALIZE_CONFUSABLES,
+            threshold=HEADERS_FUZZY_THRESHOLD,
+            window_pad=HEADERS_WINDOW_PAD_LINES,
+            suppress_toc=HEADERS_SUPPRESS_TOC,
+            suppress_running=HEADERS_SUPPRESS_RUNNING,
+            tracer=tracer,
+        )
+
+        located: List[Dict] = [
+            {
+                "text": entry.get("title", ""),
+                "number": entry.get("number"),
+                "level": int(entry.get("level", 1)),
+                "page": int(entry.get("page", 0) or 0),
+                "line_idx": int(entry.get("line_idx", 0) or 0),
+                "global_idx": int(entry.get("global_idx", 0) or 0),
+            }
+            for entry in sequential_headers
+        ]
+
+        matched_numbers = {str(entry.get("number")) for entry in sequential_headers if entry.get("number")}
+        used_indices = {int(entry.get("global_idx", 0) or 0) for entry in sequential_headers}
+
+        remaining_headers: list[Dict] = []
+        for header in headers:
+            number = (header.get("number") or "").strip()
+            if number and number in matched_numbers:
+                continue
+            remaining_headers.append(header)
+
+        if remaining_headers:
+            filtered_lines = [
+                line
+                for line in lines
+                if int(line.get("global_idx", 0) or 0) not in used_indices
+            ]
+            legacy = _locate_headers_legacy(
+                remaining_headers,
+                filtered_lines,
+                excluded_pages=excluded_pages,
+                similarity_threshold=similarity_threshold,
+                tracer=tracer,
+            )
+            located.extend(legacy)
+
+        located.sort(key=lambda item: item.get("global_idx", 0))
+        return located
+
+    return _locate_headers_legacy(
+        headers,
+        lines,
+        excluded_pages=excluded_pages,
+        similarity_threshold=similarity_threshold,
+        tracer=tracer,
+    )
 
 
 __all__ = ["locate_headers_in_lines"]

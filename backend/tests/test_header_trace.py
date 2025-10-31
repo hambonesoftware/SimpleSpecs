@@ -60,14 +60,23 @@ def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
     types = {event["type"] for event in events}
     assert "start_run" in types
     assert "end_run" in types
-    assert "candidate_found" in types or "anchor_resolved" in types
+    expected_trace_markers = {
+        "candidate_found",
+        "anchor_resolved",
+        "anchor_candidate_top",
+        "anchor_resolved_top",
+        "anchor_resolved_child",
+    }
+    assert types.intersection(expected_trace_markers)
     assert any(event["type"] == "pre_normalize_sample" for event in events)
 
     trace_path = Path(tracer.path)
     assert trace_path.exists()
     content = trace_path.read_text(encoding="utf-8").strip().splitlines()
     assert content
-    assert any("candidate_found" in line for line in content)
+    assert any(
+        any(marker in line for marker in expected_trace_markers) for line in content
+    )
     assert payload["headers"]
 
     summary_path = Path(tracer.summary_path)

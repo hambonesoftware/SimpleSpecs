@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import os
 import time
 
 from typing import Any
@@ -121,6 +122,7 @@ async def generate_headers(
     session: Session = Depends(get_session),
     settings: Settings = Depends(get_settings),
     trace: bool = Query(False),
+    align: str | None = Query(None),
 ) -> HeadersResponse:
     """Return the hierarchical headers for a stored document."""
 
@@ -146,6 +148,10 @@ async def generate_headers(
     document_bytes = document_path.read_bytes()
 
     trace_requested = trace or app_config.HEADERS_TRACE_EMBED_RESPONSE
+
+    align_strategy = (align or "").strip().lower()
+    if align_strategy in {"sequential", "legacy"}:
+        os.environ["HEADERS_ALIGN_STRATEGY"] = align_strategy
 
     if settings.headers_llm_strict:
         llm_service = LLMService(settings)

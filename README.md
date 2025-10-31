@@ -44,6 +44,21 @@ SimpleSpecs sends the full document text to OpenRouter for a high-fidelity outli
 
 The pipeline requires `OPENROUTER_API_KEY`. Cached responses avoid repeated model invocations for unchanged documents.
 
+#### Sequential alignment strategy
+
+The default header locator uses a forward-only, parent-bounded sequential search that resists table-of-contents anchors and running headers. Tune behaviour via these environment variables:
+
+```
+HEADERS_ALIGN_STRATEGY=sequential  # use `legacy` to revert to the prior locator
+HEADERS_SUPPRESS_TOC=1            # ignore pages that look like TOCs
+HEADERS_SUPPRESS_RUNNING=1        # filter repeated running headers/footers
+HEADERS_NORMALIZE_CONFUSABLES=1   # normalise numeric lookalikes (I/l → 1)
+HEADERS_FUZZY_THRESHOLD=80        # token-set similarity for title matching
+HEADERS_WINDOW_PAD_LINES=40       # expand parent search windows by ±N lines
+```
+
+Clients can override the active strategy per request with `POST /api/headers/{document_id}?align=sequential` (or `align=legacy`). When tracing is enabled the sequential locator emits events such as `anchor_candidate_top`, `window_top`, and `anchor_resolved_child` to aid debugging.
+
 
 ### Header trace debugging
 
