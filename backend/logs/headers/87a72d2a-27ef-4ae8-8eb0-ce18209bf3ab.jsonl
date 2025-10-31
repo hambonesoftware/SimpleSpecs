@@ -1,0 +1,6 @@
+{"t": 1761938566.586394, "type": "start_run", "mode": "llm_strict", "file_id": 1, "cfg": {"suppress_toc": true, "suppress_running": true}, "metadata": {"filename": "MFC-9M_R2001_E1988.pdf"}}
+{"t": 1761938567.871349, "type": "doc_stats", "pages": 0, "lines": 0, "bytes": 2783133, "excluded_pages": []}
+{"t": 1761938567.874228, "type": "llm_outline_received", "count": 0, "headers": []}
+{"t": 1761938567.874228, "type": "toc_pages", "pages": []}
+{"t": 1761938567.874228, "type": "final_outline", "headers": [], "sections": [], "mode": "llm_strict", "messages": [], "elapsed_s": 1.2872067999851424}
+{"t": 1761938567.874228, "type": "end_run", "elapsed_s": 1.2872067999851424, "total_headers": 0, "unresolved": [], "mode": "llm_strict", "doc_hash": "c7e5671948f761a792fafbc2b182c6cf1d1b02c8a6b9a3bf105e94591c98a85b"}

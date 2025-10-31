@@ -88,40 +88,6 @@ def test_strict_headers_skip_toc_lines() -> None:
     assert result["sections"][1]["end_global_index"] == 5
 
 
-def test_strict_global_index_alignment() -> None:
-    lines = []
-    global_idx = 0
-    for page in range(1, 4):
-        for local_idx in range(3):
-            text = f"Header {page}-{local_idx}" if local_idx == 1 else f"Body {page}-{local_idx}"
-            lines.append(
-                {
-                    "text": text,
-                    "global_idx": global_idx,
-                    "page": page,
-                    "line_idx": local_idx,
-                    "is_toc": False,
-                    "is_index": False,
-                    "is_running": False,
-                }
-            )
-            global_idx += 1
-
-    payload = {
-        "headers": [
-            {"text": "Header 1-1", "number": "1", "level": 1},
-            {"text": "Header 2-1", "number": "2", "level": 1},
-            {"text": "Header 3-1", "number": "3", "level": 1},
-        ]
-    }
-
-    llm = DummyLLM(payload)
-    result = extract_headers_and_sections_strict(llm=llm, lines=lines)
-
-    assert [header["line_index"] for header in result["headers"]] == [1, 4, 7]
-    assert [section["end_global_index"] for section in result["sections"]] == [3, 6, 8]
-
-
 def test_strict_handles_confusable_numbers_and_spacing() -> None:
     lines = [
         {

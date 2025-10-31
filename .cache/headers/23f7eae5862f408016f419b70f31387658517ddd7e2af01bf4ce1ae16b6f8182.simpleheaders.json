@@ -1,0 +1,269 @@
+{
+  "headers": [
+    {
+      "text": "GENERAL",
+      "number": "1",
+      "level": 1
+    },
+    {
+      "text": "Scope",
+      "number": "1.1",
+      "level": 2
+    },
+    {
+      "text": "Purpose",
+      "number": "1.2",
+      "level": 2
+    },
+    {
+      "text": "Terminology, Symbols, and Definitions",
+      "number": "1.3",
+      "level": 2
+    },
+    {
+      "text": "FLOWMETER DESCRIPTION",
+      "number": "2",
+      "level": 1
+    },
+    {
+      "text": "Operating Principles",
+      "number": "2.1",
+      "level": 2
+    },
+    {
+      "text": "Introduction",
+      "number": "2.1.1",
+      "level": 3
+    },
+    {
+      "text": "Fluid Velocity Measurement",
+      "number": "2.1.2",
+      "level": 3
+    },
+    {
+      "text": "Transit-Time Difference",
+      "number": "2.1.2.1",
+      "level": 4
+    },
+    {
+      "text": "Frequency Difference",
+      "number": "2.1.2.2",
+      "level": 4
+    },
+    {
+      "text": "Transducer Considerations",
+      "number": "2.1.3",
+      "level": 3
+    },
+    {
+      "text": "Estimating Volumetric Flow",
+      "number": "2.1.4",
+      "level": 3
+    },
+    {
+      "text": "Implementation",
+      "number": "2.2",
+      "level": 2
+    },
+    {
+      "text": "Primary Device",
+      "number": "2.2.1",
+      "level": 3
+    },
+    {
+      "text": "Measurement Section",
+      "number": "2.2.1.1",
+      "level": 4
+    },
+    {
+      "text": "Transducers",
+      "number": "2.2.1.2",
+      "level": 4
+    },
+    {
+      "text": "Acoustic Paths",
+      "number": "2.2.1.3",
+      "level": 4
+    },
+    {
+      "text": "Secondary Device",
+      "number": "2.2.2",
+      "level": 3
+    },
+    {
+      "text": "Operation of Transducers",
+      "number": "2.2.2.1",
+      "level": 4
+    },
+    {
+      "text": "Measurement Method",
+      "number": "2.2.2.2",
+      "level": 4
+    },
+    {
+      "text": "Processing of Data",
+      "number": "2.2.2.3",
+      "level": 4
+    },
+    {
+      "text": "Displays and Outputs",
+      "number": "2.2.2.4",
+      "level": 4
+    },
+    {
+      "text": "ERROR SOURCES AND THEIR REDUCTION",
+      "number": "3",
+      "level": 1
+    },
+    {
+      "text": "Axial Velocity Estimate",
+      "number": "3.1",
+      "level": 2
+    },
+    {
+      "text": "Acoustic Path Length and Angle",
+      "number": "3.1.1",
+      "level": 3
+    },
+    {
+      "text": "Transit Time",
+      "number": "3.1.2",
+      "level": 3
+    },
+    {
+      "text": "Timing",
+      "number": "3.1.2.1",
+      "level": 4
+    },
+    {
+      "text": "Signal Detection",
+      "number": "3.1.2.2",
+      "level": 4
+    },
+    {
+      "text": "Sound Speed Dependency",
+      "number": "3.1.3",
+      "level": 3
+    },
+    {
+      "text": "Secondary Flow",
+      "number": "3.1.4",
+      "level": 3
+    },
+    {
+      "text": "Integration",
+      "number": "3.2",
+      "level": 2
+    },
+    {
+      "text": "Cross Section Dimensional Errors",
+      "number": "3.2.1",
+      "level": 3
+    },
+    {
+      "text": "Acoustic Path Location",
+      "number": "3.2.2",
+      "level": 3
+    },
+    {
+      "text": "Velocity Profile",
+      "number": "3.2.3",
+      "level": 3
+    },
+    {
+      "text": "Computation",
+      "number": "3.3",
+      "level": 2
+    },
+    {
+      "text": "Calibration",
+      "number": "3.4",
+      "level": 2
+    },
+    {
+      "text": "Equipment Degradation",
+      "number": "3.5",
+      "level": 2
+    },
+    {
+      "text": "APPLICATION GUIDELINES",
+      "number": "4",
+      "level": 1
+    },
+    {
+      "text": "Performance Parameters",
+      "number": "4.1",
+      "level": 2
+    },
+    {
+      "text": "Installation Considerations",
+      "number": "4.2",
+      "level": 2
+    },
+    {
+      "text": "Introduction",
+      "number": "4.2.1",
+      "level": 3
+    },
+    {
+      "text": "Acoustic Path Length and Angle",
+      "number": "4.2.2",
+      "level": 3
+    },
+    {
+      "text": "Signal Detection",
+      "number": "4.2.3",
+      "level": 3
+    },
+    {
+      "text": "Multiple Fluids",
+      "number": "4.2.4",
+      "level": 3
+    },
+    {
+      "text": "Secondary Flow",
+      "number": "4.2.5",
+      "level": 3
+    },
+    {
+      "text": "Integration",
+      "number": "4.2.6",
+      "level": 3
+    },
+    {
+      "text": "Calibration",
+      "number": "4.2.7",
+      "level": 3
+    },
+    {
+      "text": "METER FACTOR DETERMINATION AND VERIFICATION",
+      "number": "5",
+      "level": 1
+    },
+    {
+      "text": "Laboratory Calibration",
+      "number": "5.1",
+      "level": 2
+    },
+    {
+      "text": "Field Calibration",
+      "number": "5.2",
+      "level": 2
+    },
+    {
+      "text": "Analytical Procedures",
+      "number": "5.3",
+      "level": 2
+    },
+    {
+      "text": "ACOUSTIC TRANSIT TIME IN A NONUNIFORM FLUID VELOCITY FIELD",
+      "number": "A",
+      "level": 1
+    },
+    {
+      "text": "SELECTION GUIDELINES",
+      "number": "B",
+      "level": 1
+    }
+  ]
+}

@@ -44,23 +44,9 @@ SimpleSpecs sends the full document text to OpenRouter for a high-fidelity outli
 
 The pipeline requires `OPENROUTER_API_KEY`. Cached responses avoid repeated model invocations for unchanged documents.
 
-#### Best-practice alignment strategy (`align=best`)
+#### Sequential alignment strategy
 
-The production-grade "best" strategy is now the default. It layers multiple signals to reliably anchor LLM-provided outlines:
-
-- Normalises numbering and OCR artefacts (e.g. `1 .I` → `1.1`) before scoring.
-- Suppresses TOC/running headers by detecting dotted leaders and repeated band lines.
-- Factors in typography (larger fonts, bold weight) when ranking candidates.
-- Anchors sequentially, with a last-occurrence fallback that still respects TOC bans.
-- Constrains children to hierarchical windows derived from their parents.
-- Applies a final monotonic guard so parents always precede descendants.
-- Emits rich trace events such as `candidate_found`, `anchor_resolved_best`, and `final_monotonic_pass_best` when tracing.
-
-Toggle via `HEADERS_ALIGN_STRATEGY=best` or per-request with `?align=best`. Combine with `HEADERS_TRACE=1` to inspect the new trace events.
-
-#### Sequential alignment strategy (legacy)
-
-The legacy forward-only sequential locator remains available for comparison and regression checks. Tune behaviour via these environment variables:
+The default header locator uses a forward-only, parent-bounded sequential search that resists table-of-contents anchors and running headers. Tune behaviour via these environment variables:
 
 ```
 HEADERS_ALIGN_STRATEGY=sequential  # use `legacy` to revert to the prior locator
@@ -69,7 +55,7 @@ HEADERS_SUPPRESS_RUNNING=1        # filter repeated running headers/footers
 HEADERS_NORMALIZE_CONFUSABLES=1   # normalise numeric lookalikes (I/l → 1)
 HEADERS_FUZZY_THRESHOLD=80        # token-set similarity for title matching
 HEADERS_WINDOW_PAD_LINES=40       # expand parent search windows by ±N lines
-HEADERS_BAND_LINES=3              # top/bottom lines per page considered a running band
+HEADERS_BAND_LINES=5              # top/bottom lines per page considered a running band
 HEADERS_L1_REQUIRE_NUMERIC=1      # insist on numeric prefixes for L1 anchors before fallback
 HEADERS_L1_LOOKAHEAD_CHILD_HINT=30  # scan ahead for 1.1-style hints when ranking anchors
 HEADERS_MONOTONIC_STRICT=1        # enforce forward-only anchoring with duplicate retries
@@ -183,20 +169,6 @@ Each trace entry captures the reasoning behind the locator, including:
 - `candidate_found`, `candidate_scored`, `anchor_resolved`, `monotonic_violation`, `fallback_triggered` – per-header search and alignment decisions, including gap fills.
 
 Trace files are newline-delimited JSON and can be streamed into tooling such as `jq` for analysis.
-
-
-## Strict Guardrails & Trace
-
-- **Preconditions**
-  - Abort with HTTP 422 `no_lines` when extraction returns zero lines. Controlled via `HEADERS_STRICT_ABORT_ON_NO_LINES`.
-  - Size guard logs `outline_skipped: size_guard` when estimated tokens exceed `HEADERS_MAX_DOC_TOKENS`.
-- **LLM outline**
-  - Emits `outline_call_start` / `outline_call_end` events describing provider, model, bytes, and status.
-  - `_parse_outline_strict` records `outline_parse_ok` or `outline_parse_failed` (`empty_raw`, `non_list_json`, `json_items_missing_fields`, `no_json_no_bullets`, …).
-  - Empty outline parses raise HTTP 422 `empty_outline` (configurable with `HEADERS_STRICT_FAIL_ON_EMPTY_OUTLINE`).
-- **Trace events**
-  - `doc_stats`, `outline_skipped`, `abort_no_lines`, `abort_empty_outline`, `strict_align_done`, `end_run`, and more.
-  - When `?trace=1` (or `HEADERS_TRACE_EMBED_RESPONSE=1`), responses include inline trace data and the persisted trace file path.
 
 
 ## Windows single-file bundle (optional)

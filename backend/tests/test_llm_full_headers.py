@@ -66,12 +66,10 @@ def test_single_chunks_from_headers_produces_ranges() -> None:
 
 def test_get_headers_llm_full_uses_cache(monkeypatch, tmp_path) -> None:
     calls = 0
-    captured_messages: list[list[dict]] = []
 
     def _fake_chat(messages, **kwargs):  # noqa: ANN001 - test stub
         nonlocal calls
         calls += 1
-        captured_messages.append(messages)
         payload = {
             "headers": [
                 {"text": "Alpha", "number": None, "level": 1},
@@ -105,11 +103,8 @@ def test_get_headers_llm_full_uses_cache(monkeypatch, tmp_path) -> None:
         }
     ]
 
-    pdf_bytes = b"%PDF-1.4 test"
-
     async def _run() -> None:
         headers = await get_headers_llm_full(
-            pdf_bytes,
             lines,
             "hash-value",
             settings=settings,
@@ -117,14 +112,8 @@ def test_get_headers_llm_full_uses_cache(monkeypatch, tmp_path) -> None:
         )
 
         assert headers[0]["text"] == "Alpha"
-        assert captured_messages
-        user_message = captured_messages[0][1]
-        assert isinstance(user_message.get("content"), list)
-        input_types = {item.get("type") for item in user_message["content"]}
-        assert "input_file" in input_types
 
         cached_headers = await get_headers_llm_full(
-            pdf_bytes,
             lines,
             "hash-value",
             settings=settings,

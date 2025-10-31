@@ -1,0 +1,238 @@
+{
+  "document_id": 3,
+  "overall_score": 0.0,
+  "coverage_by_discipline": {
+    "mechanical": 0.0,
+    "electrical": 0.0,
+    "controls": 0.0,
+    "software": 0.0,
+    "project_management": 0.0
+  },
+  "missing_clause_ids": [
+    "asme-pressure-relief",
+    "asme-material-traceability",
+    "iec-grounding",
+    "iec-cable-identification",
+    "iso-safety-integrity",
+    "iec-software-versioning",
+    "pm-change-control"
+  ],
+  "findings": [
+    {
+      "clause_id": "asme-pressure-relief",
+      "discipline": "mechanical",
+      "text": "Pressure relief valves shall comply with ASME Section VIII sizing requirements.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.4,
+      "missing_terms": [
+        "relief",
+        "valve",
+        "viii"
+      ],
+      "best_line": {
+        "text": "1-5.3.2 Phase Change of Metered Fluid. The uncer- tainties specified in this Standard are valid only when there is no change of phase through the primary device. Increasing the bore or throat of the primary element will reduce the differential pressure and may prevent a change of phase. For liquids, the pressure in the throat section must not fall below the vapor pressure of the liq- uid (otherwise, cavitation will result). For gases, it is only necessary to calculate the temperature at the throat if the gas is in the vicinity of its dew point. The tem- perature in the throat can be calculated assuming an isentropic expansion from the upstream conditions (the",
+        "page": 4,
+        "header_path": [
+          "Page Location Change"
+        ],
+        "disciplines": [
+          "mechanical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 1.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 4,
+          "block_index": 8,
+          "line_index": 0,
+          "bbox": [
+            71.99984741210938,
+            592.4901123046875,
+            306.0229187011719,
+            730.6483154296875
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "asme-material-traceability",
+      "discipline": "mechanical",
+      "text": "Maintain full material traceability records for load bearing components.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.333,
+      "missing_terms": [
+        "records",
+        "traceability"
+      ],
+      "best_line": {
+        "text": "2 - 4 . 2 . 1 Details of Pressure Taps for D and D / 2 Tap Orifice Meters and Flange Tap Orifice Meters (a) The spacing, l of a pressure tap is the distance be- tween the centerline of the pressure tap and the plane of a specified face of the orifice plate (see Fig. 2-3). When installing the pressure taps, the thickness of the gaskets and/or sealing material shall be considered.",
+        "page": 16,
+        "header_path": [
+          "I"
+        ],
+        "disciplines": [
+          "mechanical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 1.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 16,
+          "block_index": 5,
+          "line_index": 0,
+          "bbox": [
+            71.99884033203125,
+            649.9804077148438,
+            306.01922607421875,
+            730.6500854492188
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "iec-grounding",
+      "discipline": "electrical",
+      "text": "All control cabinets shall provide protective earth bonding in accordance with IEC 60204-1.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "60204",
+        "bonding",
+        "earth",
+        "iec",
+        "protective"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-cable-identification",
+      "discipline": "electrical",
+      "text": "Power and control conductors must be uniquely identified at both terminations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "conductors",
+        "identified",
+        "terminations"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iso-safety-integrity",
+      "discipline": "controls",
+      "text": "Safety functions shall meet ISO 13849 performance level calculations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.2,
+      "missing_terms": [
+        "13849",
+        "level",
+        "performance",
+        "safety"
+      ],
+      "best_line": {
+        "text": "3 - 4 . 1 . 1 General Shape. The part of the nozzle inside the pipe is circular. The nozzle consists of a convergent section, rounded profile, and a cylindrical throat. Figure 3-1 shows the cross-section of an ISA 1932 nozzle at a plane passing through the centerline of the throat. The let- ters in the following text refer to those shown on Fig. 3-1. Note that the use of the ISA 1932 nozzle is rare in North America, but still sees widespread use in countries that use ISO standards.",
+        "page": 32,
+        "header_path": [
+          "R 2"
+        ],
+        "disciplines": [
+          "controls"
+        ],
+        "scores": {
+          "controls": 1.5,
+          "electrical": 0.0,
+          "mechanical": 0.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 32,
+          "block_index": 2,
+          "line_index": 0,
+          "bbox": [
+            72.00035095214844,
+            159.99008178710938,
+            306.0242919921875,
+            263.6491394042969
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "iec-software-versioning",
+      "discipline": "software",
+      "text": "Firmware shall implement semantic versioning with rollback procedures.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "firmware",
+        "rollback",
+        "semantic",
+        "versioning"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "pm-change-control",
+      "discipline": "project_management",
+      "text": "Change control board approval is required before releasing revisions to the customer.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "approval",
+        "board",
+        "change",
+        "control"
+      ],
+      "best_line": null
+    }
+  ],
+  "compliance_notes": [
+    {
+      "clause_id": "asme-pressure-relief",
+      "action": "Create a Pressure Relief Valve (PRV) sizing procedure requiring ASME Section VIII Division 1 calculations, set, capacity, and certified drawings for each PRV; ensure calculations are peer reviewed and validated against API 520 test data where applicable, with records retained per the Document Control procedure."
+    },
+    {
+      "clause_id": "asme-material-traceability",
+      "action": "Implement a material traceability procedure requiring MTCs/MTRs and serial/lot tracking for all load-bearing components, with CMMS tagging, a central log for heat numbers and inspection status, and random audits to verify chain-of-custody and record retention."
+    },
+    {
+      "clause_id": "iec-grounding",
+      "action": "Adopt a grounding/bonding procedure aligned with IEC 60204-1, including cabinet earth terminals, protective conductor sizing, torque specifications, continuity verification, and label requirements; require test records before energization."
+    },
+    {
+      "clause_id": "iec-cable-identification",
+      "action": "Establish a cable identification standard requiring unique, cross-referenced identifiers at both terminations and within panels, aligned with IEC 60204-1 Clause 13; enforce through pre-handover checks and a wiring verification log."
+    },
+    {
+      "clause_id": "iso-safety-integrity",
+      "action": "Develop a functional safety workflow per ISO 13849-1 requiring preliminary hazard analysis, SIL/PLr allocation, subsystem MTTFd/DCavg/CCF calculations, verification reports, and validation documentation prior to deployment."
+    },
+    {
+      "clause_id": "iec-software-versioning",
+      "action": "Adopt a firmware versioning policy using semantic versioning with release notes, version tags, traceability to build artifacts, and documented rollback procedures; require configuration baselines and release approval in the CCB."
+    },
+    {
+      "clause_id": "pm-change-control",
+      "action": "Stand up a Change Control Board with defined gates, roles, criteria, and risk/impact assessment; require signed ECNs and release notes, and ensure customer notifications and version control for all customer-facing revisions."
+    }
+  ]
+}

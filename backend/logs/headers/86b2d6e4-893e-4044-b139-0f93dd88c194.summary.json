@@ -1,0 +1,717 @@
+{
+  "run_id": "86b2d6e4-893e-4044-b139-0f93dd88c194",
+  "metadata": {
+    "mode": "llm_strict",
+    "file_id": 1,
+    "cfg": {
+      "suppress_toc": true,
+      "suppress_running": true
+    },
+    "metadata": {
+      "filename": "MFC-9M_R2001_E1988.pdf"
+    }
+  },
+  "llm_headers": [
+    {
+      "text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+      "number": null,
+      "level": 1
+    },
+    {
+      "text": "1 GENERAL",
+      "number": "1",
+      "level": 1
+    },
+    {
+      "text": "1.1 Scope and Field of Application",
+      "number": "1.1",
+      "level": 2
+    },
+    {
+      "text": "1.2 References",
+      "number": "1.2",
+      "level": 2
+    },
+    {
+      "text": "1.3 Definitions",
+      "number": "1.3",
+      "level": 2
+    },
+    {
+      "text": "1.4 Symbols",
+      "number": "1.4",
+      "level": 2
+    },
+    {
+      "text": "2 PRINCIPLES",
+      "number": "2",
+      "level": 1
+    },
+    {
+      "text": "2.1 Statement of the Principles",
+      "number": "2.1",
+      "level": 2
+    },
+    {
+      "text": "2.1.1 Static Weighing",
+      "number": "2.1.1",
+      "level": 3
+    },
+    {
+      "text": "2.1.2 Dynamic Weighing",
+      "number": "2.1.2",
+      "level": 3
+    },
+    {
+      "text": "2.1.3 Comparison of Instantaneous and Mean Flow Rate",
+      "number": "2.1.3",
+      "level": 3
+    },
+    {
+      "text": "2.2 Accuracy of the Method",
+      "number": "2.2",
+      "level": 2
+    },
+    {
+      "text": "2.2.1 Overall Uncertainty on the Weighing Measurement",
+      "number": "2.2.1",
+      "level": 3
+    },
+    {
+      "text": "2.2.2 Requirements for Accurate Measurements",
+      "number": "2.2.2",
+      "level": 3
+    },
+    {
+      "text": "3 APPARATUS",
+      "number": "3",
+      "level": 1
+    },
+    {
+      "text": "3.1 Diverter",
+      "number": "3.1",
+      "level": 2
+    },
+    {
+      "text": "3.2 Time-Measuring Apparatus",
+      "number": "3.2",
+      "level": 2
+    },
+    {
+      "text": "3.3 Weighing Tank",
+      "number": "3.3",
+      "level": 2
+    },
+    {
+      "text": "3.4 Weighing Device",
+      "number": "3.4",
+      "level": 2
+    },
+    {
+      "text": "3.5 Auxiliary Measurements",
+      "number": "3.5",
+      "level": 2
+    },
+    {
+      "text": "4 PROCEDURE",
+      "number": "4",
+      "level": 1
+    },
+    {
+      "text": "4.1 Static Weighing Method",
+      "number": "4.1",
+      "level": 2
+    },
+    {
+      "text": "4.2 Dynamic Weighing Method",
+      "number": "4.2",
+      "level": 2
+    },
+    {
+      "text": "4.3 Common Provisions",
+      "number": "4.3",
+      "level": 2
+    },
+    {
+      "text": "5 CALCULATION OF FLOW RATE",
+      "number": "5",
+      "level": 1
+    },
+    {
+      "text": "5.1 Calculation of Mass Flow Rate",
+      "number": "5.1",
+      "level": 2
+    },
+    {
+      "text": "5.2 Calculation of Volume Flow Rate",
+      "number": "5.2",
+      "level": 2
+    },
+    {
+      "text": "6 UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+      "number": "6",
+      "level": 1
+    },
+    {
+      "text": "APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME",
+      "number": null,
+      "level": 1
+    },
+    {
+      "text": "APPENDIX B DENSITY OF PURE WATER",
+      "number": null,
+      "level": 1
+    }
+  ],
+  "decisions": [
+    {
+      "t": 1761922836.5389106,
+      "type": "candidate_found",
+      "header_text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+      "header_number": null,
+      "level": 1,
+      "page": 7,
+      "line_index": 248,
+      "global_idx": 248
+    },
+    {
+      "t": 1761922836.5455186,
+      "type": "candidate_found",
+      "header_text": "1 GENERAL",
+      "header_number": "1",
+      "level": 1,
+      "page": 7,
+      "line_index": 249,
+      "global_idx": 249
+    },
+    {
+      "t": 1761922836.5898387,
+      "type": "candidate_found",
+      "header_text": "1.2 References",
+      "header_number": "1.2",
+      "level": 2,
+      "page": 7,
+      "line_index": 294,
+      "global_idx": 294
+    },
+    {
+      "t": 1761922836.6013978,
+      "type": "candidate_found",
+      "header_text": "1.3 Definitions",
+      "header_number": "1.3",
+      "level": 2,
+      "page": 7,
+      "line_index": 317,
+      "global_idx": 317
+    },
+    {
+      "t": 1761922836.6132848,
+      "type": "candidate_found",
+      "header_text": "1.4 Symbols",
+      "header_number": "1.4",
+      "level": 2,
+      "page": 8,
+      "line_index": 356,
+      "global_idx": 356
+    },
+    {
+      "t": 1761922836.632959,
+      "type": "candidate_found",
+      "header_text": "2 PRINCIPLES",
+      "header_number": "2",
+      "level": 1,
+      "page": 8,
+      "line_index": 359,
+      "global_idx": 359
+    },
+    {
+      "t": 1761922836.6453974,
+      "type": "candidate_found",
+      "header_text": "2.1 Statement of the Principles",
+      "header_number": "2.1",
+      "level": 2,
+      "page": 8,
+      "line_index": 360,
+      "global_idx": 360
+    },
+    {
+      "t": 1761922836.6863406,
+      "type": "candidate_found",
+      "header_text": "2.1.1 Static Weighing",
+      "header_number": "2.1.1",
+      "level": 3,
+      "page": 8,
+      "line_index": 361,
+      "global_idx": 361
+    },
+    {
+      "t": 1761922836.7132363,
+      "type": "candidate_found",
+      "header_text": "2.1.2 Dynamic Weighing",
+      "header_number": "2.1.2",
+      "level": 3,
+      "page": 8,
+      "line_index": 377,
+      "global_idx": 377
+    },
+    {
+      "t": 1761922836.7702994,
+      "type": "candidate_found",
+      "header_text": "2.2 Accuracy of the Method",
+      "header_number": "2.2",
+      "level": 2,
+      "page": 8,
+      "line_index": 400,
+      "global_idx": 400
+    },
+    {
+      "t": 1761922836.8690813,
+      "type": "candidate_found",
+      "header_text": "3 APPARATUS",
+      "header_number": "3",
+      "level": 1,
+      "page": 8,
+      "line_index": 439,
+      "global_idx": 439
+    },
+    {
+      "t": 1761922836.878879,
+      "type": "candidate_found",
+      "header_text": "3.1 Diverter",
+      "header_number": "3.1",
+      "level": 2,
+      "page": 8,
+      "line_index": 440,
+      "global_idx": 440
+    },
+    {
+      "t": 1761922836.899178,
+      "type": "candidate_found",
+      "header_text": "3.2 Time-Measuring Apparatus",
+      "header_number": "3.2",
+      "level": 2,
+      "page": 16,
+      "line_index": 737,
+      "global_idx": 737
+    },
+    {
+      "t": 1761922836.9115732,
+      "type": "candidate_found",
+      "header_text": "3.3 Weighing Tank",
+      "header_number": "3.3",
+      "level": 2,
+      "page": 16,
+      "line_index": 771,
+      "global_idx": 771
+    },
+    {
+      "t": 1761922836.920032,
+      "type": "candidate_found",
+      "header_text": "3.4 Weighing Device",
+      "header_number": "3.4",
+      "level": 2,
+      "page": 5,
+      "line_index": 157,
+      "global_idx": 157
+    },
+    {
+      "t": 1761922836.9484575,
+      "type": "candidate_found",
+      "header_text": "4 PROCEDURE",
+      "header_number": "4",
+      "level": 1,
+      "page": 17,
+      "line_index": 883,
+      "global_idx": 883
+    },
+    {
+      "t": 1761922837.031747,
+      "type": "candidate_found",
+      "header_text": "4.3 Common Provisions",
+      "header_number": "4.3",
+      "level": 2,
+      "page": 19,
+      "line_index": 1035,
+      "global_idx": 1035
+    },
+    {
+      "t": 1761922837.0517335,
+      "type": "candidate_found",
+      "header_text": "5 CALCULATION OF FLOW RATE",
+      "header_number": "5",
+      "level": 1,
+      "page": 19,
+      "line_index": 1045,
+      "global_idx": 1045
+    },
+    {
+      "t": 1761922837.0688455,
+      "type": "candidate_found",
+      "header_text": "5.1 Calculation of Mass Flow Rate",
+      "header_number": "5.1",
+      "level": 2,
+      "page": 19,
+      "line_index": 1046,
+      "global_idx": 1046
+    },
+    {
+      "t": 1761922837.086078,
+      "type": "candidate_found",
+      "header_text": "5.2 Calculation of Volume Flow Rate",
+      "header_number": "5.2",
+      "level": 2,
+      "page": 19,
+      "line_index": 1088,
+      "global_idx": 1088
+    }
+  ],
+  "final_outline": {
+    "headers": [
+      {
+        "text": "3.4 Weighing Device",
+        "number": "3.4",
+        "level": 2,
+        "page": 5,
+        "line_idx": 157,
+        "global_idx": 157
+      },
+      {
+        "text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+        "number": null,
+        "level": 1,
+        "page": 7,
+        "line_idx": 248,
+        "global_idx": 248
+      },
+      {
+        "text": "1 GENERAL",
+        "number": "1",
+        "level": 1,
+        "page": 7,
+        "line_idx": 249,
+        "global_idx": 249
+      },
+      {
+        "text": "1.2 References",
+        "number": "1.2",
+        "level": 2,
+        "page": 7,
+        "line_idx": 294,
+        "global_idx": 294
+      },
+      {
+        "text": "1.3 Definitions",
+        "number": "1.3",
+        "level": 2,
+        "page": 7,
+        "line_idx": 317,
+        "global_idx": 317
+      },
+      {
+        "text": "1.4 Symbols",
+        "number": "1.4",
+        "level": 2,
+        "page": 8,
+        "line_idx": 356,
+        "global_idx": 356
+      },
+      {
+        "text": "2 PRINCIPLES",
+        "number": "2",
+        "level": 1,
+        "page": 8,
+        "line_idx": 359,
+        "global_idx": 359
+      },
+      {
+        "text": "2.1 Statement of the Principles",
+        "number": "2.1",
+        "level": 2,
+        "page": 8,
+        "line_idx": 360,
+        "global_idx": 360
+      },
+      {
+        "text": "2.1.1 Static Weighing",
+        "number": "2.1.1",
+        "level": 3,
+        "page": 8,
+        "line_idx": 361,
+        "global_idx": 361
+      },
+      {
+        "text": "2.1.2 Dynamic Weighing",
+        "number": "2.1.2",
+        "level": 3,
+        "page": 8,
+        "line_idx": 377,
+        "global_idx": 377
+      },
+      {
+        "text": "2.2 Accuracy of the Method",
+        "number": "2.2",
+        "level": 2,
+        "page": 8,
+        "line_idx": 400,
+        "global_idx": 400
+      },
+      {
+        "text": "3 APPARATUS",
+        "number": "3",
+        "level": 1,
+        "page": 8,
+        "line_idx": 439,
+        "global_idx": 439
+      },
+      {
+        "text": "3.1 Diverter",
+        "number": "3.1",
+        "level": 2,
+        "page": 8,
+        "line_idx": 440,
+        "global_idx": 440
+      },
+      {
+        "text": "3.2 Time-Measuring Apparatus",
+        "number": "3.2",
+        "level": 2,
+        "page": 16,
+        "line_idx": 737,
+        "global_idx": 737
+      },
+      {
+        "text": "3.3 Weighing Tank",
+        "number": "3.3",
+        "level": 2,
+        "page": 16,
+        "line_idx": 771,
+        "global_idx": 771
+      },
+      {
+        "text": "4 PROCEDURE",
+        "number": "4",
+        "level": 1,
+        "page": 17,
+        "line_idx": 883,
+        "global_idx": 883
+      },
+      {
+        "text": "4.3 Common Provisions",
+        "number": "4.3",
+        "level": 2,
+        "page": 19,
+        "line_idx": 1035,
+        "global_idx": 1035
+      },
+      {
+        "text": "5 CALCULATION OF FLOW RATE",
+        "number": "5",
+        "level": 1,
+        "page": 19,
+        "line_idx": 1045,
+        "global_idx": 1045
+      },
+      {
+        "text": "5.1 Calculation of Mass Flow Rate",
+        "number": "5.1",
+        "level": 2,
+        "page": 19,
+        "line_idx": 1046,
+        "global_idx": 1046
+      },
+      {
+        "text": "5.2 Calculation of Volume Flow Rate",
+        "number": "5.2",
+        "level": 2,
+        "page": 19,
+        "line_idx": 1088,
+        "global_idx": 1088
+      }
+    ],
+    "sections": [
+      {
+        "header_text": "3.4 Weighing Device",
+        "header_number": "3.4",
+        "level": 2,
+        "start_global_idx": 157,
+        "end_global_idx": 247,
+        "start_page": 5,
+        "end_page": 7
+      },
+      {
+        "header_text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 248,
+        "end_global_idx": 248,
+        "start_page": 7,
+        "end_page": 7
+      },
+      {
+        "header_text": "1 GENERAL",
+        "header_number": "1",
+        "level": 1,
+        "start_global_idx": 249,
+        "end_global_idx": 293,
+        "start_page": 7,
+        "end_page": 7
+      },
+      {
+        "header_text": "1.2 References",
+        "header_number": "1.2",
+        "level": 2,
+        "start_global_idx": 294,
+        "end_global_idx": 316,
+        "start_page": 7,
+        "end_page": 7
+      },
+      {
+        "header_text": "1.3 Definitions",
+        "header_number": "1.3",
+        "level": 2,
+        "start_global_idx": 317,
+        "end_global_idx": 355,
+        "start_page": 7,
+        "end_page": 8
+      },
+      {
+        "header_text": "1.4 Symbols",
+        "header_number": "1.4",
+        "level": 2,
+        "start_global_idx": 356,
+        "end_global_idx": 358,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "2 PRINCIPLES",
+        "header_number": "2",
+        "level": 1,
+        "start_global_idx": 359,
+        "end_global_idx": 359,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "2.1 Statement of the Principles",
+        "header_number": "2.1",
+        "level": 2,
+        "start_global_idx": 360,
+        "end_global_idx": 360,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "2.1.1 Static Weighing",
+        "header_number": "2.1.1",
+        "level": 3,
+        "start_global_idx": 361,
+        "end_global_idx": 376,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "2.1.2 Dynamic Weighing",
+        "header_number": "2.1.2",
+        "level": 3,
+        "start_global_idx": 377,
+        "end_global_idx": 399,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "2.2 Accuracy of the Method",
+        "header_number": "2.2",
+        "level": 2,
+        "start_global_idx": 400,
+        "end_global_idx": 438,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "3 APPARATUS",
+        "header_number": "3",
+        "level": 1,
+        "start_global_idx": 439,
+        "end_global_idx": 439,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "3.1 Diverter",
+        "header_number": "3.1",
+        "level": 2,
+        "start_global_idx": 440,
+        "end_global_idx": 736,
+        "start_page": 8,
+        "end_page": 16
+      },
+      {
+        "header_text": "3.2 Time-Measuring Apparatus",
+        "header_number": "3.2",
+        "level": 2,
+        "start_global_idx": 737,
+        "end_global_idx": 770,
+        "start_page": 16,
+        "end_page": 16
+      },
+      {
+        "header_text": "3.3 Weighing Tank",
+        "header_number": "3.3",
+        "level": 2,
+        "start_global_idx": 771,
+        "end_global_idx": 882,
+        "start_page": 16,
+        "end_page": 17
+      },
+      {
+        "header_text": "4 PROCEDURE",
+        "header_number": "4",
+        "level": 1,
+        "start_global_idx": 883,
+        "end_global_idx": 1034,
+        "start_page": 17,
+        "end_page": 19
+      },
+      {
+        "header_text": "4.3 Common Provisions",
+        "header_number": "4.3",
+        "level": 2,
+        "start_global_idx": 1035,
+        "end_global_idx": 1044,
+        "start_page": 19,
+        "end_page": 19
+      },
+      {
+        "header_text": "5 CALCULATION OF FLOW RATE",
+        "header_number": "5",
+        "level": 1,
+        "start_global_idx": 1045,
+        "end_global_idx": 1045,
+        "start_page": 19,
+        "end_page": 19
+      },
+      {
+        "header_text": "5.1 Calculation of Mass Flow Rate",
+        "header_number": "5.1",
+        "level": 2,
+        "start_global_idx": 1046,
+        "end_global_idx": 1087,
+        "start_page": 19,
+        "end_page": 19
+      },
+      {
+        "header_text": "5.2 Calculation of Volume Flow Rate",
+        "header_number": "5.2",
+        "level": 2,
+        "start_global_idx": 1088,
+        "end_global_idx": 1418,
+        "start_page": 19,
+        "end_page": 26
+      }
+    ],
+    "mode": "llm_strict",
+    "messages": []
+  },
+  "elapsed_s": 1.3698462000174914
+}

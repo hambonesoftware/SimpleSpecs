@@ -1,0 +1,259 @@
+{
+  "document_id": 1,
+  "overall_score": 0.0,
+  "coverage_by_discipline": {
+    "mechanical": 0.0,
+    "electrical": 0.0,
+    "controls": 0.0,
+    "software": 0.0,
+    "project_management": 0.0
+  },
+  "missing_clause_ids": [
+    "asme-pressure-relief",
+    "asme-material-traceability",
+    "iec-grounding",
+    "iec-cable-identification",
+    "iso-safety-integrity",
+    "iec-software-versioning",
+    "pm-change-control"
+  ],
+  "findings": [
+    {
+      "clause_id": "asme-pressure-relief",
+      "discipline": "mechanical",
+      "text": "Pressure relief valves shall comply with ASME Section VIII sizing requirements.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.2,
+      "missing_terms": [
+        "relief",
+        "section",
+        "valve",
+        "viii"
+      ],
+      "best_line": {
+        "text": "The method described may be applied to any liquid, provided that its vapor pressure is such that any escape of liquid from the weighing tank by vaporization is not sufficient to affect the required measurement accuracy. Closed weighing tanks and their application to the flow measurement of liquids of high vapor pres- sure are not considered in this Standard.",
+        "page": 7,
+        "header_path": [
+          "1 GENERAL"
+        ],
+        "disciplines": [
+          "mechanical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 1.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 7,
+          "block_index": 3,
+          "line_index": 0,
+          "bbox": [
+            50.59794616699219,
+            311.63189697265625,
+            290.26593017578125,
+            394.4472961425781
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "asme-material-traceability",
+      "discipline": "mechanical",
+      "text": "Maintain full material traceability records for load bearing components.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "material",
+        "records",
+        "traceability"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-grounding",
+      "discipline": "electrical",
+      "text": "All control cabinets shall provide protective earth bonding in accordance with IEC 60204-1.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "60204",
+        "bonding",
+        "earth",
+        "iec",
+        "protective"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-cable-identification",
+      "discipline": "electrical",
+      "text": "Power and control conductors must be uniquely identified at both terminations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "conductors",
+        "identified",
+        "terminations"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iso-safety-integrity",
+      "discipline": "controls",
+      "text": "Safety functions shall meet ISO 13849 performance level calculations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "13849",
+        "iso",
+        "level",
+        "performance",
+        "safety"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-software-versioning",
+      "discipline": "software",
+      "text": "Firmware shall implement semantic versioning with rollback procedures.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "firmware",
+        "rollback",
+        "semantic",
+        "versioning"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "pm-change-control",
+      "discipline": "project_management",
+      "text": "Change control board approval is required before releasing revisions to the customer.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "approval",
+        "board",
+        "change",
+        "control"
+      ],
+      "best_line": null
+    }
+  ],
+  "compliance_notes": [
+    {
+      "document_id": "1",
+      "recommended_actions": [
+        {
+          "clause_id": "asme-pressure-relief",
+          "description": "Pressure relief valves shall comply with ASME Section VIII sizing requirements.",
+          "actions": [
+            "Verify each pressure relief valve (PRV) is selected and sized per ASME Section VIII, Division 1, including installation per UG-134 and capacity certification per UV or NB provisions.",
+            "Record process data used for sizing: set pressure, overpressure, relieving temperature, fluid properties, required capacity, and safety margin (e.g., 10%).",
+            "Obtain and retain PRV manufacturer datasheets, capacity certification, NB registration (if applicable), and installation drawings.",
+            "Update the procedure to require PRV sizing checks and record retention as part of design freeze and post-weld heat treatment."
+          ],
+          "references": [
+            "ASME Section VIII, Division 1 (UG-134, UV)",
+            "ASME Boiler & Pressure Vessel Code, Section II materials as applicable"
+          ]
+        },
+        {
+          "clause_id": "asme-material-traceability",
+          "description": "Maintain full material traceability records for load bearing components.",
+          "actions": [
+            "Create and enforce a Material Traceability Standard: unique IDs per component linked to heat/lot numbers and MTCs (EN 10204 3.1/3.2).",
+            "Maintain a traceable BOM mapping load-bearing parts to their heat/lot numbers and certifications.",
+            "Retain certificates and inspection records for the asset life plus 10 years, in an auditable repository.",
+            "Update the QA plan to include spot audits of traceability from receiving through final assembly."
+          ],
+          "references": [
+            "ISO 9001",
+            "ASME Section VIII materials requirements"
+          ]
+        },
+        {
+          "clause_id": "iec-grounding",
+          "description": "All control cabinets shall provide protective earth bonding in accordance with IEC 60204-1.",
+          "actions": [
+            "Standardize cabinet bonding: dedicated PE terminal per IEC 60204-1, star topology to chassis with label and icon.",
+            "Measure and record protective conductor continuity (<0.1 \u03a9 typical threshold per 18.2) after assembly.",
+            "Update wiring diagrams and installation instructions to show PE routing and labeling conventions.",
+            "Add a production checklist item for PE continuity verification and nonconformance tracking."
+          ],
+          "references": [
+            "IEC 60204-1:2016 (18.2, Annex E for labeling)"
+          ]
+        },
+        {
+          "clause_id": "iec-cable-identification",
+          "description": "Power and control conductors must be uniquely identified at both terminations.",
+          "actions": [
+            "Implement a Cable Identification Standard: unique cable IDs with durable markers at both ends and in cable trays/conduits.",
+            "Use standardized numbering with a mapping schedule linking each cable ID to gauge, function, origin/destination, and pinout.",
+            "Update schematics and wire lists to display the unique ID and require markers on all terminations.",
+            "Add an inspection step to verify marker presence and schedule alignment prior to energization."
+          ],
+          "references": [
+            "IEC 60204-1 (5.3 identification and marking)",
+            "IEC 61346 for identification principles"
+          ]
+        },
+        {
+          "clause_id": "iso-safety-integrity",
+          "description": "Safety functions shall meet ISO 13849 performance level calculations.",
+          "actions": [
+            "Classify each safety function and determine required performance level (PLr) using ISO 13849-1 Annex A.",
+            "Select architecture (Cat 1/2/3/4), estimate PFHd, SFF, MTTFd, DCavg, CCF per ISO 13849-1 and document in a PL calculation sheet.",
+            "Validate diagnostics and test interval meet the calculated PFHd and verify channels, sensors, and actuators are suitable.",
+            "Update the safety file to include PL calculations, wiring diagrams, and justification of subsafety components; review after changes."
+          ],
+          "references": [
+            "ISO 13849-1:2015",
+            "ISO 13849-2:2012 for validation"
+          ]
+        },
+        {
+          "clause_id": "iec-software-versioning",
+          "description": "Firmware shall implement semantic versioning with rollback procedures.",
+          "actions": [
+            "Adopt Semantic Versioning (MAJOR.MINOR.PATCH) and maintain a public version manifest and release notes.",
+            "Define rollback: maintain signed previous-release image, boot-loadable recovery partition, and enable safe reversion on failure.",
+            "Enforce release gates: testing dossier, version control tag, and change log before deployment.",
+            "Add a security/change control step to verify signature and rollback readiness on each firmware release."
+          ],
+          "references": [
+            "IEC 61508 (software lifecycle and safety-related software)",
+            "Semantic Versioning 2.0.0"
+          ]
+        },
+        {
+          "clause_id": "pm-change-control",
+          "description": "Change control board approval is required before releasing revisions to the customer.",
+          "actions": [
+            "Establish a Product Management Change Control Board (PM-CCB) with defined quorum, approval criteria, and SLAs.",
+            "Require a change package: impact assessment, risk register update, test evidence, and customer-facing release notes.",
+            "Update the procedure to mandate PM-CCB approval prior to any customer release and archive decisions in a traceability log.",
+            "Add a gating step in the release workflow to verify CCB approval status."
+          ],
+          "references": [
+            "ISO 9001 (change management)",
+            " ITIL 4 (change control)"
+          ]
+        }
+      ]
+    }
+  ]
+}

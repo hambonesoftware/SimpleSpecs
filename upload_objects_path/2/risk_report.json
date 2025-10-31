@@ -1,0 +1,327 @@
+{
+  "document_id": 2,
+  "overall_score": 0.0,
+  "coverage_by_discipline": {
+    "mechanical": 0.0,
+    "electrical": 0.0,
+    "controls": 0.0,
+    "software": 0.0,
+    "project_management": 0.0
+  },
+  "missing_clause_ids": [
+    "asme-pressure-relief",
+    "asme-material-traceability",
+    "iec-grounding",
+    "iec-cable-identification",
+    "iso-safety-integrity",
+    "iec-software-versioning",
+    "pm-change-control"
+  ],
+  "findings": [
+    {
+      "clause_id": "asme-pressure-relief",
+      "discipline": "mechanical",
+      "text": "Pressure relief valves shall comply with ASME Section VIII sizing requirements.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.4,
+      "missing_terms": [
+        "relief",
+        "valve",
+        "viii"
+      ],
+      "best_line": {
+        "text": "Figures 1 Standard Orifice Plate . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11 2 Corner Tap Geometry . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13 3 Location for Orifice Flange Pressure Taps . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14 4 Honed Small Bore Orifice Flow Section With Corner Taps . . . . . . . . . . . . . . . . . . . . . . . . . . . 15",
+        "page": 3,
+        "header_path": [
+          "A N A M E R I C A N N A T I O N A L S T A N D A R D"
+        ],
+        "disciplines": [
+          "mechanical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 1.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 3,
+          "block_index": 10,
+          "line_index": 0,
+          "bbox": [
+            112.41232299804688,
+            357.5767517089844,
+            518.2849731445312,
+            415.0118408203125
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "asme-material-traceability",
+      "discipline": "mechanical",
+      "text": "Maintain full material traceability records for load bearing components.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "material",
+        "records",
+        "traceability"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-grounding",
+      "discipline": "electrical",
+      "text": "All control cabinets shall provide protective earth bonding in accordance with IEC 60204-1.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "60204",
+        "bonding",
+        "earth",
+        "iec",
+        "protective"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-cable-identification",
+      "discipline": "electrical",
+      "text": "Power and control conductors must be uniquely identified at both terminations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "conductors",
+        "identified",
+        "terminations"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iso-safety-integrity",
+      "discipline": "controls",
+      "text": "Safety functions shall meet ISO 13849 performance level calculations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.4,
+      "missing_terms": [
+        "13849",
+        "performance",
+        "safety"
+      ],
+      "best_line": {
+        "text": "8.4.1 For the purpose of this Standard, the uncer- tainty is defined as a range of values within which the true value of the measurement is estimated to be within 95% probability. In some cases, the confidence level that can be attached to this range of values will be greater than 95%, but this will be so only where the value of a quantity used in the calculation of flow rate is known with a confidence level better than 95%. In such a case, refer- ence shall be made to ASME MFC-2M or ISO 5168.",
+        "page": 22,
+        "header_path": [
+          "Customary Units",
+          "8.3 Flow Rate Measurement Uncertainty"
+        ],
+        "disciplines": [
+          "mechanical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 2.5,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 22,
+          "block_index": 11,
+          "line_index": 0,
+          "bbox": [
+            55.7086296081543,
+            613.8885498046875,
+            288.55218505859375,
+            728.9091796875
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "iec-software-versioning",
+      "discipline": "software",
+      "text": "Firmware shall implement semantic versioning with rollback procedures.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "firmware",
+        "rollback",
+        "semantic",
+        "versioning"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "pm-change-control",
+      "discipline": "project_management",
+      "text": "Change control board approval is required before releasing revisions to the customer.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "approval",
+        "board",
+        "change",
+        "control"
+      ],
+      "best_line": null
+    }
+  ],
+  "compliance_notes": [
+    {
+      "document_id": "2",
+      "recommended_actions": [
+        {
+          "clause_id": "asme-pressure-relief",
+          "title": "Verify pressure relief valve (PRV) sizing per ASME Section VIII",
+          "priority": "High",
+          "owner": "Mechanical/Process Engineer",
+          "actions": [
+            "Confirm applicable code edition (ASME Section VIII, Div. 1, Part UG-125 to UG-137 and Appendix 11) used for PRV sizing.",
+            "For gas/vapor: ensure set pressure (Pset) \u2264 MAWP \u00d7 0.90 and blowdown \u2264 10% (or 3 psig).",
+            "For steam: verify required relief load Qm (lbm/hr) and use CV method with proper superheat correction factors (K, Kv, C, Y, F2).",
+            "For liquid: verify Required Flow Area (A) using A = W/(51.5 \u00d7 Kd \u00d7 Kb \u00d7 \u221a(G \u00d7 \u0394P)) with Kb=1.0 for liquids; apply viscosity corrections where applicable.",
+            "Attach sizing calculations, valve datasheets, and ASME code reference to the PRVR.",
+            "Ensure namingplate set pressure matches the stamped set pressure and code stamp.",
+            "Verify discharge piping/flare header capacities; document accumulation limits per fired/unfired service."
+          ],
+          "evidence": [
+            "Signed PRV sizing calculation package",
+            "Vendor PRV datasheets and test certificates",
+            "P&ID excerpts and vessel data sheets",
+            "Relief capacity study (process load cases)"
+          ],
+          "due_days": 10
+        },
+        {
+          "clause_id": "asme-material-traceability",
+          "title": "Establish full material traceability for load-bearing components",
+          "priority": "High",
+          "owner": "QA/Supply Chain",
+          "actions": [
+            "Create a load-bearing BOM (shells, heads, nozzles, flanges, bolts, forgings, weldings).",
+            "Collect and reconcile MTRs for each heat/lot (CMTRs or mill certs) and verify chemical/mechanical properties vs material specs.",
+            "Ensure components are permanently marked (heat/lot/batch) and tie marks to MTRs.",
+            "Implement a single source of truth (e.g., PLM/ERP) with links: Heat ID \u2192 MTR \u2192 Drawing/PO \u2192 Serial/Tag.",
+            "Retain SR/VR NDE/UT/RT, hardness, PWHT, corrosion testing where applicable.",
+            "Audit a minimum 10% of components for traceability completeness before release."
+          ],
+          "evidence": [
+            "Material traceability matrix with MTRs attached",
+            "Heat/lot marker logs and PWHT charts",
+            "Spot audit reports"
+          ],
+          "due_days": 14
+        },
+        {
+          "clause_id": "iec-grounding",
+          "title": "Implement protective earth bonding per IEC 60204-1",
+          "priority": "High",
+          "owner": "Electrical Engineer",
+          "actions": [
+            "Bond all exposed conductive parts of control cabinets per IEC 60204-1 Cl. 8.2; ensure multiple parallel bonding paths where required.",
+            "Size protective bonding conductors per Table 6 (minimum Cu CSA 10 mm\u00b2 unless cable size dictates otherwise); verify rating meets fault current/time.",
+            "Perform and document earth continuity tests per IEC 60204-1 Cl. 18.3 (target \u2264 0.1 \u03a9 for small panels, \u22650.2 \u03a9 typical for larger; verify per standard).",
+            "Verify main grounding connections and clear identification of PE (green/yellow) conductors.",
+            "Attach test reports, cabinet drawings, and cable schedules to the ECTR."
+          ],
+          "evidence": [
+            "Earth continuity test reports",
+            "Cabinet layout and bonding diagrams",
+            "Cable sizing calculations"
+          ],
+          "due_days": 7
+        },
+        {
+          "clause_id": "iec-cable-identification",
+          "title": "Ensure unique cable/conductor identification at both ends",
+          "priority": "Medium",
+          "owner": "Panel Builder/Integrator",
+          "actions": [
+            "Label each power/control conductor at both terminations with a unique ID matching the cable schedule/loop diagram.",
+            "Use durable labels (mechanical tags or heat-shrink sleeves) and standardize per project wire numbering.",
+            "Align terminal numbering with PLC/SCADA I/O lists and junction box maps.",
+            "Verify label integrity after environmental testing and document in FAT/SAT."
+          ],
+          "evidence": [
+            "Updated cable schedules and loop diagrams",
+            "As-built photos of cabinet and field terminations",
+            "FAT/SAT checklist entries"
+          ],
+          "due_days": 7
+        },
+        {
+          "clause_id": "iso-safety-integrity",
+          "title": "Validate safety functions meet ISO 13849 performance levels",
+          "priority": "High",
+          "owner": "Functional Safety Engineer",
+          "actions": [
+            "Assign SRP/CS and safety functions; determine required PLr from risk assessment (see ISO 13849-1 Annex A).",
+            "Calculate achieved PL based on architecture (Category), DCavg, CCF, MTTFd, and diagnostics (ISO 13849-1 Tables 4\u20136).",
+            "Confirm selected components (sensors/logic/actuators) meet PL and diagnostic coverage targets; use validated data or supplier evidence.",
+            "Perform verification of safety-related control system per ISO 13849-1 Cl. 9.",
+            "Establish proof test intervals to sustain DCavg and MTTFd assumptions; document proof-test procedures.",
+            "Obtain independent assessment if PLr \u2265 PLd; update Safety Validation Report (SVR) and SSRS."
+          ],
+          "evidence": [
+            "SRS and SIL calculations",
+            "Risk assessment and PLr assignment",
+            "Proof-test procedures and schedule",
+            "Validation and assessment reports"
+          ],
+          "due_days": 14
+        },
+        {
+          "clause_id": "iec-software-versioning",
+          "title": "Implement firmware semantic versioning with rollback procedures",
+          "priority": "Medium",
+          "owner": "Firmware Engineer",
+          "actions": [
+            "Adopt Semantic Versioning (MAJOR.MINOR.PATCH) for all firmware releases.",
+            "Maintain a release notes template (changelog, compatibility, affected SKUs).",
+            "Implement A/B/dual-bank or bootloader-driven rollback to previous version on failed boot/self-test.",
+            "Tag and sign firmware images; restrict install keys and enforce secure boot if supported.",
+            "Maintain a version database (build, commit hash, SBOM, release notes) linked to each device serial.",
+            "Validate rollback during software tests; document procedures in FRS/SDS."
+          ],
+          "evidence": [
+            "Version registry and change log",
+            "Release notes and signing records",
+            "Rollback test results and SOPs"
+          ],
+          "due_days": 10
+        },
+        {
+          "clause_id": "pm-change-control",
+          "title": "Require CCB approval before releasing revisions to customers",
+          "priority": "High",
+          "owner": "Program/Change Manager",
+          "actions": [
+            "Establish a Change Control Board (CCB) with decision criteria (safety/regulatory, ECN severity, customer impact).",
+            "Create a standard ECN/ECO template including scope, risk, test evidence, and customer notification plan.",
+            "Implement gating (e.g., CCB Gate 3: Customer Release) requiring formal approval before shipment.",
+            "Retain all approvals, ECNs, and impact assessments in PLM/change records.",
+            "Audit adherence and track corrective actions on exceptions."
+          ],
+          "evidence": [
+            "CCB charter and meeting minutes",
+            "Approved ECN/ECO records",
+            "Release gate checklist and sign-offs"
+          ],
+          "due_days": 5
+        }
+      ]
+    }
+  ]
+}

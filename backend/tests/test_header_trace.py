@@ -180,7 +180,4 @@ def test_header_trace_events_emitted_for_strict_mode(tmp_path) -> None:
     events = tracer.as_list()
     event_types = {event["type"] for event in events}
     assert "llm_outline_received" in event_types
-    assert (
-        "candidate_found" in event_types
-        or "anchor_resolved_strict" in event_types
-    )
+    assert "candidate_found" in event_types

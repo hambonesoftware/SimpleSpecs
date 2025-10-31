@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import base64
 import json
 import re
 from pathlib import Path
@@ -64,7 +63,6 @@ def _build_text_blocks(
 
 
 async def get_headers_llm_full(
-    document_bytes: bytes,
     lines: Sequence[Dict],
     doc_hash: str,
     *,
@@ -95,13 +93,6 @@ async def get_headers_llm_full(
 
     merged: list[Dict] = []
     total_parts = len(parts)
-    encoded_pdf = base64.b64encode(document_bytes).decode("ascii")
-    file_attachment = {
-        "type": "input_file",
-        "mime_type": "application/pdf",
-        "name": f"{doc_hash}.pdf",
-        "data": encoded_pdf,
-    }
 
     for index, part in enumerate(parts, start=1):
         messages = [
@@ -114,26 +105,20 @@ async def get_headers_llm_full(
             },
             {
                 "role": "user",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": (
-                            "Goal: Return every heading and subheading that appears in the MAIN BODY of the document.\n"
-                            "Hard rules:\n"
-                            "- EXCLUDE any content in a Table of Contents, Index, or Glossary.\n"
-                            "- Preserve the original document order.\n"
-                            "- If a heading has a visible numbering label (e.g., \"1\", \"1.2\", \"A.3.4\"), include it as \"number\"; otherwise set \"number\": null.\n"
-                            "- Assign a positive integer \"level\" (1 = top-level).\n"
-                            "- Do NOT invent headings; only list those present.\n"
-                            "- Output EXACTLY the fenced JSON:\n\n"
-                            f"{FENCE_START}\n"
-                            "{ \"headers\": [ { \"text\": \"...\", \"number\": \"...\" | null, \"level\": 1 }, ... ] }\n"
-                            f"{FENCE_END}\n\n"
-                            f"Document part {index}/{total_parts}:\n<BEGIN DOCUMENT>\n{part}\n<END DOCUMENT>\n"
-                        ),
-                    },
-                    dict(file_attachment),
-                ],
+                "content": (
+                    "Goal: Return every heading and subheading that appears in the MAIN BODY of the document.\n"
+                    "Hard rules:\n"
+                    "- EXCLUDE any content in a Table of Contents, Index, or Glossary.\n"
+                    "- Preserve the original document order.\n"
+                    "- If a heading has a visible numbering label (e.g., \"1\", \"1.2\", \"A.3.4\"), include it as \"number\"; otherwise set \"number\": null.\n"
+                    "- Assign a positive integer \"level\" (1 = top-level).\n"
+                    "- Do NOT invent headings; only list those present.\n"
+                    "- Output EXACTLY the fenced JSON:\n\n"
+                    f"{FENCE_START}\n"
+                    "{ \"headers\": [ { \"text\": \"...\", \"number\": \"...\" | null, \"level\": 1 }, ... ] }\n"
+                    f"{FENCE_END}\n\n"
+                    f"Document part {index}/{total_parts}:\n<BEGIN DOCUMENT>\n{part}\n<END DOCUMENT>\n"
+                ),
             },
         ]
 

@@ -1,0 +1,225 @@
+{
+  "document_id": 1,
+  "overall_score": 0.0,
+  "coverage_by_discipline": {
+    "mechanical": 0.0,
+    "electrical": 0.0,
+    "controls": 0.0,
+    "software": 0.0,
+    "project_management": 0.0
+  },
+  "missing_clause_ids": [
+    "asme-pressure-relief",
+    "asme-material-traceability",
+    "iec-grounding",
+    "iec-cable-identification",
+    "iso-safety-integrity",
+    "iec-software-versioning",
+    "pm-change-control"
+  ],
+  "findings": [
+    {
+      "clause_id": "asme-pressure-relief",
+      "discipline": "mechanical",
+      "text": "Pressure relief valves shall comply with ASME Section VIII sizing requirements.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.2,
+      "missing_terms": [
+        "relief",
+        "section",
+        "valve",
+        "viii"
+      ],
+      "best_line": {
+        "text": "The method described may be applied to any liquid, provided that its vapor pressure is such that any escape of liquid from the weighing tank by vaporization is not sufficient to affect the required measurement accuracy. Closed weighing tanks and their application to the flow measurement of liquids of high vapor pres- sure are not considered in this Standard.",
+        "page": 7,
+        "header_path": [
+          "1 GENERAL"
+        ],
+        "disciplines": [
+          "mechanical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 1.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 7,
+          "block_index": 3,
+          "line_index": 0,
+          "bbox": [
+            50.59794616699219,
+            311.63189697265625,
+            290.26593017578125,
+            394.4472961425781
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "asme-material-traceability",
+      "discipline": "mechanical",
+      "text": "Maintain full material traceability records for load bearing components.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "material",
+        "records",
+        "traceability"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-grounding",
+      "discipline": "electrical",
+      "text": "All control cabinets shall provide protective earth bonding in accordance with IEC 60204-1.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "60204",
+        "bonding",
+        "earth",
+        "iec",
+        "protective"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-cable-identification",
+      "discipline": "electrical",
+      "text": "Power and control conductors must be uniquely identified at both terminations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "conductors",
+        "identified",
+        "terminations"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iso-safety-integrity",
+      "discipline": "controls",
+      "text": "Safety functions shall meet ISO 13849 performance level calculations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "13849",
+        "iso",
+        "level",
+        "performance",
+        "safety"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-software-versioning",
+      "discipline": "software",
+      "text": "Firmware shall implement semantic versioning with rollback procedures.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "firmware",
+        "rollback",
+        "semantic",
+        "versioning"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "pm-change-control",
+      "discipline": "project_management",
+      "text": "Change control board approval is required before releasing revisions to the customer.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "approval",
+        "board",
+        "change",
+        "control"
+      ],
+      "best_line": null
+    }
+  ],
+  "compliance_notes": [
+    {
+      "remediation_actions": [
+        {
+          "clause_id": "asme-pressure-relief",
+          "actions": [
+            "Use pressure relief valves sized per ASME Section VIII, Division 1 (Par. UG-134) and API 520 methodology.",
+            "Obtain and retain manufacturer sizing calculations, certified capacity and set pressure, and material certifications.",
+            "Install, set, test, and maintain PRVs per ASME Boiler & Pressure Vessel Code and site procedures.",
+            "Update drawings, datasheets, and the Bill of Materials to identify PRVs, set pressures, and fluid conditions."
+          ]
+        },
+        {
+          "clause_id": "asme-material-traceability",
+          "actions": [
+            "Create a material traceability matrix for load-bearing components (including forgings, plates, and fasteners).",
+            "Assign unique heat/lot numbers and link to Mill Test Certificates, Certificates of Conformity, and material test reports.",
+            "Maintain CMTRs and CoCs at the document repository with linkage to the component serial numbers.",
+            "Apply permanent component marking (etching, stamping, or tags) with full traceability to heat/lot.",
+            "Implement a Receiving Inspection Checklist to verify traceability before release to production."
+          ]
+        },
+        {
+          "clause_id": "iec-grounding",
+          "actions": [
+            "Provide protective earth bonding in control cabinets per IEC 60204-1 (Clause 5.2, 8.2).",
+            "Install and label protective earth terminals and busbars; ensure continuity test results per 18.2/18.3.",
+            "Maintain bonding jumpers to the enclosure and equipment; verify conductor sizing per 5.2 and local electrical code.",
+            "Update wiring diagrams, layout drawings, and test records to reflect earth bonding points."
+          ]
+        },
+        {
+          "clause_id": "iec-cable-identification",
+          "actions": [
+            "Define a cable and conductor identification scheme that uniquely numbers cables and cores.",
+            "Label each conductor at both terminations using permanent markers or heat-shrink sleeves.",
+            "Maintain a cable list/wiring register linking IDs to routing, gauge, and terminations; update schematics.",
+            "Train assemblers and installers; perform inspection to verify identification at both ends."
+          ]
+        },
+        {
+          "clause_id": "iso-safety-integrity",
+          "actions": [
+            "Identify safety functions and assign target Performance Level (PLr) per ISO 13849-1.",
+            "Calculate achieved PL for each safety function using ISO 13849-1 methodology (categories, CCF, DCavg, MTTFD).",
+            "Include safety-related control logic, sensors, actuators, and testing in the architecture; verify CCF (\u226565) and DCavg.",
+            "Document results in a Safety Integrity Report with assumptions, calculations, and validation test plan."
+          ]
+        },
+        {
+          "clause_id": "iec-software-versioning",
+          "actions": [
+            "Adopt semantic versioning (SemVer) and assign unique version identifiers to firmware releases.",
+            "Maintain changelogs and release notes covering functional, security, and safety changes.",
+            "Implement rollback procedures and recovery images; perform functional verification before and after rollback.",
+            "Control version artifacts (binaries, signatures, hashes) and archive release packages with SBOM metadata."
+          ]
+        },
+        {
+          "clause_id": "pm-change-control",
+          "actions": [
+            "Submit engineering changes to the Change Control Board with impact assessment (safety, reliability, cost, schedule).",
+            "Obtain CCB approval prior to customer-facing release; capture decision and approval level.",
+            "Update baseline documentation (BOMs, drawings, procedures, test plans) and manage version control.",
+            "Issue a controlled release notice with customer notification, approval, and record retention."
+          ]
+        }
+      ]
+    }
+  ]
+}

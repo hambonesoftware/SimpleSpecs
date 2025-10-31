@@ -1,0 +1,23 @@
+{
+  "run_id": "1d555d64-a19d-491f-9737-3b501e4099dd",
+  "metadata": {
+    "mode": "llm_strict",
+    "file_id": 1,
+    "cfg": {
+      "suppress_toc": true,
+      "suppress_running": true
+    },
+    "metadata": {
+      "filename": "MFC-9M_R2001_E1988.pdf"
+    }
+  },
+  "llm_headers": [],
+  "decisions": [],
+  "final_outline": {
+    "headers": [],
+    "sections": [],
+    "mode": "llm_strict",
+    "messages": []
+  },
+  "elapsed_s": 1.3381778000039048
+}

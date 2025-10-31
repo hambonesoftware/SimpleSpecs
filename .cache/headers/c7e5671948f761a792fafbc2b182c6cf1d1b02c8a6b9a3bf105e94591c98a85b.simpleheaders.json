@@ -1,0 +1,184 @@
+{
+  "headers": [
+    {
+      "text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+      "number": null,
+      "level": 1
+    },
+    {
+      "text": "GENERAL",
+      "number": "1",
+      "level": 1
+    },
+    {
+      "text": "Scope and Field of Application",
+      "number": "1.1",
+      "level": 2
+    },
+    {
+      "text": "References",
+      "number": "1.2",
+      "level": 2
+    },
+    {
+      "text": "Definitions",
+      "number": "1.3",
+      "level": 2
+    },
+    {
+      "text": "Symbols",
+      "number": "1.4",
+      "level": 2
+    },
+    {
+      "text": "PRINCIPLES",
+      "number": "2",
+      "level": 1
+    },
+    {
+      "text": "Statement of the Principles",
+      "number": "2.1",
+      "level": 2
+    },
+    {
+      "text": "Static Weighing",
+      "number": "2.1.1",
+      "level": 3
+    },
+    {
+      "text": "Dynamic Weighing",
+      "number": "2.1.2",
+      "level": 3
+    },
+    {
+      "text": "Comparison of Instantaneous and Mean Flow Rate",
+      "number": "2.1.3",
+      "level": 3
+    },
+    {
+      "text": "Accuracy of the Method",
+      "number": "2.2",
+      "level": 2
+    },
+    {
+      "text": "Overall Uncertainty on the Weighing Measurement",
+      "number": "2.2.1",
+      "level": 3
+    },
+    {
+      "text": "Requirements for Accurate Measurements",
+      "number": "2.2.2",
+      "level": 3
+    },
+    {
+      "text": "APPARATUS",
+      "number": "3",
+      "level": 1
+    },
+    {
+      "text": "Diverter",
+      "number": "3.1",
+      "level": 2
+    },
+    {
+      "text": "Time-Measuring Apparatus",
+      "number": "3.2",
+      "level": 2
+    },
+    {
+      "text": "Weighing Tank",
+      "number": "3.3",
+      "level": 2
+    },
+    {
+      "text": "Weighing Device",
+      "number": "3.4",
+      "level": 2
+    },
+    {
+      "text": "Auxiliary Measurements",
+      "number": "3.5",
+      "level": 2
+    },
+    {
+      "text": "PROCEDURE",
+      "number": "4",
+      "level": 1
+    },
+    {
+      "text": "Static Weighing Method",
+      "number": "4.1",
+      "level": 2
+    },
+    {
+      "text": "Dynamic Weighing Method",
+      "number": "4.2",
+      "level": 2
+    },
+    {
+      "text": "Common Provisions",
+      "number": "4.3",
+      "level": 2
+    },
+    {
+      "text": "CALCULATION OF FLOW RATE",
+      "number": "5",
+      "level": 1
+    },
+    {
+      "text": "Calculation of Mass Flow Rate",
+      "number": "5.1",
+      "level": 2
+    },
+    {
+      "text": "Calculation of Volume Flow Rate",
+      "number": "5.2",
+      "level": 2
+    },
+    {
+      "text": "UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+      "number": "6",
+      "level": 1
+    },
+    {
+      "text": "APPENDIX A",
+      "number": "A",
+      "level": 1
+    },
+    {
+      "text": "Corrections on the Measurement of Filling Time",
+      "number": "A",
+      "level": 2
+    },
+    {
+      "text": "Static Weighing Method",
+      "number": "A1",
+      "level": 3
+    },
+    {
+      "text": "Method 1",
+      "number": "A1.1",
+      "level": 4
+    },
+    {
+      "text": "Method 2",
+      "number": "A1.2",
+      "level": 4
+    },
+    {
+      "text": "Dynamic Weighing Method",
+      "number": "A2",
+      "level": 3
+    },
+    {
+      "text": "APPENDIX B",
+      "number": "B",
+      "level": 1
+    },
+    {
+      "text": "Density of Pure Water",
+      "number": "B",
+      "level": 2
+    }
+  ]
+}
