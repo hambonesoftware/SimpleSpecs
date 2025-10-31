@@ -7,6 +7,11 @@ import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from .logging import configure_logging
+
+
+LOGGER = configure_logging().getChild("headers.trace")
+
 
 @dataclass(slots=True)
 class TraceEvent:
@@ -39,6 +44,8 @@ class HeaderTracer:
         summary_payload = self._build_summary()
         with open(self._summary_path, "w", encoding="utf-8") as handle:
             json.dump(summary_payload, handle, ensure_ascii=False, indent=2)
+        LOGGER.info("[headers] Search log saved: %s", self._path)
+        LOGGER.info("[headers] Search summary saved: %s", self._summary_path)
         return self._path
 
     @property
