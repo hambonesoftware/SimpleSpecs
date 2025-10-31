@@ -29,6 +29,7 @@ from ..services.headers_orchestrator import extract_headers_and_chunks
 from ..services.llm import LLMService
 from ..services.pdf_native import collect_line_metrics, parse_pdf
 from ..services.simpleheaders_state import SimpleHeadersState
+from ..utils.errors import AlignmentPreconditionError, OutlineParseError
 from ..utils.trace import HeaderTracer
 
 router = APIRouter(prefix="/api", tags=["headers"])
@@ -115,39 +116,25 @@ class HeadersResponse(BaseModel):
         )
 
 
-@router.post("/headers/{document_id}", response_model=HeadersResponse)
-async def generate_headers(
-    document_id: int,
+async def _generate_headers_impl(
     *,
-    session: Session = Depends(get_session),
-    settings: Settings = Depends(get_settings),
-    trace: bool = Query(False),
-    align: str | None = Query(None),
+    document: Document,
+    document_bytes: bytes,
+    document_path,
+    settings: Settings,
+    trace_requested: bool,
+    align: str | None,
+    session: Session,
+    tracer_holder: dict[str, HeaderTracer | None],
 ) -> HeadersResponse:
-    """Return the hierarchical headers for a stored document."""
+    tracer_holder["tracer"] = None
 
-    document = session.get(Document, document_id)
-    if document is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
-        )
-
-    if document.id is None:
+    doc_id = document.id
+    if doc_id is None:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Document is missing a primary key",
         )
-
-    doc_id = document.id
-    document_path = settings.upload_dir / str(doc_id) / document.filename
-    if not document_path.exists():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing"
-        )
-
-    document_bytes = document_path.read_bytes()
-
-    trace_requested = trace or app_config.HEADERS_TRACE_EMBED_RESPONSE
 
     align_strategy = (align or "").strip().lower()
     if align_strategy in {"best", "sequential", "legacy", "strict"}:
@@ -156,21 +143,19 @@ async def generate_headers(
     if settings.headers_llm_strict:
         llm_service = LLMService(settings)
         if llm_service.is_enabled:
-            tracer: HeaderTracer | None = HeaderTracer(
-                out_dir=app_config.HEADERS_TRACE_DIR
-            )
+            tracer = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR)
+            tracer_holder["tracer"] = tracer
             start_time = time.perf_counter()
-            if tracer is not None:
-                tracer.ev(
-                    "start_run",
-                    mode="llm_strict",
-                    file_id=doc_id,
-                    cfg={
-                        "suppress_toc": settings.headers_suppress_toc,
-                        "suppress_running": settings.headers_suppress_running,
-                    },
-                    metadata={"filename": document.filename},
-                )
+            tracer.ev(
+                "start_run",
+                mode="llm_strict",
+                file_id=doc_id,
+                cfg={
+                    "suppress_toc": settings.headers_suppress_toc,
+                    "suppress_running": settings.headers_suppress_running,
+                },
+                metadata={"filename": document.filename},
+            )
 
             lines, _, doc_hash = collect_line_metrics(
                 document_bytes,
@@ -211,9 +196,7 @@ async def generate_headers(
                         )
                     ),
                     start_page=int(section.get("start_page", 0)),
-                    end_page=int(
-                        section.get("end_page", section.get("start_page", 0))
-                    ),
+                    end_page=int(section.get("end_page", section.get("start_page", 0))),
                 )
                 for section in strict_output.get("sections", [])
             ]
@@ -230,28 +213,24 @@ async def generate_headers(
                 trace_file=None,
             )
 
-            if tracer is not None:
-                elapsed = time.perf_counter() - start_time
-                tracer.ev(
-                    "final_outline",
-                    headers=[payload.model_dump() for payload in simpleheaders_payload],
-                    sections=[section.model_dump() for section in sections_payload],
-                    mode="llm_strict",
-                    messages=[],
-                    elapsed_s=elapsed,
-                )
-                tracer.ev(
-                    "end_run",
-                    elapsed_s=elapsed,
-                    total_headers=len(simpleheaders_payload),
-                    unresolved=[],
-                    mode="llm_strict",
-                    doc_hash=doc_hash,
-                )
-                tracer.flush_jsonl()
-                if trace_requested:
-                    response.trace = tracer.as_list()
-                    response.trace_file = tracer.path
+            elapsed = time.perf_counter() - start_time
+            tracer.ev(
+                "final_outline",
+                headers=[payload.model_dump() for payload in simpleheaders_payload],
+                sections=[section.model_dump() for section in sections_payload],
+                mode="llm_strict",
+                messages=[],
+                elapsed_s=elapsed,
+            )
+            tracer.ev(
+                "end_run",
+                elapsed_s=elapsed,
+                total_headers=len(simpleheaders_payload),
+                unresolved=[],
+                mode="llm_strict",
+                doc_hash=doc_hash,
+            )
+            tracer.flush_jsonl()
 
             return response
 
@@ -277,6 +256,7 @@ async def generate_headers(
         **orchestrator_kwargs,
         want_trace=trace_requested,
     )
+    tracer_holder["tracer"] = tracer
 
     SimpleHeadersState.set(doc_id, orchestrated["doc_hash"], orchestrated["lines"])
 
@@ -314,6 +294,79 @@ async def generate_headers(
         messages=orchestrated.get("messages"),
     )
 
+    return response
+
+
+@router.post("/headers/{document_id}", response_model=HeadersResponse)
+async def generate_headers(
+    document_id: int,
+    *,
+    session: Session = Depends(get_session),
+    settings: Settings = Depends(get_settings),
+    trace: bool = Query(False),
+    align: str | None = Query(None),
+) -> HeadersResponse:
+    """Return the hierarchical headers for a stored document."""
+
+    document = session.get(Document, document_id)
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+        )
+
+    if document.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Document is missing a primary key",
+        )
+
+    doc_id = document.id
+    document_path = settings.upload_dir / str(doc_id) / document.filename
+    if not document_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing"
+        )
+
+    document_bytes = document_path.read_bytes()
+
+    trace_requested = trace or app_config.HEADERS_TRACE_EMBED_RESPONSE
+
+    tracer_holder: dict[str, HeaderTracer | None] = {}
+    try:
+        response = await _generate_headers_impl(
+            document=document,
+            document_bytes=document_bytes,
+            document_path=document_path,
+            settings=settings,
+            trace_requested=trace_requested,
+            align=align,
+            session=session,
+            tracer_holder=tracer_holder,
+        )
+    except AlignmentPreconditionError as exc:
+        tracer = tracer_holder.get("tracer")
+        detail = {"error": exc.code, "message": str(exc), **(exc.extra or {})}
+        if trace_requested and tracer is not None:
+            try:
+                detail["trace_file"] = tracer.path
+            except Exception:
+                pass
+        raise HTTPException(status_code=422, detail=detail) from exc
+    except OutlineParseError as exc:
+        tracer = tracer_holder.get("tracer")
+        detail = {"error": exc.code, "message": str(exc)}
+        if exc.raw:
+            detail["raw_head"] = exc.raw[:500]
+        if exc.extra:
+            detail.update(exc.extra)
+        if trace_requested and tracer is not None:
+            try:
+                detail["trace_file"] = tracer.path
+            except Exception:
+                pass
+        raise HTTPException(status_code=422, detail=detail) from exc
+
+    tracer = tracer_holder.get("tracer")
     if trace_requested and tracer is not None:
         response.trace = tracer.as_list()
         response.trace_file = tracer.path

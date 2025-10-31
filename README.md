@@ -185,6 +185,20 @@ Each trace entry captures the reasoning behind the locator, including:
 Trace files are newline-delimited JSON and can be streamed into tooling such as `jq` for analysis.
 
 
+## Strict Guardrails & Trace
+
+- **Preconditions**
+  - Abort with HTTP 422 `no_lines` when extraction returns zero lines. Controlled via `HEADERS_STRICT_ABORT_ON_NO_LINES`.
+  - Size guard logs `outline_skipped: size_guard` when estimated tokens exceed `HEADERS_MAX_DOC_TOKENS`.
+- **LLM outline**
+  - Emits `outline_call_start` / `outline_call_end` events describing provider, model, bytes, and status.
+  - `_parse_outline_strict` records `outline_parse_ok` or `outline_parse_failed` (`empty_raw`, `non_list_json`, `json_items_missing_fields`, `no_json_no_bullets`, …).
+  - Empty outline parses raise HTTP 422 `empty_outline` (configurable with `HEADERS_STRICT_FAIL_ON_EMPTY_OUTLINE`).
+- **Trace events**
+  - `doc_stats`, `outline_skipped`, `abort_no_lines`, `abort_empty_outline`, `strict_align_done`, `end_run`, and more.
+  - When `?trace=1` (or `HEADERS_TRACE_EMBED_RESPONSE=1`), responses include inline trace data and the persisted trace file path.
+
+
 ## Windows single-file bundle (optional)
 A PyInstaller spec is provided for packaging the backend as a single executable on Windows.
 

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
+import time
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 try:  # pragma: no cover - optional dependency in some environments
@@ -19,22 +21,30 @@ else:  # pragma: no cover - passthrough when rapidfuzz is available
     token_set_ratio = _rf_token_set_ratio
 
 from ..config import (
+    HEADERS_DEV_VERBOSE,
     HEADERS_FINAL_MONOTONIC_GUARD,
+    HEADERS_MAX_DOC_TOKENS,
+    HEADERS_STRICT_ABORT_ON_NO_LINES,
     HEADERS_STRICT_AFTER_ANCHOR_ONLY,
     HEADERS_STRICT_BAND_LINES,
+    HEADERS_STRICT_FAIL_ON_EMPTY_OUTLINE,
     HEADERS_STRICT_FUZZY_THRESH,
     HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK,
     HEADERS_STRICT_TITLE_ONLY_THRESH,
     HEADERS_STRICT_TOC_MIN_DOT_LEADERS,
     HEADERS_STRICT_TOC_MIN_SECTION_TOKENS,
+    HEADERS_TRACE,
+    HEADERS_TRACE_DIR,
+    HEADERS_TRACE_EMBED_RESPONSE,
 )
+from ..utils.errors import AlignmentPreconditionError, OutlineParseError
 
 try:  # pragma: no cover - tracing is optional in some deployments
     from ..utils.trace import HeaderTracer
 except Exception:  # pragma: no cover - tracing disabled
     HeaderTracer = None  # type: ignore[assignment]
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("simplespecs.headers.strict")
 
 FENCE = "#headers#"
 
@@ -542,4 +552,236 @@ def extract_headers_and_sections_strict(
     }
 
 
-__all__ = ["extract_headers_and_sections_strict", "align_headers_llm_strict", "FENCE"]
+def _estimate_doc_tokens(lines: Sequence[BodyLine]) -> int:
+    """Return a coarse token estimate for the extracted body lines."""
+
+    chars = 0
+    for entry in lines:
+        text = entry.get("text", "")
+        if not isinstance(text, str):
+            text = str(text)
+        chars += len(text)
+    return max(1, chars // 4)
+
+
+def _parse_outline_strict(raw: str, tracer: HeaderTracer | None) -> List[Dict[str, Any]]:
+    """Parse an outline payload into a canonical list of header dicts."""
+
+    if not raw or not raw.strip():
+        if tracer is not None:
+            tracer.ev("outline_parse_failed", reason="empty_raw")
+        return []
+
+    import json as _json
+    import re as _re
+
+    fence_match = _re.search(r"```(?:json)?\s*(\[[\s\S]*?\])\s*```", raw, flags=_re.IGNORECASE)
+    payload = fence_match.group(1) if fence_match else raw
+
+    try:
+        data = _json.loads(payload)
+    except Exception:
+        items: List[Dict[str, Any]] = []
+        lines = [line.strip("-*• \t") for line in payload.splitlines()]
+        for line in lines:
+            match = _re.match(r"^([A-Za-z0-9.\-]+)\s+(.+)$", line)
+            if not match:
+                continue
+            number = match.group(1).strip()
+            title = match.group(2).strip()
+            if not title:
+                continue
+            items.append({"number": number, "title": title, "text": title})
+        if items and tracer is not None:
+            tracer.ev(
+                "outline_parse_ok",
+                count=len(items),
+                sample=items[:3],
+                mode="bullets",
+            )
+        elif not items and tracer is not None:
+            tracer.ev("outline_parse_failed", reason="no_json_no_bullets")
+        return items
+
+    if not isinstance(data, list):
+        if tracer is not None:
+            tracer.ev("outline_parse_failed", reason="non_list_json")
+        return []
+
+    parsed: List[Dict[str, Any]] = []
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        number = item.get("number") or item.get("num") or item.get("id")
+        if number is not None:
+            number = str(number).strip()
+        title = (
+            item.get("title")
+            or item.get("text")
+            or item.get("heading")
+            or ""
+        )
+        title = str(title).strip()
+        if not title:
+            continue
+        parsed.append({"number": number, "title": title, "text": title})
+
+    if parsed:
+        if tracer is not None:
+            tracer.ev("outline_parse_ok", count=len(parsed), sample=parsed[:3])
+    elif tracer is not None:
+        tracer.ev("outline_parse_failed", reason="json_items_missing_fields")
+
+    return parsed
+
+
+def run_strict_headers_pipeline(
+    file_id: int,
+    file_path: str,
+    *,
+    provider: str,
+    model: str,
+    trace: bool = False,
+) -> Tuple[List[Dict[str, Any]], HeaderTracer | None]:
+    """Execute the strict alignment pipeline with guardrails and tracing."""
+
+    tracer: HeaderTracer | None = None
+    if trace or HEADERS_TRACE or HEADERS_TRACE_EMBED_RESPONSE:
+        tracer = HeaderTracer(out_dir=HEADERS_TRACE_DIR)
+
+    start_time = time.perf_counter()
+
+    from .text_extraction import extract_lines
+
+    lines = extract_lines(file_path)
+
+    pages = 0
+    if lines:
+        try:
+            pages = max(
+                int(entry.get("page", 0) or 0)
+                for entry in lines
+            )
+        except Exception:
+            pages = 0
+
+    try:
+        file_bytes = os.path.getsize(file_path)
+    except Exception:
+        file_bytes = 0
+
+    if tracer is not None:
+        tracer.ev(
+            "doc_stats",
+            file_id=file_id,
+            pages=pages,
+            lines=len(lines),
+            bytes=file_bytes,
+        )
+
+    log.debug(
+        "Strict pipeline stats file_id=%s pages=%s lines=%s bytes=%s",
+        file_id,
+        pages,
+        len(lines),
+        file_bytes,
+    )
+
+    if len(lines) == 0 and HEADERS_STRICT_ABORT_ON_NO_LINES:
+        if tracer is not None:
+            tracer.ev("abort_no_lines", reason="extractor_returned_empty")
+            tracer.flush_jsonl()
+        raise AlignmentPreconditionError(
+            "no_lines",
+            "PDF contained no extractable lines",
+            {"file_id": file_id},
+        )
+
+    token_estimate = _estimate_doc_tokens(lines)
+    skip_reason: str | None = None
+
+    if token_estimate > HEADERS_MAX_DOC_TOKENS:
+        skip_reason = "size_guard"
+        if tracer is not None:
+            tracer.ev(
+                "outline_skipped",
+                reason=skip_reason,
+                est_tokens=token_estimate,
+                max=HEADERS_MAX_DOC_TOKENS,
+            )
+        llm_raw = ""
+    else:
+        if tracer is not None:
+            tracer.ev(
+                "outline_call_start",
+                provider=provider,
+                model=model,
+                est_tokens=token_estimate,
+            )
+        llm_raw = ""
+        from . import llm as llm_service
+
+        try:
+            llm_raw = llm_service.get_outline_for_headers(
+                file_id=file_id,
+                lines=lines,
+                provider=provider,
+                model=model,
+            )
+            if tracer is not None:
+                tracer.ev(
+                    "outline_call_end", status="ok", bytes=len(llm_raw)
+                )
+        except Exception as exc:
+            if tracer is not None:
+                tracer.ev(
+                    "outline_call_end",
+                    status="error",
+                    error=exc.__class__.__name__,
+                    message=str(exc),
+                )
+            log.error("Strict outline call failed for file_id=%s: %s", file_id, exc)
+            if HEADERS_DEV_VERBOSE:
+                raise
+
+    headers = _parse_outline_strict(llm_raw, tracer)
+
+    if (
+        not headers
+        and skip_reason is None
+        and HEADERS_STRICT_FAIL_ON_EMPTY_OUTLINE
+    ):
+        trace_path = None
+        if tracer is not None:
+            tracer.ev("abort_empty_outline", reason="empty_after_parse")
+            trace_path = tracer.flush_jsonl()
+        log.error(
+            "Strict outline empty after parse file_id=%s trace=%s",
+            file_id,
+            trace_path,
+        )
+        raise OutlineParseError(
+            "empty_outline",
+            "LLM outline is empty after parse",
+            raw=(llm_raw[:1000] if llm_raw else ""),
+            extra={"file_id": file_id},
+        )
+
+    resolved = align_headers_llm_strict(headers, lines, tracer=tracer)
+
+    if tracer is not None:
+        tracer.ev("strict_align_done", resolved=len(resolved))
+        tracer.ev(
+            "end_run",
+            elapsed_s=round(time.perf_counter() - start_time, 3),
+        )
+
+    return resolved, tracer
+
+
+__all__ = [
+    "extract_headers_and_sections_strict",
+    "align_headers_llm_strict",
+    "FENCE",
+    "run_strict_headers_pipeline",
+]
