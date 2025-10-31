@@ -70,7 +70,7 @@ def _extract_max_tokens(params: Mapping[str, Any] | None) -> int | None:
 
 
 def _merge_payload(
-    messages: List[Dict[str, str]],
+    messages: List[Dict[str, Any]],
     model: Optional[str],
     temperature: float,
     params: Mapping[str, Any] | None,
@@ -91,6 +91,22 @@ def _merge_payload(
             payload[key] = value
 
     return payload
+
+
+def _redact_large_fields(value: Any) -> Any:
+    """Recursively redact large binary-ish fields for safe logging."""
+
+    if isinstance(value, dict):
+        redacted: Dict[str, Any] = {}
+        for key, item in value.items():
+            if key == "data" and isinstance(item, str):
+                redacted[key] = f"<omitted {len(item)} chars>"
+                continue
+            redacted[key] = _redact_large_fields(item)
+        return redacted
+    if isinstance(value, list):
+        return [_redact_large_fields(item) for item in value]
+    return value
 
 
 def _merge_headers(headers: Mapping[str, str] | None) -> Dict[str, str]:
@@ -143,7 +159,7 @@ def _merge_headers(headers: Mapping[str, str] | None) -> Dict[str, str]:
 
 
 def chat(
-    messages: List[Dict[str, str]],
+    messages: List[Dict[str, Any]],
     *,
     model: Optional[str] = None,
     temperature: float = 0.6,
@@ -171,7 +187,20 @@ def chat(
     except (TypeError, ValueError):
         raw_request_text = str(raw_request)
 
-    print("[SimpleSpecs] OpenRouter raw request:\n" + raw_request_text)
+    try:
+        safe_payload = _redact_large_fields(payload)
+        safe_request = {
+            "url": OPENROUTER_URL,
+            "headers": request_headers,
+            "payload": safe_payload,
+        }
+        safe_request_text = json.dumps(
+            safe_request, ensure_ascii=False, indent=2, sort_keys=True
+        )
+    except (TypeError, ValueError):
+        safe_request_text = raw_request_text
+
+    print("[SimpleSpecs] OpenRouter raw request:\n" + safe_request_text)
 
     safe_headers = dict(request_headers)
     if "Authorization" in safe_headers:
