@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import time
 
 from typing import Any
 
@@ -27,6 +28,7 @@ from ..services.headers_orchestrator import extract_headers_and_chunks
 from ..services.llm import LLMService
 from ..services.pdf_native import collect_line_metrics, parse_pdf
 from ..services.simpleheaders_state import SimpleHeadersState
+from ..utils.trace import HeaderTracer
 
 router = APIRouter(prefix="/api", tags=["headers"])
 
@@ -148,15 +150,33 @@ async def generate_headers(
     if settings.headers_llm_strict:
         llm_service = LLMService(settings)
         if llm_service.is_enabled:
+            tracer: HeaderTracer | None = HeaderTracer(
+                out_dir=app_config.HEADERS_TRACE_DIR
+            )
+            start_time = time.perf_counter()
+            if tracer is not None:
+                tracer.ev(
+                    "start_run",
+                    mode="llm_strict",
+                    file_id=doc_id,
+                    cfg={
+                        "suppress_toc": settings.headers_suppress_toc,
+                        "suppress_running": settings.headers_suppress_running,
+                    },
+                    metadata={"filename": document.filename},
+                )
+
             lines, _, doc_hash = collect_line_metrics(
                 document_bytes,
                 {"filename": document.filename},
                 suppress_toc=settings.headers_suppress_toc,
                 suppress_running=settings.headers_suppress_running,
+                tracer=tracer,
             )
             strict_output = extract_headers_and_sections_strict(
                 llm=llm_service,
                 lines=lines,
+                tracer=tracer,
             )
 
             SimpleHeadersState.set(doc_id, doc_hash, lines)
@@ -192,7 +212,7 @@ async def generate_headers(
                 for section in strict_output.get("sections", [])
             ]
 
-            return HeadersResponse(
+            response = HeadersResponse(
                 document_id=doc_id,
                 source="llm_strict",
                 fenced_text=strict_output.get("fenced_text", ""),
@@ -203,6 +223,31 @@ async def generate_headers(
                 trace=None,
                 trace_file=None,
             )
+
+            if tracer is not None:
+                elapsed = time.perf_counter() - start_time
+                tracer.ev(
+                    "final_outline",
+                    headers=[payload.model_dump() for payload in simpleheaders_payload],
+                    sections=[section.model_dump() for section in sections_payload],
+                    mode="llm_strict",
+                    messages=[],
+                    elapsed_s=elapsed,
+                )
+                tracer.ev(
+                    "end_run",
+                    elapsed_s=elapsed,
+                    total_headers=len(simpleheaders_payload),
+                    unresolved=[],
+                    mode="llm_strict",
+                    doc_hash=doc_hash,
+                )
+                tracer.flush_jsonl()
+                if trace_requested:
+                    response.trace = tracer.as_list()
+                    response.trace_file = tracer.path
+
+            return response
 
     parse_result = parse_pdf(document_path, settings=settings)
     llm_client = HeadersLLMClient(settings)

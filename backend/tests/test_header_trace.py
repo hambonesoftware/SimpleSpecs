@@ -5,6 +5,8 @@ from pathlib import Path
 import backend.config as app_config
 from backend.config import Settings
 from backend.services import headers_orchestrator
+from backend.services.headers_llm_strict import extract_headers_and_sections_strict
+from backend.utils.trace import HeaderTracer
 
 
 def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
@@ -127,3 +129,46 @@ def test_header_trace_summary_created_by_default(monkeypatch, tmp_path) -> None:
     assert summary["llm_headers"][0]["text"] == "Intro"
     assert summary["final_outline"]["headers"][0]["text"] == "Intro"
     assert payload["headers"]
+
+
+def test_header_trace_events_emitted_for_strict_mode(tmp_path) -> None:
+    tracer = HeaderTracer(out_dir=str(tmp_path))
+
+    class _FakeLLM:
+        def generate(self, *, messages, fence, params=None, metadata=None):  # noqa: ANN001, D401
+            class _Result:
+                def __init__(self) -> None:
+                    self.fenced = json.dumps(
+                        {
+                            "headers": [
+                                {"text": "1 Introduction", "number": "1", "level": 1}
+                            ]
+                        }
+                    )
+
+            return _Result()
+
+    lines = [
+        {
+            "text": "1 Introduction",
+            "page": 0,
+            "line_idx": 0,
+            "global_idx": 0,
+            "is_running": False,
+            "is_toc": False,
+            "is_index": False,
+        }
+    ]
+
+    output = extract_headers_and_sections_strict(
+        llm=_FakeLLM(),
+        lines=lines,
+        tracer=tracer,
+    )
+
+    assert output["headers"]
+    tracer.flush_jsonl()
+    events = tracer.as_list()
+    event_types = {event["type"] for event in events}
+    assert "llm_outline_received" in event_types
+    assert "candidate_found" in event_types
