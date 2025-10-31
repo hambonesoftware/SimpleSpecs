@@ -44,9 +44,23 @@ SimpleSpecs sends the full document text to OpenRouter for a high-fidelity outli
 
 The pipeline requires `OPENROUTER_API_KEY`. Cached responses avoid repeated model invocations for unchanged documents.
 
-#### Sequential alignment strategy
+#### Best-practice alignment strategy (`align=best`)
 
-The default header locator uses a forward-only, parent-bounded sequential search that resists table-of-contents anchors and running headers. Tune behaviour via these environment variables:
+The production-grade "best" strategy is now the default. It layers multiple signals to reliably anchor LLM-provided outlines:
+
+- Normalises numbering and OCR artefacts (e.g. `1 .I` → `1.1`) before scoring.
+- Suppresses TOC/running headers by detecting dotted leaders and repeated band lines.
+- Factors in typography (larger fonts, bold weight) when ranking candidates.
+- Anchors sequentially, with a last-occurrence fallback that still respects TOC bans.
+- Constrains children to hierarchical windows derived from their parents.
+- Applies a final monotonic guard so parents always precede descendants.
+- Emits rich trace events such as `candidate_found`, `anchor_resolved_best`, and `final_monotonic_pass_best` when tracing.
+
+Toggle via `HEADERS_ALIGN_STRATEGY=best` or per-request with `?align=best`. Combine with `HEADERS_TRACE=1` to inspect the new trace events.
+
+#### Sequential alignment strategy (legacy)
+
+The legacy forward-only sequential locator remains available for comparison and regression checks. Tune behaviour via these environment variables:
 
 ```
 HEADERS_ALIGN_STRATEGY=sequential  # use `legacy` to revert to the prior locator
@@ -55,7 +69,7 @@ HEADERS_SUPPRESS_RUNNING=1        # filter repeated running headers/footers
 HEADERS_NORMALIZE_CONFUSABLES=1   # normalise numeric lookalikes (I/l → 1)
 HEADERS_FUZZY_THRESHOLD=80        # token-set similarity for title matching
 HEADERS_WINDOW_PAD_LINES=40       # expand parent search windows by ±N lines
-HEADERS_BAND_LINES=5              # top/bottom lines per page considered a running band
+HEADERS_BAND_LINES=3              # top/bottom lines per page considered a running band
 HEADERS_L1_REQUIRE_NUMERIC=1      # insist on numeric prefixes for L1 anchors before fallback
 HEADERS_L1_LOOKAHEAD_CHILD_HINT=30  # scan ahead for 1.1-style hints when ranking anchors
 HEADERS_MONOTONIC_STRICT=1        # enforce forward-only anchoring with duplicate retries

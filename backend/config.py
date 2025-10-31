@@ -39,7 +39,7 @@ HEADERS_TRACE_EMBED_RESPONSE: bool = (
 HEADERS_TRACE_DIR: str = os.getenv("HEADERS_TRACE_DIR", "backend/logs/headers")
 HEADERS_LOG_LEVEL: str = os.getenv("HEADERS_LOG_LEVEL", "DEBUG")
 
-HEADERS_ALIGN_STRATEGY: str = os.getenv("HEADERS_ALIGN_STRATEGY", "sequential")
+HEADERS_ALIGN_STRATEGY: str = os.getenv("HEADERS_ALIGN_STRATEGY", "best")
 HEADERS_SUPPRESS_TOC: bool = os.getenv("HEADERS_SUPPRESS_TOC", "1") in (
     "1",
     "true",
@@ -59,7 +59,7 @@ HEADERS_NORMALIZE_CONFUSABLES: bool = os.getenv(
 ) in ("1", "true", "True", "YES", "yes")
 HEADERS_FUZZY_THRESHOLD: int = int(os.getenv("HEADERS_FUZZY_THRESHOLD", "80"))
 HEADERS_WINDOW_PAD_LINES: int = int(os.getenv("HEADERS_WINDOW_PAD_LINES", "40"))
-HEADERS_BAND_LINES: int = int(os.getenv("HEADERS_BAND_LINES", "5"))
+HEADERS_BAND_LINES: int = int(os.getenv("HEADERS_BAND_LINES", "3"))
 HEADERS_L1_REQUIRE_NUMERIC: bool = os.getenv("HEADERS_L1_REQUIRE_NUMERIC", "1") in (
     "1",
     "true",
@@ -100,6 +100,37 @@ HEADERS_TITLE_ONLY_REANCHOR: bool = os.getenv("HEADERS_TITLE_ONLY_REANCHOR", "1"
 )
 HEADERS_RESCAN_PASSES: int = int(os.getenv("HEADERS_RESCAN_PASSES", "2"))
 HEADERS_DEDUPE_POLICY: str = os.getenv("HEADERS_DEDUPE_POLICY", "best")
+
+# Strategy-specific tunables for the "best" aligner
+HEADERS_FUZZY_TITLE: int = int(os.getenv("HEADERS_FUZZY_TITLE", "78"))
+HEADERS_FUZZY_NUMTITLE: int = int(os.getenv("HEADERS_FUZZY_NUMTITLE", "75"))
+HEADERS_FUZZY_TITLE_ONLY: int = int(os.getenv("HEADERS_FUZZY_TITLE_ONLY", "72"))
+
+HEADERS_TOC_MIN_DOT_LEADERS: int = int(
+    os.getenv("HEADERS_TOC_MIN_DOT_LEADERS", "4")
+)
+HEADERS_TOC_MIN_SECTION_TOKENS: int = int(
+    os.getenv("HEADERS_TOC_MIN_SECTION_TOKENS", "6")
+)
+HEADERS_RUNNER_MIN_PAGES: int = int(os.getenv("HEADERS_RUNNER_MIN_PAGES", "6"))
+
+HEADERS_W_FUZZY: float = float(os.getenv("HEADERS_W_FUZZY", "0.62"))
+HEADERS_W_TYPO: float = float(os.getenv("HEADERS_W_TYPO", "0.28"))
+HEADERS_W_POS: float = float(os.getenv("HEADERS_W_POS", "0.10"))
+
+HEADERS_PENALTY_BAND: int = int(os.getenv("HEADERS_PENALTY_BAND", "10"))
+HEADERS_PENALTY_TOC: int = int(os.getenv("HEADERS_PENALTY_TOC", "999"))
+
+HEADERS_AFTER_ANCHOR_ONLY: bool = os.getenv("HEADERS_AFTER_ANCHOR_ONLY", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
+HEADERS_LAST_OCCURRENCE_FALLBACK: bool = os.getenv(
+    "HEADERS_LAST_OCCURRENCE_FALLBACK", "1"
+) in ("1", "true", "True", "YES", "yes")
 
 # Strict/LLM matcher hardening
 HEADERS_STRICT_FUZZY_THRESH: int = int(
@@ -231,7 +262,7 @@ class Settings(BaseModel):
         default_factory=lambda: _env_flag("HEADERS_SUPPRESS_RUNNING", True)
     )
     headers_align_strategy: str = Field(
-        default_factory=lambda: os.getenv("HEADERS_ALIGN_STRATEGY", "sequential")
+        default_factory=lambda: os.getenv("HEADERS_ALIGN_STRATEGY", "best")
     )
     headers_normalize_confusables: bool = Field(
         default_factory=lambda: _env_flag("HEADERS_NORMALIZE_CONFUSABLES", True)
