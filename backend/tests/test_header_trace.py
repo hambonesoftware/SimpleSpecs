@@ -58,6 +58,7 @@ def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
     assert "start_run" in types
     assert "end_run" in types
     assert "candidate_found" in types or "anchor_resolved" in types
+    assert any(event["type"] == "pre_normalize_sample" for event in events)
 
     trace_path = Path(tracer.path)
     assert trace_path.exists()
