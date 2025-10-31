@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi==0.111.0",
-    "uvicorn[standard]==0.29.0",
+    "uvicorn[standard]==0.38.0",
     "sqlmodel==0.0.16",
     "PyMuPDF>=1.24.9",
     "pypdfium2>=4.30.0",
