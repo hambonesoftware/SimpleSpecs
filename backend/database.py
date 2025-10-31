@@ -5,10 +5,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Generator
 
+from sqlalchemy import inspect, text
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import NoSuchTableError
 from sqlmodel import Session, SQLModel, create_engine
 
-from .config import PROJECT_ROOT, get_settings
+from . import config as config_module
+from .config import PROJECT_ROOT
 from .migrations import run_migrations
 
 _engine = None
@@ -19,7 +22,7 @@ def get_engine():
 
     global _engine
     if _engine is None:
-        settings = get_settings()
+        settings = config_module.get_settings()
         database_url = settings.database_url
         url = make_url(database_url)
         connect_args = {"check_same_thread": False} if url.get_backend_name() == "sqlite" else {}
@@ -58,6 +61,19 @@ def init_db() -> None:
     engine = get_engine()
     SQLModel.metadata.create_all(engine)
     run_migrations(engine)
+
+    # Ensure critical migrations have been applied even if the database
+    # started in an unexpected state (e.g., tests overriding ``DATABASE_URL``
+    # mid-session).
+    with engine.begin() as connection:
+        inspector = inspect(connection)
+        try:
+            columns = inspector.get_columns("document")
+        except NoSuchTableError:
+            return
+
+        if not any(column["name"] == "mime_type" for column in columns):
+            connection.execute(text("ALTER TABLE document ADD COLUMN mime_type VARCHAR"))
 
 
 def reset_database_state() -> None:
