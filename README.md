@@ -45,6 +45,35 @@ SimpleSpecs sends the full document text to OpenRouter for a high-fidelity outli
 The pipeline requires `OPENROUTER_API_KEY`. Cached responses avoid repeated model invocations for unchanged documents.
 
 
+### Header trace debugging
+
+Set the following flags to capture a detailed, end-to-end trace of header discovery:
+
+```
+HEADERS_TRACE=1
+HEADERS_TRACE_DIR=backend/logs/headers
+HEADERS_TRACE_EMBED_RESPONSE=1  # optional: echo events in API responses
+HEADERS_LOG_LEVEL=DEBUG
+```
+
+With tracing enabled, each call to `POST /api/headers/{document_id}?trace=1` writes a JSONL file under `HEADERS_TRACE_DIR` and, when `trace=1` (or `HEADERS_TRACE_EMBED_RESPONSE=1`), returns the events inline:
+
+```bash
+curl -X POST "http://localhost:8000/api/headers/42?trace=1" \
+  -H "accept: application/json"
+```
+
+Each trace entry captures the reasoning behind the locator, including:
+
+- `start_run`, `doc_stats`, and `end_run` – run metadata, document shape, timings, and unresolved headers.
+- `pre_normalize_sample` / `normalized_line` – representative text before and after cleanup.
+- `toc_detected` / `running_header_filtered` – TOC and running-header suppression decisions.
+- `llm_outline_received` – outline size sampled from the LLM.
+- `candidate_found`, `candidate_scored`, `anchor_resolved`, `monotonic_violation`, `fallback_triggered` – per-header search and alignment decisions, including gap fills.
+
+Trace files are newline-delimited JSON and can be streamed into tooling such as `jq` for analysis.
+
+
 ## Windows single-file bundle (optional)
 A PyInstaller spec is provided for packaging the backend as a single executable on Windows.
 

@@ -26,6 +26,20 @@ DEFAULT_TERMS_DIR = BASE_DIR / "resources" / "terms"
 DEFAULT_BASELINES_PATH = BASE_DIR / "resources" / "baselines" / "mandatory_clauses.json"
 
 
+HEADERS_TRACE: bool = os.getenv("HEADERS_TRACE", "0").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+HEADERS_TRACE_EMBED_RESPONSE: bool = (
+    os.getenv("HEADERS_TRACE_EMBED_RESPONSE", "0").strip().lower()
+    in {"1", "true", "yes", "on"}
+)
+HEADERS_TRACE_DIR: str = os.getenv("HEADERS_TRACE_DIR", "backend/logs/headers")
+HEADERS_LOG_LEVEL: str = os.getenv("HEADERS_LOG_LEVEL", "DEBUG")
+
+
 def _load_environment() -> None:
     """Load environment variables from a ``.env`` file if present."""
 

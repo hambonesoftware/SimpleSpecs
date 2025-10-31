@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import inspect
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 from sqlmodel import Session
 
+import backend.config as app_config
 from ..config import Settings, get_settings
 from ..database import get_session
 from ..models import Document
@@ -83,6 +86,8 @@ class HeadersResponse(BaseModel):
     sections: list[SectionPayload] = Field(default_factory=list)
     mode: str | None = None
     messages: list[str] = Field(default_factory=list)
+    trace: list[dict[str, Any]] | None = None
+    trace_file: str | None = None
 
     @classmethod
     def from_result(
@@ -113,6 +118,7 @@ async def generate_headers(
     *,
     session: Session = Depends(get_session),
     settings: Settings = Depends(get_settings),
+    trace: bool = Query(False),
 ) -> HeadersResponse:
     """Return the hierarchical headers for a stored document."""
 
@@ -136,6 +142,8 @@ async def generate_headers(
         )
 
     document_bytes = document_path.read_bytes()
+
+    trace_requested = trace or app_config.HEADERS_TRACE_EMBED_RESPONSE
 
     if settings.headers_llm_strict:
         llm_service = LLMService(settings)
@@ -192,6 +200,8 @@ async def generate_headers(
                 simpleheaders=simpleheaders_payload,
                 sections=sections_payload,
                 mode="llm_strict",
+                trace=None,
+                trace_file=None,
             )
 
     parse_result = parse_pdf(document_path, settings=settings)
@@ -211,9 +221,10 @@ async def generate_headers(
     if "document" in signature.parameters:
         orchestrator_kwargs["document"] = document
 
-    orchestrated = await extract_headers_and_chunks(
+    orchestrated, tracer = await extract_headers_and_chunks(
         document_bytes,
         **orchestrator_kwargs,
+        want_trace=trace_requested,
     )
 
     SimpleHeadersState.set(doc_id, orchestrated["doc_hash"], orchestrated["lines"])
@@ -243,7 +254,7 @@ async def generate_headers(
         for section in orchestrated.get("sections", [])
     ]
 
-    return HeadersResponse.from_result(
+    response = HeadersResponse.from_result(
         doc_id,
         result,
         simpleheaders=simpleheaders_payload,
@@ -251,6 +262,12 @@ async def generate_headers(
         mode=orchestrated.get("mode"),
         messages=orchestrated.get("messages"),
     )
+
+    if trace_requested and tracer is not None:
+        response.trace = tracer.as_list()
+        response.trace_file = tracer.path
+
+    return response
 
 
 @router.get("/headers/{document_id}/section-text", response_class=PlainTextResponse)
