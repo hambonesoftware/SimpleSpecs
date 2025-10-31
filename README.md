@@ -95,6 +95,29 @@ When tracing (`?trace=1`) the sequential tracer records the corrective steps tak
 Clients can override the active strategy per request with `POST /api/headers/{document_id}?align=sequential` (or `align=legacy`). When tracing is enabled the sequential locator emits events such as `anchor_candidate_top`, `window_top`, and `anchor_resolved_child` to aid debugging.
 
 
+#### Strict Lockdown mode
+
+The strict LLM-backed locator hardens matching for tricky numbering and appendix layouts:
+
+- Normalises `I`/`l` → `1`, collapses spaced dot separators, and replaces NBSP variants prior to scoring.
+- Detects and suppresses TOC/summary pages by counting dotted leaders and dense section-like tokens.
+- Prefers the first candidate after the previous anchor, with a last-occurrence fallback when the document repeats numbers.
+- Fuses two-line `APPENDIX A` headings for scoring while keeping the anchor on the first line.
+- Runs a final monotonic guard that re-resolves children that slipped ahead of their parents.
+
+Environment toggles (defaults shown):
+
+```
+HEADERS_STRICT_FUZZY_THRESH=75
+HEADERS_STRICT_TITLE_ONLY_THRESH=72
+HEADERS_STRICT_BAND_LINES=3
+HEADERS_STRICT_TOC_MIN_SECTION_TOKENS=6
+HEADERS_STRICT_TOC_MIN_DOT_LEADERS=4
+HEADERS_STRICT_AFTER_ANCHOR_ONLY=1
+HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK=1
+HEADERS_FINAL_MONOTONIC_GUARD=1
+```
+
 ### Header trace debugging
 
 Set the following flags to capture a detailed, end-to-end trace of header discovery:

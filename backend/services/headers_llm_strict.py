@@ -5,8 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Mapping, Protocol, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 try:  # pragma: no cover - optional dependency in some environments
     from rapidfuzz.fuzz import token_set_ratio as _rf_token_set_ratio
@@ -19,7 +18,21 @@ except Exception:  # pragma: no cover - fallback for minimal installs
 else:  # pragma: no cover - passthrough when rapidfuzz is available
     token_set_ratio = _rf_token_set_ratio
 
-from ..utils.trace import HeaderTracer
+from ..config import (
+    HEADERS_FINAL_MONOTONIC_GUARD,
+    HEADERS_STRICT_AFTER_ANCHOR_ONLY,
+    HEADERS_STRICT_BAND_LINES,
+    HEADERS_STRICT_FUZZY_THRESH,
+    HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK,
+    HEADERS_STRICT_TITLE_ONLY_THRESH,
+    HEADERS_STRICT_TOC_MIN_DOT_LEADERS,
+    HEADERS_STRICT_TOC_MIN_SECTION_TOKENS,
+)
+
+try:  # pragma: no cover - tracing is optional in some deployments
+    from ..utils.trace import HeaderTracer
+except Exception:  # pragma: no cover - tracing disabled
+    HeaderTracer = None  # type: ignore[assignment]
 
 log = logging.getLogger(__name__)
 
@@ -52,211 +65,332 @@ Document:
 
 BodyLine = Dict[str, Any]
 
+DOTS = r"[.\u2024\u2027·]"
+NBSPS = "\u00A0\u2007\u2009"
+SOFT_HYPH = "\u00AD"
 
-def _is_toc_or_index_line(text: str) -> bool:
-    trimmed = text.strip()
-    if not trimmed:
-        return False
-    upper = trimmed.upper()
-    if upper in {"CONTENTS", "TABLE OF CONTENTS", "INDEX"}:
-        return True
-    if re.search(r"\.{2,}\s*\d+\s*$", trimmed):
-        return True
-    return False
+SPACED_DOTS_RE = re.compile(r"(?<=\d)\s*" + DOTS + r"\s*(?=\d)")
+CONFUSABLE_ONE_RES = [
+    re.compile(r"(?<=\d)\s*[Il]\s*(?=(?:\d|\b))"),
+    re.compile(r"(?<=" + DOTS + r")\s*[Il]\b"),
+]
 
-
-DOT_VARIANTS = ".\u2024\u2027"
-DOT_CASCADE_RE = re.compile(rf"(\d)\s*[{DOT_VARIANTS}]\s*(\d)")
-IL_MIDDLE_RE = re.compile(r"(?<=\d)\s*[Il]\s*(?=(?:\d|\b))")
-IL_AFTER_DOT_RE = re.compile(rf"(?<=[{DOT_VARIANTS}])\s*[Il]\b")
-WHITESPACE_RE = re.compile(r"\s+")
-APPENDIX_LINE_RE = re.compile(r"^APPENDIX\s+[A-Z0-9]+$", re.IGNORECASE)
-NBSP_TRANSLATION = str.maketrans({"\u00A0": " ", "\u2007": " ", "\u2009": " "})
-BAND_LIMIT = 3
-NUMERIC_THRESHOLD = 74
-TITLE_THRESHOLD = 80
+DOTTED_LEADER_RE = re.compile(r"\.{3,}\s*\d+\s*$")
+SECTION_LIKE_RE = re.compile(r"^\s*\d+(?:\s*" + DOTS + r"\s*\d+)*\b")
+APPENDIX_LINE_RE = re.compile(r"^\s*APPENDIX\s+[A-Z]\b", re.IGNORECASE)
 
 
-def _pre_normalise(value: str) -> str:
-    cleaned = value.translate(NBSP_TRANSLATION)
-    cleaned = DOT_CASCADE_RE.sub(r"\1.\2", cleaned)
-    cleaned = cleaned.replace("\u2024", ".").replace("\u2027", ".")
-    cleaned = IL_MIDDLE_RE.sub("1", cleaned)
-    cleaned = IL_AFTER_DOT_RE.sub("1", cleaned)
-    return cleaned
+def _collapse_spaced_dots(value: str) -> str:
+    """Collapse spaced dot sequences like ``1 . 2`` → ``1.2`` until stable."""
+
+    return SPACED_DOTS_RE.sub(".", value)
 
 
-def _normalise(text: str) -> str:
-    cleaned = _pre_normalise(text)
-    cleaned = WHITESPACE_RE.sub(" ", cleaned)
+def normalize_strict_text(value: str) -> str:
+    """Normalise text for strict matching while preserving printed intent."""
+
+    cleaned = value.replace(SOFT_HYPH, "")
+    for ch in NBSPS:
+        cleaned = cleaned.replace(ch, " ")
+    cleaned = _collapse_spaced_dots(cleaned)
+    for rx in CONFUSABLE_ONE_RES:
+        cleaned = rx.sub("1", cleaned)
+    cleaned = _collapse_spaced_dots(cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned)
     return cleaned.strip().casefold()
 
 
-def _is_body_candidate(line: BodyLine) -> bool:
-    text = str(line.get("text", ""))
-    if not text.strip():
-        return False
-    if line.get("is_toc") or line.get("is_index"):
-        return False
-    if line.get("is_running"):
-        return False
-    if _is_toc_or_index_line(text):
-        return False
-    return True
+def compile_number_regex_fuzzy(number: str) -> re.Pattern[str]:
+    """Compile a regex that tolerates spacing around dot separators."""
+
+    number_pat = re.escape(number).replace(r"\.", r"\s*" + DOTS + r"\s*")
+    return re.compile(r"^\s*" + number_pat + r"\b(?!\.)", re.IGNORECASE)
 
 
-def _compile_number_regex(number: str) -> re.Pattern[str]:
-    cleaned = WHITESPACE_RE.sub(" ", _pre_normalise(number)).strip()
-    if not cleaned:
-        raise ValueError("empty number pattern")
-    escaped = re.escape(cleaned)
-    escaped = escaped.replace(r"\ ", r"\s+")
-    escaped = escaped.replace(r"\.", rf"\s*[{DOT_VARIANTS}]\s*")
-    return re.compile(rf"^\s*{escaped}\b(?![{DOT_VARIANTS}])", re.IGNORECASE)
+def detect_toc_pages_strict(lines: Sequence[BodyLine]) -> set[int]:
+    """Identify pages that resemble a Table of Contents."""
 
+    from collections import defaultdict
 
-def _is_all_caps(value: str) -> bool:
-    letters = re.sub(r"[^A-Za-z0-9]", "", value)
-    return bool(letters) and letters.upper() == letters
-
-
-def _appendix_merge_text(index: int, lines: Sequence[BodyLine]) -> str:
-    current = str(lines[index].get("text", ""))
-    stripped = current.strip()
-    if not APPENDIX_LINE_RE.match(stripped):
-        return current
-    if index + 1 >= len(lines):
-        return current
-    next_text = str(lines[index + 1].get("text", "")).strip()
-    if not next_text:
-        return current
-    if _is_all_caps(next_text):
-        return f"{current} {next_text}"
-    return current
-
-
-def _band_indices(lines: Sequence[BodyLine]) -> set[int]:
-    per_page: Dict[int, List[Tuple[int, int]]] = {}
-    for idx, line in enumerate(lines):
-        if not _is_body_candidate(line):
-            continue
-        page = int(line.get("page", 0) or 0)
-        global_idx = int(line.get("global_idx", idx) or idx)
-        per_page.setdefault(page, []).append((global_idx, idx))
-
-    banded: set[int] = set()
-    for entries in per_page.values():
-        entries.sort(key=lambda item: item[0])
-        if not entries:
-            continue
-        tops = entries[:BAND_LIMIT]
-        bots = entries[-BAND_LIMIT:] if len(entries) > BAND_LIMIT else entries
-        for _, idx in tops + bots:
-            banded.add(idx)
-    return banded
-
-
-@dataclass(slots=True)
-class PreparedLine:
-    index: int
-    text: str
-    page: int
-    global_idx: int
-    line_idx: int
-    combined_normalised: str
-    prenormalised: str
-    is_candidate: bool
-    in_band: bool
-
-
-def _prepare_lines(lines: Sequence[BodyLine]) -> List[PreparedLine]:
-    banded = _band_indices(lines)
-    prepared: List[PreparedLine] = []
-    for idx, line in enumerate(lines):
-        text = str(line.get("text", ""))
-        merged = _appendix_merge_text(idx, lines)
-        prepared.append(
-            PreparedLine(
-                index=idx,
-                text=text,
-                page=int(line.get("page", 0) or 0),
-                global_idx=int(line.get("global_idx", idx) or idx),
-                line_idx=int(line.get("line_idx", idx) or idx),
-                combined_normalised=_normalise(merged),
-                prenormalised=WHITESPACE_RE.sub(" ", _pre_normalise(text)).casefold(),
-                is_candidate=_is_body_candidate(line),
-                in_band=idx in banded,
-            )
-        )
-    return prepared
-
-
-def _select_best(current: Tuple[int, int, PreparedLine] | None, score: int, line: PreparedLine) -> Tuple[int, int, PreparedLine]:
-    if current is None:
-        return (score, line.global_idx, line)
-    best_score, best_idx, _ = current
-    if score > best_score:
-        return (score, line.global_idx, line)
-    if score == best_score and line.global_idx < best_idx:
-        return (score, line.global_idx, line)
-    return current
-
-
-def _find_header_line(
-    header: Mapping[str, Any],
-    prepared_lines: Sequence[PreparedLine],
-) -> PreparedLine | None:
-    title = str(header.get("text", ""))
-    title_norm = _normalise(title)
-    if not title_norm:
-        return None
-
-    number_value = header.get("number")
-    number_regex: re.Pattern[str] | None = None
-    combined_target = title_norm
-    if isinstance(number_value, str) and number_value.strip():
+    by_page = defaultdict(list)
+    for entry in lines:
         try:
-            number_regex = _compile_number_regex(number_value)
-            combined_target = _normalise(f"{number_value} {title}")
-        except ValueError:
-            number_regex = None
+            page = int(entry.get("page", 0) or 0)
+        except Exception:
+            page = 0
+        by_page[page].append(str(entry.get("text", "")))
 
-    best_numeric: Tuple[int, int, PreparedLine] | None = None
-    best_title: Tuple[int, int, PreparedLine] | None = None
+    toc_pages: set[int] = set()
+    for page, texts in by_page.items():
+        dotted = sum(1 for text in texts if DOTTED_LEADER_RE.search(text))
+        section_like = 0
+        for text in texts:
+            if SECTION_LIKE_RE.search(normalize_strict_text(text)):
+                section_like += 1
+        if (
+            dotted >= HEADERS_STRICT_TOC_MIN_DOT_LEADERS
+            or section_like >= HEADERS_STRICT_TOC_MIN_SECTION_TOKENS
+        ):
+            toc_pages.add(page)
+    return toc_pages
 
-    for prepared in prepared_lines:
-        if not prepared.is_candidate:
+
+def fuse_two_line_appendix_candidates(lines: Sequence[BodyLine]) -> List[BodyLine]:
+    """Merge two-line appendix headings into a synthetic candidate."""
+
+    fused: List[BodyLine] = []
+    as_list = list(lines)
+    total = len(as_list)
+    index = 0
+    while index < total:
+        current = dict(as_list[index])
+        text = str(current.get("text", ""))
+        if APPENDIX_LINE_RE.match(text):
+            lookahead = index + 1
+            if lookahead < total:
+                next_line = as_list[lookahead]
+                next_text = str(next_line.get("text", "")).strip()
+                if next_text:
+                    combined = text.rstrip() + " " + next_text.lstrip()
+                    current["_synthetic_text"] = combined
+        fused.append(current)
+        index += 1
+    return fused
+
+
+def align_headers_llm_strict(
+    llm_headers: List[Dict[str, Any]],
+    lines_input: Sequence[BodyLine],
+    tracer: Optional[HeaderTracer] = None,
+) -> List[Dict[str, Any]]:
+    """Align LLM-provided headers to body lines using strict heuristics."""
+
+    lines_list = list(lines_input)
+    raw_lines = fuse_two_line_appendix_candidates(lines_list)
+
+    lines: List[Dict[str, Any]] = []
+    for idx, entry in enumerate(raw_lines):
+        text = str(entry.get("text", ""))
+        if not text.strip():
             continue
+        try:
+            page = int(entry.get("page", 0) or 0)
+        except Exception:
+            page = 0
+        try:
+            global_idx = int(entry.get("global_idx", idx) or idx)
+        except Exception:
+            global_idx = idx
+        line_idx_raw = entry.get("line_idx", entry.get("line_index"))
+        if line_idx_raw is None:
+            line_idx = idx
+        else:
+            try:
+                line_idx = int(line_idx_raw)
+            except Exception:
+                line_idx = idx
+        blocked = bool(
+            entry.get("is_toc") or entry.get("is_index") or entry.get("is_running")
+        )
+        syn_text = entry.get("_synthetic_text")
+        norm_syn = normalize_strict_text(syn_text) if syn_text else None
+        lines.append(
+            {
+                "text": text,
+                "page": page,
+                "global_idx": global_idx,
+                "line_index": line_idx,
+                "norm": normalize_strict_text(text),
+                "norm_syn": norm_syn,
+                "blocked": blocked,
+            }
+        )
 
-        has_number = False
-        numeric_score = -1
+    toc_pages = detect_toc_pages_strict(lines_list)
+    if tracer is not None:
+        tracer.ev("toc_pages", pages=sorted(toc_pages))
+
+    from collections import defaultdict
+
+    per_page: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
+    for line in lines:
+        if line["blocked"]:
+            continue
+        per_page[line["page"]].append(line)
+
+    page_positions: Dict[int, Dict[int, int]] = {}
+    for page, items in per_page.items():
+        sorted_items = sorted(items, key=lambda item: item["global_idx"])
+        page_positions[page] = {
+            item["global_idx"]: position for position, item in enumerate(sorted_items)
+        }
+
+    def in_band(line: Dict[str, Any]) -> bool:
+        positions = page_positions.get(line["page"])
+        if not positions:
+            return False
+        pos = positions.get(line["global_idx"])
+        if pos is None:
+            return False
+        band_limit = max(HEADERS_STRICT_BAND_LINES, 0)
+        total = len(per_page.get(line["page"], []))
+        if band_limit == 0 or total == 0:
+            return False
+        return pos < band_limit or pos >= max(0, total - band_limit)
+
+    resolved: List[Dict[str, Any]] = []
+    prev_idx = -1
+
+    for header in llm_headers:
+        title = str(header.get("title") or header.get("text") or "")
+        title_norm = normalize_strict_text(title)
+        number_value = header.get("number")
+        number = str(number_value).strip() if isinstance(number_value, str) else None
+        want_full = normalize_strict_text(f"{number} {title}") if number else title_norm
+        number_regex = compile_number_regex_fuzzy(number) if number else None
+
+        candidates: List[Tuple[int, Dict[str, Any], str, bool]] = []
         if number_regex is not None:
-            if number_regex.search(prepared.prenormalised):
-                has_number = True
-                numeric_score = token_set_ratio(
-                    prepared.combined_normalised, combined_target
+            for line in lines:
+                if line["blocked"] or line["page"] in toc_pages:
+                    continue
+                norm_basis = line["norm_syn"] or line["norm"]
+                if number_regex.search(line["norm"]) or (
+                    line["norm_syn"] and number_regex.search(line["norm_syn"])
+                ):
+                    band_flag = in_band(line)
+                    raw_score = token_set_ratio(norm_basis, want_full)
+                    adjusted_score = raw_score - (10 if band_flag else 0)
+                    if adjusted_score >= HEADERS_STRICT_FUZZY_THRESH:
+                        candidates.append((adjusted_score, line, "num+title", band_flag))
+
+        filtered_candidates = candidates
+        if HEADERS_STRICT_AFTER_ANCHOR_ONLY and prev_idx >= 0:
+            filtered_candidates = [
+                candidate for candidate in candidates if candidate[1]["global_idx"] > prev_idx
+            ]
+
+        chosen: Optional[Tuple[int, Dict[str, Any], str, bool]] = None
+        if filtered_candidates:
+            chosen = max(filtered_candidates, key=lambda item: item[0])
+
+        if (
+            chosen is None
+            and HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK
+            and candidates
+        ):
+            fallback_candidate = max(candidates, key=lambda item: item[1]["global_idx"])
+            chosen = (fallback_candidate[0], fallback_candidate[1], "last_occurrence", fallback_candidate[3])
+
+        if chosen is None and title_norm:
+            for line in lines:
+                if line["blocked"] or line["page"] in toc_pages:
+                    continue
+                if HEADERS_STRICT_AFTER_ANCHOR_ONLY and line["global_idx"] <= prev_idx:
+                    continue
+                norm_basis = line["norm_syn"] or line["norm"]
+                score = token_set_ratio(norm_basis, title_norm)
+                if score >= HEADERS_STRICT_TITLE_ONLY_THRESH:
+                    band_flag = in_band(line)
+                    chosen = (score, line, "title_only", band_flag)
+                    break
+
+        if chosen is None:
+            log.debug("Header not located in body: %s", header.get("text"))
+            if tracer is not None:
+                tracer.ev(
+                    "anchor_unresolved_strict",
+                    number=number,
+                    title=title,
+                    reason="no_candidate",
                 )
-
-        if prepared.in_band and not has_number:
             continue
 
-        if has_number and numeric_score >= NUMERIC_THRESHOLD:
-            best_numeric = _select_best(best_numeric, numeric_score, prepared)
-            continue
+        score, line, strategy, band_flag = chosen
+        prev_idx = line["global_idx"]
+        resolved.append(
+            {
+                "header": header,
+                "line": line,
+                "number": number,
+                "score": score,
+                "strategy": strategy,
+                "band": band_flag,
+            }
+        )
+        if tracer is not None:
+            tracer.ev(
+                "anchor_resolved_strict",
+                number=number,
+                title=title,
+                page=line["page"],
+                idx=line["global_idx"],
+                score=score,
+                band=band_flag,
+                toc_page=line["page"] in toc_pages,
+                strategy=strategy,
+                want=want_full,
+                text=line["text"][:200],
+            )
 
-        title_score = token_set_ratio(prepared.combined_normalised, title_norm)
-        if number_regex is not None and has_number and numeric_score >= 0:
-            # numeric evidence but below threshold – allow fallback with slight boost
-            title_score += 2
+    if not resolved:
+        return []
 
-        if title_score >= TITLE_THRESHOLD:
-            best_title = _select_best(best_title, title_score, prepared)
+    resolved.sort(key=lambda item: item["line"]["global_idx"])
 
-    if best_numeric is not None:
-        return best_numeric[2]
-    if best_title is not None:
-        return best_title[2]
-    return None
+    if HEADERS_FINAL_MONOTONIC_GUARD:
+        fixed = 0
+        position_map: Dict[str, int] = {
+            item["number"]: item["line"]["global_idx"]
+            for item in resolved
+            if item["number"]
+        }
+        for item in resolved:
+            number = item.get("number")
+            if not number or "." not in number:
+                continue
+            parent = ".".join(number.split(".")[:-1])
+            parent_idx = position_map.get(parent)
+            if parent_idx is None:
+                continue
+            if parent_idx <= item["line"]["global_idx"]:
+                continue
+            regex = compile_number_regex_fuzzy(number)
+            all_candidates = [
+                line
+                for line in lines
+                if not line["blocked"]
+                and line["page"] not in toc_pages
+                and (
+                    regex.search(line["norm"])
+                    or (line["norm_syn"] and regex.search(line["norm_syn"]))
+                )
+            ]
+            after_parent = [
+                line for line in all_candidates if line["global_idx"] > parent_idx
+            ]
+            repick = None
+            if after_parent:
+                repick = max(after_parent, key=lambda cand: cand["global_idx"])
+            elif HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK and all_candidates:
+                repick = max(all_candidates, key=lambda cand: cand["global_idx"])
+            if repick is not None and repick["global_idx"] != item["line"]["global_idx"]:
+                item["line"] = repick
+                position_map[number] = repick["global_idx"]
+                fixed += 1
+                if tracer is not None:
+                    tracer.ev(
+                        "final_monotonic_fix",
+                        number=number,
+                        new_idx=repick["global_idx"],
+                        parent=parent,
+                        parent_idx=parent_idx,
+                    )
+        if tracer is not None:
+            tracer.ev("final_monotonic_pass", fixed=fixed)
+        resolved.sort(key=lambda item: item["line"]["global_idx"])
+
+    return resolved
 
 
 def _coerce_level(value: Any) -> int:
@@ -286,12 +420,13 @@ def _extract_headers(payload: Mapping[str, Any]) -> Iterable[Dict[str, Any]]:
             number = str(number).strip() or None
         yield {
             "text": text,
+            "title": entry.get("title"),
             "number": number,
             "level": _coerce_level(entry.get("level")),
         }
 
 
-class _SupportsGenerate(Protocol):
+class _SupportsGenerate:
     def generate(
         self,
         *,
@@ -311,7 +446,8 @@ def extract_headers_and_sections_strict(
 ) -> Dict[str, Any]:
     """Locate headers and construct contiguous section ranges."""
 
-    full_text = "\n".join(str(line.get("text", "")) for line in lines)
+    lines_list = list(lines)
+    full_text = "\n".join(str(line.get("text", "")) for line in lines_list)
 
     prompt = PROMPT_TEMPLATE.format(fence=FENCE, doc_text=full_text)
     result = llm.generate(messages=[{"role": "user", "content": prompt}], fence=FENCE)
@@ -326,7 +462,6 @@ def extract_headers_and_sections_strict(
         payload = {}
 
     llm_headers = list(_extract_headers(payload))
-    prepared_lines = _prepare_lines(lines)
     if tracer is not None:
         tracer.ev(
             "llm_outline_received",
@@ -334,52 +469,56 @@ def extract_headers_and_sections_strict(
             headers=[{**header} for header in llm_headers],
         )
 
-    located: List[Dict[str, Any]] = []
+    resolved = align_headers_llm_strict(llm_headers, lines_list, tracer=tracer)
 
-    for header in llm_headers:
-        prepared = _find_header_line(header, prepared_lines)
-        if not prepared:
-            log.debug("Header not located in body: %s", header["text"])
-            if tracer is not None:
-                tracer.ev("candidate_missing", header={**header})
+    located: List[Dict[str, Any]] = []
+    for item in resolved:
+        header = item["header"]
+        line = item["line"]
+        if not lines_list:
             continue
-        list_index = prepared.index
-        global_idx = prepared.global_idx
-        page = prepared.page
-        if tracer is not None:
-            tracer.ev(
-                "candidate_found",
-                header_text=header["text"],
-                header_number=header["number"],
-                level=header["level"],
-                page=page,
-                line_index=list_index,
-                global_idx=global_idx,
+        line_index = line.get("line_index", 0)
+        try:
+            line_index = int(line_index)
+        except Exception:
+            line_index = 0
+        if not (0 <= line_index < len(lines_list)):
+            fallback_index = next(
+                (
+                    idx
+                    for idx, original in enumerate(lines_list)
+                    if int(original.get("global_idx", idx) or idx) == line["global_idx"]
+                ),
+                None,
             )
+            if fallback_index is not None:
+                line_index = fallback_index
+            else:
+                line_index = max(0, min(len(lines_list) - 1, line_index))
         located.append(
             {
-                "text": header["text"],
-                "number": header["number"],
-                "level": header["level"],
-                "line_index": list_index,
-                "start_global_index": global_idx,
-                "start_page": page,
+                "text": header.get("text", ""),
+                "number": header.get("number"),
+                "level": header.get("level"),
+                "line_index": line_index,
+                "start_global_index": line["global_idx"],
+                "start_page": line["page"],
             }
         )
 
     located.sort(key=lambda item: item["start_global_index"])
 
     sections: List[Dict[str, Any]] = []
-    if lines:
+    if lines_list and located:
         for idx, header in enumerate(located):
             start_line_index = header["line_index"]
             if idx + 1 < len(located):
                 next_line_index = located[idx + 1]["line_index"] - 1
             else:
-                next_line_index = len(lines) - 1
+                next_line_index = len(lines_list) - 1
             if next_line_index < start_line_index:
                 next_line_index = start_line_index
-            end_line = lines[next_line_index]
+            end_line = lines_list[next_line_index]
             sections.append(
                 {
                     "text": header["text"],
@@ -403,4 +542,4 @@ def extract_headers_and_sections_strict(
     }
 
 
-__all__ = ["extract_headers_and_sections_strict", "FENCE"]
+__all__ = ["extract_headers_and_sections_strict", "align_headers_llm_strict", "FENCE"]

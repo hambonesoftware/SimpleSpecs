@@ -101,6 +101,32 @@ HEADERS_TITLE_ONLY_REANCHOR: bool = os.getenv("HEADERS_TITLE_ONLY_REANCHOR", "1"
 HEADERS_RESCAN_PASSES: int = int(os.getenv("HEADERS_RESCAN_PASSES", "2"))
 HEADERS_DEDUPE_POLICY: str = os.getenv("HEADERS_DEDUPE_POLICY", "best")
 
+# Strict/LLM matcher hardening
+HEADERS_STRICT_FUZZY_THRESH: int = int(
+    os.getenv("HEADERS_STRICT_FUZZY_THRESH", "75")
+)
+HEADERS_STRICT_TITLE_ONLY_THRESH: int = int(
+    os.getenv("HEADERS_STRICT_TITLE_ONLY_THRESH", "72")
+)
+HEADERS_STRICT_BAND_LINES: int = int(
+    os.getenv("HEADERS_STRICT_BAND_LINES", "3")
+)
+HEADERS_STRICT_TOC_MIN_SECTION_TOKENS: int = int(
+    os.getenv("HEADERS_STRICT_TOC_MIN_SECTION_TOKENS", "6")
+)
+HEADERS_STRICT_TOC_MIN_DOT_LEADERS: int = int(
+    os.getenv("HEADERS_STRICT_TOC_MIN_DOT_LEADERS", "4")
+)
+HEADERS_STRICT_AFTER_ANCHOR_ONLY: bool = os.getenv(
+    "HEADERS_STRICT_AFTER_ANCHOR_ONLY", "1"
+) in ("1", "true", "True", "YES", "yes")
+HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK: bool = os.getenv(
+    "HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK", "1"
+) in ("1", "true", "True", "YES", "yes")
+HEADERS_FINAL_MONOTONIC_GUARD: bool = os.getenv(
+    "HEADERS_FINAL_MONOTONIC_GUARD", "1"
+) in ("1", "true", "True", "YES", "yes")
+
 
 def _load_environment() -> None:
     """Load environment variables from a ``.env`` file if present."""
