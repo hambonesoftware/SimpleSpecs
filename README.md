@@ -28,6 +28,8 @@ SimpleSpecs parses engineering specification PDFs and structures the extracted d
 5. Visit `http://localhost:8000/api/health` to verify the service responds with `{ "ok": true }`.
 6. Open `http://localhost:8000/` in your browser to use the SimpleSpecs web app; the FastAPI server serves the static frontend from the same origin.
 
+   If you need to host the static files separately (for example during local prototyping), add a `<meta name="api-base">` tag to `frontend/index.html` or assign `window.API_BASE` at runtime with the full API origin (e.g. `http://127.0.0.1:8000`). The frontend falls back to the same origin when no override is provided.
+
 The server creates the `uploads/` and `exports/` directories on startup if they are missing. Adjust their locations via the `UPLOAD_DIR` and `EXPORT_DIR` environment variables.
 
 ### Header extraction configuration
