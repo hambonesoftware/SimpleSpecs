@@ -127,6 +127,31 @@ HEADERS_FINAL_MONOTONIC_GUARD: bool = os.getenv(
     "HEADERS_FINAL_MONOTONIC_GUARD", "1"
 ) in ("1", "true", "True", "YES", "yes")
 
+# Extractor selection
+PARSER_ENGINE: str = os.getenv("PARSER_ENGINE", "auto")
+
+# Heuristics for "auto" page-level fallback
+PARSER_NOISE_SPACED_DOT_THRESH: float = float(
+    os.getenv("PARSER_NOISE_SPACED_DOT_THRESH", "0.18")
+)
+PARSER_NOISE_CONFUSABLE_1_THRESH: float = float(
+    os.getenv("PARSER_NOISE_CONFUSABLE_1_THRESH", "0.12")
+)
+
+# Reading-order grouping
+PARSER_LINE_Y_TOLERANCE: float = float(
+    os.getenv("PARSER_LINE_Y_TOLERANCE", "2.0")
+)
+
+# Safety toggles
+PARSER_KEEP_BBOX: bool = os.getenv("PARSER_KEEP_BBOX", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
+
 
 def _load_environment() -> None:
     """Load environment variables from a ``.env`` file if present."""
