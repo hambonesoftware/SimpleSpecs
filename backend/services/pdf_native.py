@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import io
 import hashlib
+import tempfile
 
 import logging
 import re
 import warnings
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -32,6 +33,7 @@ except Exception:  # pragma: no cover - optional dependency
 
 from ..config import Settings
 from ..utils.trace import HeaderTracer
+from .text_extraction import extract_lines
 
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pytesseract")
 
@@ -117,6 +119,12 @@ class ParseResult:
 
 class ParseError(RuntimeError):
     """Raised when a document cannot be parsed."""
+
+
+def parse_pdf_to_lines(file_path: str | Path) -> list[dict]:
+    """Return normalised line entries extracted from ``file_path``."""
+
+    return extract_lines(str(file_path))
 
 
 def parse_pdf(document_path: Path, *, settings: Settings) -> ParseResult:
@@ -393,88 +401,97 @@ def collect_line_metrics(
 
     doc_hash = hashlib.sha256(document_bytes).hexdigest()
     excluded_pages: set[int] = set()
-    pages: list[dict] = []
     header_counter: Counter[str] = Counter()
     footer_counter: Counter[str] = Counter()
+    page_heights: dict[int, float] = {}
+    try:
+        with fitz.open(stream=document_bytes, filetype="pdf") as pdf_document:
+            for page in pdf_document:
+                page_heights[int(page.number) + 1] = float(page.rect.height)
+    except Exception:
+        page_heights = {}
 
-    with fitz.open(stream=document_bytes, filetype="pdf") as pdf_document:
-        sample_budget = 10
-        for page in pdf_document:
-            page_number = int(page.number)
-            text_dict = page.get_text("dict") or {}
-            raw_blocks = text_dict.get("blocks") or []
-            page_lines: list[dict] = []
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as temp_file:
+            temp_file.write(document_bytes)
+            temp_file.flush()
+            temp_path = Path(temp_file.name)
+        extracted_lines = extract_lines(str(temp_path))
+    finally:
+        if temp_path is not None:
+            try:
+                temp_path.unlink()
+            except FileNotFoundError:
+                pass
 
-            for block in raw_blocks:
-                if block.get("type", 0) != 0:
-                    continue
-                for line in block.get("lines", []):
-                    spans = line.get("spans", [])
-                    text = "".join(span.get("text", "") for span in spans).replace("\r", "")
-                    if not text or not text.strip():
-                        continue
-                    bbox = line.get("bbox") or block.get("bbox")
-                    if not bbox:
-                        continue
-                    left, top, right, bottom = (float(value) for value in bbox)
-                    sizes = [float(span.get("size", 0.0)) for span in spans if span.get("size")]
-                    size = sum(sizes) / len(sizes) if sizes else 0.0
-                    fonts = [str(span.get("font", "")) for span in spans if span.get("font")]
-                    bold = any("bold" in font.lower() for font in fonts)
-                    is_caps = text.strip().isupper()
-                    entry = {
-                        "global_idx": -1,
-                        "page": page_number,
-                        "line_idx": len(page_lines),
-                        "text": text,
-                        "size": size,
-                        "bold": bold,
-                        "is_caps": is_caps,
-                        "left": left,
-                        "right": right,
-                        "top": top,
-                        "bottom": bottom,
-                        "is_toc": False,
-                        "is_index": False,
-                        "is_running": False,
-                    }
-                    if tracer and sample_budget > 0:
-                        tracer.ev(
-                            "pre_normalize_sample",
-                            page=page_number,
-                            line_idx=entry["line_idx"],
-                            text=text,
-                        )
-                        sample_budget -= 1
-                    page_lines.append(entry)
+    all_lines: list[dict] = []
+    page_texts: dict[int, list[str]] = defaultdict(list)
+    page_entries: dict[int, list[dict]] = defaultdict(list)
+    line_norms: dict[int, str] = {}
+    page_line_counters: dict[int, int] = defaultdict(int)
 
-            height = float(page.rect.height)
+    sample_budget = 10
+    for entry in sorted(extracted_lines, key=lambda item: int(item.get("global_idx", 0))):
+        text = str(entry.get("text", ""))
+        if not text.strip():
+            continue
+        page_number = int(entry.get("page", 0) or 0)
+        global_idx = int(entry.get("global_idx", len(all_lines)))
+        line_idx = page_line_counters[page_number]
+        page_line_counters[page_number] += 1
+
+        bbox = entry.get("bbox")
+        left = top = right = bottom = None
+        if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
+            left, top, right, bottom = (float(value) for value in bbox)
+
+        if tracer and sample_budget > 0:
+            tracer.ev(
+                "pre_normalize_sample",
+                page=page_number,
+                line_idx=line_idx,
+                text=text,
+            )
+            sample_budget -= 1
+
+        normalised = _normalise_text(text)
+        if tracer and line_idx < 5 and normalised:
+            tracer.ev(
+                "normalized_line",
+                page=page_number,
+                line_idx=line_idx,
+                raw=text,
+                normalised=normalised,
+            )
+
+        height = page_heights.get(page_number)
+        if normalised and height is not None and top is not None and bottom is not None:
             top_threshold = height * 0.18
             bottom_threshold = height * 0.85
-            for entry in page_lines:
-                normalised = _normalise_text(entry.get("text", ""))
-                if not normalised:
-                    continue
-                if tracer and entry.get("line_idx", 0) < 5:
-                    tracer.ev(
-                        "normalized_line",
-                        page=page_number,
-                        line_idx=entry.get("line_idx", 0),
-                        raw=entry.get("text", ""),
-                        normalised=normalised,
-                    )
-                if entry["top"] <= top_threshold:
-                    header_counter[normalised] += 1
-                elif entry["bottom"] >= bottom_threshold:
-                    footer_counter[normalised] += 1
+            if top <= top_threshold:
+                header_counter[normalised] += 1
+            elif bottom >= bottom_threshold:
+                footer_counter[normalised] += 1
 
-            pages.append(
-                {
-                    "number": page_number,
-                    "height": height,
-                    "lines": page_lines,
-                }
-            )
+        line_norms[global_idx] = normalised
+        page_texts[page_number].append(text)
+        payload = {
+            "global_idx": global_idx,
+            "page": page_number,
+            "line_idx": line_idx,
+            "text": text,
+            "bbox": bbox,
+            "left": left,
+            "right": right,
+            "top": top,
+            "bottom": bottom,
+            "is_toc": False,
+            "is_index": False,
+            "is_running": False,
+        }
+        page_entries[page_number].append(payload)
+        all_lines.append(payload)
 
     running_markers: set[str] = set()
     if suppress_running:
@@ -490,39 +507,33 @@ def collect_line_metrics(
                     footer_hits=footer_counter.get(text, 0),
                 )
 
-    all_lines: list[dict] = []
-    global_idx = 0
+    if suppress_running and running_markers:
+        for payload in all_lines:
+            norm = line_norms.get(int(payload.get("global_idx", -1)))
+            if norm and norm in running_markers:
+                payload["is_running"] = True
 
-    for page in pages:
-        page_number = page["number"]
-        page_lines = page["lines"]
-        texts = [line.get("text", "") for line in page_lines]
-        is_toc_page = _is_toc_like(texts, page_number)
-        is_index_page = _is_index_like(texts)
-        if suppress_toc and (is_toc_page or is_index_page):
-            excluded_pages.add(page_number)
-            if tracer:
-                tracer.ev(
-                    "toc_detected",
-                    page=page_number,
-                    reason="index" if is_index_page else "toc",
-                    sample=texts[:6],
-                )
-
-        for entry in page_lines:
-            normalised = _normalise_text(entry.get("text", ""))
-            if suppress_running and normalised in running_markers:
-                entry["is_running"] = True
-            entry["is_toc"] = is_toc_page
-            entry["is_index"] = is_index_page
-            entry["global_idx"] = global_idx
-            all_lines.append(entry)
-            global_idx += 1
+    if suppress_toc:
+        for page_number, texts in page_texts.items():
+            is_toc_page = _is_toc_like(texts, page_number)
+            is_index_page = _is_index_like(texts)
+            if is_toc_page or is_index_page:
+                excluded_pages.add(page_number)
+                if tracer:
+                    tracer.ev(
+                        "toc_detected",
+                        page=page_number,
+                        reason="index" if is_index_page else "toc",
+                        sample=texts[:6],
+                    )
+            for payload in page_entries.get(page_number, []):
+                payload["is_toc"] = is_toc_page
+                payload["is_index"] = is_index_page
 
     if tracer:
         tracer.ev(
             "doc_stats",
-            pages=len(pages),
+            pages=len(page_texts),
             lines=len(all_lines),
             bytes=len(document_bytes),
             excluded_pages=sorted(excluded_pages),
