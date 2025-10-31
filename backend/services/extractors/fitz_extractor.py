@@ -4,48 +4,37 @@ from typing import Dict, List
 
 import fitz
 
-from backend.config import PARSER_KEEP_BBOX, PARSER_LINE_Y_TOLERANCE
-
+from backend.config import PARSER_KEEP_BBOX
 from ._normalize import normalize_numeric_artifacts
 
 
-def _group_words_into_lines(words: list) -> List[Dict[str, object]]:
+def _lines_from_rawdict(raw: dict) -> List[Dict[str, object]]:
     lines: List[Dict[str, object]] = []
-    if not words:
-        return lines
-
-    words.sort(key=lambda w: (w[1], w[0]))
-    current_y = None
-    buffer: list = []
-
-    def flush() -> None:
-        nonlocal buffer
-        if not buffer:
-            return
-        text = " ".join(entry[4] for entry in buffer)
-        if not text.strip():
-            buffer = []
-            return
-        x0 = min(entry[0] for entry in buffer)
-        y0 = min(entry[1] for entry in buffer)
-        x1 = max(entry[2] for entry in buffer)
-        y1 = max(entry[3] for entry in buffer)
-        lines.append({"_text": text, "_bbox": (x0, y0, x1, y1)})
-        buffer = []
-
-    for word in words:
-        x0, y0, x1, y1 = word[0], word[1], word[2], word[3]
-        if current_y is None:
-            current_y = y0
-            buffer = [word]
+    for block in raw.get("blocks", []):
+        if block.get("type") != 0:
             continue
-        if abs(y0 - current_y) <= PARSER_LINE_Y_TOLERANCE:
-            buffer.append(word)
-        else:
-            flush()
-            current_y = y0
-            buffer = [word]
-    flush()
+        for line in block.get("lines", []):
+            spans = line.get("spans", [])
+            if not spans:
+                continue
+            text = "".join(span.get("text", "") for span in spans).strip()
+            if not text:
+                continue
+            size_max = max(float(span.get("size", 0.0)) for span in spans)
+            bold = any((int(span.get("flags", 0)) & 2) != 0 for span in spans)
+            x0 = min(span.get("bbox", [0.0, 0.0, 0.0, 0.0])[0] for span in spans)
+            y0 = min(span.get("bbox", [0.0, 0.0, 0.0, 0.0])[1] for span in spans)
+            x1 = max(span.get("bbox", [0.0, 0.0, 0.0, 0.0])[2] for span in spans)
+            y1 = max(span.get("bbox", [0.0, 0.0, 0.0, 0.0])[3] for span in spans)
+            lines.append(
+                {
+                    "_text": text,
+                    "_bbox": (x0, y0, x1, y1),
+                    "_size": size_max,
+                    "_bold": bold,
+                }
+            )
+    lines.sort(key=lambda entry: (entry["_bbox"][1], entry["_bbox"][0]))
     return lines
 
 
@@ -54,18 +43,20 @@ def extract_lines_fitz(pdf_path: str) -> List[Dict[str, object]]:
     global_idx = 0
     with fitz.open(pdf_path) as document:
         for page_number, page in enumerate(document, start=1):
-            words = page.get_text("words")
-            grouped = _group_words_into_lines(words)
-            for record in grouped:
-                raw_text = record["_text"]
+            raw = page.get_text("rawdict")
+            lines = _lines_from_rawdict(raw)
+            for entry in lines:
+                raw_text = entry["_text"]
                 text = normalize_numeric_artifacts(raw_text)
-                bbox = record["_bbox"] if PARSER_KEEP_BBOX else None
+                bbox = entry["_bbox"] if PARSER_KEEP_BBOX else None
                 output.append(
                     {
                         "text": text,
                         "page": page_number,
                         "global_idx": global_idx,
                         "bbox": bbox,
+                        "font_size": entry.get("_size"),
+                        "bold": bool(entry.get("_bold")),
                     }
                 )
                 global_idx += 1

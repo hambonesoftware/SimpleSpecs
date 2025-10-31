@@ -15,6 +15,8 @@ from backend.config import (
 )
 
 from ..utils.trace import HeaderTracer
+from .header_align_bp import align_headers_best
+from .headers_llm_strict import align_headers_llm_strict
 from .headers_sequential import align_headers_sequential
 
 
@@ -163,6 +165,75 @@ def locate_headers_in_lines(
     tracer: HeaderTracer | None = None,
 ) -> List[Dict]:
     strategy = os.getenv("HEADERS_ALIGN_STRATEGY", HEADERS_ALIGN_STRATEGY).strip().lower()
+
+    if strategy == "best":
+        best_headers = align_headers_best(headers, lines, tracer=tracer)
+
+        located: List[Dict] = [
+            {
+                "text": str(entry.get("title", "")),
+                "number": entry.get("number"),
+                "level": int(entry.get("level", 1)),
+                "page": int(entry.get("page", 0) or 0),
+                "line_idx": int(entry.get("line_idx", 0) or 0),
+                "global_idx": int(entry.get("global_idx", 0) or 0),
+            }
+            for entry in best_headers
+        ]
+
+        matched_numbers = {
+            str(entry.get("number"))
+            for entry in best_headers
+            if entry.get("number")
+        }
+        used_indices = {
+            int(entry.get("global_idx", 0) or 0)
+            for entry in best_headers
+        }
+
+        remaining_headers: list[Dict] = []
+        for header in headers:
+            number = (header.get("number") or "").strip()
+            if number and number in matched_numbers:
+                continue
+            remaining_headers.append(header)
+
+        if remaining_headers:
+            filtered_lines = [
+                line
+                for line in lines
+                if int(line.get("global_idx", 0) or 0) not in used_indices
+            ]
+            legacy = _locate_headers_legacy(
+                remaining_headers,
+                filtered_lines,
+                excluded_pages=excluded_pages,
+                similarity_threshold=similarity_threshold,
+                tracer=tracer,
+            )
+            located.extend(legacy)
+
+        located.sort(key=lambda item: item.get("global_idx", 0))
+        return located
+
+    if strategy == "strict":
+        resolved = align_headers_llm_strict(list(headers), list(lines), tracer=tracer)
+        located: List[Dict] = []
+        for item in resolved:
+            header = item.get("header", {})
+            line = item.get("line", {})
+            located.append(
+                {
+                    "text": str(header.get("title") or header.get("text") or ""),
+                    "number": header.get("number"),
+                    "level": int(header.get("level", 1)),
+                    "page": int(line.get("page", 0) or 0),
+                    "line_idx": int(line.get("line_index", 0) or 0),
+                    "global_idx": int(line.get("global_idx", 0) or 0),
+                }
+            )
+        located.sort(key=lambda item: item.get("global_idx", 0))
+        return located
 
     if strategy == "sequential":
         sequential_headers = align_headers_sequential(

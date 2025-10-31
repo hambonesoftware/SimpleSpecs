@@ -150,7 +150,7 @@ async def generate_headers(
     trace_requested = trace or app_config.HEADERS_TRACE_EMBED_RESPONSE
 
     align_strategy = (align or "").strip().lower()
-    if align_strategy in {"sequential", "legacy"}:
+    if align_strategy in {"best", "sequential", "legacy", "strict"}:
         os.environ["HEADERS_ALIGN_STRATEGY"] = align_strategy
 
     if settings.headers_llm_strict:
