@@ -118,6 +118,30 @@ HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK=1
 HEADERS_FINAL_MONOTONIC_GUARD=1
 ```
 
+### Hybrid extractor
+
+SimpleSpecs now extracts body lines via a hybrid engine that keeps the strict matcher unchanged while improving noisy PDFs:
+
+- Primary: **PyMuPDF** word-to-line grouping sorted by `(y, x)` reading order.
+- Fallback: **pypdfium2** whenever the document exhibits spaced-dot numbering or `1`/`I` confusables.
+- Output shape: each line is a dict `{ text, page, global_idx, bbox }` with stable ordering across the document.
+
+Control behaviour with environment variables (defaults shown):
+
+```
+PARSER_ENGINE=auto                  # choose `fitz`, `pdfium`, or `auto`
+PARSER_LINE_Y_TOLERANCE=2.0         # PyMuPDF word grouping tolerance in px
+PARSER_NOISE_SPACED_DOT_THRESH=0.18 # spaced-dot ratio to trigger pdfium fallback
+PARSER_NOISE_CONFUSABLE_1_THRESH=0.12  # confusable "I"→"1" ratio threshold
+PARSER_KEEP_BBOX=1                  # keep bounding boxes when available
+```
+
+Why it helps:
+
+- Normalises NBSPs, soft hyphens, and dotted numbering artefacts before matching.
+- Keeps strict TOC gating, after-anchor vs. last-occurrence rules, and the final monotonic guard intact.
+- Provides consistent bounding boxes so running-header suppression and downstream tools keep functioning.
+
 ### Header trace debugging
 
 Set the following flags to capture a detailed, end-to-end trace of header discovery:
