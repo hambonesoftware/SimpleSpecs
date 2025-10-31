@@ -72,7 +72,9 @@ class Settings(BaseModel):
 
     database_url: str = Field(default_factory=_database_url_default)
     upload_dir: Path = Field(
-        default_factory=lambda: Path(os.getenv("UPLOAD_DIR", "upload_objects_path"))
+        default_factory=lambda: Path(
+            os.getenv("UPLOAD_DIR", str(PROJECT_ROOT / "uploads"))
+        )
     )
     max_upload_size: int = Field(
         default_factory=lambda: int(os.getenv("MAX_UPLOAD_SIZE", str(25 * 1024 * 1024)))
@@ -84,19 +86,10 @@ class Settings(BaseModel):
             if mime.strip()
         )
     )
-    cors_allow_origins: Tuple[str, ...] = Field(
-        default_factory=lambda: tuple(
-            origin.strip()
-            for origin in os.getenv(
-                "CORS_ALLOW_ORIGINS",
-                "http://localhost:3600,http://127.0.0.1:3600",
-            ).split(",")
-            if origin.strip()
-        )
-    )
+    cors_allow_origins: Tuple[str, ...] = Field(default_factory=tuple)
     cors_allow_origin_regex: str | None = Field(default_factory=_cors_origin_regex_default)
     host: str = Field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
-    port: int = Field(default_factory=lambda: int(os.getenv("PORT", "7600")))
+    port: int = Field(default_factory=lambda: int(os.getenv("PORT", "8000")))
     log_level: str = Field(default_factory=lambda: os.getenv("LOG_LEVEL", "info"))
     parser_multi_column: bool = Field(
         default_factory=lambda: _env_flag("PARSER_MULTI_COLUMN", True)
@@ -172,7 +165,9 @@ class Settings(BaseModel):
         )
     )
     export_dir: Path = Field(
-        default_factory=lambda: Path(os.getenv("EXPORT_DIR", "exported_reports"))
+        default_factory=lambda: Path(
+            os.getenv("EXPORT_DIR", str(PROJECT_ROOT / "exports"))
+        )
     )
     export_retention_days: int = Field(
         default_factory=lambda: int(os.getenv("EXPORT_RETENTION_DAYS", "30"))

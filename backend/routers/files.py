@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
 from sqlmodel import Session
 
@@ -9,6 +11,7 @@ from ..config import Settings, get_settings
 from ..database import get_session
 from ..models import Document
 from ..services.files import delete_document, handle_upload, list_documents
+from ..paths import EXPORT_DIR, UPLOAD_DIR
 
 router = APIRouter(prefix="/api", tags=["files"])
 
@@ -31,8 +34,20 @@ async def upload_file(
 
 
 @router.get("/files", response_model=list[Document])
-async def get_files(*, session: Session = Depends(get_session)) -> list[Document]:
-    """Return the list of uploaded documents."""
+async def get_files(
+    *, session: Session = Depends(get_session), settings: Settings = Depends(get_settings)
+) -> list[Document]:
+    """Return the list of uploaded documents, tolerating missing storage paths."""
+
+    # Guarantee both legacy (settings-driven) and new defaults exist; return an empty
+    # list instead of propagating filesystem errors when the directories are missing.
+    for directory in {
+        UPLOAD_DIR,
+        EXPORT_DIR,
+        settings.upload_dir,
+        settings.export_dir,
+    }:
+        Path(directory).mkdir(parents=True, exist_ok=True)
 
     return list_documents(session=session)
 

@@ -3,31 +3,49 @@
 from __future__ import annotations
 
 import logging
-import re
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Iterable
+import re
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from .config import get_settings
 from .database import init_db
-from .routers import api_router
 from .middleware import RequestIdMiddleware, SecurityHeadersMiddleware
 from .observability import RequestMetricsMiddleware
-from .config import get_settings
+from .paths import EXPORT_DIR, FRONTEND_DIR, UPLOAD_DIR
+from .routers import (
+    compare,
+    documents,
+    files,
+    headers,
+    health,
+    observability,
+    parse,
+    specs,
+)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Initialise application state for the FastAPI app."""
-
-    init_db()
-    yield
-
-
+settings = get_settings()
 logger = logging.getLogger("uvicorn.error")
+
+cors_allow_origins = list(settings.cors_allow_origins)
+allow_credentials = True
+if "*" in cors_allow_origins:
+    cors_allow_origins = ["*"]
+    allow_credentials = False
+if not cors_allow_origins:
+    cors_allow_origins = ["http://localhost:3600", "http://127.0.0.1:3600"]
+
+_cors_origin_pattern = (
+    re.compile(settings.cors_allow_origin_regex)
+    if settings.cors_allow_origin_regex
+    else None
+)
 
 
 def _mask_api_key(value: str | None) -> str:
@@ -65,22 +83,26 @@ def _announce_openrouter_api_key(value: str | None) -> None:
     logger.info(message)
 
 
-settings = get_settings()
 _announce_openrouter_api_key(settings.openrouter_api_key)
 
-cors_allow_origins = list(settings.cors_allow_origins)
-allow_credentials = True
-if "*" in cors_allow_origins:
-    cors_allow_origins = ["*"]
-    allow_credentials = False
-if not cors_allow_origins:
-    cors_allow_origins = ["http://localhost:3600", "http://127.0.0.1:3600"]
 
-_cors_origin_pattern = (
-    re.compile(settings.cors_allow_origin_regex)
-    if settings.cors_allow_origin_regex
-    else None
-)
+def _ensure_storage_dirs() -> None:
+    """Ensure upload/export directories exist before handling requests."""
+
+    # Settings validators also create these paths, but ensure they exist even if
+    # settings are overridden in tests.
+    for path in {UPLOAD_DIR, EXPORT_DIR, settings.upload_dir, settings.export_dir}:
+        Path(path).mkdir(parents=True, exist_ok=True)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialise application state for the FastAPI app."""
+
+    init_db()
+    _ensure_storage_dirs()
+    yield
+
 
 app = FastAPI(title="SimpleSpecs", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
@@ -94,14 +116,28 @@ app.add_middleware(
 app.add_middleware(RequestIdMiddleware)
 app.add_middleware(RequestMetricsMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
-app.include_router(api_router)
+
+
+ROUTERS: Iterable = (
+    files.router,
+    documents.router,
+    headers.router,
+    health.router,
+    parse.router,
+    specs.router,
+    compare.router,
+    observability.router,
+)
+
+for router in ROUTERS:
+    app.include_router(router)
 
 
 @app.exception_handler(Exception)
 async def handle_unexpected_exception(
     request: Request, exc: Exception
 ) -> JSONResponse:
-    """Ensure unexpected exceptions return a JSON payload and preserve CORS headers."""
+    """Ensure unexpected exceptions return a JSON payload."""
 
     logger.exception(
         "Unhandled exception while processing %s %s", request.method, request.url.path
@@ -131,13 +167,13 @@ async def handle_unexpected_exception(
         headers=headers or None,
     )
 
-FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 if FRONTEND_DIR.exists():
-    app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="frontend-static")
+    app.mount(
+        "/",
+        StaticFiles(directory=str(FRONTEND_DIR), html=True),
+        name="frontend",
+    )
 
-    @app.get("/", include_in_schema=False)
-    async def serve_frontend_index() -> FileResponse:
-        """Return the compiled frontend entrypoint."""
 
-        return FileResponse(FRONTEND_DIR / "index.html")
+__all__ = ["app", "UPLOAD_DIR", "EXPORT_DIR", "FRONTEND_DIR"]
