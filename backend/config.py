@@ -39,6 +39,27 @@ HEADERS_TRACE_EMBED_RESPONSE: bool = (
 HEADERS_TRACE_DIR: str = os.getenv("HEADERS_TRACE_DIR", "backend/logs/headers")
 HEADERS_LOG_LEVEL: str = os.getenv("HEADERS_LOG_LEVEL", "DEBUG")
 
+HEADERS_ALIGN_STRATEGY: str = os.getenv("HEADERS_ALIGN_STRATEGY", "sequential")
+HEADERS_SUPPRESS_TOC: bool = os.getenv("HEADERS_SUPPRESS_TOC", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
+HEADERS_SUPPRESS_RUNNING: bool = os.getenv("HEADERS_SUPPRESS_RUNNING", "1") in (
+    "1",
+    "true",
+    "True",
+    "YES",
+    "yes",
+)
+HEADERS_NORMALIZE_CONFUSABLES: bool = os.getenv(
+    "HEADERS_NORMALIZE_CONFUSABLES", "1"
+) in ("1", "true", "True", "YES", "yes")
+HEADERS_FUZZY_THRESHOLD: int = int(os.getenv("HEADERS_FUZZY_THRESHOLD", "80"))
+HEADERS_WINDOW_PAD_LINES: int = int(os.getenv("HEADERS_WINDOW_PAD_LINES", "40"))
+
 
 def _load_environment() -> None:
     """Load environment variables from a ``.env`` file if present."""
@@ -116,6 +137,18 @@ class Settings(BaseModel):
     )
     headers_suppress_running: bool = Field(
         default_factory=lambda: _env_flag("HEADERS_SUPPRESS_RUNNING", True)
+    )
+    headers_align_strategy: str = Field(
+        default_factory=lambda: os.getenv("HEADERS_ALIGN_STRATEGY", "sequential")
+    )
+    headers_normalize_confusables: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_NORMALIZE_CONFUSABLES", True)
+    )
+    headers_fuzzy_threshold: int = Field(
+        default_factory=lambda: int(os.getenv("HEADERS_FUZZY_THRESHOLD", "80"))
+    )
+    headers_window_pad_lines: int = Field(
+        default_factory=lambda: int(os.getenv("HEADERS_WINDOW_PAD_LINES", "40"))
     )
     headers_llm_strict: bool = Field(
         default_factory=lambda: os.getenv("HEADERS_LLM_STRICT", "false").lower()
