@@ -471,38 +471,38 @@ def extract_headers_and_sections_strict(
 
     resolved = align_headers_llm_strict(llm_headers, lines_list, tracer=tracer)
 
+    index_by_global: Dict[int, int] = {
+        int(entry.get("global_idx", idx) or idx): idx
+        for idx, entry in enumerate(lines_list)
+    }
+
     located: List[Dict[str, Any]] = []
     for item in resolved:
         header = item["header"]
         line = item["line"]
         if not lines_list:
             continue
-        line_index = line.get("line_index", 0)
-        try:
-            line_index = int(line_index)
-        except Exception:
-            line_index = 0
-        if not (0 <= line_index < len(lines_list)):
-            fallback_index = next(
-                (
-                    idx
-                    for idx, original in enumerate(lines_list)
-                    if int(original.get("global_idx", idx) or idx) == line["global_idx"]
-                ),
-                None,
-            )
-            if fallback_index is not None:
-                line_index = fallback_index
+        global_idx = int(line.get("global_idx", 0))
+        line_index = index_by_global.get(global_idx)
+        if line_index is None:
+            raw_line_index = line.get("line_index", 0)
+            try:
+                raw_line_index = int(raw_line_index)
+            except Exception:
+                raw_line_index = 0
+            if 0 <= raw_line_index < len(lines_list):
+                line_index = raw_line_index
             else:
-                line_index = max(0, min(len(lines_list) - 1, line_index))
+                line_index = max(0, min(len(lines_list) - 1, raw_line_index))
+        line_entry = lines_list[line_index]
         located.append(
             {
                 "text": header.get("text", ""),
                 "number": header.get("number"),
                 "level": header.get("level"),
                 "line_index": line_index,
-                "start_global_index": line["global_idx"],
-                "start_page": line["page"],
+                "start_global_index": global_idx,
+                "start_page": int(line_entry.get("page", line.get("page", 0))),
             }
         )
 
