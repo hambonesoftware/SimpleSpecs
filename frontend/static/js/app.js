@@ -37,6 +37,8 @@ const state = {
   approvedLines: new Set(),
   specRecord: null,
   approvalLoading: false,
+  headerSearchAttempted: false,
+  specsSearchAttempted: false,
 };
 
 const elements = {
@@ -59,6 +61,7 @@ const elements = {
   reviewerInput: document.querySelector('#reviewer-name'),
   headerModeTag: document.querySelector('#header-mode-tag'),
   refreshHeaders: document.querySelector('#refresh-headers'),
+  startSpecs: document.querySelector('#start-specs'),
 };
 
 function updateHeaderModeTag(mode) {
@@ -130,6 +133,10 @@ elements.refreshHeaders?.addEventListener('click', () => {
   void refreshHeaders();
 });
 
+elements.startSpecs?.addEventListener('click', () => {
+  void runSpecsSearch();
+});
+
 elements.documentsList?.addEventListener('click', (event) => {
   const target = event.target.closest('[data-document-id]');
   if (!target) return;
@@ -198,31 +205,30 @@ async function selectDocument(documentId) {
   const documentRecord = state.documents.find((doc) => doc.id === documentId);
   setDocumentMeta(elements.documentMeta, documentRecord);
 
+  state.parse = null;
+  state.headers = null;
+  state.specs = null;
+  state.risk = null;
+  state.headerSearchAttempted = false;
+  state.specsSearchAttempted = false;
+
   if (elements.workspaceSubtitle) {
     elements.workspaceSubtitle.textContent = 'Loading analysis results…';
   }
 
-  setHeaderRefreshBusy(true);
   setPanelLoading(elements.parseContent, 'Parsing document…');
-  setPanelLoading(elements.headersContent, 'Generating outline…');
-  setPanelLoading(elements.headersRawContent, 'Fetching raw LLM response…');
-  setPanelLoading(elements.specsContent, 'Classifying specification lines…');
+  showHeaderSearchPrompt();
+  showSpecsSearchPrompt();
   setPanelLoading(elements.riskContent, 'Computing risk score…');
   updateHeaderModeTag(null);
+  setHeaderRefreshBusy(false);
+  setSpecsSearchBusy(false);
   setApprovalStatus('Loading approval status…', 'muted');
   updateApprovalUI({ busy: true });
 
   try {
-    const [
-      parseResult,
-      headersResult,
-      specsResult,
-      riskResult,
-      recordResult,
-    ] = await Promise.allSettled([
+    const [parseResult, riskResult, recordResult] = await Promise.allSettled([
       parseDocument(documentId),
-      fetchHeaders(documentId),
-      fetchSpecifications(documentId),
       compareSpecifications(documentId),
       fetchSpecRecord(documentId),
     ]);
@@ -233,40 +239,6 @@ async function selectDocument(documentId) {
     } else {
       state.parse = null;
       setPanelError(elements.parseContent, parseResult.reason?.message ?? 'Unable to parse document.');
-    }
-
-    if (headersResult.status === 'fulfilled') {
-      state.headers = headersResult.value;
-      renderHeaderRawResponse(elements.headersRawContent, state.headers?.fenced_text ?? '');
-      renderHeaderOutline(elements.headersContent, state.headers, {
-        documentId,
-        fetchSection: fetchSectionText,
-      });
-      updateHeaderModeTag(state.headers?.mode ?? null);
-      if (Array.isArray(state.headers?.messages)) {
-        state.headers.messages.forEach((message) => {
-          if (!message) {
-            return;
-          }
-          showToast(message, 'warning', 6000);
-        });
-      }
-    } else {
-      state.headers = null;
-      setPanelError(
-        elements.headersRawContent,
-        headersResult.reason?.message ?? 'Unable to load raw response.',
-      );
-      setPanelError(elements.headersContent, headersResult.reason?.message ?? 'Unable to load headers.');
-      updateHeaderModeTag(null);
-    }
-
-    if (specsResult.status === 'fulfilled') {
-      state.specs = specsResult.value;
-      renderSpecsView();
-    } else {
-      state.specs = null;
-      setPanelError(elements.specsContent, specsResult.reason?.message ?? 'Unable to classify specifications.');
     }
 
     if (riskResult.status === 'fulfilled') {
@@ -292,7 +264,6 @@ async function selectDocument(documentId) {
     if (elements.workspaceSubtitle) {
       elements.workspaceSubtitle.textContent = `Document ${documentId} ready.`;
     }
-    setHeaderRefreshBusy(false);
   }
 }
 
@@ -302,22 +273,26 @@ function setHeaderRefreshBusy(busy) {
     return;
   }
 
-  const labelFromText = (button.textContent || '').trim();
-  const defaultLabel =
-    button.dataset.defaultLabel ?? (labelFromText || 'Refresh');
-  button.dataset.defaultLabel = defaultLabel;
+  delete button.dataset.defaultLabel;
 
   if (busy) {
     button.disabled = true;
     button.dataset.loading = 'true';
-    button.textContent = 'Refreshing…';
+    button.textContent = 'Running…';
     button.setAttribute('aria-busy', 'true');
+    button.setAttribute('aria-label', 'Running header search');
     return;
   }
+
+  const defaultLabel = state.headerSearchAttempted ? 'Run again' : 'Start search';
+  const ariaLabel = state.headerSearchAttempted
+    ? 'Run the header search again'
+    : 'Start the header search';
 
   button.textContent = defaultLabel;
   delete button.dataset.loading;
   button.removeAttribute('aria-busy');
+  button.setAttribute('aria-label', ariaLabel);
   button.disabled = !state.selectedId;
 }
 
@@ -329,9 +304,10 @@ async function refreshHeaders() {
   }
 
   const previousHeaders = state.headers;
+  state.headerSearchAttempted = true;
   setHeaderRefreshBusy(true);
-  setPanelLoading(elements.headersContent, 'Refreshing outline…');
-  setPanelLoading(elements.headersRawContent, 'Refreshing raw response…');
+  setPanelLoading(elements.headersContent, 'Running header search…');
+  setPanelLoading(elements.headersRawContent, 'Fetching raw response…');
   updateHeaderModeTag(null);
 
   try {
@@ -351,9 +327,9 @@ async function refreshHeaders() {
         showToast(message, 'warning', 6000);
       });
     }
-    showToast('Header outline refreshed.');
+    showToast('Header search completed.');
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to refresh headers.';
+    const message = error instanceof Error ? error.message : 'Unable to run header search.';
     showToast(message, 'error');
     if (previousHeaders) {
       state.headers = previousHeaders;
@@ -376,7 +352,92 @@ async function refreshHeaders() {
   }
 }
 
+function showHeaderSearchPrompt() {
+  if (elements.headersContent) {
+    elements.headersContent.innerHTML =
+      '<p class="panel-status">Click "Start search" to generate the header outline.</p>';
+  }
+  if (elements.headersRawContent) {
+    elements.headersRawContent.innerHTML =
+      '<p class="panel-status">Run the header search to view the raw response.</p>';
+  }
+}
+
+function setSpecsSearchBusy(busy) {
+  const button = elements.startSpecs;
+  if (!button) {
+    return;
+  }
+
+  if (busy) {
+    button.disabled = true;
+    button.dataset.loading = 'true';
+    button.textContent = 'Running…';
+    button.setAttribute('aria-busy', 'true');
+    button.setAttribute('aria-label', 'Running specifications search');
+    return;
+  }
+
+  const defaultLabel = state.specsSearchAttempted ? 'Run again' : 'Start search';
+  const ariaLabel = state.specsSearchAttempted
+    ? 'Run the specifications search again'
+    : 'Start the specifications search';
+
+  button.textContent = defaultLabel;
+  delete button.dataset.loading;
+  button.removeAttribute('aria-busy');
+  button.setAttribute('aria-label', ariaLabel);
+  button.disabled = !state.selectedId;
+}
+
+function showSpecsSearchPrompt() {
+  if (elements.specsContent) {
+    elements.specsContent.innerHTML =
+      '<p class="panel-status">Click "Start search" to classify specification lines.</p>';
+  }
+}
+
+async function runSpecsSearch() {
+  const documentId = state.selectedId;
+  if (!documentId) {
+    showToast('Select a document first.', 'error');
+    return;
+  }
+
+  const previousSpecs = state.specs;
+  let success = false;
+  state.specsSearchAttempted = true;
+  setSpecsSearchBusy(true);
+  setPanelLoading(elements.specsContent, 'Classifying specification lines…');
+
+  try {
+    const specsResult = await fetchSpecifications(documentId);
+    state.specs = specsResult;
+    renderSpecsView();
+    showToast('Specifications search completed.');
+    success = true;
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Unable to run specifications search.';
+    showToast(message, 'error');
+    if (previousSpecs) {
+      state.specs = previousSpecs;
+      renderSpecsView();
+    } else {
+      state.specs = null;
+      setPanelError(elements.specsContent, message);
+    }
+    updateApprovalUI({ preserveStatus: true });
+  } finally {
+    setSpecsSearchBusy(false);
+    if (success) {
+      updateApprovalUI();
+    }
+  }
+}
+
 setHeaderRefreshBusy(false);
+setSpecsSearchBusy(false);
 
 function handleExport(kind) {
   const documentId = state.selectedId;
