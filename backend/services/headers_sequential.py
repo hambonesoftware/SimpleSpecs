@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from rapidfuzz.fuzz import token_set_ratio
 
@@ -19,6 +19,10 @@ from backend.config import (
     HEADERS_L1_LOOKAHEAD_CHILD_HINT,
     HEADERS_MONOTONIC_STRICT,
     HEADERS_REANCHOR_PASS,
+    HEADERS_STRICT_INVARIANTS,
+    HEADERS_TITLE_ONLY_REANCHOR,
+    HEADERS_RESCAN_PASSES,
+    HEADERS_DEDUPE_POLICY,
 )
 
 try:  # pragma: no cover - optional dependency for tracing
@@ -120,6 +124,31 @@ def detect_running_header_footer(lines: List[Line], band: int | None = None) -> 
     return {text for text, count in occurrences.items() if count >= threshold}
 
 
+def cand_score(norm_line: str, want_norm: str, has_number: bool, in_band: bool) -> int:
+    """Return a composite score favouring numeric matches and penalising band hits."""
+
+    score = token_set_ratio(norm_line, want_norm)
+    if has_number:
+        score += 20
+    if in_band:
+        score -= 15
+    return score
+
+
+def number_key(num: str) -> List[int]:
+    return [int(x) for x in num.split(".")]
+
+
+def is_ineligible_runner_or_toc(
+    ln: Line, norm_text: str, toc_pages: Set[int], runners: Set[str]
+) -> bool:
+    if ln.page in toc_pages:
+        return True
+    if norm_text in runners:
+        return True
+    return False
+
+
 def make_header_items(llm_headers: Iterable[Dict]) -> List[HeaderItem]:
     items: List[HeaderItem] = []
     for header in llm_headers:
@@ -146,6 +175,10 @@ def page_positions(lines: List[Line]) -> Dict[int, Dict[int, int]]:
         ordered = sorted(page_lines, key=lambda line: line.global_idx)
         mapping[page] = {line.global_idx: idx for idx, line in enumerate(ordered)}
     return mapping
+
+
+def within(value: int, start: int, end: int) -> bool:
+    return start <= value < end
 
 
 def in_page_band(ln: Line, pos_map: Dict[int, Dict[int, int]], band: int) -> bool:
@@ -449,6 +482,285 @@ def find_in_window(
     return None
 
 
+def convert_windows_to_global(
+    lines: List[Line],
+    windows: Dict[str, Tuple[int, int, int]],
+) -> Dict[str, Tuple[int, int, int]]:
+    if not lines:
+        return {}
+
+    last_gid = lines[-1].global_idx
+    out: Dict[str, Tuple[int, int, int]] = {}
+    for num, (anchor_idx, start_idx, end_idx) in windows.items():
+        anchor_line = lines[anchor_idx] if 0 <= anchor_idx < len(lines) else None
+        start_line = lines[start_idx] if 0 <= start_idx < len(lines) else anchor_line
+        if end_idx <= 0:
+            end_gid = last_gid + 1
+        else:
+            end_pos = min(len(lines) - 1, max(0, end_idx - 1))
+            end_gid = lines[end_pos].global_idx + 1
+        anchor_gid = (
+            anchor_line.global_idx
+            if anchor_line is not None
+            else start_line.global_idx if start_line is not None else 0
+        )
+        start_gid = (
+            start_line.global_idx
+            if start_line is not None
+            else anchor_gid
+        )
+        out[num] = (anchor_gid, start_gid, end_gid)
+    return out
+
+
+def compute_windows_from_anchors_and_children(
+    lines: List[Line],
+    anchors: Dict[str, int],
+    llm_items: List[HeaderItem],
+) -> Dict[str, Tuple[int, int, int]]:
+    """Return evidence-based windows using resolved anchors and earliest children."""
+
+    if not lines or not anchors:
+        return {}
+
+    l1s = sorted([h for h in llm_items if h.level == 1], key=lambda h: number_key(h.num))
+    children_by_parent: Dict[str, List[int]] = {}
+    for h in llm_items:
+        if h.level >= 2 and h.num in anchors:
+            parent = ".".join(h.num.split(".")[:-1])
+            children_by_parent.setdefault(parent, []).append(anchors[h.num])
+
+    ordered: List[Tuple[str, int]] = []
+    for header in l1s:
+        anchor_idx = anchors.get(header.num)
+        earliest_child = min(children_by_parent.get(header.num, []), default=None)
+        start_idx = anchor_idx if anchor_idx is not None else earliest_child
+        if (
+            anchor_idx is not None
+            and earliest_child is not None
+            and anchor_idx > earliest_child
+        ):
+            start_idx = earliest_child
+        if start_idx is not None:
+            ordered.append((header.num, start_idx))
+
+    ordered.sort(key=lambda item: item[1])
+    if not ordered:
+        return {}
+
+    last_idx = lines[-1].global_idx if lines else 0
+    windows: Dict[str, Tuple[int, int, int]] = {}
+    for pos, (num, start) in enumerate(ordered):
+        end = last_idx + 1
+        if pos + 1 < len(ordered):
+            end = ordered[pos + 1][1]
+        anchor_val = anchors.get(num, start)
+        windows[num] = (anchor_val, start, end)
+    return windows
+
+
+def enforce_invariants_and_autofix(
+    lines: List[Line],
+    llm_items: List[HeaderItem],
+    anchors: Dict[str, int],
+    windows: Dict[str, Tuple[int, int, int]],
+    *,
+    confusables: bool,
+    runners: Set[str],
+    toc_pages: Set[int],
+    tracer: Optional[HeaderTracer],
+    fuzzy_threshold: int,
+) -> Dict[str, int]:
+    """Enforce parent/child invariants and relocate anchors when needed."""
+
+    if not HEADERS_STRICT_INVARIANTS:
+        return anchors
+
+    items_by_num = {item.num: item for item in llm_items}
+    lines_by_idx = {line.global_idx: line for line in lines}
+    pos = anchors.copy()
+    pos_map = page_positions(lines)
+
+    def reanchor_parent_title_only(parent_num: str, earliest_child_idx: int) -> bool:
+        parent_item = items_by_num.get(parent_num)
+        if parent_item is None:
+            return False
+        want_norm = normalize(
+            f"{parent_item.num} {parent_item.title}", confusables=confusables
+        )
+        number_regex = compile_number_regex(parent_item.num)
+        start_scan = max(0, earliest_child_idx - 800)
+        best: Optional[Tuple[int, int, bool]] = None
+        for line in lines:
+            if line.global_idx >= earliest_child_idx or line.global_idx < start_scan:
+                continue
+            norm_text = normalize(line.text, confusables=confusables)
+            if is_ineligible_runner_or_toc(line, norm_text, toc_pages, runners):
+                continue
+            has_num = bool(number_regex.search(norm_text))
+            if not has_num and not HEADERS_TITLE_ONLY_REANCHOR:
+                continue
+            score = cand_score(
+                norm_text,
+                want_norm,
+                has_number=has_num,
+                in_band=in_page_band(line, pos_map, HEADERS_BAND_LINES),
+            )
+            if score >= max(fuzzy_threshold, 70):
+                candidate = (score, line.global_idx, has_num)
+                if best is None or candidate > best:
+                    best = candidate
+        if best is not None:
+            pos[parent_num] = best[1]
+            if tracer:
+                tracer.ev(
+                    "reanchor_parent",
+                    num=parent_num,
+                    to_idx=best[1],
+                    mode="numeric" if best[2] else "title-only",
+                )
+            return True
+        pos[parent_num] = earliest_child_idx
+        if tracer:
+            tracer.ev(
+                "reanchor_parent_implied", num=parent_num, to_idx=earliest_child_idx
+            )
+        return True
+
+    def parent_children_map() -> Dict[str, List[str]]:
+        mapping: Dict[str, List[str]] = {}
+        for item in llm_items:
+            if item.level >= 2:
+                parent = ".".join(item.num.split(".")[:-1])
+                mapping.setdefault(parent, []).append(item.num)
+        return mapping
+
+    def dedupe_within_windows() -> None:
+        for parent_num, (_, window_start, window_end) in windows.items():
+            bucket: Dict[str, List[int]] = {}
+            for num, idx in pos.items():
+                if not within(idx, window_start, window_end):
+                    continue
+                if num == parent_num or num.startswith(parent_num + "."):
+                    bucket.setdefault(num, []).append(idx)
+            for num, indices in bucket.items():
+                if len(indices) <= 1:
+                    continue
+                chosen_idx = None
+                if HEADERS_DEDUPE_POLICY == "earliest":
+                    chosen_idx = min(indices)
+                else:
+                    item = items_by_num.get(num)
+                    want_norm = (
+                        normalize(
+                            f"{item.num} {item.title}", confusables=confusables
+                        )
+                        if item
+                        else ""
+                    )
+                    number_regex = compile_number_regex(num)
+                    best_score = -999
+                    for gi in sorted(indices):
+                        line = lines_by_idx.get(gi)
+                        if line is None:
+                            continue
+                        norm_text = normalize(line.text, confusables=confusables)
+                        if is_ineligible_runner_or_toc(
+                            line, norm_text, toc_pages, runners
+                        ):
+                            continue
+                        has_num = bool(number_regex.search(norm_text))
+                        score = cand_score(norm_text, want_norm, has_num, False)
+                        if score > best_score or (
+                            score == best_score and (chosen_idx is None or gi < chosen_idx)
+                        ):
+                            best_score = score
+                            chosen_idx = gi
+                if chosen_idx is None:
+                    chosen_idx = min(indices)
+                for gi in indices:
+                    if gi != chosen_idx and tracer:
+                        tracer.ev(
+                            "dedupe_drop",
+                            num=num,
+                            drop_idx=gi,
+                            keep_idx=chosen_idx,
+                        )
+                pos[num] = chosen_idx
+
+    for pass_idx in range(max(1, HEADERS_RESCAN_PASSES)):
+        changed = False
+        pc_map = parent_children_map()
+        for parent_num, kids in pc_map.items():
+            kid_indices = [pos[child] for child in kids if child in pos]
+            if not kid_indices:
+                continue
+            earliest_child_idx = min(kid_indices)
+            if parent_num not in pos or pos[parent_num] > earliest_child_idx:
+                if reanchor_parent_title_only(parent_num, earliest_child_idx):
+                    changed = True
+
+        computed = compute_windows_from_anchors_and_children(lines, pos, llm_items)
+        if computed:
+            windows.update(computed)
+
+        for parent_num, (_, window_start, window_end) in windows.items():
+            for num, idx in list(pos.items()):
+                if num == parent_num or not num.startswith(parent_num + "."):
+                    continue
+                if within(idx, window_start, window_end):
+                    continue
+                item = items_by_num.get(num)
+                if item is None:
+                    continue
+                number_regex = compile_number_regex(num)
+                want_norm = normalize(
+                    f"{item.num} {item.title}", confusables=confusables
+                )
+                best_idx: Optional[int] = None
+                best_score = -999
+                for line in lines:
+                    if not within(line.global_idx, window_start, window_end):
+                        continue
+                    norm_text = normalize(line.text, confusables=confusables)
+                    if is_ineligible_runner_or_toc(line, norm_text, toc_pages, runners):
+                        continue
+                    if not number_regex.search(norm_text):
+                        continue
+                    score = cand_score(
+                        norm_text,
+                        want_norm,
+                        has_number=True,
+                        in_band=in_page_band(line, pos_map, HEADERS_BAND_LINES),
+                    )
+                    if score >= fuzzy_threshold and score > best_score:
+                        best_score = score
+                        best_idx = line.global_idx
+                if best_idx is not None:
+                    if tracer:
+                        tracer.ev(
+                            "child_relocate_to_window",
+                            num=num,
+                            from_idx=idx,
+                            to_idx=best_idx,
+                            parent=parent_num,
+                        )
+                    pos[num] = best_idx
+                    changed = True
+
+        before = pos.copy()
+        dedupe_within_windows()
+        if pos != before:
+            changed = True
+
+        if tracer:
+            tracer.ev("invariants_pass", pass_id=pass_idx, changed=changed, anchors=len(pos))
+        if not changed:
+            break
+
+    return pos
+
+
 def align_headers_sequential(
     llm_headers: Iterable[Dict],
     lines_input: Iterable[Dict],
@@ -478,6 +790,7 @@ def align_headers_sequential(
     index_lookup = {line.global_idx: idx for idx, line in enumerate(lines)}
 
     items = make_header_items(llm_headers)
+    items_by_num = {item.num: item for item in items}
     if tracer:
         tracer.ev("sequential_start", items=len(items), lines=len(lines))
 
@@ -591,7 +904,7 @@ def align_headers_sequential(
             earliest_child_global = min(child_positions)
             if parent_idx_global <= earliest_child_global:
                 continue
-            parent_item = next((itm for itm in items if itm.num == parent), None)
+            parent_item = items_by_num.get(parent)
             if parent_item is None:
                 continue
             want_title_norm = normalize(
@@ -619,18 +932,6 @@ def align_headers_sequential(
             if new_idx is not None:
                 new_line = lines[new_idx]
                 anchors[parent] = new_line.global_idx
-                for pos, (gidx, payload) in enumerate(results):
-                    if payload.get("number") == parent:
-                        results[pos] = (
-                            new_line.global_idx,
-                            {
-                                **payload,
-                                "global_idx": new_line.global_idx,
-                                "page": new_line.page,
-                                "line_idx": new_line.line_idx,
-                            },
-                        )
-                        break
                 if tracer:
                     tracer.ev(
                         "reanchor_parent",
@@ -641,7 +942,39 @@ def align_headers_sequential(
         if tracer:
             tracer.ev("reanchor_pass_end")
 
-    results.sort(key=lambda item: item[0])
+    base_windows = compute_windows_from_anchors_and_children(lines, anchors, items)
+    if not base_windows:
+        base_windows = convert_windows_to_global(lines, windows)
+
+    anchors = enforce_invariants_and_autofix(
+        lines=lines,
+        llm_items=items,
+        anchors=anchors,
+        windows=base_windows,
+        confusables=confusables,
+        runners=runners,
+        toc_pages=toc_pages,
+        tracer=tracer,
+        fuzzy_threshold=threshold,
+    )
+
+    line_by_gid = {line.global_idx: line for line in lines}
+    results = []
+    for num, gid in anchors.items():
+        line = line_by_gid.get(gid)
+        item = items_by_num.get(num)
+        level = item.level if item else num.count(".") + 1
+        entry = {
+            "number": num,
+            "title": item.title if item else "",
+            "level": level,
+            "global_idx": gid,
+            "page": line.page if line else None,
+            "line_idx": line.line_idx if line else None,
+        }
+        results.append((gid, entry))
+
+    results.sort(key=lambda item: (item[0], item[1]["number"]))
     ordered = [payload for _, payload in results]
     if tracer:
         tracer.ev("sequential_end", resolved=len(ordered))

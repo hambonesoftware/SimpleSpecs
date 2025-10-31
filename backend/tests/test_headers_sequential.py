@@ -96,3 +96,48 @@ def test_l1_numeric_precedes_children(
     positions = {entry["number"]: idx for idx, entry in enumerate(out)}
     if "1" in positions and "1.1" in positions:
         assert positions["1"] < positions["1.1"]
+
+
+def test_invariants_parent_before_children(
+    sample_llm_headers: list[dict[str, str]], sample_lines: list[dict[str, object]]
+) -> None:
+    out = align_headers_sequential(
+        sample_llm_headers,
+        sample_lines,
+        confusables=True,
+        threshold=78,
+        window_pad=40,
+        tracer=None,
+    )
+
+    positions = {entry["number"]: idx for idx, entry in enumerate(out)}
+    for number in positions:
+        if "." not in number:
+            continue
+        parent = ".".join(number.split(".")[:-1])
+        if parent in positions:
+            assert positions[parent] < positions[number]
+
+
+def test_no_duplicate_numbers_within_parent(
+    sample_llm_headers: list[dict[str, str]], sample_lines: list[dict[str, object]]
+) -> None:
+    out = align_headers_sequential(
+        sample_llm_headers,
+        sample_lines,
+        confusables=True,
+        threshold=78,
+        window_pad=40,
+        tracer=None,
+    )
+
+    from collections import defaultdict
+
+    by_parent: dict[str, list[str]] = defaultdict(list)
+    for header in out:
+        number = header["number"]
+        parent = ".".join(number.split(".")[:-1]) if "." in number else number
+        by_parent[parent].append(number)
+
+    for numbers in by_parent.values():
+        assert len(numbers) == len(set(numbers))

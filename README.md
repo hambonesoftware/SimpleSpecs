@@ -55,7 +55,7 @@ HEADERS_SUPPRESS_RUNNING=1        # filter repeated running headers/footers
 HEADERS_NORMALIZE_CONFUSABLES=1   # normalise numeric lookalikes (I/l → 1)
 HEADERS_FUZZY_THRESHOLD=80        # token-set similarity for title matching
 HEADERS_WINDOW_PAD_LINES=40       # expand parent search windows by ±N lines
-HEADERS_BAND_LINES=3              # top/bottom lines per page considered a running band
+HEADERS_BAND_LINES=5              # top/bottom lines per page considered a running band
 HEADERS_L1_REQUIRE_NUMERIC=1      # insist on numeric prefixes for L1 anchors before fallback
 HEADERS_L1_LOOKAHEAD_CHILD_HINT=30  # scan ahead for 1.1-style hints when ranking anchors
 HEADERS_MONOTONIC_STRICT=1        # enforce forward-only anchoring with duplicate retries
@@ -75,6 +75,22 @@ Enable tracing to inspect the sequential decisions end-to-end:
 HEADERS_ALIGN_STRATEGY=sequential HEADERS_TRACE=1 \
 curl -X POST "http://localhost:8000/api/headers/{document_id}?align=sequential&trace=1"
 ```
+
+#### Bullet-proof sequential invariants
+
+For the most robust experience enable the invariant sweep (defaults shown):
+
+```
+HEADERS_ALIGN_STRATEGY=sequential
+HEADERS_STRICT_INVARIANTS=1
+HEADERS_TITLE_ONLY_REANCHOR=1
+HEADERS_BAND_LINES=5
+HEADERS_RESCAN_PASSES=2
+HEADERS_DEDUPE_POLICY=best
+```
+
+When tracing (`?trace=1`) the sequential tracer records the corrective steps taken during the invariant loop, including
+`reanchor_parent`, `reanchor_parent_implied`, `child_relocate_to_window`, `dedupe_drop`, and per-pass `invariants_pass` summaries.
 
 Clients can override the active strategy per request with `POST /api/headers/{document_id}?align=sequential` (or `align=legacy`). When tracing is enabled the sequential locator emits events such as `anchor_candidate_top`, `window_top`, and `anchor_resolved_child` to aid debugging.
 
