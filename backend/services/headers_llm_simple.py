@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 
 from ..config import Settings
 from ..services import openrouter_client
@@ -15,16 +15,12 @@ from .lines import get_fulltext
 PROMPT_PATH = Path(__file__).resolve().parent / "prompts" / "headers_simple.txt"
 
 
-class InvalidLLMJSONError(RuntimeError):
-    """Raised when the LLM returns malformed JSON."""
-
-
 def _load_prompt() -> str:
     try:
         return PROMPT_PATH.read_text(encoding="utf-8")
     except FileNotFoundError as exc:  # pragma: no cover - packaging error
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail="LLM prompt template missing",
         ) from exc
 
@@ -39,6 +35,10 @@ def _chunk_document(fulltext: str, max_tokens: int) -> List[str]:
     ] or [fulltext]
 
 
+class InvalidLLMJSONError(RuntimeError):
+    """Raised when the LLM returns malformed JSON."""
+
+
 def _write_log(log_path: Path, payload: str | Dict[str, Any]) -> None:
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with log_path.open("w", encoding="utf-8") as handle:
@@ -49,49 +49,45 @@ def _write_log(log_path: Path, payload: str | Dict[str, Any]) -> None:
             handle.write("\n")
 
 
-def _normalise_headers(
-    raw: Dict[str, Any],
-    *,
-    strict: bool,
-) -> Dict[str, List[Dict[str, Any]]]:
-    headers_value = raw.get("headers") if isinstance(raw, dict) else None
+def _normalise_headers(raw: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+    if not isinstance(raw, dict):
+        raise InvalidLLMJSONError
+
+    headers_value = raw.get("headers")
     if not isinstance(headers_value, list):
-        if strict:
-            raise InvalidLLMJSONError
-        return {"headers": []}
+        raise InvalidLLMJSONError
 
     cleaned: List[Dict[str, Any]] = []
-    seen: set[tuple[str, int]] = set()
-
     for item in headers_value:
         if not isinstance(item, dict):
-            if strict:
-                raise InvalidLLMJSONError
-            continue
+            raise InvalidLLMJSONError
         title = item.get("title")
         level = item.get("level")
         page = item.get("page")
         if not isinstance(title, str):
-            if strict:
-                raise InvalidLLMJSONError
-            continue
+            raise InvalidLLMJSONError
         try:
             level_int = int(level)
             page_int = int(page)
         except (TypeError, ValueError):
-            if strict:
-                raise InvalidLLMJSONError
-            continue
-        key = (title, level_int)
-        if key in seen:
-            continue
-        seen.add(key)
+            raise InvalidLLMJSONError
         cleaned.append({"title": title, "level": level_int, "page": page_int})
 
-    if strict and not cleaned:
-        raise InvalidLLMJSONError
-
     return {"headers": cleaned}
+
+
+def _strip_fences(payload: str) -> str:
+    text = payload.strip()
+    if text.startswith("```"):
+        text = text[3:]
+        stripped = text.lstrip()
+        if stripped.lower().startswith("json"):
+            text = stripped[4:]
+        else:
+            text = stripped
+        if text.endswith("```"):
+            text = text[: -3]
+    return text.strip()
 
 
 def get_headers_llm_json(
@@ -122,26 +118,29 @@ def get_headers_llm_json(
         )
     except openrouter_client.OpenRouterError as exc:  # pragma: no cover - network failure
         raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
+            status_code=502,
             detail="openrouter_error",
         ) from exc
 
     log_path = settings.headers_log_dir / f"headers_{document_id}_llm.json"
 
     try:
-        parsed = json.loads(response_text)
+        parsed = json.loads(_strip_fences(response_text))
     except json.JSONDecodeError:
         _write_log(log_path, response_text)
         if settings.headers_llm_strict:
             raise InvalidLLMJSONError
         return {"headers": []}
 
-    _write_log(log_path, parsed)
-
     try:
-        normalised = _normalise_headers(parsed, strict=settings.headers_llm_strict)
+        normalised = _normalise_headers(parsed)
     except InvalidLLMJSONError:
-        raise
+        _write_log(log_path, response_text)
+        if settings.headers_llm_strict:
+            raise
+        return {"headers": []}
+
+    _write_log(log_path, normalised)
 
     return normalised
 

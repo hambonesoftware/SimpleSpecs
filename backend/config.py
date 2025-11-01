@@ -327,6 +327,20 @@ class Settings(BaseModel):
             os.getenv("HEADERS_LOG_DIR", "backend/logs")
         )
     )
+    headers_match_page_band: int = Field(
+        default_factory=lambda: int(os.getenv("HEADERS_MATCH_PAGE_BAND", "2"))
+    )
+    headers_match_min_title_len: int = Field(
+        default_factory=lambda: int(os.getenv("HEADERS_MATCH_MIN_TITLE_LEN", "4"))
+    )
+    headers_match_enable_offset_calibration: bool = Field(
+        default_factory=lambda: _env_flag(
+            "HEADERS_MATCH_ENABLE_OFFSET_CALIBRATION", True
+        )
+    )
+    headers_match_offset_seed_min: int = Field(
+        default_factory=lambda: int(os.getenv("HEADERS_MATCH_OFFSET_SEED_MIN", "3"))
+    )
     header_locate_use_embeddings: bool = Field(
         default_factory=lambda: _env_flag("HEADER_LOCATE_USE_EMBEDDINGS", False)
     )
