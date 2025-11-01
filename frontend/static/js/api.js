@@ -11,6 +11,32 @@ function normaliseBase(value) {
     return "";
   }
 
+  if (trimmed.startsWith(":")) {
+    // Allow port-only overrides (e.g. ":7600") by inferring the current host.
+    if (typeof window !== "undefined") {
+      const { protocol } = window.location;
+      let host = window.location.hostname;
+      if (!host) {
+        const locationHost = window.location.host;
+        if (locationHost.startsWith("[")) {
+          const endIndex = locationHost.indexOf("]");
+          host = endIndex >= 0 ? locationHost.slice(0, endIndex + 1) : locationHost;
+        } else {
+          host = locationHost.split(":")[0];
+        }
+      }
+
+      if (!host) {
+        host = "localhost";
+      }
+
+      const needsBrackets = host.includes(":") && !(host.startsWith("[") && host.endsWith("]"));
+      const safeHost = needsBrackets ? `[${host}]` : host;
+      return `${protocol}//${safeHost}${trimmed}`.replace(/\/+$/, "");
+    }
+    return trimmed.replace(/\/+$/, "");
+  }
+
   if (trimmed.startsWith("//")) {
     return `${window.location.protocol}${trimmed}`.replace(/\/+$/, "");
   }
