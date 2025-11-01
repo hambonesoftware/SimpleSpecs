@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -77,6 +78,7 @@ def persist_parse_result(
                 page_index=page.page_number,
                 width=page.width,
                 height=page.height,
+                is_toc=page.is_toc,
                 text_raw=text_content,
                 layout=layout,
             )
@@ -129,9 +131,94 @@ def get_cached_parse_payload(
         key=PARSE_RESULT_ARTIFACT_KEY,
         inputs=_cache_inputs_for_document(document),
     )
-    if artifact is None:
+    if artifact is not None:
+        return artifact.body
+
+    payload = _hydrate_payload_from_pages(session=session, document=document)
+    if payload is None:
         return None
-    return artifact.body
+
+    store_artifact(
+        session=session,
+        document_id=document.id,
+        artifact_type=DocumentArtifactType.PAGE_LAYOUT,
+        key=PARSE_RESULT_ARTIFACT_KEY,
+        inputs=_cache_inputs_for_document(document),
+        body=payload,
+    )
+    return payload
+
+
+def _hydrate_payload_from_pages(
+    *, session: Session, document: Document
+) -> Mapping[str, Any] | None:
+    """Reconstruct a parse payload from persisted page and table records."""
+
+    if document.id is None:
+        return None
+
+    page_statement = (
+        select(DocumentPage)
+        .where(DocumentPage.document_id == document.id)
+        .order_by(DocumentPage.page_index)
+    )
+    pages = list(session.exec(page_statement).scalars().all())
+    if not pages:
+        return None
+
+    table_statement = select(DocumentTable).where(
+        DocumentTable.document_id == document.id
+    )
+    table_rows = list(session.exec(table_statement).scalars().all())
+    tables_by_page: dict[int, list[DocumentTable]] = defaultdict(list)
+    for table in table_rows:
+        tables_by_page[table.page_index].append(table)
+
+    payload_pages: list[dict[str, Any]] = []
+    for page in pages:
+        layout_blocks: Iterable[Mapping[str, Any]] = page.layout or []
+        blocks: list[dict[str, Any]] = []
+        for block in layout_blocks:
+            bbox = block.get("bbox", (0.0, 0.0, 0.0, 0.0))
+            if isinstance(bbox, list):
+                bbox_tuple = tuple(float(value) for value in bbox)
+            else:
+                bbox_tuple = tuple(float(value) for value in bbox)
+            blocks.append(
+                {
+                    "text": block.get("text", ""),
+                    "bbox": bbox_tuple,
+                    "font": block.get("font"),
+                    "font_size": block.get("font_size"),
+                    "source": block.get("source", ""),
+                }
+            )
+
+        tables_payload = [
+            {
+                "bbox": tuple(float(value) for value in table.bbox),
+                "flavor": table.flavor,
+                "accuracy": table.accuracy,
+            }
+            for table in tables_by_page.get(page.page_index, [])
+        ]
+
+        payload_pages.append(
+            {
+                "page_number": page.page_index,
+                "width": page.width,
+                "height": page.height,
+                "blocks": blocks,
+                "tables": tables_payload,
+                "is_toc": bool(page.is_toc),
+            }
+        )
+
+    return {
+        "has_ocr": bool(document.has_ocr),
+        "used_mineru": bool(document.used_mineru),
+        "pages": payload_pages,
+    }
 
 
 def cache_parse_result(

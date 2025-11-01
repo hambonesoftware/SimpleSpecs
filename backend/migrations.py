@@ -28,8 +28,30 @@ def _ensure_document_mime_type(engine: Engine) -> None:
         connection.execute(text("ALTER TABLE document ADD COLUMN mime_type VARCHAR"))
 
 
+def _ensure_document_page_is_toc(engine: Engine) -> None:
+    """Add the ``is_toc`` flag to ``document_pages`` when absent."""
+
+    with engine.begin() as connection:
+        inspector = inspect(connection)
+        try:
+            columns = inspector.get_columns("document_pages")
+        except NoSuchTableError:
+            return
+
+        if any(column["name"] == "is_toc" for column in columns):
+            return
+
+        connection.execute(
+            text(
+                "ALTER TABLE document_pages "
+                "ADD COLUMN is_toc BOOLEAN NOT NULL DEFAULT 0"
+            )
+        )
+
+
 _MIGRATIONS: tuple[MigrationFunc, ...] = (
     _ensure_document_mime_type,
+    _ensure_document_page_is_toc,
 )
 
 
