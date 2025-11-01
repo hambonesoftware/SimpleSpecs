@@ -11,6 +11,7 @@ from .artifacts import (
     PromptResponse,
 )
 from .document import Document
+from .section import DocumentSection
 from .spec_record import SpecAuditEntry, SpecRecord
 
 __all__ = [
@@ -22,6 +23,7 @@ __all__ = [
     "DocumentFigure",
     "DocumentPage",
     "DocumentTable",
+    "DocumentSection",
     "PromptResponse",
     "SpecRecord",
     "SpecAuditEntry",

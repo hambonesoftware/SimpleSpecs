@@ -249,6 +249,16 @@ function renderSimpleHeaders(container, payload, { documentId, fetchSection } = 
   let activeIndex = -1;
   let requestToken = 0;
 
+  const formatPageRange = (section) => {
+    const startPage = Number(section?.start_page ?? 0) + 1;
+    const endPageRaw = section?.end_page ?? section?.start_page ?? 0;
+    const endPage = Number(endPageRaw) + 1;
+    if (!Number.isFinite(startPage) || !Number.isFinite(endPage)) {
+      return 'Pages unknown';
+    }
+    return startPage === endPage ? `Page ${startPage}` : `Pages ${startPage}–${endPage}`;
+  };
+
   const items = headers.map((header, index) => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -257,7 +267,10 @@ function renderSimpleHeaders(container, payload, { documentId, fetchSection } = 
     const label = header.number ? `${header.number} ${header.text}` : header.text;
     button.textContent = label;
     button.style.paddingLeft = `${Math.max(0, Number(header.level || 1) - 1) * 12}px`;
-    button.title = `Page ${Number(header.page ?? 0) + 1}`;
+    button.title = formatPageRange(sections[index]) ?? `Page ${Number(header.page ?? 0) + 1}`;
+    if (header.section_key) {
+      button.dataset.sectionKey = String(header.section_key);
+    }
     button.addEventListener('click', () => selectIndex(index));
     list.append(button);
     return button;
@@ -267,6 +280,8 @@ function renderSimpleHeaders(container, payload, { documentId, fetchSection } = 
     if (index === activeIndex) return;
     activeIndex = index;
     const section = sections[index];
+    const sectionKey = headerKeyForIndex(index);
+    const pageLabel = formatPageRange(section);
     items.forEach((item, idx) => {
       if (idx === index) {
         item.dataset.active = 'true';
@@ -284,18 +299,20 @@ function renderSimpleHeaders(container, payload, { documentId, fetchSection } = 
 
     const token = ++requestToken;
     viewer.dataset.loading = 'true';
-    viewer.textContent = 'Loading section…';
+    viewer.textContent = `Loading section…\n${pageLabel}`;
 
     try {
       const text = await fetchSection(
         documentId,
         section.start_global_idx,
         section.end_global_idx,
+        sectionKey,
       );
       if (token !== requestToken) {
         return;
       }
-      viewer.textContent = text?.trim() ? text : '(Empty section)';
+      const finalText = text?.trim() ? text : '(Empty section)';
+      viewer.textContent = `${pageLabel}\n\n${finalText}`;
     } catch (error) {
       if (token !== requestToken) {
         return;
@@ -307,6 +324,15 @@ function renderSimpleHeaders(container, payload, { documentId, fetchSection } = 
         delete viewer.dataset.loading;
       }
     }
+  }
+
+  function headerKeyForIndex(index) {
+    const header = headers[index];
+    if (header && header.section_key) {
+      return header.section_key;
+    }
+    const section = sections[index];
+    return section?.section_key ?? null;
   }
 
   wrapper.append(list, viewer);
