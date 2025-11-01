@@ -4,6 +4,7 @@ from backend.models import Document, DocumentArtifactType, DocumentPage, Documen
 from backend.services.artifact_store import (
     PARSER_VERSION,
     get_cached_artifact,
+    get_cached_parse_payload,
     persist_parse_result,
     store_artifact,
 )
@@ -57,6 +58,7 @@ def test_persist_parse_result_stores_pages_and_tables() -> None:
         stored_pages = session.exec(select(DocumentPage)).all()
         stored_tables = session.exec(select(DocumentTable)).all()
         refreshed = session.get(Document, document.id)
+        cached_payload = get_cached_parse_payload(session=session, document=document)
 
         assert len(stored_pages) == 1
         assert stored_pages[0].text_raw.strip() == "Heading"
@@ -65,6 +67,9 @@ def test_persist_parse_result_stores_pages_and_tables() -> None:
         assert refreshed.page_count == 1
         assert refreshed.has_ocr is True
         assert refreshed.parser_version == PARSER_VERSION
+        assert cached_payload is not None
+        assert cached_payload["has_ocr"] is True
+        assert cached_payload["pages"][0]["blocks"][0]["text"] == "Heading"
 
 
 def test_store_artifact_reuses_existing_entry() -> None:
