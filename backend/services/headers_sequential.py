@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import re
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Set, Tuple
@@ -10,9 +9,6 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple
 from rapidfuzz.fuzz import token_set_ratio
 
 from backend.config import (
-    HEADERS_ALIGN_HINT_STRICT,
-    HEADERS_ALIGN_PAGE_TOLERANCE,
-    HEADERS_ALIGN_USE_LLM_HINTS,
     HEADERS_SUPPRESS_TOC,
     HEADERS_SUPPRESS_RUNNING,
     HEADERS_FUZZY_THRESHOLD,
@@ -27,27 +23,12 @@ from backend.config import (
     HEADERS_TITLE_ONLY_REANCHOR,
     HEADERS_RESCAN_PASSES,
     HEADERS_DEDUPE_POLICY,
-    HEADERS_LLM_STRICT,
 )
 
 try:  # pragma: no cover - optional dependency for tracing
     from backend.utils.trace import HeaderTracer
 except Exception:  # pragma: no cover - tracing is optional in tests
     HeaderTracer = None  # type: ignore
-
-from .header_hint_gate import Hint, pick_best_in_band
-
-
-LOGGER = logging.getLogger(__name__)
-
-
-def _coerce_optional_int(value: object) -> Optional[int]:
-    try:
-        if value is None:
-            return None
-        return int(value)
-    except (TypeError, ValueError):
-        return None
 
 
 NUM_RE = re.compile(r"^\s*(?P<num>(\d+(?:\.\d+)*))\b", re.I)
@@ -78,8 +59,6 @@ class HeaderItem:
     title: str
     level: int
     tokens: tuple[str, ...] = field(default_factory=tuple)
-    page_hint: Optional[int] = None
-    line_hint: Optional[int] = None
 
 
 def normalize(value: str, confusables: bool = True) -> str:
@@ -265,16 +244,12 @@ def make_header_items(llm_headers: Iterable[Dict]) -> List[HeaderItem]:
         if not tokens:
             continue
         level = int(header.get("level") or len(tokens) or 1)
-        page_hint = _coerce_optional_int(header.get("page_hint"))
-        line_hint = _coerce_optional_int(header.get("line_hint"))
         items.append(
             HeaderItem(
                 num=str(number),
                 title=title,
                 level=level,
                 tokens=tokens,
-                page_hint=page_hint,
-                line_hint=line_hint,
             )
         )
     items.sort(key=lambda item: (number_key(item.tokens), item.level))
@@ -430,8 +405,6 @@ def build_top_level_windows(
         best_idx: Optional[int] = None
         best_score = -999
         best_reason = ""
-        scored_candidates: List[tuple[int, float, int]] = []
-        candidate_meta: Dict[int, tuple[int, str]] = {}
         passes = (1, 2) if HEADERS_L1_REQUIRE_NUMERIC else (2,)
         for pass_id in passes:
             for idx in range(cursor_idx + 1, len(lines)):
@@ -457,45 +430,12 @@ def build_top_level_windows(
                             reason="l1_before_cursor",
                         )
                     continue
-                candidate_line = lines[idx]
-                scored_candidates.append((candidate_line.page, float(score), idx))
-                prev = candidate_meta.get(idx)
-                if prev is None or score > prev[0]:
-                    candidate_meta[idx] = (score, reason)
                 if score > best_score:
                     best_score = score
                     best_idx = idx
                     best_reason = reason
             if best_idx is not None:
                 break
-
-        if HEADERS_ALIGN_USE_LLM_HINTS and scored_candidates:
-            hint = Hint(page=item.page_hint, line=item.line_hint)
-            tol = HEADERS_ALIGN_PAGE_TOLERANCE
-            strict_mode = HEADERS_ALIGN_HINT_STRICT or HEADERS_LLM_STRICT
-            chosen = pick_best_in_band(scored_candidates[:], hint, tol, strict_mode)
-            if chosen is None and strict_mode:
-                chosen = pick_best_in_band(scored_candidates[:], hint, tol + 2, True)
-                if chosen is None:
-                    LOGGER.warning(
-                        "Hint gate rejected all top-level candidates for %s (hint_page=%s)",
-                        item.num,
-                        item.page_hint,
-                    )
-            if chosen is not None:
-                best_idx = int(chosen)
-                score_reason = candidate_meta.get(best_idx)
-                if score_reason:
-                    best_score, best_reason = score_reason
-                if tracer:
-                    tracer.ev(
-                        "hint_gate_top",
-                        num=item.num,
-                        hint_page=item.page_hint,
-                        tol=tol,
-                        strict=strict_mode,
-                        chosen_idx=lines[best_idx].global_idx,
-                    )
 
         if best_idx is not None:
             chosen = lines[best_idx]
@@ -569,7 +509,6 @@ def find_in_window(
     re_num = compile_number_regex(target.num)
     want = normalize(f"{target.num} {target.title}", confusables=confusables)
     best: Optional[Tuple[int, int]] = None
-    scored_candidates: List[tuple[int, float, int]] = []
     scan_start = max(0, start_idx + 1)
     scan_end = min(len(lines), end_idx)
     for idx in range(scan_start, scan_end):
@@ -593,8 +532,12 @@ def find_in_window(
                 score=score,
                 text=line.text[:200],
             )
-        if score < threshold:
-            continue
+        if score >= threshold:
+            if best is None or score > best[0]:
+                best = (score, idx)
+    if best is not None:
+        _, idx = best
+        line = lines[idx]
         if (
             cursor_idx is not None
             and HEADERS_MONOTONIC_STRICT
@@ -608,52 +551,16 @@ def find_in_window(
                     cursor=lines[cursor_idx].global_idx,
                     reason="child_before_cursor",
                 )
-            continue
-        scored_candidates.append((line.page, float(score), idx))
-        if best is None or score > best[0]:
-            best = (score, idx)
-
-    chosen_idx: Optional[int] = None
-    strict_mode = HEADERS_ALIGN_HINT_STRICT or HEADERS_LLM_STRICT
-    tol = HEADERS_ALIGN_PAGE_TOLERANCE
-    if HEADERS_ALIGN_USE_LLM_HINTS and scored_candidates:
-        hint = Hint(page=target.page_hint, line=target.line_hint)
-        chosen = pick_best_in_band(scored_candidates[:], hint, tol, strict_mode)
-        if chosen is None and strict_mode:
-            chosen = pick_best_in_band(scored_candidates[:], hint, tol + 2, True)
-            if chosen is None:
-                LOGGER.warning(
-                    "Hint gate rejected all child candidates for %s (hint_page=%s)",
-                    target.num,
-                    target.page_hint,
-                )
-        if chosen is not None:
-            chosen_idx = int(chosen)
+        else:
             if tracer:
-                line = lines[chosen_idx]
                 tracer.ev(
-                    "hint_gate_child",
+                    "anchor_resolved_child",
                     num=target.num,
                     idx=line.global_idx,
                     page=line.page,
-                    tol=tol,
-                    strict=strict_mode,
+                    score=best[0],
                 )
-
-    if chosen_idx is None and best is not None:
-        chosen_idx = best[1]
-
-    if chosen_idx is not None:
-        line = lines[chosen_idx]
-        if tracer:
-            tracer.ev(
-                "anchor_resolved_child",
-                num=target.num,
-                idx=line.global_idx,
-                page=line.page,
-                score=best[0] if best else None,
-            )
-        return chosen_idx
+            return idx
 
     for idx in range(scan_start, scan_end):
         line = lines[idx]
