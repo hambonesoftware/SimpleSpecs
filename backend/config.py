@@ -20,6 +20,30 @@ def _env_flag(name: str, default: bool) -> bool:
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def env_bool(name: str, default: bool) -> bool:
+    """Return a boolean flag with a fallback to ``default`` when unset."""
+
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    value = raw.strip().lower()
+    if not value:
+        return default
+    return value in {"1", "true", "yes", "on"}
+
+
+def env_int(name: str, default: int) -> int:
+    """Return an integer parsed from the environment with ``default`` fallback."""
+
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return int(raw.strip())
+    except (TypeError, ValueError):
+        return default
+
+
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
 DEFAULT_TERMS_DIR = BASE_DIR / "resources" / "terms"
@@ -125,6 +149,22 @@ HEADERS_TITLE_ONLY_REANCHOR: bool = os.getenv("HEADERS_TITLE_ONLY_REANCHOR", "1"
 )
 HEADERS_RESCAN_PASSES: int = int(os.getenv("HEADERS_RESCAN_PASSES", "2"))
 HEADERS_DEDUPE_POLICY: str = os.getenv("HEADERS_DEDUPE_POLICY", "best")
+
+HEADERS_LLM_STRICT: bool = env_bool(
+    "HEADERS_LLM_STRICT", env_bool("headers_llm_strict", False)
+)
+HEADERS_LLM_INCLUDE_LOCATIONS: bool = env_bool(
+    "HEADERS_LLM_INCLUDE_LOCATIONS", True
+)
+HEADERS_LLM_PAGE_INDEX_BASE: int = env_int("HEADERS_LLM_PAGE_INDEX_BASE", 1)
+HEADERS_ALIGN_USE_LLM_HINTS: bool = env_bool(
+    "HEADERS_ALIGN_USE_LLM_HINTS", True
+)
+HEADERS_ALIGN_PAGE_TOLERANCE: int = env_int("HEADERS_ALIGN_PAGE_TOLERANCE", 2)
+HEADERS_ALIGN_HINT_STRICT: bool = env_bool("HEADERS_ALIGN_HINT_STRICT", False)
+
+if HEADERS_LLM_STRICT:
+    HEADERS_ALIGN_HINT_STRICT = True
 
 HEADER_LOCATE_USE_EMBEDDINGS: bool = _env_flag("HEADER_LOCATE_USE_EMBEDDINGS", False)
 HEADER_LOCATE_FUSE_WEIGHTS: tuple[float, ...] = _parse_weights(
@@ -298,9 +338,12 @@ class Settings(BaseModel):
     headers_window_pad_lines: int = Field(
         default_factory=lambda: int(os.getenv("HEADERS_WINDOW_PAD_LINES", "40"))
     )
-    headers_llm_strict: bool = Field(
-        default_factory=lambda: os.getenv("HEADERS_LLM_STRICT", "false").lower()
-        == "true"
+    headers_llm_strict: bool = Field(default_factory=lambda: HEADERS_LLM_STRICT)
+    headers_llm_include_locations: bool = Field(
+        default_factory=lambda: HEADERS_LLM_INCLUDE_LOCATIONS
+    )
+    headers_llm_page_index_base: int = Field(
+        default_factory=lambda: HEADERS_LLM_PAGE_INDEX_BASE
     )
     headers_mode: str = Field(
         default_factory=lambda: os.getenv("HEADERS_MODE", "llm_full")
@@ -341,6 +384,15 @@ class Settings(BaseModel):
     )
     header_locate_prefer_last_match: bool = Field(
         default_factory=lambda: _env_flag("HEADER_LOCATE_PREFER_LAST_MATCH", True)
+    )
+    headers_align_use_llm_hints: bool = Field(
+        default_factory=lambda: HEADERS_ALIGN_USE_LLM_HINTS
+    )
+    headers_align_page_tolerance: int = Field(
+        default_factory=lambda: HEADERS_ALIGN_PAGE_TOLERANCE
+    )
+    headers_align_hint_strict: bool = Field(
+        default_factory=lambda: HEADERS_ALIGN_HINT_STRICT
     )
     mineru_fallback: bool = Field(
         default_factory=lambda: _env_flag("MINERU_FALLBACK", False)
