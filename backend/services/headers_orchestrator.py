@@ -15,6 +15,7 @@ from backend.models import Document, DocumentArtifactType
 
 from .artifact_store import PARSER_VERSION, get_cached_artifact, store_artifact
 from .header_locator import locate_headers_in_lines
+from .headers_sequential import number_key
 from .pdf_headers_llm_full import get_headers_llm_full
 from .pdf_native import collect_line_metrics
 from .section_chunking import single_chunks_from_headers
@@ -109,6 +110,7 @@ async def extract_headers_and_chunks(
         "suppress_toc": settings.headers_suppress_toc,
         "suppress_running": settings.headers_suppress_running,
         "metadata": dict(metadata or {}),
+        "header_locator_rev": "2025-10-31-seq-source-order",
     }
 
     if session is not None and doc_id is not None:
@@ -279,6 +281,19 @@ def _enforce_header_sequence(
     if not headers:
         return [], []
 
+    def _order_key(header: Mapping[str, object]) -> tuple:
+        number = header.get("number")
+        order = number_key(str(number)) if number else [-1]
+        source_idx = int(header.get("source_idx", -1))
+        if source_idx >= 0:
+            return (
+                source_idx,
+                *order,
+                int(header.get("level", 0)),
+                int(header.get("global_idx", 0)),
+            )
+        return (*order, int(header.get("level", 0)), int(header.get("global_idx", 0)))
+
     working_headers = [
         {
             "text": str(header.get("text", "")).strip(),
@@ -287,10 +302,12 @@ def _enforce_header_sequence(
             "page": int(header.get("page") or 0),
             "line_idx": int(header.get("line_idx") or 0),
             "global_idx": int(header.get("global_idx") or 0),
+            "source_idx": int(header.get("source_idx", -1)),
         }
         for header in headers
     ]
     working_headers.sort(key=lambda item: item.get("global_idx", 0))
+    working_headers.sort(key=_order_key)
 
     sections = single_chunks_from_headers(working_headers, lines)
 
@@ -371,6 +388,12 @@ def _enforce_header_sequence(
                     reason="unresolved",
                 )
             break
+
+    working_headers.sort(key=lambda item: item.get("global_idx", 0))
+    working_headers.sort(key=_order_key)
+
+    for entry in working_headers:
+        entry.pop("source_idx", None)
 
     return working_headers, sections
 

@@ -15,11 +15,15 @@ from backend.config import (
 )
 
 from ..utils.trace import HeaderTracer
-from .headers_sequential import align_headers_sequential
+from .headers_sequential import (
+    align_headers_sequential,
+    compile_number_regex,
+    normalize,
+)
 
 
 def _normalise(text: str) -> str:
-    return re.sub(r"\s+", " ", text.strip()).lower()
+    return normalize(text, confusables=True)
 
 
 def _locate_headers_legacy(
@@ -50,6 +54,7 @@ def _locate_headers_legacy(
             continue
         number = (header.get("number") or "").strip()
         candidates: list[dict] = []
+        number_pattern = compile_number_regex(number) if number else None
         if tracer:
             pattern = rf"^\s*{re.escape(number)}" if number else None
             tracer.ev(
@@ -59,25 +64,44 @@ def _locate_headers_legacy(
                 pattern=pattern,
             )
 
+        target_tokens = [token for token in target.split() if token]
+
         for line in usable:
             text = str(line.get("text", ""))
-            if number:
-                if re.match(rf"^\s*{re.escape(number)}(?:\b|[.)\-\s])", text):
-                    candidates.append(line)
-                    if tracer:
-                        tracer.ev(
-                            "candidate_found",
-                            target=str(header.get("text", "")),
-                            page=int(line.get("page", 0)),
-                            line_idx=int(line.get("line_idx", 0)),
-                            snippet=text.strip(),
-                            score=1.0,
-                            before_prev_anchor=int(line.get("global_idx", -1))
-                            <= previous_anchor,
-                        )
-                    continue
+            norm_text = line.get("_norm", "")
+            if number_pattern and (
+                number_pattern.search(text) or number_pattern.search(norm_text)
+            ):
+                candidates.append(line)
+                if tracer:
+                    tracer.ev(
+                        "candidate_found",
+                        target=str(header.get("text", "")),
+                        page=int(line.get("page", 0)),
+                        line_idx=int(line.get("line_idx", 0)),
+                        snippet=text.strip(),
+                        score=1.0,
+                        before_prev_anchor=int(line.get("global_idx", -1))
+                        <= previous_anchor,
+                    )
+                continue
             norm = line.get("_norm", "")
             if norm == target or target in norm:
+                candidates.append(line)
+                if tracer:
+                    tracer.ev(
+                        "candidate_found",
+                        target=str(header.get("text", "")),
+                        page=int(line.get("page", 0)),
+                        line_idx=int(line.get("line_idx", 0)),
+                        snippet=text.strip(),
+                        score=1.0,
+                        before_prev_anchor=int(line.get("global_idx", -1))
+                        <= previous_anchor,
+                    )
+                continue
+
+            if target_tokens and all(token in norm for token in target_tokens):
                 candidates.append(line)
                 if tracer:
                     tracer.ev(
@@ -120,7 +144,15 @@ def _locate_headers_legacy(
                 )
             continue
 
-        best = max(candidates, key=lambda item: item.get("global_idx", -1))
+        candidates.sort(key=lambda item: item.get("global_idx", -1))
+        best = None
+        for candidate in candidates:
+            gid = int(candidate.get("global_idx", -1))
+            if gid >= previous_anchor:
+                best = candidate
+                break
+        if best is None:
+            best = candidates[-1]
         monotonic_ok = int(best.get("global_idx", -1)) >= previous_anchor
         if tracer and not monotonic_ok:
             tracer.ev(
@@ -164,15 +196,56 @@ def locate_headers_in_lines(
 ) -> List[Dict]:
     strategy = os.getenv("HEADERS_ALIGN_STRATEGY", HEADERS_ALIGN_STRATEGY).strip().lower()
 
+    index_buckets: dict[tuple[str, str], list[int]] = {}
+    for idx, header in enumerate(headers):
+        number_key = (header.get("number") or "").strip()
+        text_key = _normalise(str(header.get("text", "")))
+        index_buckets.setdefault((number_key, text_key), []).append(idx)
+
+    def _take_index(number: str | None, text: str) -> int:
+        key = ((number or "").strip(), _normalise(text))
+        bucket = index_buckets.get(key)
+        if bucket:
+            return bucket.pop(0)
+        return len(headers) + 1000
+
     if strategy == "sequential":
+        excluded = {int(page) for page in excluded_pages}
+
+        def _eligible(line: Dict) -> bool:
+            page = int(line.get("page", 0) or 0)
+            if page in excluded:
+                return False
+            if line.get("is_toc") or line.get("is_index"):
+                return False
+            return True
+
+        sequential_lines = [line for line in lines if _eligible(line)]
+
         sequential_headers = align_headers_sequential(
             headers,
-            lines,
+            sequential_lines,
             confusables=HEADERS_NORMALIZE_CONFUSABLES,
             threshold=HEADERS_FUZZY_THRESHOLD,
             window_pad=HEADERS_WINDOW_PAD_LINES,
             tracer=tracer,
         )
+
+        total_numbered = sum(1 for header in headers if (header.get("number") or "").strip())
+        coverage = (
+            len(sequential_headers) / total_numbered
+            if total_numbered
+            else 1.0
+        )
+        if coverage < 0.6:
+            if tracer:
+                tracer.ev(
+                    "fallback_triggered",
+                    method="sequential",
+                    reason="low_coverage",
+                    coverage=coverage,
+                )
+            sequential_headers = []
 
         located: List[Dict] = [
             {
@@ -185,6 +258,9 @@ def locate_headers_in_lines(
             }
             for entry in sequential_headers
         ]
+
+        for entry in located:
+            entry["source_idx"] = _take_index(entry.get("number"), entry.get("text", ""))
 
         matched_numbers = {str(entry.get("number")) for entry in sequential_headers if entry.get("number")}
         used_indices = {int(entry.get("global_idx", 0) or 0) for entry in sequential_headers}
@@ -199,7 +275,7 @@ def locate_headers_in_lines(
         if remaining_headers:
             filtered_lines = [
                 line
-                for line in lines
+                for line in sequential_lines
                 if int(line.get("global_idx", 0) or 0) not in used_indices
             ]
             legacy = _locate_headers_legacy(
@@ -209,18 +285,32 @@ def locate_headers_in_lines(
                 similarity_threshold=similarity_threshold,
                 tracer=tracer,
             )
+            for entry in legacy:
+                entry["source_idx"] = _take_index(
+                    entry.get("number"), entry.get("text", "")
+                )
             located.extend(legacy)
 
-        located.sort(key=lambda item: item.get("global_idx", 0))
+        located.sort(
+            key=lambda item: (int(item.get("source_idx", len(headers) + 1000)), item.get("global_idx", 0))
+        )
         return located
 
-    return _locate_headers_legacy(
+    legacy_only = _locate_headers_legacy(
         headers,
         lines,
         excluded_pages=excluded_pages,
         similarity_threshold=similarity_threshold,
         tracer=tracer,
     )
+
+    for entry in legacy_only:
+        entry["source_idx"] = _take_index(entry.get("number"), entry.get("text", ""))
+
+    legacy_only.sort(
+        key=lambda item: (int(item.get("source_idx", len(headers) + 1000)), item.get("global_idx", 0))
+    )
+    return legacy_only
 
 
 __all__ = ["locate_headers_in_lines"]

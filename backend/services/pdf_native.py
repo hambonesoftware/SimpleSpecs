@@ -369,13 +369,34 @@ _INDEX_ENTRY_RE = re.compile(
 
 
 def _is_toc_like(lines: list[str], page_number: int) -> bool:
-    if page_number > 4 or not lines:
+    if not lines:
         return False
-    blob = " ".join(line.lower() for line in lines)
-    if "table of contents" in blob or blob.strip().startswith("contents"):
+
+    cleaned = [line.strip() for line in lines if line.strip()]
+    if not cleaned:
+        return False
+
+    lowered = [line.lower() for line in cleaned]
+    if any(
+        entry.startswith("table of contents") or entry == "contents"
+        for entry in lowered
+    ):
         return True
-    dotted_entries = sum(1 for line in lines if re.search(r"\.{2,}\s*\d+$", line))
-    return dotted_entries >= max(4, len(lines) // 2)
+
+    dotted_entries = sum(
+        1 for line in cleaned if re.search(r"\.{2,}\s*\d+$", line)
+    )
+    dot_only = sum(1 for line in cleaned if re.fullmatch(r"\.{3,}", line))
+    threshold = max(4, len(cleaned) // 2)
+
+    if dotted_entries >= threshold:
+        return True
+    if dot_only >= 12:
+        return True
+    if dot_only >= 6 and dotted_entries >= 1:
+        return True
+
+    return False
 
 
 def _is_index_like(lines: list[str]) -> bool:
