@@ -92,7 +92,13 @@ def _ensure_storage_dirs() -> None:
 
     # Settings validators also create these paths, but ensure they exist even if
     # settings are overridden in tests.
-    for path in {UPLOAD_DIR, EXPORT_DIR, settings.upload_dir, settings.export_dir}:
+    for path in {
+        UPLOAD_DIR,
+        EXPORT_DIR,
+        settings.upload_dir,
+        settings.export_dir,
+        settings.headers_log_dir,
+    }:
         Path(path).mkdir(parents=True, exist_ok=True)
 
 

@@ -299,11 +299,10 @@ class Settings(BaseModel):
         default_factory=lambda: int(os.getenv("HEADERS_WINDOW_PAD_LINES", "40"))
     )
     headers_llm_strict: bool = Field(
-        default_factory=lambda: os.getenv("HEADERS_LLM_STRICT", "false").lower()
-        == "true"
+        default_factory=lambda: _env_flag("HEADERS_LLM_STRICT", False)
     )
     headers_mode: str = Field(
-        default_factory=lambda: os.getenv("HEADERS_MODE", "llm_full")
+        default_factory=lambda: os.getenv("HEADERS_MODE", "llm_simple")
     )
     headers_llm_model: str = Field(
         default_factory=lambda: os.getenv(
@@ -320,7 +319,12 @@ class Settings(BaseModel):
     )
     headers_llm_cache_dir: Path = Field(
         default_factory=lambda: Path(
-            os.getenv("HEADERS_LLM_CACHE_DIR", "./.cache/headers")
+            os.getenv("HEADERS_LLM_CACHE_DIR", ".cache/headers")
+        )
+    )
+    headers_log_dir: Path = Field(
+        default_factory=lambda: Path(
+            os.getenv("HEADERS_LOG_DIR", "backend/logs")
         )
     )
     header_locate_use_embeddings: bool = Field(
@@ -444,6 +448,12 @@ class Settings(BaseModel):
     @field_validator("headers_llm_cache_dir", mode="after")
     @classmethod
     def _ensure_headers_cache_dir(cls, value: Path) -> Path:
+        value.mkdir(parents=True, exist_ok=True)
+        return value
+
+    @field_validator("headers_log_dir", mode="after")
+    @classmethod
+    def _ensure_headers_log_dir(cls, value: Path) -> Path:
         value.mkdir(parents=True, exist_ok=True)
         return value
 
