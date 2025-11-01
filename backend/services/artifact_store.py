@@ -21,6 +21,7 @@ from ..models import (
 from ..services.pdf_native import ParseResult
 
 PARSER_VERSION = "2025.01"
+PARSE_RESULT_ARTIFACT_KEY = "parse-result"
 
 
 def _now() -> datetime:
@@ -102,6 +103,54 @@ def persist_parse_result(
     session.add(document)
     session.commit()
 
+    cache_parse_result(
+        session=session, document=document, parse_result=parse_result
+    )
+
+
+def _cache_inputs_for_document(document: Document) -> Mapping[str, Any]:
+    checksum = document.checksum or ""
+    doc_hash = hashlib.sha256(checksum.encode("utf-8")).hexdigest()
+    return {"doc_hash": doc_hash, "parser_version": PARSER_VERSION}
+
+
+def get_cached_parse_payload(
+    *, session: Session, document: Document
+) -> Mapping[str, Any] | None:
+    """Return a cached parse payload for the provided document if available."""
+
+    if document.id is None:
+        return None
+
+    artifact = get_cached_artifact(
+        session=session,
+        document_id=document.id,
+        artifact_type=DocumentArtifactType.PAGE_LAYOUT,
+        key=PARSE_RESULT_ARTIFACT_KEY,
+        inputs=_cache_inputs_for_document(document),
+    )
+    if artifact is None:
+        return None
+    return artifact.body
+
+
+def cache_parse_result(
+    *, session: Session, document: Document, parse_result: ParseResult
+) -> None:
+    """Store the parse result payload keyed by the document hash."""
+
+    if document.id is None:
+        raise ValueError("Document must be persisted before caching parse result")
+
+    store_artifact(
+        session=session,
+        document_id=document.id,
+        artifact_type=DocumentArtifactType.PAGE_LAYOUT,
+        key=PARSE_RESULT_ARTIFACT_KEY,
+        inputs=_cache_inputs_for_document(document),
+        body=parse_result.to_dict(),
+    )
+
 
 def get_cached_artifact(
     *,
@@ -182,7 +231,10 @@ def store_artifact(
 
 __all__ = [
     "PARSER_VERSION",
+    "PARSE_RESULT_ARTIFACT_KEY",
+    "cache_parse_result",
     "get_cached_artifact",
+    "get_cached_parse_payload",
     "persist_parse_result",
     "store_artifact",
 ]
