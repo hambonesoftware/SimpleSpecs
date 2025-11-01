@@ -2,6 +2,7 @@ import asyncio
 
 from backend.config import Settings
 from backend.services import headers_orchestrator
+from backend.services.pdf_headers_llm_full import LLMFullHeadersResult
 
 
 async def _run_extract(
@@ -35,9 +36,13 @@ async def _run_extract(
     async def _fake_llm(*args, **kwargs):  # noqa: ANN001 - test stub
         if llm_exception is not None:
             raise llm_exception
-        return [
-            {"text": "Intro", "number": "1", "level": 1},
-        ]
+        return LLMFullHeadersResult(
+            headers=[{"text": "Intro", "number": "1", "level": 1}],
+            raw_responses=["raw-response"],
+            fenced_blocks=[
+                "-----BEGIN SIMPLEHEADERS JSON-----\n{\"headers\": []}\n-----END SIMPLEHEADERS JSON-----"
+            ],
+        )
 
     def _fake_locate(headers, *_args, tracer=None, **_kwargs):  # noqa: ANN001 - test stub
         if tracer is not None:
@@ -143,6 +148,7 @@ def test_extract_headers_llm_success_has_no_messages(monkeypatch, tmp_path) -> N
 
     assert result["mode"] == "llm_full"
     assert result["messages"] == []
+    assert result["fenced_text"]
 
 
 def test_extract_headers_strict_mode(monkeypatch, tmp_path) -> None:
@@ -150,3 +156,4 @@ def test_extract_headers_strict_mode(monkeypatch, tmp_path) -> None:
 
     assert result["mode"] == "llm_strict"
     assert result["messages"] == []
+    assert result["fenced_text"]

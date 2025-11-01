@@ -6,6 +6,7 @@ import backend.config as app_config
 from backend.config import Settings
 from backend.services import headers_orchestrator
 from backend.services.headers_llm_strict import extract_headers_and_sections_strict
+from backend.services.pdf_headers_llm_full import LLMFullHeadersResult
 from backend.utils.trace import HeaderTracer
 
 
@@ -35,7 +36,13 @@ def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
         return sample_lines, set(), "hash-value"
 
     async def _fake_llm(*_args, **_kwargs):  # noqa: ANN001
-        return [{"text": "Introduction", "number": "1", "level": 1}]
+        return LLMFullHeadersResult(
+            headers=[{"text": "Introduction", "number": "1", "level": 1}],
+            raw_responses=["raw"],
+            fenced_blocks=[
+                "-----BEGIN SIMPLEHEADERS JSON-----\n{\"headers\": []}\n-----END SIMPLEHEADERS JSON-----"
+            ],
+        )
 
     monkeypatch.setattr(
         "backend.services.headers_orchestrator.collect_line_metrics", _fake_collect
@@ -112,7 +119,13 @@ def test_header_trace_summary_created_by_default(monkeypatch, tmp_path) -> None:
         return sample_lines, set(), "hash-value"
 
     async def _fake_llm(*_args, **_kwargs):  # noqa: ANN001
-        return [{"text": "Intro", "number": "1", "level": 1}]
+        return LLMFullHeadersResult(
+            headers=[{"text": "Intro", "number": "1", "level": 1}],
+            raw_responses=["raw"],
+            fenced_blocks=[
+                "-----BEGIN SIMPLEHEADERS JSON-----\n{\"headers\": []}\n-----END SIMPLEHEADERS JSON-----"
+            ],
+        )
 
     monkeypatch.setattr(
         "backend.services.headers_orchestrator.collect_line_metrics", _fake_collect
