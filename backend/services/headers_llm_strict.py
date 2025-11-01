@@ -104,7 +104,7 @@ def compile_number_regex_fuzzy(number: str) -> re.Pattern[str]:
     """Compile a regex that tolerates spacing around dot separators."""
 
     number_pat = re.escape(number).replace(r"\.", r"\s*" + DOTS + r"\s*")
-    return re.compile(r"^\s*" + number_pat + r"\b(?!\.)", re.IGNORECASE)
+    return re.compile(r"(?<![0-9A-Za-z.])" + number_pat + r"\b(?!\.)", re.IGNORECASE)
 
 
 def detect_toc_pages_strict(lines: Sequence[BodyLine]) -> set[int]:
@@ -250,6 +250,7 @@ def align_headers_llm_strict(
         number_regex = compile_number_regex_fuzzy(number) if number else None
 
         candidates: List[Tuple[int, Dict[str, Any], str, bool]] = []
+        weak_candidates: List[Tuple[int, Dict[str, Any], str, bool]] = []
         if number_regex is not None:
             for line in lines:
                 if line["blocked"] or line["page"] in toc_pages:
@@ -263,6 +264,8 @@ def align_headers_llm_strict(
                     adjusted_score = raw_score - (10 if band_flag else 0)
                     if adjusted_score >= HEADERS_STRICT_FUZZY_THRESH:
                         candidates.append((adjusted_score, line, "num+title", band_flag))
+                    elif adjusted_score > 0:
+                        weak_candidates.append((adjusted_score, line, "num+title-weak", band_flag))
 
         filtered_candidates = candidates
         if HEADERS_STRICT_AFTER_ANCHOR_ONLY and prev_idx >= 0:
@@ -272,7 +275,9 @@ def align_headers_llm_strict(
 
         chosen: Optional[Tuple[int, Dict[str, Any], str, bool]] = None
         if filtered_candidates:
-            chosen = max(filtered_candidates, key=lambda item: item[0])
+            chosen = max(
+                filtered_candidates, key=lambda item: (item[0], item[1]["global_idx"])
+            )
 
         if (
             chosen is None
@@ -281,6 +286,25 @@ def align_headers_llm_strict(
         ):
             fallback_candidate = max(candidates, key=lambda item: item[1]["global_idx"])
             chosen = (fallback_candidate[0], fallback_candidate[1], "last_occurrence", fallback_candidate[3])
+
+        if chosen is None and weak_candidates:
+            weak_filtered = weak_candidates
+            if HEADERS_STRICT_AFTER_ANCHOR_ONLY and prev_idx >= 0:
+                weak_filtered = [
+                    candidate for candidate in weak_candidates if candidate[1]["global_idx"] > prev_idx
+                ]
+            if weak_filtered:
+                chosen = max(
+                    weak_filtered, key=lambda item: (item[0], item[1]["global_idx"])
+                )
+            elif HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK:
+                fallback_candidate = max(weak_candidates, key=lambda item: item[1]["global_idx"])
+                chosen = (
+                    fallback_candidate[0],
+                    fallback_candidate[1],
+                    "num+title-weak-last",
+                    fallback_candidate[3],
+                )
 
         if chosen is None and title_norm:
             for line in lines:
@@ -296,15 +320,26 @@ def align_headers_llm_strict(
                     break
 
         if chosen is None:
-            log.debug("Header not located in body: %s", header.get("text"))
-            if tracer is not None:
-                tracer.ev(
-                    "anchor_unresolved_strict",
-                    number=number,
-                    title=title,
-                    reason="no_candidate",
-                )
-            continue
+            fallback_line = None
+            for line in lines:
+                if line["blocked"] or line["page"] in toc_pages:
+                    continue
+                if HEADERS_STRICT_AFTER_ANCHOR_ONLY and line["global_idx"] <= prev_idx:
+                    continue
+                fallback_line = line
+                break
+            if fallback_line is not None:
+                chosen = (0, fallback_line, "sequential_fallback", False)
+            else:
+                log.debug("Header not located in body: %s", header.get("text"))
+                if tracer is not None:
+                    tracer.ev(
+                        "anchor_unresolved_strict",
+                        number=number,
+                        title=title,
+                        reason="no_candidate",
+                    )
+                continue
 
         score, line, strategy, band_flag = chosen
         prev_idx = line["global_idx"]
