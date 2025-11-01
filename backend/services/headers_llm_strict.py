@@ -276,7 +276,7 @@ def align_headers_llm_strict(
         chosen: Optional[Tuple[int, Dict[str, Any], str, bool]] = None
         if filtered_candidates:
             chosen = max(
-                filtered_candidates, key=lambda item: (item[0], item[1]["global_idx"])
+                filtered_candidates, key=lambda item: (item[0], -item[1]["global_idx"])
             )
 
         if (
@@ -295,7 +295,7 @@ def align_headers_llm_strict(
                 ]
             if weak_filtered:
                 chosen = max(
-                    weak_filtered, key=lambda item: (item[0], item[1]["global_idx"])
+                    weak_filtered, key=lambda item: (item[0], -item[1]["global_idx"])
                 )
             elif HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK:
                 fallback_candidate = max(weak_candidates, key=lambda item: item[1]["global_idx"])
