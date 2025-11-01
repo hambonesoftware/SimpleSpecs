@@ -64,6 +64,27 @@ def test_single_chunks_from_headers_produces_ranges() -> None:
     assert chunks[1]["end_global_idx"] == 3
 
 
+def test_single_chunks_from_headers_avoids_overlap() -> None:
+    headers = [
+        {"text": "Overview", "number": "1", "level": 1, "global_idx": 10},
+        {"text": "Scope", "number": "1.1", "level": 2, "global_idx": 20},
+    ]
+    lines = [
+        {"global_idx": 10, "page": 0, "text": "Overview"},
+        {"global_idx": 11, "page": 0, "text": "Intro text"},
+        {"global_idx": 20, "page": 1, "text": "Scope heading"},
+        {"global_idx": 21, "page": 1, "text": "Scope body"},
+        {"global_idx": 20, "page": 1, "text": "Scope heading duplicate"},
+        {"global_idx": 22, "page": 1, "text": "More scope"},
+    ]
+
+    chunks = single_chunks_from_headers(headers, lines)
+
+    assert len(chunks) == 2
+    assert chunks[0]["end_global_idx"] == 11
+    assert chunks[1]["start_global_idx"] == 20
+
+
 def test_get_headers_llm_full_uses_cache(monkeypatch, tmp_path) -> None:
     calls = 0
 
