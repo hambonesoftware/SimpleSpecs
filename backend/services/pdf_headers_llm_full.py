@@ -5,11 +5,13 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence
 
 from backend.config import Settings
 
+from ..utils.logging import configure_logging
 from .openrouter_client import chat
 from .token_chunk import split_by_token_limit
 
@@ -17,19 +19,42 @@ FENCE_START = "-----BEGIN SIMPLEHEADERS JSON-----"
 FENCE_END = "-----END SIMPLEHEADERS JSON-----"
 
 
+LOGGER = configure_logging().getChild(__name__)
+
+
+@dataclass(slots=True)
+class LLMFullHeadersResult:
+    """Container for the full-LLM header extraction response."""
+
+    headers: List[Dict]
+    raw_responses: List[str]
+    fenced_blocks: List[str]
+
+    def combined_fenced(self) -> str:
+        """Return a single fenced block for downstream consumers."""
+
+        if self.fenced_blocks:
+            cleaned = [block.strip("\n") for block in self.fenced_blocks if block.strip()]
+            if cleaned:
+                return "\n\n".join(cleaned)
+        payload = json.dumps({"headers": self.headers}, ensure_ascii=False, indent=2)
+        return "\n".join([FENCE_START, payload, FENCE_END])
+
+
 def _cache_path(cache_dir: Path, doc_hash: str) -> Path:
     cache_dir.mkdir(parents=True, exist_ok=True)
     return cache_dir / f"{doc_hash}.simpleheaders.json"
 
 
-def _extract_fenced_json(content: str) -> Dict:
+def _extract_fenced_json(content: str) -> tuple[Dict, str]:
     match = re.search(
         re.escape(FENCE_START) + r"(.*?)" + re.escape(FENCE_END), content, re.S
     )
     if not match:
         raise ValueError("LLM response missing fenced SIMPLEHEADERS JSON")
     payload = match.group(1)
-    return json.loads(payload)
+    fenced_block = match.group(0)
+    return json.loads(payload), fenced_block
 
 
 def _build_text_blocks(
@@ -92,6 +117,8 @@ async def get_headers_llm_full(
         client_params["x_title"] = settings.openrouter_title
 
     merged: list[Dict] = []
+    raw_responses: list[str] = []
+    fenced_blocks: list[str] = []
     total_parts = len(parts)
 
     for index, part in enumerate(parts, start=1):
@@ -133,7 +160,15 @@ async def get_headers_llm_full(
                 timeout_read=settings.headers_llm_timeout_s,
             ),
         )
-        data = _extract_fenced_json(content)
+        LOGGER.info(
+            "[headers.llm_full] Raw LLM response part %s/%s:\n%s",
+            index,
+            total_parts,
+            content.strip(),
+        )
+        raw_responses.append(content)
+        data, fenced_block = _extract_fenced_json(content)
+        fenced_blocks.append(fenced_block)
         merged.extend(data.get("headers", []))
 
     deduped: list[Dict] = []
@@ -158,7 +193,16 @@ async def get_headers_llm_full(
         encoding="utf-8",
     )
 
-    return deduped
+    return LLMFullHeadersResult(
+        headers=deduped,
+        raw_responses=raw_responses,
+        fenced_blocks=fenced_blocks,
+    )
 
 
-__all__ = ["get_headers_llm_full", "FENCE_START", "FENCE_END"]
+__all__ = [
+    "LLMFullHeadersResult",
+    "get_headers_llm_full",
+    "FENCE_START",
+    "FENCE_END",
+]

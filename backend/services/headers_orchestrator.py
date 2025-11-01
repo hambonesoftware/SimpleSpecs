@@ -18,7 +18,7 @@ from .header_locate_vector import locate_headers_with_vectors
 from .header_locator import locate_headers_in_lines
 from .headers_llm_strict import align_headers_llm_strict
 from .headers_sequential import number_key
-from .pdf_headers_llm_full import get_headers_llm_full
+from .pdf_headers_llm_full import LLMFullHeadersResult, get_headers_llm_full
 from .pdf_native import collect_line_metrics
 from .section_chunking import single_chunks_from_headers
 from ..utils.logging import configure_logging
@@ -64,6 +64,7 @@ async def extract_headers_and_chunks(
 ) -> tuple[dict, HeaderTracer | None]:
     """Return located headers and section ranges for the provided document."""
 
+    trace_requested = want_trace or app_config.HEADERS_TRACE
     tracer: HeaderTracer | None = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR)
 
     start_time = time.perf_counter()
@@ -103,6 +104,7 @@ async def extract_headers_and_chunks(
     located_headers: list[dict] = []
     mode_used = "llm_full"
     messages: list[str] = []
+    fenced_text: str | None = None
 
     doc_id = document.id if document and document.id is not None else None
     cache_inputs = {
@@ -129,6 +131,7 @@ async def extract_headers_and_chunks(
             sections = list(payload.get("sections", []))
             messages = list(payload.get("messages", []))
             mode_used = payload.get("mode", "cache")
+            fenced_text = payload.get("fenced_text")
             matched_titles = {str(item.get("text", "")).strip() for item in located}
             expected_titles = [str(item.get("text", "")) for item in (native_headers or [])]
             unresolved = [
@@ -168,17 +171,19 @@ async def extract_headers_and_chunks(
                 "doc_hash": doc_hash,
                 "excluded_pages": sorted(excluded_pages),
                 "messages": messages,
+                "fenced_text": fenced_text,
             }, tracer
 
     if settings.headers_mode.lower() == "llm_full":
         try:
-            llm_headers = await get_headers_llm_full(
+            llm_result: LLMFullHeadersResult = await get_headers_llm_full(
                 lines,
                 doc_hash,
                 settings=settings,
                 excluded_pages=excluded_pages,
             )
-            llm_headers = llm_headers or []
+            llm_headers = llm_result.headers or []
+            fenced_text = llm_result.combined_fenced()
             strict_attempted = False
             vector_attempted = False
             if settings.headers_llm_strict and llm_headers:
@@ -257,6 +262,12 @@ async def extract_headers_and_chunks(
                     count=len(llm_headers),
                     headers=llm_headers,
                 )
+                if app_config.HEADERS_TRACE_EMBED_RESPONSE:
+                    tracer.ev(
+                        "llm_raw_response",
+                        parts=llm_result.raw_responses,
+                        fenced=llm_result.fenced_blocks,
+                    )
         except Exception as exc:  # pragma: no cover - network/runtime dependent
             LOGGER.warning("LLM header extraction failed: %s", exc)
             located_headers = []
@@ -298,6 +309,7 @@ async def extract_headers_and_chunks(
                 "mode": mode_used,
                 "messages": messages,
                 "doc_hash": doc_hash,
+                "fenced_text": fenced_text,
             },
         )
 
@@ -335,6 +347,7 @@ async def extract_headers_and_chunks(
         "doc_hash": doc_hash,
         "excluded_pages": sorted(excluded_pages),
         "messages": messages,
+        "fenced_text": fenced_text,
     }, tracer
 
 

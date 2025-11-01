@@ -125,16 +125,18 @@ def test_get_headers_llm_full_uses_cache(monkeypatch, tmp_path) -> None:
     ]
 
     async def _run() -> None:
-        headers = await get_headers_llm_full(
+        result = await get_headers_llm_full(
             lines,
             "hash-value",
             settings=settings,
             excluded_pages=set(),
         )
 
-        assert headers[0]["text"] == "Alpha"
+        assert result.headers[0]["text"] == "Alpha"
+        assert result.fenced_blocks
+        assert result.raw_responses
 
-        cached_headers = await get_headers_llm_full(
+        cached_result = await get_headers_llm_full(
             lines,
             "hash-value",
             settings=settings,
@@ -142,6 +144,6 @@ def test_get_headers_llm_full_uses_cache(monkeypatch, tmp_path) -> None:
         )
 
         assert calls == 1
-        assert cached_headers == headers
+        assert cached_result.headers == result.headers
 
     asyncio.run(_run())

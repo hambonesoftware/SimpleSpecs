@@ -350,6 +350,19 @@ def align_headers_llm_strict(
 
         score, line, strategy, band_flag = chosen
         prev_idx = line["global_idx"]
+        if tracer is not None:
+            tracer.ev(
+                "candidate_found",
+                number=number,
+                title=title,
+                page=line.get("page"),
+                idx=line.get("global_idx"),
+                line_index=line.get("line_index"),
+                score=score,
+                strategy=strategy,
+                band=band_flag,
+                toc_page=line.get("page") in toc_pages,
+            )
         resolved.append(
             {
                 "header": header,
