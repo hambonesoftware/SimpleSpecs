@@ -11,6 +11,7 @@ from .artifacts import (
     PromptResponse,
 )
 from .document import Document
+from .header_anchor import HeaderAnchor
 from .section import DocumentSection
 from .spec_record import SpecAuditEntry, SpecRecord
 
@@ -24,6 +25,7 @@ __all__ = [
     "DocumentPage",
     "DocumentTable",
     "DocumentSection",
+    "HeaderAnchor",
     "PromptResponse",
     "SpecRecord",
     "SpecAuditEntry",

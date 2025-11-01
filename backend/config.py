@@ -39,6 +39,23 @@ HEADERS_TRACE_EMBED_RESPONSE: bool = (
 HEADERS_TRACE_DIR: str = os.getenv("HEADERS_TRACE_DIR", "backend/logs/headers")
 HEADERS_LOG_LEVEL: str = os.getenv("HEADERS_LOG_LEVEL", "DEBUG")
 
+
+def _parse_weights(raw: str | None) -> tuple[float, ...]:
+    """Return a tuple of floats parsed from a comma-delimited string."""
+
+    if not raw:
+        return (0.55, 0.30, 0.10, 0.05)
+    parts: list[float] = []
+    for chunk in raw.split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        try:
+            parts.append(float(chunk))
+        except ValueError:
+            continue
+    return tuple(parts) if parts else (0.55, 0.30, 0.10, 0.05)
+
 HEADERS_ALIGN_STRATEGY: str = os.getenv("HEADERS_ALIGN_STRATEGY", "sequential")
 HEADERS_SUPPRESS_TOC: bool = os.getenv("HEADERS_SUPPRESS_TOC", "1") in (
     "1",
@@ -60,6 +77,9 @@ HEADERS_NORMALIZE_CONFUSABLES: bool = os.getenv(
 HEADERS_FUZZY_THRESHOLD: int = int(os.getenv("HEADERS_FUZZY_THRESHOLD", "80"))
 HEADERS_WINDOW_PAD_LINES: int = int(os.getenv("HEADERS_WINDOW_PAD_LINES", "40"))
 HEADERS_BAND_LINES: int = int(os.getenv("HEADERS_BAND_LINES", "5"))
+HEADERS_FUZZY_TITLE: int = int(os.getenv("HEADERS_FUZZY_TITLE", "80"))
+HEADERS_FUZZY_TITLE_ONLY: int = int(os.getenv("HEADERS_FUZZY_TITLE_ONLY", "78"))
+HEADERS_FUZZY_NUMTITLE: int = int(os.getenv("HEADERS_FUZZY_NUMTITLE", "82"))
 HEADERS_L1_REQUIRE_NUMERIC: bool = os.getenv("HEADERS_L1_REQUIRE_NUMERIC", "1") in (
     "1",
     "true",
@@ -84,6 +104,11 @@ HEADERS_REANCHOR_PASS: bool = os.getenv("HEADERS_REANCHOR_PASS", "1") in (
     "YES",
     "yes",
 )
+HEADERS_AFTER_ANCHOR_ONLY: bool = _env_flag("HEADERS_AFTER_ANCHOR_ONLY", True)
+HEADERS_LAST_OCCURRENCE_FALLBACK: bool = _env_flag("HEADERS_LAST_OCCURRENCE_FALLBACK", True)
+HEADERS_PENALTY_BAND: float = float(os.getenv("HEADERS_PENALTY_BAND", "0.25"))
+HEADERS_PENALTY_TOC: float = float(os.getenv("HEADERS_PENALTY_TOC", "0.45"))
+HEADERS_RUNNER_MIN_PAGES: int = int(os.getenv("HEADERS_RUNNER_MIN_PAGES", "2"))
 HEADERS_STRICT_INVARIANTS: bool = os.getenv("HEADERS_STRICT_INVARIANTS", "1") in (
     "1",
     "true",
@@ -100,6 +125,28 @@ HEADERS_TITLE_ONLY_REANCHOR: bool = os.getenv("HEADERS_TITLE_ONLY_REANCHOR", "1"
 )
 HEADERS_RESCAN_PASSES: int = int(os.getenv("HEADERS_RESCAN_PASSES", "2"))
 HEADERS_DEDUPE_POLICY: str = os.getenv("HEADERS_DEDUPE_POLICY", "best")
+
+HEADER_LOCATE_USE_EMBEDDINGS: bool = _env_flag("HEADER_LOCATE_USE_EMBEDDINGS", False)
+HEADER_LOCATE_FUSE_WEIGHTS: tuple[float, ...] = _parse_weights(
+    os.getenv("HEADER_LOCATE_FUSE_WEIGHTS")
+)
+HEADER_LOCATE_MIN_LEXICAL: float = float(os.getenv("HEADER_LOCATE_MIN_LEXICAL", "0.3"))
+HEADER_LOCATE_MIN_COSINE: float = float(os.getenv("HEADER_LOCATE_MIN_COSINE", "0.25"))
+HEADER_LOCATE_PREFER_LAST_MATCH: bool = _env_flag(
+    "HEADER_LOCATE_PREFER_LAST_MATCH", True
+)
+
+EMBEDDINGS_PROVIDER: str = os.getenv("EMBEDDINGS_PROVIDER", "local")
+EMBEDDINGS_MODEL: str = os.getenv(
+    "EMBEDDINGS_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+)
+EMBEDDINGS_CACHE_DIR: Path = Path(os.getenv("EMBEDDINGS_CACHE_DIR", ".cache/emb"))
+EMBEDDINGS_OPENROUTER_MODEL: str = os.getenv(
+    "EMBEDDINGS_OPENROUTER_MODEL", "openai/text-embedding-3-small"
+)
+EMBEDDINGS_OPENROUTER_TIMEOUT_S: int = int(
+    os.getenv("EMBEDDINGS_OPENROUTER_TIMEOUT_S", "60")
+)
 
 # Strict/LLM matcher hardening
 HEADERS_STRICT_FUZZY_THRESH: int = int(
@@ -126,6 +173,15 @@ HEADERS_STRICT_LAST_OCCURRENCE_FALLBACK: bool = os.getenv(
 HEADERS_FINAL_MONOTONIC_GUARD: bool = os.getenv(
     "HEADERS_FINAL_MONOTONIC_GUARD", "1"
 ) in ("1", "true", "True", "YES", "yes")
+HEADERS_TOC_MIN_SECTION_TOKENS: int = int(
+    os.getenv("HEADERS_TOC_MIN_SECTION_TOKENS", "6")
+)
+HEADERS_TOC_MIN_DOT_LEADERS: int = int(
+    os.getenv("HEADERS_TOC_MIN_DOT_LEADERS", "4")
+)
+HEADERS_W_FUZZY: float = float(os.getenv("HEADERS_W_FUZZY", "0.6"))
+HEADERS_W_POS: float = float(os.getenv("HEADERS_W_POS", "0.25"))
+HEADERS_W_TYPO: float = float(os.getenv("HEADERS_W_TYPO", "0.15"))
 
 # Extractor selection
 PARSER_ENGINE: str = os.getenv("PARSER_ENGINE", "auto")
@@ -267,6 +323,25 @@ class Settings(BaseModel):
             os.getenv("HEADERS_LLM_CACHE_DIR", "./.cache/headers")
         )
     )
+    header_locate_use_embeddings: bool = Field(
+        default_factory=lambda: _env_flag("HEADER_LOCATE_USE_EMBEDDINGS", False)
+    )
+    header_locate_fuse_weights: Tuple[float, float, float, float] = Field(
+        default_factory=lambda: tuple(
+            HEADER_LOCATE_FUSE_WEIGHTS[:4]
+            if len(HEADER_LOCATE_FUSE_WEIGHTS) >= 4
+            else (0.55, 0.30, 0.10, 0.05)
+        )
+    )
+    header_locate_min_lexical: float = Field(
+        default_factory=lambda: float(os.getenv("HEADER_LOCATE_MIN_LEXICAL", "0.3"))
+    )
+    header_locate_min_cosine: float = Field(
+        default_factory=lambda: float(os.getenv("HEADER_LOCATE_MIN_COSINE", "0.25"))
+    )
+    header_locate_prefer_last_match: bool = Field(
+        default_factory=lambda: _env_flag("HEADER_LOCATE_PREFER_LAST_MATCH", True)
+    )
     mineru_fallback: bool = Field(
         default_factory=lambda: _env_flag("MINERU_FALLBACK", False)
     )
@@ -311,6 +386,29 @@ class Settings(BaseModel):
     export_retention_days: int = Field(
         default_factory=lambda: int(os.getenv("EXPORT_RETENTION_DAYS", "30"))
     )
+    embeddings_provider: str = Field(
+        default_factory=lambda: os.getenv("EMBEDDINGS_PROVIDER", "local")
+    )
+    embeddings_model: str = Field(
+        default_factory=lambda: os.getenv(
+            "EMBEDDINGS_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+        )
+    )
+    embeddings_cache_dir: Path = Field(
+        default_factory=lambda: Path(
+            os.getenv("EMBEDDINGS_CACHE_DIR", ".cache/emb")
+        )
+    )
+    embeddings_openrouter_model: str = Field(
+        default_factory=lambda: os.getenv(
+            "EMBEDDINGS_OPENROUTER_MODEL", "openai/text-embedding-3-small"
+        )
+    )
+    embeddings_openrouter_timeout_s: int = Field(
+        default_factory=lambda: int(
+            os.getenv("EMBEDDINGS_OPENROUTER_TIMEOUT_S", "60")
+        )
+    )
 
     @field_validator("upload_dir", mode="after")
     @classmethod
@@ -346,6 +444,35 @@ class Settings(BaseModel):
     @field_validator("headers_llm_cache_dir", mode="after")
     @classmethod
     def _ensure_headers_cache_dir(cls, value: Path) -> Path:
+        value.mkdir(parents=True, exist_ok=True)
+        return value
+
+    @field_validator("header_locate_fuse_weights", mode="after")
+    @classmethod
+    def _normalise_fuse_weights(
+        cls, value: Tuple[float, float, float, float]
+    ) -> Tuple[float, float, float, float]:
+        weights = tuple(value)
+        if len(weights) != 4:
+            weights = (0.55, 0.30, 0.10, 0.05)
+        total = sum(weights)
+        if total <= 0:
+            return (0.55, 0.30, 0.10, 0.05)
+        return tuple(weight / total for weight in weights)
+
+    @field_validator("header_locate_min_lexical", mode="after")
+    @classmethod
+    def _clamp_lexical(cls, value: float) -> float:
+        return max(0.0, min(1.0, value))
+
+    @field_validator("header_locate_min_cosine", mode="after")
+    @classmethod
+    def _clamp_cosine(cls, value: float) -> float:
+        return max(0.0, min(1.0, value))
+
+    @field_validator("embeddings_cache_dir", mode="after")
+    @classmethod
+    def _ensure_embeddings_cache_dir(cls, value: Path) -> Path:
         value.mkdir(parents=True, exist_ok=True)
         return value
 
