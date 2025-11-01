@@ -139,6 +139,7 @@ class LLMService:
             )
             if cached.get("usage"):
                 self._log_usage(provider, base_model, cached.get("usage"), cached=True)
+            self._echo_response(cached["content"])
             return LLMResult(
                 content=cached["content"],
                 usage=cached.get("usage"),
@@ -187,6 +188,7 @@ class LLMService:
 
             self._reset_failures()
             content = response.content
+            self._echo_response(content)
             fenced_block = self._extract_fence(content, fence) if fence else None
             if fence and not fenced_block:
                 last_error = LLMProviderError("Response missing fenced output")
@@ -213,6 +215,11 @@ class LLMService:
         if last_error is None:
             last_error = LLMProviderError("Unknown LLM failure")
         raise last_error
+
+    def _echo_response(self, content: str) -> None:
+        """Print the raw LLM response content to standard output."""
+
+        print(content, flush=True)
 
     def _register_failure(self, *, trip: bool = False) -> None:
         self._failure_count += 1
