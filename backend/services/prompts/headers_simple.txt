@@ -1,16 +1,17 @@
 You are given the full text of a technical document.
 
-Return ONLY valid JSON (no preface, no markdown). Use this exact schema:
+Return ONLY valid JSON (no markdown fencing, no commentary). Use exactly:
 {
   "headers": [
-    { "title": "string (exactly as written in the document, preserve spacing/case/linebreaks if present)",
+    { "title": "string (exactly as printed in the MAIN BODY; preserve spacing and line breaks if they appear)",
       "level": 1|2|3,
       "page": integer (1-based page number) }
   ]
 }
 
 Rules:
-- Include ALL top-level headers AND their subheaders (levels 1–3).
-- Titles must match the document text EXACTLY (respect spacing and line breaks).
-- Page is where the header’s visible title appears in the main body (ignore TOC, index, running headers).
-- Do not include any other keys. Do not include commentary. Output must be a single JSON object.
+- MAIN BODY ONLY — exclude Table of Contents, Index, running headers/footers, and committee/personnel/foreword pages.
+- Titles must match the visible heading text exactly. If a heading wraps across lines, normalize whitespace only to join the visual title; otherwise preserve line breaks exactly if present.
+- Page is the page where the heading title appears in the MAIN BODY (not the TOC’s page listing).
+- Include all top-level headers and their subheaders (levels 1–3).
+- No extra keys. Return a single JSON object only.

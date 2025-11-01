@@ -1,195 +1,212 @@
-"""Utilities for aligning LLM-reported headers with parsed lines."""
+"""Exact header matcher with logging, TOC guard, and offset calibration."""
 
 from __future__ import annotations
 
 import json
+import os
 import re
-from typing import Any, Dict, Iterable, List
+from pathlib import Path
+from statistics import median
+from typing import Dict, List, Tuple
 
-from ..config import get_settings
-from .lines import Line, iter_lines
-from .headers_llm_strict import align_headers_llm_strict
-from .headers_sequential import extract_number
+from .lines import iter_lines
 
-_WHITESPACE_RE = re.compile(r"\s+")
-
-
-def _normalise(text: str) -> str:
-    """Collapse whitespace and lower-case ``text`` for fuzzy comparisons."""
-
-    return _WHITESPACE_RE.sub(" ", text).strip().casefold()
+DOT_LEADERS_RE = re.compile(r"\.{2,}\s*\d+\s*$")
 
 
-def _find_match(
-    lines: Iterable[Line],
-    normalised: List[tuple[str, Line]],
-    title: str,
-    expected_page: int,
-) -> Line | None:
-    if not title:
-        return None
+def _norm(value: str) -> str:
+    value = (value or "").strip()
+    value = value.replace("\u2013", "-").replace("\u2014", "-")
+    value = value.replace("\u2019", "'").replace("\u2018", "'")
+    value = value.replace("\u201c", '"').replace("\u201d", '"')
+    return " ".join(value.split())
 
-    def _iter_lines(prefer_page: bool) -> Iterable[Line]:
-        for line in lines:
-            if prefer_page and expected_page and int(line["page"]) != expected_page:
+
+def _equal_heading(candidate: str, target: str) -> bool:
+    return _norm(candidate) == _norm(target)
+
+
+def _build_pages(lines):
+    pages: Dict[int, List[Dict]] = {}
+    for line in lines:
+        pages.setdefault(int(line["page"]), []).append(line)
+    for page, values in pages.items():
+        values.sort(key=lambda item: int(item["line_in_page"]))
+    return pages
+
+
+def _match_on_page_exact(title: str, page_lines: List[Dict]) -> Tuple[bool, Dict | None]:
+    if "\n" not in title:
+        target = _norm(title)
+        for entry in page_lines:
+            text = entry.get("text", "")
+            if DOT_LEADERS_RE.search(text):
                 continue
-            yield line
+            if _equal_heading(text, target):
+                return True, {
+                    "found_page": int(entry.get("page", 0)),
+                    "line_in_page": int(entry.get("line_in_page", 0)),
+                    "matched_text": text,
+                }
+        return False, None
 
-    for line in _iter_lines(prefer_page=True):
-        if title in str(line["text"]):
-            return line
-    for line in _iter_lines(prefer_page=False):
-        if title in str(line["text"]):
-            return line
-
-    target = _normalise(title)
-    if not target:
-        return None
-
-    def _iter_normalised(prefer_page: bool) -> Iterable[tuple[str, Line]]:
-        for value, line in normalised:
-            if prefer_page and expected_page and int(line["page"]) != expected_page:
-                continue
-            yield value, line
-
-    for value, line in _iter_normalised(prefer_page=True):
-        if value == target:
-            return line
-    for value, line in _iter_normalised(prefer_page=False):
-        if value == target:
-            return line
-
-    return None
-
-
-def _prepare_strict_lines(lines: Iterable[Line]) -> List[Dict[str, Any]]:
-    """Return line dictionaries compatible with the strict header locator."""
-
-    prepared: List[Dict[str, Any]] = []
-    for idx, line in enumerate(lines):
-        text = str(line.get("text", ""))
-        try:
-            page = int(line.get("page", 0))
-        except (TypeError, ValueError):
-            page = 0
-        try:
-            line_in_page = int(line.get("line_in_page", 0))
-        except (TypeError, ValueError):
-            line_in_page = 0
-        prepared.append(
-            {
-                "text": text,
-                "page": page,
-                "line_in_page": line_in_page,
-                "global_idx": idx,
-                "line_idx": idx,
-                "is_toc": False,
-                "is_index": False,
-                "is_running": False,
-            }
-        )
-    return prepared
-
-
-def _prepare_strict_headers(
-    llm_headers: Iterable[Dict[str, Any]]
-) -> List[Dict[str, Any]]:
-    """Coerce LLM headers into dictionaries understood by the strict locator."""
-
-    strict_headers: List[Dict[str, Any]] = []
-    for idx, header in enumerate(llm_headers):
-        title = str(header.get("title", "")).strip()
-        if not title:
+    segments = title.split("\n")
+    segment_count = len(segments)
+    if segment_count == 0:
+        return False, None
+    total_lines = len(page_lines)
+    for start in range(0, total_lines - segment_count + 1):
+        window_lines = [page_lines[start + offset].get("text", "") for offset in range(segment_count)]
+        if not window_lines:
             continue
-        try:
-            level = int(header.get("level", 1))
-        except (TypeError, ValueError):
-            level = 1
-        number = header.get("number")
-        if isinstance(number, str):
-            number = number.strip() or None
-        else:
-            number = None
-        if number is None:
-            number = extract_number(title)
-        strict_headers.append(
-            {
-                "text": title,
-                "number": number,
-                "level": level,
-                "_orig_index": idx,
+        if DOT_LEADERS_RE.search(window_lines[0]):
+            continue
+        window = "\n".join(window_lines)
+        if _equal_heading(window, title):
+            anchor = page_lines[start]
+            return True, {
+                "found_page": int(anchor.get("page", 0)),
+                "line_in_page": int(anchor.get("line_in_page", 0)),
+                "matched_text": window,
             }
-        )
-    return strict_headers
+    return False, None
 
 
-def find_header_occurrences(
-    session,
-    document_id: int,
-    llm_headers: List[Dict],
-) -> List[Dict]:
-    """Match LLM headers to parsed lines and emit a JSONL log."""
+def _scan_order(hint_page: int | None, pages_sorted: List[int], band: int) -> List[int]:
+    seen: set[int] = set()
+    ordered: List[int] = []
+    if hint_page:
+        if hint_page in pages_sorted:
+            ordered.append(hint_page)
+            seen.add(hint_page)
+        for delta in range(1, band + 1):
+            lower = hint_page - delta
+            upper = hint_page + delta
+            if lower in pages_sorted and lower not in seen:
+                ordered.append(lower)
+                seen.add(lower)
+            if upper in pages_sorted and upper not in seen:
+                ordered.append(upper)
+                seen.add(upper)
+    for page in pages_sorted:
+        if page not in seen:
+            ordered.append(page)
+    return ordered
 
-    settings = get_settings()
-    settings.headers_log_dir.mkdir(parents=True, exist_ok=True)
+
+def find_header_occurrences(session, document_id: int, llm_headers: List[Dict]) -> List[Dict]:
+    band = int(os.getenv("HEADERS_MATCH_PAGE_BAND", "2") or 2)
+    min_len = int(os.getenv("HEADERS_MATCH_MIN_TITLE_LEN", "4") or 4)
+    use_calibration = os.getenv("HEADERS_MATCH_ENABLE_OFFSET_CALIBRATION", "1").lower() in {"1", "true", "yes", "on"}
+    calibration_seed_min = int(os.getenv("HEADERS_MATCH_OFFSET_SEED_MIN", "3") or 3)
 
     lines = list(iter_lines(session, document_id))
-    normalised = [(_normalise(str(line["text"])), line) for line in lines]
-
-    strict_mode = settings.headers_llm_strict
-    strict_lines = _prepare_strict_lines(lines) if strict_mode else []
-    strict_headers = _prepare_strict_headers(llm_headers or []) if strict_mode else []
-    resolved_by_index: Dict[int, Dict[str, Any]] = {}
-
-    if strict_mode and strict_lines and any(
-        header.get("text") for header in strict_headers
-    ):
-        resolved = align_headers_llm_strict(strict_headers, strict_lines, tracer=None)
-        for item in resolved:
-            header = item.get("header", {})
-            orig_index = header.get("_orig_index")
-            if isinstance(orig_index, int):
-                resolved_by_index[orig_index] = item
+    pages_map = _build_pages(lines)
+    pages_sorted = sorted(pages_map.keys())
 
     matches: List[Dict] = []
-    log_path = settings.headers_log_dir / f"header_matches_{document_id}.jsonl"
+    seeds: List[int] = []
+    rows_for_log: List[Dict] = []
 
-    with log_path.open("w", encoding="utf-8") as handle:
-        for index, header in enumerate(llm_headers or []):
-            title = str(header.get("title", ""))
+    for header in llm_headers:
+        title = header.get("title", "")
+        try:
+            level = int(header.get("level", 1) or 1)
+        except (TypeError, ValueError):
+            level = 1
+        try:
+            expected_page = int(header.get("page", 0) or 0)
+        except (TypeError, ValueError):
+            expected_page = 0
+
+        record = {
+            "llm_title": title,
+            "level": level,
+            "expected_page": expected_page or None,
+            "found": False,
+            "found_page": None,
+            "line_in_page": None,
+            "matched_text": None,
+            "reason": None,
+            "page_scan_range": None,
+        }
+
+        if len(_norm(title)) < min_len:
+            record["reason"] = "title_too_short"
+            rows_for_log.append(record)
+            matches.append(record)
+            continue
+
+        hint = expected_page if expected_page in pages_map else None
+        scan_order = _scan_order(hint, pages_sorted, band)
+        record["page_scan_range"] = scan_order
+
+        for page in scan_order:
+            ok, info = _match_on_page_exact(title, pages_map.get(page, []))
+            if ok and info is not None:
+                record.update(
+                    {
+                        "found": True,
+                        "found_page": info["found_page"],
+                        "line_in_page": info["line_in_page"],
+                        "matched_text": info["matched_text"],
+                    }
+                )
+                if expected_page:
+                    seeds.append(info["found_page"] - expected_page)
+                break
+
+        if not record["found"]:
+            record["reason"] = "no_exact_match_on_scanned_pages"
+
+        rows_for_log.append(record)
+        matches.append(record)
+
+    if use_calibration and len(seeds) >= calibration_seed_min:
+        offset = int(round(median(seeds)))
+        updated_rows: List[Dict] = []
+        for record, header in zip(matches, llm_headers):
+            if record["found"]:
+                updated_rows.append(record)
+                continue
+            title = header.get("title", "")
             try:
-                level = int(header.get("level", 1))
-            except (TypeError, ValueError):
-                level = 1
-            try:
-                expected_page = int(header.get("page", 0))
+                expected_page = int(header.get("page", 0) or 0)
             except (TypeError, ValueError):
                 expected_page = 0
 
-            strict_match = resolved_by_index.get(index)
-            match_line: Dict[str, Any] | None = None
-            if strict_match is not None:
-                match_line = strict_match.get("line")
-            if match_line is None:
-                match_line = _find_match(lines, normalised, title, expected_page)
+            adjusted_hint = expected_page + offset if expected_page else None
+            if adjusted_hint not in pages_map:
+                adjusted_hint = None
+            scan_order = _scan_order(adjusted_hint, pages_sorted, band)
+            record["page_scan_range"] = scan_order
 
-            result = {
-                "llm_title": title,
-                "level": level,
-                "expected_page": expected_page,
-                "found": match_line is not None,
-                "found_page": int(match_line.get("page", 0)) if match_line else None,
-                "line_in_page": (
-                    int(match_line.get("line_in_page", 0)) if match_line else None
-                ),
-                "matched_text": str(match_line.get("text", "")) if match_line else None,
-            }
+            for page in scan_order:
+                ok, info = _match_on_page_exact(title, pages_map.get(page, []))
+                if ok and info is not None:
+                    record.update(
+                        {
+                            "found": True,
+                            "found_page": info["found_page"],
+                            "line_in_page": info["line_in_page"],
+                            "matched_text": info["matched_text"],
+                            "reason": "matched_after_offset",
+                        }
+                    )
+                    break
+            if not record["found"]:
+                record["reason"] = "no_match_after_offset"
+            updated_rows.append(record)
+        rows_for_log = updated_rows
 
-            matches.append(result)
-            handle.write(json.dumps(result, ensure_ascii=False))
-            handle.write("\n")
+    log_dir = Path(os.getenv("HEADERS_LOG_DIR", "backend/logs"))
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_dir / f"header_matches_{document_id}.jsonl"
+    with log_path.open("w", encoding="utf-8") as handle:
+        for row in rows_for_log:
+            handle.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    return matches
+    return rows_for_log
 
 
-__all__ = ["find_header_occurrences"]
+__all__ = ["find_header_occurrences", "_match_on_page_exact"]

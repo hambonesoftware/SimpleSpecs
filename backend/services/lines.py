@@ -1,12 +1,11 @@
-"""Utilities for working with parsed document line metadata."""
+"""Utilities for accessing parsed document lines with reliable line numbers."""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Iterable, Iterator, TypedDict
+from typing import Dict, Iterable, Iterator, List, TypedDict
 
-from fastapi import HTTPException, status
 from sqlmodel import select
 
 from .. import models as models_pkg
@@ -14,135 +13,142 @@ from ..config import get_settings
 
 
 class Line(TypedDict):
-    """Typed representation of a parsed line of text."""
-
-    page: int
-    line_in_page: int
+    page: int           # 1-based page index
+    line_in_page: int   # 1-based line index within the page
     text: str
 
 
-def _iter_jsonl_lines(path: Path) -> Iterator[Line]:
-    """Yield line records from a JSONL export file."""
+def _coerce_line(
+    page_value,
+    line_in_page_value,
+    text_value,
+    counters: Dict[int, int],
+) -> Line:
+    try:
+        page = int(page_value)
+    except (TypeError, ValueError):
+        page = 1
+    if page <= 0:
+        page = 1
 
-    with path.open("r", encoding="utf-8") as handle:
+    text = str(text_value or "")
+
+    try:
+        line_number = int(line_in_page_value)
+    except (TypeError, ValueError):
+        counters[page] = counters.get(page, 0) + 1
+        line_number = counters[page]
+    else:
+        if line_number <= 0:
+            counters[page] = counters.get(page, 0) + 1
+            line_number = counters[page]
+        else:
+            counters[page] = max(counters.get(page, 0), line_number)
+
+    return Line(page=page, line_in_page=line_number, text=text)
+
+
+def _iter_lines_jsonl(jsonl_path: Path) -> Iterator[Line]:
+    if not jsonl_path.exists():
+        return iter(())
+
+    counters: Dict[int, int] = {}
+    with jsonl_path.open("r", encoding="utf-8") as handle:
         for raw_line in handle:
-            chunk = raw_line.strip()
-            if not chunk:
+            raw_line = raw_line.strip()
+            if not raw_line:
                 continue
             try:
-                payload = json.loads(chunk)
-            except json.JSONDecodeError as exc:  # pragma: no cover - corrupted export
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Invalid line export entry",
-                ) from exc
+                payload = json.loads(raw_line)
+            except json.JSONDecodeError:
+                continue
 
-            try:
-                page = int(payload["page"])
-                line_in_page = int(payload["line_in_page"])
-                text = str(payload.get("text", ""))
-            except (KeyError, TypeError, ValueError) as exc:  # pragma: no cover - corrupted export
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Malformed line metadata",
-                ) from exc
-
-            yield Line(page=page, line_in_page=line_in_page, text=text)
+            page = payload.get("page", 1)
+            line_in_page = payload.get("line_in_page")
+            text = payload.get("text", "")
+            yield _coerce_line(page, line_in_page, text, counters)
 
 
 def _iter_db_lines(session, document_id: int) -> Iterator[Line]:
-    """Yield lines from a database model when available."""
-
-    document_line_model = getattr(models_pkg, "DocumentLine", None)
-    if document_line_model is None or session is None:
+    model = getattr(models_pkg, "DocumentLine", None)
+    if model is None or session is None:
         return iter(())
 
     try:
         statement = (
-            select(document_line_model)
-            .where(document_line_model.document_id == document_id)
+            select(model)
+            .where(model.document_id == document_id)
             .order_by(
-                getattr(document_line_model, "page", 0),
-                getattr(document_line_model, "line_in_page", 0),
+                getattr(model, "page", getattr(model, "page_index", 0)),
+                getattr(model, "line_in_page", getattr(model, "line", 0)),
             )
         )
         rows = session.exec(statement).all()
-    except Exception:  # pragma: no cover - optional table not present
+    except Exception:
         return iter(())
 
     if not rows:
         return iter(())
 
-    def _generator() -> Iterator[Line]:
-        for row in rows:
-            page = getattr(row, "page", None)
-            if page is None:
-                page = getattr(row, "page_index", 0)
-            line_in_page = getattr(row, "line_in_page", None)
-            if line_in_page is None:
-                line_in_page = getattr(row, "line", 0)
-            text = getattr(row, "text", "")
-            yield Line(page=int(page), line_in_page=int(line_in_page), text=str(text))
-
-    return _generator()
+    counters: Dict[int, int] = {}
+    for row in rows:
+        page = getattr(row, "page", None)
+        if page is None:
+            page = getattr(row, "page_index", 1)
+        line_in_page = getattr(row, "line_in_page", None)
+        if line_in_page is None:
+            line_in_page = getattr(row, "line", None)
+        text = getattr(row, "text", "")
+        yield _coerce_line(page, line_in_page, text, counters)
 
 
 def _iter_page_layout_lines(session, document_id: int) -> Iterator[Line]:
-    """Yield lines reconstructed from persisted page layouts."""
-
-    document_page_model = getattr(models_pkg, "DocumentPage", None)
-    if document_page_model is None or session is None:
+    model = getattr(models_pkg, "DocumentPage", None)
+    if model is None or session is None:
         return iter(())
 
     try:
         statement = (
-            select(document_page_model)
-            .where(document_page_model.document_id == document_id)
-            .order_by(getattr(document_page_model, "page_index", 0))
+            select(model)
+            .where(model.document_id == document_id)
+            .order_by(getattr(model, "page", getattr(model, "page_index", 0)))
         )
         rows = session.exec(statement).all()
-    except Exception:  # pragma: no cover - optional table might be unavailable
+    except Exception:
         return iter(())
 
     if not rows:
         return iter(())
 
-    def _generator() -> Iterator[Line]:
-        for row in rows:
-            page_index = int(getattr(row, "page_index", 0))
-            layout = list(getattr(row, "layout", []) or [])
-            line_counter = 1
+    counters: Dict[int, int] = {}
+    for row in rows:
+        page = getattr(row, "page", None)
+        if page is None:
+            page = getattr(row, "page_index", 1)
 
-            def _emit_from_strings(chunks: Iterable[str]) -> Iterator[Line]:
-                nonlocal line_counter
-                for chunk in chunks:
-                    cleaned = str(chunk).strip()
+        layout = getattr(row, "layout", None)
+        emitted = False
+        if isinstance(layout, list) and layout:
+            for block in layout:
+                text_value = block.get("text") if isinstance(block, dict) else None
+                if not isinstance(text_value, str):
+                    continue
+                for piece in text_value.splitlines() or [text_value]:
+                    cleaned = piece.strip()
                     if not cleaned:
                         continue
-                    yield Line(
-                        page=page_index, line_in_page=line_counter, text=cleaned
-                    )
-                    line_counter += 1
-
-            if layout:
-                for block in layout:
-                    text_value = block.get("text") if isinstance(block, dict) else None
-                    if not isinstance(text_value, str):
-                        continue
-                    pieces = text_value.splitlines() or [text_value]
-                    yield from _emit_from_strings(pieces)
-                continue
-
-            text_raw = getattr(row, "text_raw", "")
-            if isinstance(text_raw, str):
-                yield from _emit_from_strings(text_raw.splitlines())
-
-    return _generator()
+                    emitted = True
+                    yield _coerce_line(page, None, cleaned, counters)
+        text_raw = getattr(row, "text_raw", "")
+        if not emitted and isinstance(text_raw, str):
+            for piece in text_raw.splitlines() or [text_raw]:
+                cleaned = piece.strip()
+                if not cleaned:
+                    continue
+                yield _coerce_line(page, None, cleaned, counters)
 
 
 def iter_lines(session, document_id: int) -> Iterable[Line]:
-    """Return the parsed lines for ``document_id``."""
-
     db_lines = list(_iter_db_lines(session, document_id))
     if db_lines:
         return db_lines
@@ -152,21 +158,21 @@ def iter_lines(session, document_id: int) -> Iterable[Line]:
         return page_layout_lines
 
     settings = get_settings()
-    export_path = settings.export_dir / str(document_id) / "lines.jsonl"
-    if export_path.exists():
-        return list(_iter_jsonl_lines(export_path))
+    candidates: List[Path] = []
+    if settings is not None:
+        candidates.append(settings.export_dir / str(document_id) / "lines.jsonl")
+    candidates.append(Path(f"exports/{document_id}/lines.jsonl"))
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Parsed lines not found for document",
-    )
+    for path in candidates:
+        lines = list(_iter_lines_jsonl(path))
+        if lines:
+            return lines
+
+    return []
 
 
 def get_fulltext(session, document_id: int) -> str:
-    """Return the full document text reconstructed from parsed lines."""
-
-    lines = iter_lines(session, document_id)
-    return "\n".join(str(line["text"]) for line in lines)
+    return "\n".join(line["text"] for line in iter_lines(session, document_id))
 
 
 __all__ = ["Line", "iter_lines", "get_fulltext"]
