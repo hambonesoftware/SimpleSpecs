@@ -301,6 +301,7 @@ def _render_prompt(
         "- Every header must include \"title\" and integer \"level\" (1 = top level).\n"
         "- Include \"number\" when the source shows one; otherwise use null.\n"
         "- Preserve document order and exclude tables of contents or running headers.\n"
+        "- Ignore any previewed or summarised TOC items; use only headers from the main body context.\n"
         "- Do not omit appendices; include them as headers when present.\n"
         "- If no headers exist, return {\"headers\": []}.\n\n"
         "Context:\n"
