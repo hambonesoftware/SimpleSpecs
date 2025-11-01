@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
 from rapidfuzz.fuzz import token_set_ratio
@@ -36,6 +36,8 @@ DOT_SPACE_RE = re.compile(r"(\d)\s*\.\s*(\d)")
 MULTISPACE_RE = re.compile(r"\s+")
 TOC_LEADER_RE = re.compile(r"\.{3,}\s*\d+\s*$")
 CONFUSABLE_NUM_RE = re.compile(r"(?<=\d)\s*[Il]\s*(?=[\.\s])")
+ALPHA_ONE_RE = re.compile(r"(?<=\b[A-Za-z])\s*[Il](?=\b)")
+NUMBER_COMPONENT_RE = re.compile(r"[A-Za-z]+|\d+")
 
 
 @dataclass(slots=True)
@@ -56,6 +58,7 @@ class HeaderItem:
     num: str
     title: str
     level: int
+    tokens: tuple[str, ...] = field(default_factory=tuple)
 
 
 def normalize(value: str, confusables: bool = True) -> str:
@@ -66,7 +69,76 @@ def normalize(value: str, confusables: bool = True) -> str:
     cleaned = MULTISPACE_RE.sub(" ", cleaned)
     if confusables:
         cleaned = CONFUSABLE_NUM_RE.sub("1", cleaned)
+        cleaned = ALPHA_ONE_RE.sub("1", cleaned)
     return cleaned.strip().casefold()
+
+
+def number_tokens(num: str | None) -> tuple[str, ...]:
+    """Return alphanumeric components that form *num* in document order."""
+
+    if not num:
+        return tuple()
+    return tuple(NUMBER_COMPONENT_RE.findall(str(num)))
+
+
+def _alpha_component_value(token: str) -> int:
+    total = 0
+    for char in token.upper():
+        if "A" <= char <= "Z":
+            total = total * 26 + (ord(char) - ord("A") + 1)
+    return total
+
+
+def _component_value(token: str) -> int:
+    if token.isdigit():
+        return int(token)
+    if token.isalpha():
+        return _alpha_component_value(token)
+    digits = re.findall(r"\d+", token)
+    if digits:
+        return int(digits[0])
+    return 0
+
+
+def number_key(num: str | Sequence[str]) -> List[int]:
+    """Return sortable key for a numbering token or sequence of tokens."""
+
+    if isinstance(num, str):
+        tokens = number_tokens(num)
+    else:
+        tokens = tuple(num)
+    return [_component_value(token) for token in tokens]
+
+
+def number_parent(num: str | None) -> str | None:
+    """Return the immediate parent numbering token for *num* if available."""
+
+    if not num:
+        return None
+    if "." in num:
+        return num.rsplit(".", 1)[0]
+    stripped = num.strip()
+    if not stripped:
+        return None
+    idx = len(stripped)
+    while idx > 0 and stripped[idx - 1].isdigit():
+        idx -= 1
+    if idx <= 0 or idx >= len(stripped):
+        return None
+    return stripped[:idx]
+
+
+def is_number_descendant(candidate: str, parent: str | None) -> bool:
+    """Return True when *candidate* is a descendant of *parent*."""
+
+    if not parent or not candidate or candidate == parent:
+        return False
+    current = number_parent(candidate)
+    while current:
+        if current == parent:
+            return True
+        current = number_parent(current)
+    return False
 
 
 def extract_number(text: str) -> Optional[str]:
@@ -77,8 +149,26 @@ def extract_number(text: str) -> Optional[str]:
 
 
 def compile_number_regex(num: str) -> re.Pattern[str]:
-    escaped = re.escape(num)
-    return re.compile(rf"^\s*{escaped}\b(?!\.)", re.I)
+    tokens = number_tokens(num)
+    if not tokens:
+        escaped = re.escape(num)
+        return re.compile(rf"(?<!\S){escaped}(?=$|\s|[).:-])", re.I)
+
+    parts: List[str] = []
+    for idx, token in enumerate(tokens):
+        escaped = re.escape(token)
+        if idx == 0:
+            parts.append(escaped)
+            continue
+        prev = tokens[idx - 1]
+        if prev.isdigit() and token.isdigit():
+            parts.append(rf"\s*\.\s*{escaped}")
+        else:
+            parts.append(rf"[.\s]*{escaped}")
+
+    core = "".join(parts)
+    pattern = rf"(?<!\S){core}(?=$|\s|[).:-])"
+    return re.compile(pattern, re.I)
 
 
 def is_probable_toc_line(text: str) -> bool:
@@ -133,12 +223,6 @@ def cand_score(norm_line: str, want_norm: str, has_number: bool, in_band: bool) 
     if in_band:
         score -= 15
     return score
-
-
-def number_key(num: str) -> List[int]:
-    return [int(x) for x in num.split(".")]
-
-
 def is_ineligible_runner_or_toc(
     ln: Line, norm_text: str, toc_pages: Set[int], runners: Set[str]
 ) -> bool:
@@ -156,9 +240,19 @@ def make_header_items(llm_headers: Iterable[Dict]) -> List[HeaderItem]:
         title = str(header.get("title") or header.get("text") or "").strip()
         if not number:
             continue
-        level = number.count(".") + 1
-        items.append(HeaderItem(num=number, title=title, level=level))
-    items.sort(key=lambda item: ([int(part) for part in item.num.split(".")], item.level))
+        tokens = number_tokens(str(number))
+        if not tokens:
+            continue
+        level = int(header.get("level") or len(tokens) or 1)
+        items.append(
+            HeaderItem(
+                num=str(number),
+                title=title,
+                level=level,
+                tokens=tokens,
+            )
+        )
+    items.sort(key=lambda item: (number_key(item.tokens), item.level))
     return items
 
 
@@ -203,7 +297,22 @@ def has_child_hint(
 ) -> bool:
     if lookahead <= 0:
         return False
-    hint_pattern = re.compile(rf"^\s*{re.escape(parent_num)}\.\d+", re.I)
+    tokens = number_tokens(parent_num)
+    if not tokens:
+        return False
+    pattern_parts: List[str] = []
+    for idx, token in enumerate(tokens):
+        escaped = re.escape(token)
+        if idx == 0:
+            pattern_parts.append(escaped)
+            continue
+        prev = tokens[idx - 1]
+        if prev.isdigit() and token.isdigit():
+            pattern_parts.append(rf"\.{escaped}")
+        else:
+            pattern_parts.append(rf"[.\s]*{escaped}")
+    pattern = r"^\s*" + "".join(pattern_parts) + r"[.\s]*\d+"
+    hint_pattern = re.compile(pattern, re.I)
     end = min(len(lines), idx + 1 + lookahead)
     for offset in range(idx + 1, end):
         candidate = lines[offset]
@@ -368,7 +477,7 @@ def build_top_level_windows(
             if tracer:
                 tracer.ev("anchor_unresolved_top", num=item.num)
 
-    ordered = sorted(anchors.items(), key=lambda kv: [int(part) for part in kv[0].split(".")])
+    ordered = sorted(anchors.items(), key=lambda kv: number_key(kv[0]))
     windows: Dict[str, Tuple[int, int, int]] = {}
     for pos, (num, idx) in enumerate(ordered):
         start = idx
@@ -523,11 +632,13 @@ def compute_windows_from_anchors_and_children(
     if not lines or not anchors:
         return {}
 
-    l1s = sorted([h for h in llm_items if h.level == 1], key=lambda h: number_key(h.num))
+    l1s = sorted([h for h in llm_items if h.level == 1], key=lambda h: number_key(h.tokens))
     children_by_parent: Dict[str, List[int]] = {}
     for h in llm_items:
         if h.level >= 2 and h.num in anchors:
-            parent = ".".join(h.num.split(".")[:-1])
+            parent = number_parent(h.num)
+            if not parent:
+                continue
             children_by_parent.setdefault(parent, []).append(anchors[h.num])
 
     ordered: List[Tuple[str, int]] = []
@@ -631,7 +742,9 @@ def enforce_invariants_and_autofix(
         mapping: Dict[str, List[str]] = {}
         for item in llm_items:
             if item.level >= 2:
-                parent = ".".join(item.num.split(".")[:-1])
+                parent = number_parent(item.num)
+                if not parent:
+                    continue
                 mapping.setdefault(parent, []).append(item.num)
         return mapping
 
@@ -641,7 +754,7 @@ def enforce_invariants_and_autofix(
             for num, idx in pos.items():
                 if not within(idx, window_start, window_end):
                     continue
-                if num == parent_num or num.startswith(parent_num + "."):
+                if num == parent_num or is_number_descendant(num, parent_num):
                     bucket.setdefault(num, []).append(idx)
             for num, indices in bucket.items():
                 if len(indices) <= 1:
@@ -706,7 +819,7 @@ def enforce_invariants_and_autofix(
 
         for parent_num, (_, window_start, window_end) in windows.items():
             for num, idx in list(pos.items()):
-                if num == parent_num or not num.startswith(parent_num + "."):
+                if num == parent_num or not is_number_descendant(num, parent_num):
                     continue
                 if within(idx, window_start, window_end):
                     continue
@@ -837,12 +950,14 @@ def align_headers_sequential(
         windows[num] = (anchor_idx, anchor_idx, end_idx)
 
     children = [item for item in items if item.level >= 2]
-    children.sort(key=lambda h: ([int(part) for part in h.num.split(".")], h.level))
+    children.sort(key=lambda h: (number_key(h.tokens), h.level))
 
     chain_cursor: Dict[str, int] = {num: idx for num, (idx, _, _) in windows.items()}
 
     for header in children:
-        parent_num = ".".join(header.num.split(".")[:-1])
+        parent_num = number_parent(header.num)
+        if not parent_num:
+            continue
         if parent_num not in windows:
             if tracer:
                 tracer.ev("missing_parent", child=header.num, parent=parent_num)
@@ -894,9 +1009,10 @@ def align_headers_sequential(
 
         children_by_parent: Dict[str, List[int]] = defaultdict(list)
         for num, gidx in anchors.items():
-            if "." in num:
-                parent = ".".join(num.split(".")[:-1])
-                children_by_parent[parent].append(gidx)
+            parent = number_parent(num)
+            if not parent:
+                continue
+            children_by_parent[parent].append(gidx)
         for parent, child_positions in children_by_parent.items():
             if parent not in anchors or not child_positions:
                 continue
