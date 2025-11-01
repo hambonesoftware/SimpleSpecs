@@ -14,6 +14,7 @@ from backend.config import Settings
 from backend.models import Document, DocumentArtifactType
 
 from .artifact_store import PARSER_VERSION, get_cached_artifact, store_artifact
+from .header_locate_vector import locate_headers_with_vectors
 from .header_locator import locate_headers_in_lines
 from .headers_sequential import number_key
 from .pdf_headers_llm_full import get_headers_llm_full
@@ -177,12 +178,48 @@ async def extract_headers_and_chunks(
                 excluded_pages=excluded_pages,
             )
             llm_headers = llm_headers or []
-            located_headers = locate_headers_in_lines(
-                llm_headers,
-                lines,
-                excluded_pages=excluded_pages,
-                tracer=tracer,
-            )
+            vector_attempted = False
+            if settings.header_locate_use_embeddings:
+                try:
+                    vector_attempted = True
+                    located_headers = locate_headers_with_vectors(
+                        session=session,
+                        document_id=doc_id or 0,
+                        simple_headers=llm_headers,
+                        lines=lines,
+                        settings=settings,
+                        excluded_pages=excluded_pages,
+                        tracer=tracer,
+                        doc_hash=doc_hash,
+                        write_trace_json=trace_requested,
+                    )
+                    if located_headers:
+                        mode_used = "llm_vector"
+                except Exception as exc:  # pragma: no cover - defensive log
+                    LOGGER.warning("Vector header locator failed: %s", exc, exc_info=True)
+                    if tracer:
+                        tracer.ev(
+                            "fallback_triggered",
+                            method="vector",
+                            reason="exception",
+                            message=str(exc),
+                        )
+                    messages.append("Vector header locator unavailable; using sequential alignment.")
+                    located_headers = []
+
+            if not located_headers:
+                located_headers = locate_headers_in_lines(
+                    llm_headers,
+                    lines,
+                    excluded_pages=excluded_pages,
+                    tracer=tracer,
+                )
+                if vector_attempted and tracer:
+                    tracer.ev(
+                        "fallback_triggered",
+                        method="vector",
+                        reason="no_candidates",
+                    )
             if tracer:
                 tracer.ev(
                     "llm_outline_received",

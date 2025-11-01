@@ -95,6 +95,33 @@ When tracing (`?trace=1`) the sequential tracer records the corrective steps tak
 Clients can override the active strategy per request with `POST /api/headers/{document_id}?align=sequential` (or `align=legacy`). When tracing is enabled the sequential locator emits events such as `anchor_candidate_top`, `window_top`, and `anchor_resolved_child` to aid debugging.
 
 
+#### Vector-enhanced locator (opt-in)
+
+Set `HEADER_LOCATE_USE_EMBEDDINGS=1` to swap the sequential window search for a vector-guided locator. The LLM outline remains the source of truth—each header is matched against sliding line windows scored via lexical BM25/fuzzy matching, cosine similarity, font size, and page position. Candidates that resemble TOC entries (dot leaders, "contents", index terms) or running headers are discarded before selection.
+
+Key tuning knobs:
+
+```
+HEADER_LOCATE_USE_EMBEDDINGS=1           # enable vector fusion
+HEADER_LOCATE_FUSE_WEIGHTS=0.55,0.30,0.10,0.05  # lexical, cosine, font-rank, vertical bonuses
+HEADER_LOCATE_MIN_LEXICAL=0.30           # minimum lexical score to keep a candidate
+HEADER_LOCATE_MIN_COSINE=0.25            # minimum cosine similarity
+HEADER_LOCATE_PREFER_LAST_MATCH=1        # favour later matches when scores tie (avoids TOC hits)
+```
+
+Embeddings default to the local `sentence-transformers/all-MiniLM-L6-v2` model. Override the provider or remote model via:
+
+```
+EMBEDDINGS_PROVIDER=local                # or 'openrouter'
+EMBEDDINGS_MODEL=sentence-transformers/all-MiniLM-L6-v2
+EMBEDDINGS_CACHE_DIR=.cache/emb          # per-text + per-document vector cache
+EMBEDDINGS_OPENROUTER_MODEL=openai/text-embedding-3-small
+EMBEDDINGS_OPENROUTER_TIMEOUT_S=60
+```
+
+When `HEADERS_TRACE=1` (or `?trace=1`), the vector locator logs ranked candidates per header and writes `exports/{doc_id}/header_locations.json` with the top three matches and their component scores for offline analysis.
+
+
 #### Strict Lockdown mode
 
 The strict LLM-backed locator hardens matching for tricky numbering and appendix layouts:
