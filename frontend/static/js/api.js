@@ -146,8 +146,11 @@ export async function fetchHeaders(documentId) {
   return request(`/api/headers/${documentId}`, { method: "POST" });
 }
 
-export async function fetchSectionText(documentId, start, end) {
+export async function fetchSectionText(documentId, start, end, sectionKey) {
   const params = new URLSearchParams({ start: String(start), end: String(end) });
+  if (sectionKey) {
+    params.set("section_key", String(sectionKey));
+  }
   const response = await fetch(
     buildUrl(`/api/headers/${documentId}/section-text?${params}`)
   );

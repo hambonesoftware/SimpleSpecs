@@ -11,12 +11,12 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 import backend.config as app_config
 from ..config import Settings, get_settings
 from ..database import get_session
-from ..models import Document
+from ..models import Document, DocumentSection
 from ..services.headers import (
     HeaderExtractionResult,
     HeaderNode,
@@ -28,10 +28,20 @@ from ..services.headers_llm_strict import extract_headers_and_sections_strict
 from ..services.headers_orchestrator import extract_headers_and_chunks
 from ..services.llm import LLMService
 from ..services.pdf_native import collect_line_metrics, parse_pdf
+from ..services.sections import build_and_store_sections
 from ..services.simpleheaders_state import SimpleHeadersState
 from ..utils.trace import HeaderTracer
 
 router = APIRouter(prefix="/api", tags=["headers"])
+
+
+def _safe_int(value: object) -> int | None:
+    """Return ``value`` coerced to ``int`` when possible."""
+
+    try:
+        return int(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
 
 
 class HeaderNodePayload(BaseModel):
@@ -64,11 +74,13 @@ class SimpleHeaderPayload(BaseModel):
     page: int
     line_idx: int
     global_idx: int
+    section_key: str | None = None
 
 
 class SectionPayload(BaseModel):
     """Chunk describing the line range belonging to a header."""
 
+    section_key: str
     header_text: str
     header_number: str | None = None
     level: int
@@ -187,36 +199,52 @@ async def generate_headers(
 
             SimpleHeadersState.set(doc_id, doc_hash, lines)
 
-            simpleheaders_payload = [
-                SimpleHeaderPayload(
-                    text=item.get("text", ""),
-                    number=item.get("number"),
-                    level=int(item.get("level", 1)),
-                    page=int(item.get("start_page", 0)),
-                    line_idx=int(item.get("line_index", 0)),
-                    global_idx=int(item.get("start_global_index", 0)),
-                )
-                for item in strict_output.get("headers", [])
-            ]
+            sections_models = build_and_store_sections(
+                session=session,
+                document_id=doc_id,
+                simpleheaders=strict_output.get("headers", []),
+                lines=lines,
+            )
+            key_by_anchor = {
+                section.start_global_idx: section.section_key
+                for section in sections_models
+            }
 
-            sections_payload = [
-                SectionPayload(
-                    header_text=section.get("text", ""),
-                    header_number=section.get("number"),
-                    level=int(section.get("level", 1)),
-                    start_global_idx=int(section.get("start_global_index", 0)),
-                    end_global_idx=int(
-                        section.get(
-                            "end_global_index", section.get("start_global_index", 0)
-                        )
-                    ),
-                    start_page=int(section.get("start_page", 0)),
-                    end_page=int(
-                        section.get("end_page", section.get("start_page", 0))
-                    ),
+            simpleheaders_payload: list[SimpleHeaderPayload] = []
+            for item in strict_output.get("headers", []) or []:
+                gid = _safe_int(
+                    item.get("start_global_index") or item.get("global_idx")
                 )
-                for section in strict_output.get("sections", [])
-            ]
+                resolved_gid = gid or 0
+                simpleheaders_payload.append(
+                    SimpleHeaderPayload(
+                        text=item.get("text", ""),
+                        number=item.get("number"),
+                        level=int(item.get("level", 1)),
+                        page=int(item.get("start_page", item.get("page", 0))),
+                        line_idx=int(item.get("line_index", item.get("line_idx", 0))),
+                        global_idx=int(resolved_gid),
+                        section_key=key_by_anchor.get(resolved_gid),
+                    )
+                )
+
+            sections_payload = []
+            for section in sorted(
+                sections_models, key=lambda entry: entry.start_global_idx
+            ):
+                end_bound = max(section.start_global_idx, section.end_global_idx - 1)
+                sections_payload.append(
+                    SectionPayload(
+                        section_key=section.section_key,
+                        header_text=section.title,
+                        header_number=section.number,
+                        level=section.level,
+                        start_global_idx=section.start_global_idx,
+                        end_global_idx=end_bound,
+                        start_page=section.start_page or 0,
+                        end_page=section.end_page or section.start_page or 0,
+                    )
+                )
 
             response = HeadersResponse(
                 document_id=doc_id,
@@ -280,30 +308,47 @@ async def generate_headers(
 
     SimpleHeadersState.set(doc_id, orchestrated["doc_hash"], orchestrated["lines"])
 
-    simpleheaders_payload = [
-        SimpleHeaderPayload(
-            text=item.get("text", ""),
-            number=item.get("number"),
-            level=int(item.get("level", 1)),
-            page=int(item.get("page", 0)),
-            line_idx=int(item.get("line_idx", 0)),
-            global_idx=int(item.get("global_idx", 0)),
-        )
-        for item in orchestrated.get("headers", [])
-    ]
+    sections_models = build_and_store_sections(
+        session=session,
+        document_id=doc_id,
+        simpleheaders=orchestrated.get("headers", []),
+        lines=orchestrated.get("lines", []),
+    )
+    key_by_anchor = {
+        section.start_global_idx: section.section_key for section in sections_models
+    }
 
-    sections_payload = [
-        SectionPayload(
-            header_text=section.get("header_text", ""),
-            header_number=section.get("header_number"),
-            level=int(section.get("level", 1)),
-            start_global_idx=int(section.get("start_global_idx", 0)),
-            end_global_idx=int(section.get("end_global_idx", 0)),
-            start_page=int(section.get("start_page", 0)),
-            end_page=int(section.get("end_page", 0)),
+    simpleheaders_payload = []
+    for item in orchestrated.get("headers", []) or []:
+        gid = _safe_int(item.get("global_idx"))
+        resolved_gid = gid or 0
+        simpleheaders_payload.append(
+            SimpleHeaderPayload(
+                text=item.get("text", ""),
+                number=item.get("number"),
+                level=int(item.get("level", 1)),
+                page=int(item.get("page", 0)),
+                line_idx=int(item.get("line_idx", 0)),
+                global_idx=int(resolved_gid),
+                section_key=key_by_anchor.get(resolved_gid),
+            )
         )
-        for section in orchestrated.get("sections", [])
-    ]
+
+    sections_payload = []
+    for section in sorted(sections_models, key=lambda entry: entry.start_global_idx):
+        end_bound = max(section.start_global_idx, section.end_global_idx - 1)
+        sections_payload.append(
+            SectionPayload(
+                section_key=section.section_key,
+                header_text=section.title,
+                header_number=section.number,
+                level=section.level,
+                start_global_idx=section.start_global_idx,
+                end_global_idx=end_bound,
+                start_page=section.start_page or 0,
+                end_page=section.end_page or section.start_page or 0,
+            )
+        )
 
     response = HeadersResponse.from_result(
         doc_id,
@@ -327,6 +372,7 @@ async def section_text(
     start: int,
     end: int,
     *,
+    section_key: str | None = Query(None),
     session: Session = Depends(get_session),
 ) -> PlainTextResponse:
     """Return the plain text for a section bounded by global indices."""
@@ -346,6 +392,20 @@ async def section_text(
             status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
         )
 
+    section_record = None
+    if section_key:
+        section_record = session.exec(
+            select(DocumentSection).where(
+                DocumentSection.document_id == document_id,
+                DocumentSection.section_key == section_key,
+            )
+        ).first()
+        if section_record is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Section not found for this document",
+            )
+
     cached = SimpleHeadersState.get(document_id)
     if cached is None:
         raise HTTPException(
@@ -354,6 +414,11 @@ async def section_text(
         )
 
     _, lines = cached
+    if section_record is not None:
+        start = max(start, section_record.start_global_idx)
+        end = min(end, section_record.end_global_idx - 1)
+        if end < start:
+            end = start
     text_lines = [
         str(line.get("text", ""))
         for line in lines

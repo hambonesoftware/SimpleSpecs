@@ -162,6 +162,7 @@ class DocumentEmbedding(SQLModel, table=True):
     vector: bytes = Field(sa_column=Column(LargeBinary, nullable=False))
     norm: float | None = Field(default=None, sa_column=Column(Float, nullable=True))
     text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
+    section_key: str | None = Field(default=None, index=True, nullable=True)
     header_path: str | None = Field(default=None, nullable=True)
     page_index: int | None = Field(default=None, nullable=True)
     sha_model: str = Field(nullable=False, index=True)

@@ -321,4 +321,8 @@ def test_headers_endpoint_returns_outline(
     assert payload["outline"][0]["children"][0]["title"] == "Scope"
     assert payload["mode"] == "llm_full"
     assert payload["simpleheaders"][0]["text"] == "General Requirements"
-    assert payload["sections"][0]["start_global_idx"] == 0
+    assert payload["simpleheaders"][0]["section_key"]
+    section = payload["sections"][0]
+    assert section["start_global_idx"] == 0
+    assert section["end_global_idx"] == 0
+    assert section["section_key"] == payload["simpleheaders"][0]["section_key"]

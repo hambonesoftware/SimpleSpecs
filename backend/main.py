@@ -26,6 +26,7 @@ from .routers import (
     health,
     observability,
     parse,
+    search,
     specs,
 )
 
@@ -124,6 +125,7 @@ ROUTERS: Iterable = (
     headers.router,
     health.router,
     parse.router,
+    search.router,
     specs.router,
     compare.router,
     observability.router,
