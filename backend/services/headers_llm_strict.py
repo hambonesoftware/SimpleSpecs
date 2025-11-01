@@ -124,12 +124,19 @@ def detect_toc_pages_strict(lines: Sequence[BodyLine]) -> set[int]:
     for page, texts in by_page.items():
         dotted = sum(1 for text in texts if DOTTED_LEADER_RE.search(text))
         section_like = 0
+        body_like = 0
         for text in texts:
-            if SECTION_LIKE_RE.search(normalize_strict_text(text)):
+            normalised = normalize_strict_text(text)
+            if SECTION_LIKE_RE.search(normalised):
                 section_like += 1
+            if "." in text and len(normalised) >= 40:
+                body_like += 1
+        if dotted >= HEADERS_STRICT_TOC_MIN_DOT_LEADERS:
+            toc_pages.add(page)
+            continue
         if (
-            dotted >= HEADERS_STRICT_TOC_MIN_DOT_LEADERS
-            or section_like >= HEADERS_STRICT_TOC_MIN_SECTION_TOKENS
+            section_like >= HEADERS_STRICT_TOC_MIN_SECTION_TOKENS
+            and body_like <= max(1, section_like // 2)
         ):
             toc_pages.add(page)
     return toc_pages

@@ -4,7 +4,13 @@ from backend.config import Settings
 from backend.services import headers_orchestrator
 
 
-async def _run_extract(monkeypatch, tmp_path, *, llm_exception: Exception | None = None):
+async def _run_extract(
+    monkeypatch,
+    tmp_path,
+    *,
+    llm_exception: Exception | None = None,
+    strict_mode: bool = False,
+):
     lines = [
         {
             "text": "Intro",
@@ -82,8 +88,32 @@ async def _run_extract(monkeypatch, tmp_path, *, llm_exception: Exception | None
     monkeypatch.setattr(
         "backend.services.headers_orchestrator.single_chunks_from_headers", _fake_chunks
     )
+    monkeypatch.setattr(
+        "backend.services.headers_orchestrator.align_headers_llm_strict",
+        lambda headers, _lines, tracer=None: [
+            {
+                "header": {
+                    "text": header.get("text"),
+                    "number": header.get("number"),
+                    "level": header.get("level"),
+                    "_orig_index": idx,
+                },
+                "line": {
+                    "page": 0,
+                    "line_idx": 0,
+                    "global_idx": idx,
+                },
+                "score": 1.0,
+                "strategy": "unit-test",
+                "band": False,
+            }
+            for idx, header in enumerate(headers)
+        ],
+    )
 
-    settings = Settings(upload_dir=tmp_path, headers_mode="llm_full")
+    settings = Settings(
+        upload_dir=tmp_path, headers_mode="llm_full", headers_llm_strict=strict_mode
+    )
 
     result, _ = await headers_orchestrator.extract_headers_and_chunks(
         b"pdf-bytes",
@@ -112,4 +142,11 @@ def test_extract_headers_llm_success_has_no_messages(monkeypatch, tmp_path) -> N
     result = asyncio.run(_run_extract(monkeypatch, tmp_path))
 
     assert result["mode"] == "llm_full"
+    assert result["messages"] == []
+
+
+def test_extract_headers_strict_mode(monkeypatch, tmp_path) -> None:
+    result = asyncio.run(_run_extract(monkeypatch, tmp_path, strict_mode=True))
+
+    assert result["mode"] == "llm_strict"
     assert result["messages"] == []

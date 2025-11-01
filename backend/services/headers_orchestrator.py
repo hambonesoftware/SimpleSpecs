@@ -16,6 +16,7 @@ from backend.models import Document, DocumentArtifactType
 from .artifact_store import PARSER_VERSION, get_cached_artifact, store_artifact
 from .header_locate_vector import locate_headers_with_vectors
 from .header_locator import locate_headers_in_lines
+from .headers_llm_strict import align_headers_llm_strict
 from .headers_sequential import number_key
 from .pdf_headers_llm_full import get_headers_llm_full
 from .pdf_native import collect_line_metrics
@@ -178,8 +179,32 @@ async def extract_headers_and_chunks(
                 excluded_pages=excluded_pages,
             )
             llm_headers = llm_headers or []
+            strict_attempted = False
             vector_attempted = False
-            if settings.header_locate_use_embeddings:
+            if settings.headers_llm_strict and llm_headers:
+                strict_attempted = True
+                strict_resolved = align_headers_llm_strict(
+                    llm_headers,
+                    lines,
+                    tracer=tracer,
+                )
+                if strict_resolved:
+                    located_headers = [
+                        {
+                            "text": str(item["header"].get("text", "")).strip(),
+                            "number": item["header"].get("number"),
+                            "level": int(item["header"].get("level", 1)),
+                            "page": int(item["line"].get("page", 0)),
+                            "line_idx": int(item["line"].get("line_idx", 0)),
+                            "global_idx": int(item["line"].get("global_idx", 0)),
+                            "source_idx": int(item["header"].get("_orig_index", -1)),
+                            "strategy": item.get("strategy"),
+                            "score": item.get("score"),
+                        }
+                        for item in strict_resolved
+                    ]
+                    mode_used = "llm_strict"
+            if not located_headers and settings.header_locate_use_embeddings:
                 try:
                     vector_attempted = True
                     located_headers = locate_headers_with_vectors(
@@ -218,6 +243,12 @@ async def extract_headers_and_chunks(
                     tracer.ev(
                         "fallback_triggered",
                         method="vector",
+                        reason="no_candidates",
+                    )
+                if strict_attempted and tracer:
+                    tracer.ev(
+                        "fallback_triggered",
+                        method="llm_strict",
                         reason="no_candidates",
                     )
             if tracer:
