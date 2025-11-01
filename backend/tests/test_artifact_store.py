@@ -62,6 +62,7 @@ def test_persist_parse_result_stores_pages_and_tables() -> None:
 
         assert len(stored_pages) == 1
         assert stored_pages[0].text_raw.strip() == "Heading"
+        assert stored_pages[0].is_toc is False
         assert len(stored_tables) == 1
         assert refreshed is not None
         assert refreshed.page_count == 1

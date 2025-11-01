@@ -46,6 +46,11 @@ class DocumentPage(SQLModel, table=True):
     page_index: int = Field(nullable=False)
     width: float = Field(nullable=False)
     height: float = Field(nullable=False)
+    is_toc: bool = Field(
+        default=False,
+        nullable=False,
+        description="Flag indicating whether the page was classified as table of contents.",
+    )
     text_raw: str = Field(
         default="",
         sa_column=Column(Text, nullable=False),
