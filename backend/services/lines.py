@@ -87,12 +87,69 @@ def _iter_db_lines(session, document_id: int) -> Iterator[Line]:
     return _generator()
 
 
+def _iter_page_layout_lines(session, document_id: int) -> Iterator[Line]:
+    """Yield lines reconstructed from persisted page layouts."""
+
+    document_page_model = getattr(models_pkg, "DocumentPage", None)
+    if document_page_model is None or session is None:
+        return iter(())
+
+    try:
+        statement = (
+            select(document_page_model)
+            .where(document_page_model.document_id == document_id)
+            .order_by(getattr(document_page_model, "page_index", 0))
+        )
+        rows = session.exec(statement).all()
+    except Exception:  # pragma: no cover - optional table might be unavailable
+        return iter(())
+
+    if not rows:
+        return iter(())
+
+    def _generator() -> Iterator[Line]:
+        for row in rows:
+            page_index = int(getattr(row, "page_index", 0))
+            layout = list(getattr(row, "layout", []) or [])
+            line_counter = 1
+
+            def _emit_from_strings(chunks: Iterable[str]) -> Iterator[Line]:
+                nonlocal line_counter
+                for chunk in chunks:
+                    cleaned = str(chunk).strip()
+                    if not cleaned:
+                        continue
+                    yield Line(
+                        page=page_index, line_in_page=line_counter, text=cleaned
+                    )
+                    line_counter += 1
+
+            if layout:
+                for block in layout:
+                    text_value = block.get("text") if isinstance(block, dict) else None
+                    if not isinstance(text_value, str):
+                        continue
+                    pieces = text_value.splitlines() or [text_value]
+                    yield from _emit_from_strings(pieces)
+                continue
+
+            text_raw = getattr(row, "text_raw", "")
+            if isinstance(text_raw, str):
+                yield from _emit_from_strings(text_raw.splitlines())
+
+    return _generator()
+
+
 def iter_lines(session, document_id: int) -> Iterable[Line]:
     """Return the parsed lines for ``document_id``."""
 
     db_lines = list(_iter_db_lines(session, document_id))
     if db_lines:
         return db_lines
+
+    page_layout_lines = list(_iter_page_layout_lines(session, document_id))
+    if page_layout_lines:
+        return page_layout_lines
 
     settings = get_settings()
     export_path = settings.export_dir / str(document_id) / "lines.jsonl"
