@@ -8,104 +8,72 @@ from pathlib import Path
 
 import pytest
 
-from backend.config import reset_settings_cache
+import backend.config as config
 from backend.services.header_match import find_header_occurrences
 from backend.services.pdf_native import parse_pdf_to_lines
 
 GOLDEN_HEADERS = [
-    {"title": "1 General", "number": "1", "level": 1, "page": 0},
+    {"title": "1 GENERAL", "number": "1", "level": 1, "page": 0},
+    {"title": "1.1 Scope", "number": "1.1", "level": 2, "page": 0},
+    {"title": "1.2 Purpose", "number": "1.2", "level": 2, "page": 0},
     {
-        "title": "1.1 Scope and Field of Application",
-        "number": "1.1",
+        "title": "1.3 Terminology, Symbols, and Definitions",
+        "number": "1.3",
         "level": 2,
         "page": 0,
     },
-    {"title": "1.2 References", "number": "1.2", "level": 2, "page": 0},
-    {"title": "1.3 Definitions", "number": "1.3", "level": 2, "page": 0},
-    {"title": "1.4 Symbols", "number": "1.4", "level": 2, "page": 0},
-    {"title": "2 Principles", "number": "2", "level": 1, "page": 0},
+    {"title": "2 FLOWMETER DESCRIPTION", "number": "2", "level": 1, "page": 0},
+    {"title": "2.1 Operating Principles", "number": "2.1", "level": 2, "page": 0},
+    {"title": "2.1.1 Introduction", "number": "2.1.1", "level": 3, "page": 0},
     {
-        "title": "2.1 Statement of the Principles",
-        "number": "2.1",
-        "level": 2,
+        "title": "2.1.2 Fluid Velocity Measurement",
+        "number": "2.1.2",
+        "level": 3,
         "page": 0,
     },
-    {"title": "2.1.1 Static Weighing", "number": "2.1.1", "level": 3, "page": 0},
-    {"title": "2.1.2 Dynamic Weighing", "number": "2.1.2", "level": 3, "page": 0},
     {
-        "title": "2.1.3 Comparison of Instantaneous and Mean Flow Rate",
+        "title": "2.1.3 Transducer Considerations",
         "number": "2.1.3",
         "level": 3,
         "page": 0,
     },
+    {"title": "2.2 Implementation", "number": "2.2", "level": 2, "page": 0},
+    {"title": "2.2.1 Primary Device", "number": "2.2.1", "level": 3, "page": 0},
+    {"title": "2.2.2 Secondary Device", "number": "2.2.2", "level": 3, "page": 0},
     {
-        "title": "2.2 Accuracy of the Method",
-        "number": "2.2",
-        "level": 2,
+        "title": "3 ERROR SOURCES AND THEIR REDUCTION",
+        "number": "3",
+        "level": 1,
         "page": 0,
     },
+    {"title": "3.1 Axial Velocity Estimate", "number": "3.1", "level": 2, "page": 0},
+    {"title": "3.2 Integration", "number": "3.2", "level": 2, "page": 0},
+    {"title": "3.3 Computation", "number": "3.3", "level": 2, "page": 0},
+    {"title": "3.4 Calibration", "number": "3.4", "level": 2, "page": 0},
+    {"title": "3.5 Equipment Degradation", "number": "3.5", "level": 2, "page": 0},
     {
-        "title": "2.2.1 Overall Uncertainty on the Weighing Measurement",
-        "number": "2.2.1",
-        "level": 3,
+        "title": "4 APPLICATION GUIDELINES",
+        "number": "4",
+        "level": 1,
         "page": 0,
     },
+    {"title": "4.1 Performance Parameters", "number": "4.1", "level": 2, "page": 0},
     {
-        "title": "2.2.2 Requirements for Accurate Measurements",
-        "number": "2.2.2",
-        "level": 3,
-        "page": 0,
-    },
-    {"title": "3 Apparatus", "number": "3", "level": 1, "page": 0},
-    {"title": "3.1 Diverter", "number": "3.1", "level": 2, "page": 0},
-    {
-        "title": "3.2 Time-Measuring Apparatus",
-        "number": "3.2",
-        "level": 2,
-        "page": 0,
-    },
-    {"title": "3.3 Weighing Tank", "number": "3.3", "level": 2, "page": 0},
-    {"title": "3.4 Weighing Device", "number": "3.4", "level": 2, "page": 0},
-    {
-        "title": "3.5 Auxiliary Measurements",
-        "number": "3.5",
-        "level": 2,
-        "page": 0,
-    },
-    {"title": "4 Procedure", "number": "4", "level": 1, "page": 0},
-    {
-        "title": "4.1 Static Weighing Method",
-        "number": "4.1",
-        "level": 2,
-        "page": 0,
-    },
-    {
-        "title": "4.2 Dynamic Weighing Method",
+        "title": "4.2 Installation Considerations",
         "number": "4.2",
         "level": 2,
         "page": 0,
     },
     {
-        "title": "4.3 Common Provisions",
-        "number": "4.3",
-        "level": 2,
+        "title": "5 METER FACTOR DETERMINATION\nAND VERIFICATION",
+        "number": "5",
+        "level": 1,
         "page": 0,
     },
-    {"title": "5 Calculation of Flow Rate", "number": "5", "level": 1, "page": 0},
+    {"title": "5.1 Laboratory Calibration", "number": "5.1", "level": 2, "page": 0},
+    {"title": "5.2 Field Calibration", "number": "5.2", "level": 2, "page": 0},
     {
-        "title": "5.1 Calculation of Mass Flow Rate",
-        "number": "5.1",
-        "level": 2,
-        "page": 0,
-    },
-    {
-        "title": "5.2 Calculation of Volume Flow Rate",
-        "number": "5.2",
-        "level": 2,
-        "page": 0,
-    },
-    {
-        "title": "6 Uncertainties in the Measurement of Flow Rate",
+        "title": "6 A Typical Cross Path Ultrasonic Flowmeter Configuration",
         "number": "6",
         "level": 1,
         "page": 0,
@@ -129,11 +97,13 @@ def test_strict_header_search_matches_golden_outline(monkeypatch, tmp_path) -> N
     monkeypatch.setenv("UPLOAD_DIR", str(upload_dir))
     monkeypatch.setenv("HEADERS_LOG_DIR", str(log_dir))
     monkeypatch.setenv("HEADERS_LLM_STRICT", "1")
-    reset_settings_cache()
+    config.reset_settings_cache()
+    settings = config.get_settings()
+    assert settings.export_dir.resolve() == export_dir.resolve()
 
     lines = parse_pdf_to_lines(pdf_path)
     doc_id = 101
-    doc_dir = export_dir / str(doc_id)
+    doc_dir = settings.export_dir / str(doc_id)
     doc_dir.mkdir(parents=True, exist_ok=True)
 
     per_page_counts: dict[int, int] = defaultdict(int)

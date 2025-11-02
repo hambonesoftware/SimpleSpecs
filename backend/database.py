@@ -74,8 +74,32 @@ def init_db() -> None:
         except NoSuchTableError:
             return
 
-        if not any(column["name"] == "mime_type" for column in columns):
+        column_names = {column["name"] for column in columns}
+
+        if "mime_type" not in column_names:
             connection.execute(text("ALTER TABLE document ADD COLUMN mime_type VARCHAR"))
+        if "byte_size" not in column_names:
+            connection.execute(
+                text("ALTER TABLE document ADD COLUMN byte_size INTEGER NOT NULL DEFAULT 0")
+            )
+        if "page_count" not in column_names:
+            connection.execute(text("ALTER TABLE document ADD COLUMN page_count INTEGER"))
+        if "has_ocr" not in column_names:
+            connection.execute(
+                text("ALTER TABLE document ADD COLUMN has_ocr BOOLEAN NOT NULL DEFAULT 0")
+            )
+        if "used_mineru" not in column_names:
+            connection.execute(
+                text(
+                    "ALTER TABLE document ADD COLUMN used_mineru BOOLEAN NOT NULL DEFAULT 0"
+                )
+            )
+        if "parser_version" not in column_names:
+            connection.execute(text("ALTER TABLE document ADD COLUMN parser_version VARCHAR"))
+        if "last_parsed_at" not in column_names:
+            connection.execute(
+                text("ALTER TABLE document ADD COLUMN last_parsed_at DATETIME")
+            )
 
 
 def reset_database_state() -> None:

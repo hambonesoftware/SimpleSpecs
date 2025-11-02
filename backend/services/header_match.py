@@ -12,6 +12,7 @@ from typing import Dict, List, Tuple
 from .lines import iter_lines
 
 DOT_LEADERS_RE = re.compile(r"\.{2,}\s*\d+\s*$")
+NUMBER_PREFIX_RE = re.compile(r"^\s*(\d+(?:\.\d+)*)")
 
 
 def _norm(value: str) -> str:
@@ -26,6 +27,34 @@ def _equal_heading(candidate: str, target: str) -> bool:
     return _norm(candidate) == _norm(target)
 
 
+def _contains_heading(candidate: str, target: str) -> bool:
+    candidate_norm = _norm(candidate)
+    target_norm = _norm(target)
+    if not target_norm:
+        return False
+    if candidate_norm == target_norm:
+        return True
+    start = 0
+    while True:
+        index = candidate_norm.find(target_norm, start)
+        if index == -1:
+            break
+        end_index = index + len(target_norm)
+        while end_index < len(candidate_norm) and candidate_norm[end_index].isspace():
+            end_index += 1
+        if end_index == len(candidate_norm) or candidate_norm[end_index] in "-–—:;,./()[]{}":
+            return True
+        start = index + 1
+    return False
+
+
+def _number_prefix(value: str) -> str | None:
+    match = NUMBER_PREFIX_RE.match(_norm(value))
+    if match:
+        return match.group(1)
+    return None
+
+
 def _build_pages(lines):
     pages: Dict[int, List[Dict]] = {}
     for line in lines:
@@ -38,11 +67,18 @@ def _build_pages(lines):
 def _match_on_page_exact(title: str, page_lines: List[Dict]) -> Tuple[bool, Dict | None]:
     if "\n" not in title:
         target = _norm(title)
+        target_prefix = _number_prefix(title)
         for entry in page_lines:
             text = entry.get("text", "")
             if DOT_LEADERS_RE.search(text):
                 continue
-            if _equal_heading(text, target):
+            if _contains_heading(text, target):
+                return True, {
+                    "found_page": int(entry.get("page", 0)),
+                    "line_in_page": int(entry.get("line_in_page", 0)),
+                    "matched_text": text,
+                }
+            if target_prefix and _number_prefix(text) == target_prefix:
                 return True, {
                     "found_page": int(entry.get("page", 0)),
                     "line_in_page": int(entry.get("line_in_page", 0)),
