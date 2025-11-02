@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
@@ -28,6 +29,7 @@ from ..config import (
     HEADERS_STRICT_TOC_MIN_DOT_LEADERS,
     HEADERS_STRICT_TOC_MIN_SECTION_TOKENS,
 )
+from ..utils.errors import AlignmentPreconditionError, OutlineParseError
 
 try:  # pragma: no cover - tracing is optional in some deployments
     from ..utils.trace import HeaderTracer
@@ -481,49 +483,13 @@ def _extract_headers(payload: Mapping[str, Any]) -> Iterable[Dict[str, Any]]:
         }
 
 
-class _SupportsGenerate:
-    def generate(
-        self,
-        *,
-        messages: Sequence[Mapping[str, str]],
-        fence: str | None = None,
-        params: Mapping[str, Any] | None = None,
-        metadata: Mapping[str, Any] | None = None,
-    ) -> Any:
-        ...
-
-
-def extract_headers_and_sections_strict(
+def _align_headers_to_sections(
+    llm_headers: Sequence[Dict[str, Any]],
+    lines_list: List[BodyLine],
+    tracer: HeaderTracer | None,
     *,
-    llm: _SupportsGenerate,
-    lines: Sequence[BodyLine],
-    tracer: HeaderTracer | None = None,
+    fenced_text: str | None,
 ) -> Dict[str, Any]:
-    """Locate headers and construct contiguous section ranges."""
-
-    lines_list = list(lines)
-    full_text = "\n".join(str(line.get("text", "")) for line in lines_list)
-
-    prompt = PROMPT_TEMPLATE.format(fence=FENCE, doc_text=full_text)
-    result = llm.generate(messages=[{"role": "user", "content": prompt}], fence=FENCE)
-
-    if not result.fenced:
-        raise RuntimeError("LLM response missing fenced JSON")
-
-    try:
-        payload = json.loads(result.fenced)
-    except json.JSONDecodeError as exc:
-        log.error("Failed to decode headers JSON: %s", exc)
-        payload = {}
-
-    llm_headers = list(_extract_headers(payload))
-    if tracer is not None:
-        tracer.ev(
-            "llm_outline_received",
-            count=len(llm_headers),
-            headers=[{**header} for header in llm_headers],
-        )
-
     resolved = align_headers_llm_strict(llm_headers, lines_list, tracer=tracer)
 
     located: List[Dict[str, Any]] = []
@@ -593,8 +559,169 @@ def extract_headers_and_sections_strict(
     return {
         "headers": located,
         "sections": sections,
-        "fenced_text": result.fenced,
+        "fenced_text": fenced_text,
     }
 
 
-__all__ = ["extract_headers_and_sections_strict", "align_headers_llm_strict", "FENCE"]
+class _SupportsGenerate:
+    def generate(
+        self,
+        *,
+        messages: Sequence[Mapping[str, str]],
+        fence: str | None = None,
+        params: Mapping[str, Any] | None = None,
+        metadata: Mapping[str, Any] | None = None,
+    ) -> Any:
+        ...
+
+
+def extract_headers_and_sections_strict(
+    *,
+    llm: _SupportsGenerate,
+    lines: Sequence[BodyLine],
+    tracer: HeaderTracer | None = None,
+) -> Dict[str, Any]:
+    """Locate headers and construct contiguous section ranges."""
+
+    lines_list = list(lines)
+    full_text = "\n".join(str(line.get("text", "")) for line in lines_list)
+
+    prompt = PROMPT_TEMPLATE.format(fence=FENCE, doc_text=full_text)
+    result = llm.generate(messages=[{"role": "user", "content": prompt}], fence=FENCE)
+
+    if not result.fenced:
+        raise RuntimeError("LLM response missing fenced JSON")
+
+    try:
+        payload = json.loads(result.fenced)
+    except json.JSONDecodeError as exc:
+        log.error("Failed to decode headers JSON: %s", exc)
+        payload = {}
+
+    llm_headers = list(_extract_headers(payload))
+    if tracer is not None:
+        tracer.ev(
+            "llm_outline_received",
+            count=len(llm_headers),
+            headers=[{**header} for header in llm_headers],
+        )
+
+    return _align_headers_to_sections(
+        llm_headers,
+        lines_list,
+        tracer,
+        fenced_text=result.fenced,
+    )
+
+
+def _env_flag(name: str, default: str = "0") -> bool:
+    value = os.getenv(name, default)
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def run_strict_headers_pipeline(
+    *,
+    file_id: int,
+    file_path: str | os.PathLike[str],
+    provider: str,
+    model: str,
+    trace: bool = False,
+) -> Dict[str, Any]:
+    """Legacy orchestration wrapper used by guard-rail tests."""
+
+    from ..services import llm as llm_module
+    from ..services import text_extraction
+    from ..config import get_settings
+    from .llm import LLMService
+
+    lines_list = list(text_extraction.extract_lines(str(file_path)))
+    if not lines_list:
+        if _env_flag("HEADERS_STRICT_ABORT_ON_NO_LINES", "0"):
+            raise AlignmentPreconditionError(
+                "no_lines",
+                "No lines available for strict header alignment.",
+                {"file_id": file_id},
+            )
+        return {"headers": [], "sections": [], "fenced_text": None}
+
+    fail_on_empty = _env_flag("HEADERS_STRICT_FAIL_ON_EMPTY_OUTLINE", "0")
+
+    tracer: HeaderTracer | None = None
+    settings = get_settings()
+    if trace and HeaderTracer is not None:
+        tracer = HeaderTracer(out_dir=str(settings.headers_log_dir))
+        tracer.ev(
+            "start_run",
+            mode="llm_strict",
+            file_id=file_id,
+            metadata={"provider": provider, "model": model},
+        )
+
+    outline_loader = getattr(llm_module, "get_outline_for_headers", None)
+    if callable(outline_loader):
+        outline_raw = outline_loader(
+            file_id=file_id,
+            file_path=str(file_path),
+            provider=provider,
+            model=model,
+            trace=trace,
+            lines=lines_list,
+        )
+        outline_text = str(outline_raw or "").strip()
+        if not outline_text:
+            if fail_on_empty:
+                raise OutlineParseError(
+                    "empty_outline",
+                    "LLM outline was empty.",
+                    raw=str(outline_raw or ""),
+                )
+            return {"headers": [], "sections": [], "fenced_text": None}
+
+        try:
+            payload = json.loads(outline_text)
+        except json.JSONDecodeError as exc:
+            raise OutlineParseError(
+                "invalid_outline",
+                "LLM outline could not be decoded as JSON.",
+                raw=outline_text,
+            ) from exc
+
+        llm_headers = list(_extract_headers(payload))
+        if tracer is not None:
+            tracer.ev(
+                "llm_outline_received",
+                count=len(llm_headers),
+                headers=[{**header} for header in llm_headers],
+            )
+        if not llm_headers:
+            if fail_on_empty:
+                raise OutlineParseError(
+                    "empty_outline",
+                    "LLM outline did not contain any headers.",
+                    raw=outline_text,
+                )
+            return {"headers": [], "sections": [], "fenced_text": outline_text}
+
+        return _align_headers_to_sections(
+            llm_headers,
+            lines_list,
+            tracer,
+            fenced_text=outline_text,
+        )
+
+    llm_service = LLMService(settings=settings)
+    return extract_headers_and_sections_strict(
+        llm=llm_service,
+        lines=lines_list,
+        tracer=tracer,
+    )
+
+
+__all__ = [
+    "extract_headers_and_sections_strict",
+    "align_headers_llm_strict",
+    "run_strict_headers_pipeline",
+    "FENCE",
+]

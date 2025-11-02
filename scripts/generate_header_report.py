@@ -5,26 +5,32 @@ from __future__ import annotations
 import json
 import os
 import sys
+from importlib import import_module
 from pathlib import Path
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from backend.resources.golden_headers import MFC_5M_R2001_E1985
-from backend.services.header_report import generate_header_alignment_report
 
 
 def main() -> int:
+    repo_root = Path(__file__).resolve().parents[1]
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+
+    golden_headers = import_module("backend.resources.golden_headers")
+    services_header_report = import_module("backend.services.header_report")
+
+    mfc_headers = getattr(golden_headers, "MFC_5M_R2001_E1985")
+    generate_header_alignment_report = getattr(
+        services_header_report, "generate_header_alignment_report"
+    )
+
     os.environ.setdefault("HEADERS_LLM_STRICT", "true")
 
-    pdf_path = REPO_ROOT / "MFC-5M_R2001_E1985.pdf"
+    pdf_path = repo_root / "MFC-5M_R2001_E1985.pdf"
     if not pdf_path.exists():
         raise SystemExit(f"PDF document not found: {pdf_path}")
 
-    report = generate_header_alignment_report(pdf_path, MFC_5M_R2001_E1985)
+    report = generate_header_alignment_report(pdf_path, mfc_headers)
 
-    reports_dir = REPO_ROOT / "reports"
+    reports_dir = repo_root / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
     output_path = reports_dir / "MFC-5M_R2001_E1985_header_report.json"
     output_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")

@@ -9,6 +9,7 @@ from backend.config import (
 )
 
 from .extractors._normalize import (
+    SPACED_DOTS_RE,
     score_confusable_one_ratio,
     score_spaced_dots_ratio,
 )
@@ -26,9 +27,11 @@ def _should_fallback_to_pdfium(pdf_path: str) -> bool:
         return False
     spaced = score_spaced_dots_ratio(text)
     confusable = score_confusable_one_ratio(text)
+    spaced_hits = len(SPACED_DOTS_RE.findall(text))
     return (
         spaced >= PARSER_NOISE_SPACED_DOT_THRESH
         or confusable >= PARSER_NOISE_CONFUSABLE_1_THRESH
+        or spaced_hits >= 50
     )
 
 

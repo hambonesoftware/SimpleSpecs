@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional, Set, Tuple
+from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from rapidfuzz.fuzz import token_set_ratio
 
@@ -12,8 +12,6 @@ from backend.config import (
     HEADERS_SUPPRESS_TOC,
     HEADERS_SUPPRESS_RUNNING,
     HEADERS_FUZZY_THRESHOLD,
-    HEADERS_NORMALIZE_CONFUSABLES,
-    HEADERS_WINDOW_PAD_LINES,
     HEADERS_BAND_LINES,
     HEADERS_L1_REQUIRE_NUMERIC,
     HEADERS_L1_LOOKAHEAD_CHILD_HINT,

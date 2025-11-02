@@ -34,7 +34,7 @@ def _group_words_into_lines(words: list) -> List[Dict[str, object]]:
         buffer = []
 
     for word in words:
-        x0, y0, x1, y1 = word[0], word[1], word[2], word[3]
+        y0 = word[1]
         if current_y is None:
             current_y = y0
             buffer = [word]

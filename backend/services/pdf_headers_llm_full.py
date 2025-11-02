@@ -93,7 +93,7 @@ async def get_headers_llm_full(
     *,
     settings: Settings,
     excluded_pages: Iterable[int] = (),
-) -> List[Dict]:
+) -> LLMFullHeadersResult:
     """Return LLM extracted headers for a document."""
 
     cache_file = _cache_path(settings.headers_llm_cache_dir, doc_hash)
@@ -101,7 +101,28 @@ async def get_headers_llm_full(
         cached = json.loads(cache_file.read_text(encoding="utf-8"))
         headers = cached.get("headers")
         if isinstance(headers, list):
-            return headers  # type: ignore[return-value]
+            cleaned = [
+                {
+                    "text": str(entry.get("text", "")),
+                    "number": entry.get("number"),
+                    "level": int(entry.get("level", 1) or 1),
+                }
+                for entry in headers
+                if isinstance(entry, dict)
+            ]
+            return LLMFullHeadersResult(
+                headers=cleaned,
+                raw_responses=[
+                    str(entry)
+                    for entry in cached.get("raw_responses", [])
+                    if isinstance(entry, str)
+                ],
+                fenced_blocks=[
+                    str(entry)
+                    for entry in cached.get("fenced_blocks", [])
+                    if isinstance(entry, str)
+                ],
+            )
 
     text_blocks = _build_text_blocks(lines, excluded_pages)
     parts = split_by_token_limit(
@@ -189,7 +210,15 @@ async def get_headers_llm_full(
         )
 
     cache_file.write_text(
-        json.dumps({"headers": deduped}, ensure_ascii=False, indent=2),
+        json.dumps(
+            {
+                "headers": deduped,
+                "raw_responses": raw_responses,
+                "fenced_blocks": fenced_blocks,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
 

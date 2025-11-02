@@ -396,6 +396,10 @@ class LLMService:
         )
 
 
+# Backwards compatibility hook patched in tests; real pipeline uses :class:`LLMService`.
+get_outline_for_headers = None  # type: ignore[assignment]
+
+
 __all__ = [
     "LLMCircuitOpenError",
     "LLMProviderError",

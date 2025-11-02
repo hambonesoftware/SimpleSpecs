@@ -8,8 +8,8 @@ from typing import Dict, Iterable, Iterator, List, TypedDict
 
 from sqlmodel import select
 
+from .. import config as config_module
 from .. import models as models_pkg
-from ..config import get_settings
 
 
 class Line(TypedDict):
@@ -157,7 +157,7 @@ def iter_lines(session, document_id: int) -> Iterable[Line]:
     if page_layout_lines:
         return page_layout_lines
 
-    settings = get_settings()
+    settings = config_module.get_settings()
     candidates: List[Path] = []
     if settings is not None:
         candidates.append(settings.export_dir / str(document_id) / "lines.jsonl")
