@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import pytest
+from pytest import CaptureFixture
 
 from backend.config import Settings
 from backend.services.llm import (
@@ -125,3 +126,24 @@ def test_llm_service_circuit_breaker(tmp_path: Path) -> None:
             messages=[{"role": "user", "content": "outline"}], fence="#headers#"
         )
     assert attempts["count"] == 2 * (service._max_retries + 1)  # type: ignore[attr-defined]
+
+
+def test_llm_service_echo_response_prints_full_message(
+    tmp_path: Path, capsys: CaptureFixture[str]
+) -> None:
+    """The stdout echo should include the complete response without truncation."""
+
+    settings = build_settings(tmp_path)
+    service = LLMService(
+        settings,
+        transport_overrides={},
+        sleep=lambda _: None,
+        time_func=lambda: 0.0,
+    )
+
+    message = "First line of response\nSecond line with unicode ✓"
+    service._echo_response(message)
+
+    captured = capsys.readouterr()
+    assert captured.out == message + "\n"
+    assert captured.err == ""
