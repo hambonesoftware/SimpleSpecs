@@ -17,7 +17,11 @@ from .header_locate_vector import locate_headers_with_vectors
 from .header_locator import locate_headers_in_lines
 from .headers_llm_strict import align_headers_llm_strict
 from .headers_sequential import number_key
-from .pdf_headers_llm_full import LLMFullHeadersResult, get_headers_llm_full
+from .pdf_headers_llm_full import (
+    LLMFullHeadersParseError,
+    LLMFullHeadersResult,
+    get_headers_llm_full,
+)
 from .pdf_native import collect_line_metrics
 from .section_chunking import single_chunks_from_headers
 from ..utils.logging import configure_logging
@@ -104,6 +108,7 @@ async def extract_headers_and_chunks(
     mode_used = "llm_full"
     messages: list[str] = []
     fenced_text: str | None = None
+    llm_failure_raw_response: str | None = None
 
     doc_id = document.id if document and document.id is not None else None
     cache_inputs = {
@@ -131,6 +136,7 @@ async def extract_headers_and_chunks(
             messages = list(payload.get("messages", []))
             mode_used = payload.get("mode", "cache")
             fenced_text = payload.get("fenced_text")
+            llm_failure_raw_response = payload.get("llm_failure_raw_response")
             matched_titles = {str(item.get("text", "")).strip() for item in located}
             expected_titles = [str(item.get("text", "")) for item in (native_headers or [])]
             unresolved = [
@@ -171,6 +177,7 @@ async def extract_headers_and_chunks(
                 "excluded_pages": sorted(excluded_pages),
                 "messages": messages,
                 "fenced_text": fenced_text,
+                "llm_failure_raw_response": llm_failure_raw_response,
             }, tracer
 
     if settings.headers_mode.lower() == "llm_full":
@@ -266,11 +273,34 @@ async def extract_headers_and_chunks(
                     parts=llm_result.raw_responses,
                     fenced=llm_result.fenced_blocks,
                 )
+        except LLMFullHeadersParseError as exc:
+            LOGGER.warning("LLM response parse failed: %s", exc)
+            located_headers = []
+            mode_used = "llm_full_error"
+            llm_failure_raw_response = exc.content
+            fenced_text = exc.content
+            message = (
+                "LLM header extraction returned an invalid response; raw output "
+                "is available for review."
+            )
+            messages.append(message)
+            if tracer:
+                tracer.ev("llm_outline_received", count=0, headers=[])
+                tracer.ev(
+                    "fallback_triggered",
+                    method="llm_full",
+                    reason="invalid_response",
+                    message=str(exc),
+                )
         except Exception as exc:  # pragma: no cover - network/runtime dependent
             LOGGER.warning("LLM header extraction failed: %s", exc)
             located_headers = []
             messages.append(_format_llm_failure(exc))
             mode_used = "llm_full_error"
+            raw_from_exc = getattr(exc, "content", None)
+            if isinstance(raw_from_exc, str) and raw_from_exc.strip():
+                llm_failure_raw_response = raw_from_exc
+                fenced_text = raw_from_exc
             if tracer:
                 tracer.ev("llm_outline_received", count=0, headers=[])
                 tracer.ev(
@@ -308,6 +338,7 @@ async def extract_headers_and_chunks(
                 "messages": messages,
                 "doc_hash": doc_hash,
                 "fenced_text": fenced_text,
+                "llm_failure_raw_response": llm_failure_raw_response,
             },
         )
 
@@ -346,6 +377,7 @@ async def extract_headers_and_chunks(
         "excluded_pages": sorted(excluded_pages),
         "messages": messages,
         "fenced_text": fenced_text,
+        "llm_failure_raw_response": llm_failure_raw_response,
     }, tracer
 
 

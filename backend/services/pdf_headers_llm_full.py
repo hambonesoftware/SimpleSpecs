@@ -46,6 +46,15 @@ def _cache_path(cache_dir: Path, doc_hash: str) -> Path:
     return cache_dir / f"{doc_hash}.simpleheaders.json"
 
 
+class LLMFullHeadersParseError(RuntimeError):
+    """Raised when the LLM returns an unparsable headers payload."""
+
+    def __init__(self, message: str, *, content: str, part_index: int | None = None) -> None:
+        super().__init__(message)
+        self.content = content
+        self.part_index = part_index
+
+
 def _extract_fenced_json(content: str) -> tuple[Dict, str]:
     match = re.search(
         re.escape(FENCE_START) + r"(.*?)" + re.escape(FENCE_END), content, re.S
@@ -188,7 +197,14 @@ async def get_headers_llm_full(
             content.strip(),
         )
         raw_responses.append(content)
-        data, fenced_block = _extract_fenced_json(content)
+        try:
+            data, fenced_block = _extract_fenced_json(content)
+        except ValueError as exc:  # pragma: no cover - requires malformed provider output
+            raise LLMFullHeadersParseError(
+                str(exc) or "LLM response missing fenced SIMPLEHEADERS JSON",
+                content=content,
+                part_index=index,
+            ) from exc
         fenced_blocks.append(fenced_block)
         merged.extend(data.get("headers", []))
 
@@ -232,6 +248,7 @@ async def get_headers_llm_full(
 __all__ = [
     "LLMFullHeadersResult",
     "get_headers_llm_full",
+    "LLMFullHeadersParseError",
     "FENCE_START",
     "FENCE_END",
 ]

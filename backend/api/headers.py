@@ -181,6 +181,10 @@ async def compute_headers(
         "excluded_pages": orchestrated.get("excluded_pages", []),
     }
 
+    failure_raw = orchestrated.get("llm_failure_raw_response")
+    if isinstance(failure_raw, str) and failure_raw:
+        response_payload["llm_failure_raw_response"] = failure_raw
+
     if trace and tracer is not None:
         response_payload["trace"] = {
             "events": tracer.as_list(),

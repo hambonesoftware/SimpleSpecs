@@ -212,6 +212,24 @@ export function renderHeaderRawResponse(container, text) {
 
 export function renderHeaderOutline(container, payload, options = {}) {
   if (!container) return;
+  if (
+    payload?.mode === 'llm_full_error' &&
+    payload?.llm_failure_raw_response &&
+    String(payload.llm_failure_raw_response).trim()
+  ) {
+    const message = document.createElement('p');
+    message.className = 'panel-error';
+    message.textContent =
+      'LLM returned an invalid response. Review the raw output below to diagnose the fault.';
+
+    const pre = document.createElement('pre');
+    pre.className = 'raw-response';
+    pre.textContent = String(payload.llm_failure_raw_response);
+
+    container.innerHTML = '';
+    container.append(message, pre);
+    return;
+  }
   if (Array.isArray(payload?.simpleheaders) && payload.simpleheaders.length && Array.isArray(payload.sections) && payload.sections.length) {
     renderSimpleHeaders(container, payload, options);
     return;
