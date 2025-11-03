@@ -261,12 +261,11 @@ async def extract_headers_and_chunks(
                     count=len(llm_headers),
                     headers=llm_headers,
                 )
-                if app_config.HEADERS_TRACE_EMBED_RESPONSE:
-                    tracer.ev(
-                        "llm_raw_response",
-                        parts=llm_result.raw_responses,
-                        fenced=llm_result.fenced_blocks,
-                    )
+                tracer.ev(
+                    "llm_raw_response",
+                    parts=llm_result.raw_responses,
+                    fenced=llm_result.fenced_blocks,
+                )
         except Exception as exc:  # pragma: no cover - network/runtime dependent
             LOGGER.warning("LLM header extraction failed: %s", exc)
             located_headers = []

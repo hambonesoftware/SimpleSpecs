@@ -63,6 +63,8 @@ class HeaderTracer:
         events = self.as_list()
         metadata: Dict[str, Any] = {}
         llm_headers: List[Dict[str, Any]] = []
+        llm_raw_responses: List[str] = []
+        llm_fenced_blocks: List[str] = []
         final_outline: Dict[str, Any] = {}
         decisions: List[Dict[str, Any]] = []
         elapsed: float | None = None
@@ -93,6 +95,22 @@ class HeaderTracer:
                 }
                 if "elapsed_s" in event:
                     elapsed = event.get("elapsed_s")
+            elif event_type == "llm_raw_response":
+                raw_parts = event.get("parts")
+                if isinstance(raw_parts, list):
+                    llm_raw_responses.extend(
+                        str(part) for part in raw_parts if isinstance(part, str)
+                    )
+                elif isinstance(raw_parts, str):
+                    llm_raw_responses.append(raw_parts)
+
+                fenced_parts = event.get("fenced")
+                if isinstance(fenced_parts, list):
+                    llm_fenced_blocks.extend(
+                        str(entry) for entry in fenced_parts if isinstance(entry, str)
+                    )
+                elif isinstance(fenced_parts, str):
+                    llm_fenced_blocks.append(fenced_parts)
             elif event_type == "end_run":
                 if elapsed is None:
                     elapsed = event.get("elapsed_s")
@@ -105,6 +123,8 @@ class HeaderTracer:
             "run_id": self.run_id,
             "metadata": metadata,
             "llm_headers": llm_headers,
+            "llm_raw_responses": llm_raw_responses,
+            "llm_fenced_blocks": llm_fenced_blocks,
             "decisions": decisions,
             "final_outline": final_outline,
             "elapsed_s": elapsed,
