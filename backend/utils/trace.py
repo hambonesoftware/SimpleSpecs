@@ -36,6 +36,11 @@ class HeaderTracer:
     def ev(self, event_type: str, **data: Any) -> None:
         self.events.append(TraceEvent(t=time.time(), type=event_type, data=data))
 
+    def log_call(self, name: str, **context: Any) -> None:
+        """Record an invocation of *name* preserving call order."""
+
+        self.ev("function_call", name=name, **context)
+
     def flush_jsonl(self) -> str:
         with open(self._path, "w", encoding="utf-8") as handle:
             for event in self.events:
@@ -69,6 +74,7 @@ class HeaderTracer:
         final_outline: Dict[str, Any] = {}
         decisions: List[Dict[str, Any]] = []
         elapsed: float | None = None
+        function_calls: List[Dict[str, Any]] = []
 
         decision_types = {
             "candidate_found",
@@ -128,6 +134,19 @@ class HeaderTracer:
                 if elapsed is None:
                     elapsed = event.get("elapsed_s")
                 final_outline.setdefault("mode", event.get("mode"))
+            elif event_type == "function_call":
+                call_entry: Dict[str, Any] = {
+                    "order": len(function_calls) + 1,
+                    "name": str(event.get("name", "")),
+                }
+                context = {
+                    key: value
+                    for key, value in event.items()
+                    if key not in {"t", "type", "name"}
+                }
+                if context:
+                    call_entry["context"] = context
+                function_calls.append(call_entry)
 
             if event_type in decision_types:
                 decisions.append(event)
@@ -142,6 +161,7 @@ class HeaderTracer:
             "decisions": decisions,
             "final_outline": final_outline,
             "elapsed_s": elapsed,
+            "function_calls": function_calls,
         }
 
 

@@ -174,6 +174,9 @@ def align_headers_llm_strict(
 ) -> List[Dict[str, Any]]:
     """Align LLM-provided headers to body lines using strict heuristics."""
 
+    if tracer is not None:
+        tracer.log_call(f"{__name__}.align_headers_llm_strict")
+
     lines_list = list(lines_input)
     raw_lines = fuse_two_line_appendix_candidates(lines_list)
 
@@ -490,6 +493,9 @@ def _align_headers_to_sections(
     *,
     fenced_text: str | None,
 ) -> Dict[str, Any]:
+    if tracer is not None:
+        tracer.log_call(f"{__name__}._align_headers_to_sections")
+
     resolved = align_headers_llm_strict(llm_headers, lines_list, tracer=tracer)
 
     located: List[Dict[str, Any]] = []
@@ -583,6 +589,9 @@ def extract_headers_and_sections_strict(
 ) -> Dict[str, Any]:
     """Locate headers and construct contiguous section ranges."""
 
+    if tracer is not None:
+        tracer.log_call(f"{__name__}.extract_headers_and_sections_strict")
+
     lines_list = list(lines)
     full_text = "\n".join(str(line.get("text", "")) for line in lines_list)
 
@@ -658,6 +667,9 @@ def run_strict_headers_pipeline(
             file_id=file_id,
             metadata={"provider": provider, "model": model},
         )
+
+    if tracer is not None:
+        tracer.log_call(f"{__name__}.run_strict_headers_pipeline")
 
     outline_loader = getattr(llm_module, "get_outline_for_headers", None)
     if callable(outline_loader):

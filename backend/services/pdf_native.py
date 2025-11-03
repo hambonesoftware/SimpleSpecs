@@ -513,6 +513,9 @@ def collect_line_metrics(
 ) -> tuple[list[dict], set[int], str]:
     """Return flattened line metrics for the provided PDF bytes."""
 
+    if tracer:
+        tracer.log_call(f"{__name__}.collect_line_metrics")
+
     doc_hash = hashlib.sha256(document_bytes).hexdigest()
     excluded_pages: set[int] = set()
     header_counter: Counter[str] = Counter()

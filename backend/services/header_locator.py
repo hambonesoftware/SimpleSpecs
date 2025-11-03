@@ -35,6 +35,8 @@ def _locate_headers_legacy(
     tracer: HeaderTracer | None = None,
 ) -> List[Dict]:
     excluded = set(excluded_pages)
+    if tracer:
+        tracer.log_call(f"{__name__}._locate_headers_legacy")
     usable: list[dict] = []
     for line in lines:
         if line.get("page") in excluded:
@@ -194,6 +196,9 @@ def locate_headers_in_lines(
     similarity_threshold: float = 0.88,
     tracer: HeaderTracer | None = None,
 ) -> List[Dict]:
+    if tracer:
+        tracer.log_call(f"{__name__}.locate_headers_in_lines")
+
     strategy = os.getenv("HEADERS_ALIGN_STRATEGY", HEADERS_ALIGN_STRATEGY).strip().lower()
 
     index_buckets: dict[tuple[str, str], list[int]] = {}

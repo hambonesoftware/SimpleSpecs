@@ -394,6 +394,9 @@ def build_top_level_windows(
     toc_pages: set[int],
     tracer: HeaderTracer | None = None,
 ) -> Dict[str, Tuple[int, int, int]]:
+    if tracer:
+        tracer.log_call(f"{__name__}.build_top_level_windows")
+
     anchors: Dict[str, int] = {}
     cursor_idx = -1
     pos_map = page_positions(lines)
@@ -504,6 +507,9 @@ def find_in_window(
     pos_map: Optional[Dict[int, Dict[int, int]]] = None,
     cursor_idx: Optional[int] = None,
 ) -> Optional[int]:
+    if tracer:
+        tracer.log_call(f"{__name__}.find_in_window")
+
     re_num = compile_number_regex(target.num)
     want = normalize(f"{target.num} {target.title}", confusables=confusables)
     best: Optional[Tuple[int, int]] = None
@@ -882,6 +888,9 @@ def align_headers_sequential(
     tracer: HeaderTracer | None = None,
 ) -> List[Dict]:
     """Return aligned headers with positional metadata using sequential search."""
+
+    if tracer:
+        tracer.log_call(f"{__name__}.align_headers_sequential")
 
     lines: List[Line] = []
     for raw in lines_input:

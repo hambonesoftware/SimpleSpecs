@@ -69,6 +69,8 @@ async def extract_headers_and_chunks(
 
     trace_requested = want_trace or app_config.HEADERS_TRACE
     tracer: HeaderTracer | None = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR)
+    if tracer:
+        tracer.log_call(f"{__name__}.extract_headers_and_chunks")
 
     start_time = time.perf_counter()
     if tracer:
@@ -96,6 +98,10 @@ async def extract_headers_and_chunks(
                 count=len(native_headers),
             )
 
+    if tracer:
+        tracer.log_call(
+            f"{collect_line_metrics.__module__}.{collect_line_metrics.__qualname__}"
+        )
     lines, excluded_pages, doc_hash = collect_line_metrics(
         document_bytes,
         metadata,
@@ -203,6 +209,10 @@ async def extract_headers_and_chunks(
             vector_attempted = False
             if settings.headers_llm_strict and llm_headers:
                 strict_attempted = True
+                if tracer:
+                    tracer.log_call(
+                        f"{align_headers_llm_strict.__module__}.{align_headers_llm_strict.__qualname__}"
+                    )
                 strict_resolved = align_headers_llm_strict(
                     llm_headers,
                     lines,
@@ -227,6 +237,10 @@ async def extract_headers_and_chunks(
             if not located_headers and settings.header_locate_use_embeddings:
                 try:
                     vector_attempted = True
+                    if tracer:
+                        tracer.log_call(
+                            f"{locate_headers_with_vectors.__module__}.{locate_headers_with_vectors.__qualname__}"
+                        )
                     located_headers = locate_headers_with_vectors(
                         session=session,
                         document_id=doc_id or 0,
@@ -253,6 +267,10 @@ async def extract_headers_and_chunks(
                     located_headers = []
 
             if not located_headers:
+                if tracer:
+                    tracer.log_call(
+                        f"{locate_headers_in_lines.__module__}.{locate_headers_in_lines.__qualname__}"
+                    )
                 located_headers = locate_headers_in_lines(
                     llm_headers,
                     lines,
@@ -329,6 +347,10 @@ async def extract_headers_and_chunks(
             )
             tracer.ev("llm_outline_received", count=0, headers=[])
 
+    if tracer:
+        tracer.log_call(
+            f"{_enforce_header_sequence.__module__}.{_enforce_header_sequence.__qualname__}"
+        )
     located_headers, sections = _enforce_header_sequence(
         located_headers, lines, tracer=tracer
     )
@@ -403,6 +425,9 @@ def _enforce_header_sequence(
     tracer: HeaderTracer | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """Ensure located headers follow sequential numbering when possible."""
+
+    if tracer:
+        tracer.log_call(f"{__name__}._enforce_header_sequence")
 
     if not headers:
         return [], []
