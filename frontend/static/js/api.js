@@ -97,6 +97,21 @@ function buildUrl(path) {
   return `${base}${normalisedPath}`;
 }
 
+function serialiseQuery(params = {}) {
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null) continue;
+    // Treat booleans as 1/0 to make server-side parsing trivial
+    if (typeof v === "boolean") {
+      sp.set(k, v ? "1" : "0");
+    } else {
+      sp.set(k, String(v));
+    }
+  }
+  const s = sp.toString();
+  return s ? `?${s}` : "";
+}
+
 async function request(path, options = {}) {
   const url = buildUrl(path);
   const config = {
@@ -168,9 +183,22 @@ export async function parseDocument(documentId) {
   return request(`/api/parse/${documentId}`, { method: "POST" });
 }
 
-export async function fetchHeaders(documentId) {
-  return request(`/api/headers/${documentId}`, { method: "POST" });
+/**
+ * Fetch headers for a document.
+ * Options:
+ *   - force (boolean): if true, appends ?force=1 to bypass caches and fetch fresh LLM headers.
+ *   - trace (boolean|number): if truthy, appends ?trace=1 to enable server-side tracing.
+ *   - extra (object): additional query params to include (e.g., { align: "sequential" }).
+ */
+export async function fetchHeaders(documentId, opts = {}) {
+  const params = new URLSearchParams();
+  if (opts.force) params.set('force', '1');
+  if (opts.trace) params.set('trace', '1');
+  const qs = params.toString();
+  const path = qs ? `/api/headers/${documentId}?${qs}` : `/api/headers/${documentId}`;
+  return request(path, { method: "POST" });
 }
+
 
 export async function fetchSectionText(documentId, start, end, sectionKey) {
   const params = new URLSearchParams({ start: String(start), end: String(end) });

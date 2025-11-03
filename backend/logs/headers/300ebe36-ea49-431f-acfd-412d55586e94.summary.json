@@ -1,0 +1,43 @@
+{
+  "run_id": "300ebe36-ea49-431f-acfd-412d55586e94",
+  "metadata": {
+    "mode": "llm_full",
+    "file_id": 1,
+    "cfg": {
+      "suppress_toc": true,
+      "suppress_running": true
+    },
+    "metadata": {
+      "filename": "MFC-9M_R2001_E1988.pdf",
+      "document_id": 1
+    }
+  },
+  "llm_headers": [],
+  "llm_requests": [],
+  "llm_raw_responses": [],
+  "llm_fenced_blocks": [],
+  "decisions": [],
+  "final_outline": {
+    "headers": [],
+    "sections": [],
+    "mode": "llm_full_error",
+    "messages": [
+      "LLM header extraction unavailable."
+    ]
+  },
+  "elapsed_s": 0.8521263000002364,
+  "function_calls": [
+    {
+      "order": 1,
+      "name": "backend.services.headers_orchestrator.extract_headers_and_chunks"
+    },
+    {
+      "order": 2,
+      "name": "backend.services.pdf_native.collect_line_metrics"
+    },
+    {
+      "order": 3,
+      "name": "backend.services.pdf_native.collect_line_metrics"
+    }
+  ]
+}

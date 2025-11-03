@@ -1,0 +1,926 @@
+{
+  "run_id": "038446da-72b8-46c1-9bb3-756d136b27fc",
+  "metadata": {
+    "mode": "llm_full",
+    "file_id": 1,
+    "cfg": {
+      "suppress_toc": true,
+      "suppress_running": true
+    },
+    "metadata": {
+      "filename": "MFC-9M_R2001_E1988.pdf"
+    }
+  },
+  "llm_headers": [
+    {
+      "text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+      "number": null,
+      "level": 1,
+      "page": 8,
+      "line_idx": 6,
+      "global_idx": 341
+    },
+    {
+      "text": "GENERAL",
+      "number": "1",
+      "level": 1,
+      "page": 8,
+      "line_idx": 8,
+      "global_idx": 343
+    },
+    {
+      "text": "Scope and Field of Application",
+      "number": "1.1",
+      "level": 2,
+      "page": 8,
+      "line_idx": 11,
+      "global_idx": 346
+    },
+    {
+      "text": "References",
+      "number": "1.2",
+      "level": 2,
+      "page": 8,
+      "line_idx": 74,
+      "global_idx": 409
+    },
+    {
+      "text": "Definitions",
+      "number": "1.3",
+      "level": 2,
+      "page": 8,
+      "line_idx": 48,
+      "global_idx": 383
+    },
+    {
+      "text": "Symbols",
+      "number": "1.4",
+      "level": 2,
+      "page": 8,
+      "line_idx": 48,
+      "global_idx": 383
+    },
+    {
+      "text": "PRINCIPLES",
+      "number": "2",
+      "level": 1,
+      "page": 9,
+      "line_idx": 11,
+      "global_idx": 434
+    },
+    {
+      "text": "Statement of the Principles",
+      "number": "2.1",
+      "level": 2,
+      "page": 9,
+      "line_idx": 34,
+      "global_idx": 457
+    },
+    {
+      "text": "Static Weighing",
+      "number": "2.1.1",
+      "level": 3,
+      "page": 9,
+      "line_idx": 36,
+      "global_idx": 459
+    },
+    {
+      "text": "Dynamic Weighing",
+      "number": "2.1.2",
+      "level": 3,
+      "page": 9,
+      "line_idx": 68,
+      "global_idx": 491
+    },
+    {
+      "text": "Comparison of Instantaneous and Mean Flow Rate",
+      "number": "2.1.3",
+      "level": 3,
+      "page": 9,
+      "line_idx": 83,
+      "global_idx": 506
+    },
+    {
+      "text": "Accuracy of the Method",
+      "number": "2.2",
+      "level": 2,
+      "page": 22,
+      "line_idx": 48,
+      "global_idx": 1278
+    },
+    {
+      "text": "Overall Uncertainty on the Weighing Measurement",
+      "number": "2.2.1",
+      "level": 3,
+      "page": 9,
+      "line_idx": 13,
+      "global_idx": 436
+    },
+    {
+      "text": "Requirements for Accurate Measurements",
+      "number": "2.2.2",
+      "level": 3,
+      "page": 9,
+      "line_idx": 21,
+      "global_idx": 444
+    },
+    {
+      "text": "APPARATUS",
+      "number": "3",
+      "level": 1,
+      "page": 9,
+      "line_idx": 60,
+      "global_idx": 483
+    },
+    {
+      "text": "Diverter",
+      "number": "3.1",
+      "level": 2,
+      "page": 9,
+      "line_idx": 68,
+      "global_idx": 491
+    },
+    {
+      "text": "Time-Measuring Apparatus",
+      "number": "3.2",
+      "level": 2,
+      "page": 16,
+      "line_idx": 51,
+      "global_idx": 842
+    },
+    {
+      "text": "Weighing Tank",
+      "number": "3.3",
+      "level": 2,
+      "page": 17,
+      "line_idx": 16,
+      "global_idx": 875
+    },
+    {
+      "text": "Weighing Device",
+      "number": "3.4",
+      "level": 2,
+      "page": 18,
+      "line_idx": 11,
+      "global_idx": 949
+    },
+    {
+      "text": "Auxiliary Measurements",
+      "number": "3.5",
+      "level": 2,
+      "page": 18,
+      "line_idx": 71,
+      "global_idx": 1009
+    },
+    {
+      "text": "PROCEDURE",
+      "number": "4",
+      "level": 1,
+      "page": 18,
+      "line_idx": 81,
+      "global_idx": 1019
+    },
+    {
+      "text": "Static Weighing Method",
+      "number": "4.1",
+      "level": 2,
+      "page": 22,
+      "line_idx": 42,
+      "global_idx": 1272
+    },
+    {
+      "text": "Dynamic Weighing Method",
+      "number": "4.2",
+      "level": 2,
+      "page": 23,
+      "line_idx": 32,
+      "global_idx": 1345
+    },
+    {
+      "text": "Common Provisions",
+      "number": "4.3",
+      "level": 2,
+      "page": 20,
+      "line_idx": 5,
+      "global_idx": 1111
+    },
+    {
+      "text": "CALCULATION OF FLOW RATE",
+      "number": "5",
+      "level": 1,
+      "page": 20,
+      "line_idx": 26,
+      "global_idx": 1132
+    },
+    {
+      "text": "Calculation of Mass Flow Rate",
+      "number": "5.1",
+      "level": 2,
+      "page": 20,
+      "line_idx": 27,
+      "global_idx": 1133
+    },
+    {
+      "text": "Calculation of Volume Flow Rate",
+      "number": "5.2",
+      "level": 2,
+      "page": 20,
+      "line_idx": 27,
+      "global_idx": 1133
+    },
+    {
+      "text": "UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+      "number": "6",
+      "level": 1,
+      "page": 20,
+      "line_idx": 50,
+      "global_idx": 1156
+    },
+    {
+      "text": "APPENDIX A",
+      "number": "A",
+      "level": 1,
+      "page": 20,
+      "line_idx": 53,
+      "global_idx": 1159
+    },
+    {
+      "text": "Corrections on the Measurement of Filling Time",
+      "number": "A",
+      "level": 2,
+      "page": 20,
+      "line_idx": 53,
+      "global_idx": 1159
+    },
+    {
+      "text": "Static Weighing Method",
+      "number": "A1",
+      "level": 3,
+      "page": 22,
+      "line_idx": 42,
+      "global_idx": 1272
+    },
+    {
+      "text": "Method 1",
+      "number": "A1.1",
+      "level": 4,
+      "page": 22,
+      "line_idx": 42,
+      "global_idx": 1272
+    },
+    {
+      "text": "Method 2",
+      "number": "A1.2",
+      "level": 4,
+      "page": 22,
+      "line_idx": 48,
+      "global_idx": 1278
+    },
+    {
+      "text": "Dynamic Weighing Method",
+      "number": "A2",
+      "level": 3,
+      "page": 23,
+      "line_idx": 32,
+      "global_idx": 1345
+    },
+    {
+      "text": "APPENDIX B",
+      "number": "B",
+      "level": 1,
+      "page": 25,
+      "line_idx": 5,
+      "global_idx": 1428
+    },
+    {
+      "text": "Density of Pure Water",
+      "number": "B",
+      "level": 2,
+      "page": 25,
+      "line_idx": 5,
+      "global_idx": 1428
+    }
+  ],
+  "decisions": [],
+  "final_outline": {
+    "headers": [
+      {
+        "text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+        "number": null,
+        "level": 1,
+        "page": 8,
+        "line_idx": 6,
+        "global_idx": 341
+      },
+      {
+        "text": "GENERAL",
+        "number": "1",
+        "level": 1,
+        "page": 8,
+        "line_idx": 8,
+        "global_idx": 343
+      },
+      {
+        "text": "Scope and Field of Application",
+        "number": "1.1",
+        "level": 2,
+        "page": 8,
+        "line_idx": 11,
+        "global_idx": 346
+      },
+      {
+        "text": "References",
+        "number": "1.2",
+        "level": 2,
+        "page": 8,
+        "line_idx": 74,
+        "global_idx": 409
+      },
+      {
+        "text": "Definitions",
+        "number": "1.3",
+        "level": 2,
+        "page": 8,
+        "line_idx": 48,
+        "global_idx": 383
+      },
+      {
+        "text": "Symbols",
+        "number": "1.4",
+        "level": 2,
+        "page": 8,
+        "line_idx": 48,
+        "global_idx": 383
+      },
+      {
+        "text": "PRINCIPLES",
+        "number": "2",
+        "level": 1,
+        "page": 9,
+        "line_idx": 11,
+        "global_idx": 434
+      },
+      {
+        "text": "Statement of the Principles",
+        "number": "2.1",
+        "level": 2,
+        "page": 9,
+        "line_idx": 34,
+        "global_idx": 457
+      },
+      {
+        "text": "Static Weighing",
+        "number": "2.1.1",
+        "level": 3,
+        "page": 9,
+        "line_idx": 36,
+        "global_idx": 459
+      },
+      {
+        "text": "Dynamic Weighing",
+        "number": "2.1.2",
+        "level": 3,
+        "page": 9,
+        "line_idx": 68,
+        "global_idx": 491
+      },
+      {
+        "text": "Comparison of Instantaneous and Mean Flow Rate",
+        "number": "2.1.3",
+        "level": 3,
+        "page": 9,
+        "line_idx": 83,
+        "global_idx": 506
+      },
+      {
+        "text": "Accuracy of the Method",
+        "number": "2.2",
+        "level": 2,
+        "page": 22,
+        "line_idx": 48,
+        "global_idx": 1278
+      },
+      {
+        "text": "Overall Uncertainty on the Weighing Measurement",
+        "number": "2.2.1",
+        "level": 3,
+        "page": 9,
+        "line_idx": 13,
+        "global_idx": 436
+      },
+      {
+        "text": "Requirements for Accurate Measurements",
+        "number": "2.2.2",
+        "level": 3,
+        "page": 9,
+        "line_idx": 21,
+        "global_idx": 444
+      },
+      {
+        "text": "APPARATUS",
+        "number": "3",
+        "level": 1,
+        "page": 9,
+        "line_idx": 60,
+        "global_idx": 483
+      },
+      {
+        "text": "Diverter",
+        "number": "3.1",
+        "level": 2,
+        "page": 9,
+        "line_idx": 68,
+        "global_idx": 491
+      },
+      {
+        "text": "Time-Measuring Apparatus",
+        "number": "3.2",
+        "level": 2,
+        "page": 16,
+        "line_idx": 51,
+        "global_idx": 842
+      },
+      {
+        "text": "Weighing Tank",
+        "number": "3.3",
+        "level": 2,
+        "page": 17,
+        "line_idx": 16,
+        "global_idx": 875
+      },
+      {
+        "text": "Weighing Device",
+        "number": "3.4",
+        "level": 2,
+        "page": 18,
+        "line_idx": 11,
+        "global_idx": 949
+      },
+      {
+        "text": "Auxiliary Measurements",
+        "number": "3.5",
+        "level": 2,
+        "page": 18,
+        "line_idx": 71,
+        "global_idx": 1009
+      },
+      {
+        "text": "PROCEDURE",
+        "number": "4",
+        "level": 1,
+        "page": 18,
+        "line_idx": 81,
+        "global_idx": 1019
+      },
+      {
+        "text": "Static Weighing Method",
+        "number": "4.1",
+        "level": 2,
+        "page": 22,
+        "line_idx": 42,
+        "global_idx": 1272
+      },
+      {
+        "text": "Dynamic Weighing Method",
+        "number": "4.2",
+        "level": 2,
+        "page": 23,
+        "line_idx": 32,
+        "global_idx": 1345
+      },
+      {
+        "text": "Common Provisions",
+        "number": "4.3",
+        "level": 2,
+        "page": 20,
+        "line_idx": 5,
+        "global_idx": 1111
+      },
+      {
+        "text": "CALCULATION OF FLOW RATE",
+        "number": "5",
+        "level": 1,
+        "page": 20,
+        "line_idx": 26,
+        "global_idx": 1132
+      },
+      {
+        "text": "Calculation of Mass Flow Rate",
+        "number": "5.1",
+        "level": 2,
+        "page": 20,
+        "line_idx": 27,
+        "global_idx": 1133
+      },
+      {
+        "text": "Calculation of Volume Flow Rate",
+        "number": "5.2",
+        "level": 2,
+        "page": 20,
+        "line_idx": 27,
+        "global_idx": 1133
+      },
+      {
+        "text": "UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+        "number": "6",
+        "level": 1,
+        "page": 20,
+        "line_idx": 50,
+        "global_idx": 1156
+      },
+      {
+        "text": "APPENDIX A",
+        "number": "A",
+        "level": 1,
+        "page": 20,
+        "line_idx": 53,
+        "global_idx": 1159
+      },
+      {
+        "text": "Corrections on the Measurement of Filling Time",
+        "number": "A",
+        "level": 2,
+        "page": 20,
+        "line_idx": 53,
+        "global_idx": 1159
+      },
+      {
+        "text": "Static Weighing Method",
+        "number": "A1",
+        "level": 3,
+        "page": 22,
+        "line_idx": 42,
+        "global_idx": 1272
+      },
+      {
+        "text": "Method 1",
+        "number": "A1.1",
+        "level": 4,
+        "page": 22,
+        "line_idx": 42,
+        "global_idx": 1272
+      },
+      {
+        "text": "Method 2",
+        "number": "A1.2",
+        "level": 4,
+        "page": 22,
+        "line_idx": 48,
+        "global_idx": 1278
+      },
+      {
+        "text": "Dynamic Weighing Method",
+        "number": "A2",
+        "level": 3,
+        "page": 23,
+        "line_idx": 32,
+        "global_idx": 1345
+      },
+      {
+        "text": "APPENDIX B",
+        "number": "B",
+        "level": 1,
+        "page": 25,
+        "line_idx": 5,
+        "global_idx": 1428
+      },
+      {
+        "text": "Density of Pure Water",
+        "number": "B",
+        "level": 2,
+        "page": 25,
+        "line_idx": 5,
+        "global_idx": 1428
+      }
+    ],
+    "sections": [
+      {
+        "header_text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 341,
+        "end_global_idx": 342,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "GENERAL",
+        "header_number": "1",
+        "level": 1,
+        "start_global_idx": 343,
+        "end_global_idx": 345,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "Scope and Field of Application",
+        "header_number": "1.1",
+        "level": 2,
+        "start_global_idx": 346,
+        "end_global_idx": 408,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "References",
+        "header_number": "1.2",
+        "level": 2,
+        "start_global_idx": 409,
+        "end_global_idx": 409,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "Definitions",
+        "header_number": "1.3",
+        "level": 2,
+        "start_global_idx": 383,
+        "end_global_idx": 383,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "Symbols",
+        "header_number": "1.4",
+        "level": 2,
+        "start_global_idx": 383,
+        "end_global_idx": 433,
+        "start_page": 8,
+        "end_page": 9
+      },
+      {
+        "header_text": "PRINCIPLES",
+        "header_number": "2",
+        "level": 1,
+        "start_global_idx": 434,
+        "end_global_idx": 456,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Statement of the Principles",
+        "header_number": "2.1",
+        "level": 2,
+        "start_global_idx": 457,
+        "end_global_idx": 458,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Static Weighing",
+        "header_number": "2.1.1",
+        "level": 3,
+        "start_global_idx": 459,
+        "end_global_idx": 490,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Dynamic Weighing",
+        "header_number": "2.1.2",
+        "level": 3,
+        "start_global_idx": 491,
+        "end_global_idx": 505,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Comparison of Instantaneous and Mean Flow Rate",
+        "header_number": "2.1.3",
+        "level": 3,
+        "start_global_idx": 506,
+        "end_global_idx": 1277,
+        "start_page": 9,
+        "end_page": 22
+      },
+      {
+        "header_text": "Accuracy of the Method",
+        "header_number": "2.2",
+        "level": 2,
+        "start_global_idx": 1278,
+        "end_global_idx": 1278,
+        "start_page": 22,
+        "end_page": 22
+      },
+      {
+        "header_text": "Overall Uncertainty on the Weighing Measurement",
+        "header_number": "2.2.1",
+        "level": 3,
+        "start_global_idx": 436,
+        "end_global_idx": 443,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Requirements for Accurate Measurements",
+        "header_number": "2.2.2",
+        "level": 3,
+        "start_global_idx": 444,
+        "end_global_idx": 482,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "APPARATUS",
+        "header_number": "3",
+        "level": 1,
+        "start_global_idx": 483,
+        "end_global_idx": 490,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Diverter",
+        "header_number": "3.1",
+        "level": 2,
+        "start_global_idx": 491,
+        "end_global_idx": 841,
+        "start_page": 9,
+        "end_page": 16
+      },
+      {
+        "header_text": "Time-Measuring Apparatus",
+        "header_number": "3.2",
+        "level": 2,
+        "start_global_idx": 842,
+        "end_global_idx": 874,
+        "start_page": 16,
+        "end_page": 17
+      },
+      {
+        "header_text": "Weighing Tank",
+        "header_number": "3.3",
+        "level": 2,
+        "start_global_idx": 875,
+        "end_global_idx": 948,
+        "start_page": 17,
+        "end_page": 18
+      },
+      {
+        "header_text": "Weighing Device",
+        "header_number": "3.4",
+        "level": 2,
+        "start_global_idx": 949,
+        "end_global_idx": 1008,
+        "start_page": 18,
+        "end_page": 18
+      },
+      {
+        "header_text": "Auxiliary Measurements",
+        "header_number": "3.5",
+        "level": 2,
+        "start_global_idx": 1009,
+        "end_global_idx": 1018,
+        "start_page": 18,
+        "end_page": 18
+      },
+      {
+        "header_text": "PROCEDURE",
+        "header_number": "4",
+        "level": 1,
+        "start_global_idx": 1019,
+        "end_global_idx": 1271,
+        "start_page": 18,
+        "end_page": 22
+      },
+      {
+        "header_text": "Static Weighing Method",
+        "header_number": "4.1",
+        "level": 2,
+        "start_global_idx": 1272,
+        "end_global_idx": 1344,
+        "start_page": 22,
+        "end_page": 23
+      },
+      {
+        "header_text": "Dynamic Weighing Method",
+        "header_number": "4.2",
+        "level": 2,
+        "start_global_idx": 1345,
+        "end_global_idx": 1345,
+        "start_page": 23,
+        "end_page": 23
+      },
+      {
+        "header_text": "Common Provisions",
+        "header_number": "4.3",
+        "level": 2,
+        "start_global_idx": 1111,
+        "end_global_idx": 1131,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "CALCULATION OF FLOW RATE",
+        "header_number": "5",
+        "level": 1,
+        "start_global_idx": 1132,
+        "end_global_idx": 1132,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "Calculation of Mass Flow Rate",
+        "header_number": "5.1",
+        "level": 2,
+        "start_global_idx": 1133,
+        "end_global_idx": 1133,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "Calculation of Volume Flow Rate",
+        "header_number": "5.2",
+        "level": 2,
+        "start_global_idx": 1133,
+        "end_global_idx": 1155,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+        "header_number": "6",
+        "level": 1,
+        "start_global_idx": 1156,
+        "end_global_idx": 1158,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "APPENDIX A",
+        "header_number": "A",
+        "level": 1,
+        "start_global_idx": 1159,
+        "end_global_idx": 1159,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "Corrections on the Measurement of Filling Time",
+        "header_number": "A",
+        "level": 2,
+        "start_global_idx": 1159,
+        "end_global_idx": 1271,
+        "start_page": 20,
+        "end_page": 22
+      },
+      {
+        "header_text": "Static Weighing Method",
+        "header_number": "A1",
+        "level": 3,
+        "start_global_idx": 1272,
+        "end_global_idx": 1272,
+        "start_page": 22,
+        "end_page": 22
+      },
+      {
+        "header_text": "Method 1",
+        "header_number": "A1.1",
+        "level": 4,
+        "start_global_idx": 1272,
+        "end_global_idx": 1277,
+        "start_page": 22,
+        "end_page": 22
+      },
+      {
+        "header_text": "Method 2",
+        "header_number": "A1.2",
+        "level": 4,
+        "start_global_idx": 1278,
+        "end_global_idx": 1344,
+        "start_page": 22,
+        "end_page": 23
+      },
+      {
+        "header_text": "Dynamic Weighing Method",
+        "header_number": "A2",
+        "level": 3,
+        "start_global_idx": 1345,
+        "end_global_idx": 1427,
+        "start_page": 23,
+        "end_page": 25
+      },
+      {
+        "header_text": "APPENDIX B",
+        "header_number": "B",
+        "level": 1,
+        "start_global_idx": 1428,
+        "end_global_idx": 1428,
+        "start_page": 25,
+        "end_page": 25
+      },
+      {
+        "header_text": "Density of Pure Water",
+        "header_number": "B",
+        "level": 2,
+        "start_global_idx": 1428,
+        "end_global_idx": 1553,
+        "start_page": 25,
+        "end_page": 27
+      }
+    ],
+    "mode": "llm_full",
+    "messages": []
+  },
+  "elapsed_s": 0.33780559999286197
+}

@@ -99,11 +99,14 @@ function deriveHeaderMatches(payload) {
     return [];
   }
 
-  const headers = Array.isArray(payload.simpleheaders) ? payload.simpleheaders : [];
+  // Use canonical field from backend payload
+  const headers = Array.isArray(payload.headers) ? payload.headers : [];
   return headers
     .map((header) => {
       const text = typeof header.text === 'string' ? header.text : '';
-      const number = header.number != null ? header.number : null;
+      const number = header.number != null && String(header.number).trim() !== ''
+        ? String(header.number)
+        : null;
       const page = Number(header.page);
       const line = Number(header.line_idx);
       const globalIdx = Number(header.global_idx);
@@ -119,11 +122,10 @@ function deriveHeaderMatches(payload) {
     .filter((entry) => entry.text);
 }
 
+
 function updateHeaderModeTag(mode) {
   const tag = elements.headerModeTag;
-  if (!tag) {
-    return;
-  }
+  if (!tag) return;
 
   if (!mode) {
     tag.hidden = true;
@@ -134,23 +136,27 @@ function updateHeaderModeTag(mode) {
     return;
   }
 
-  const normalised = String(mode).toLowerCase();
+  const m = String(mode).toLowerCase();
   let label = 'LLM';
-  let variant = 'openrouter';
-  let description = 'Headers derived from the OpenRouter LLM.';
+  let variant = 'llm';
+  let description = 'Headers derived via LLM extraction.';
 
-  if (normalised === 'llm_full') {
-    label = 'LLM';
-    variant = 'llm';
-    description = 'Headers derived via LLM extraction.';
-  } else if (normalised === 'llm_full_error') {
-    label = 'LLM';
-    variant = 'llm';
+  if (m === 'llm_full_error') {
     description = 'LLM header extraction failed; see logs for details.';
-  } else if (normalised === 'llm_disabled') {
+  } else if (m === 'llm_disabled') {
     label = 'Off';
     variant = 'openrouter';
     description = 'LLM header extraction is disabled.';
+  } else if (m === 'llm_strict') {
+    label = 'LLM (strict)';
+    description = 'LLM headers aligned with strict anchor matching.';
+  } else if (m === 'llm_vector') {
+    label = 'LLM (vector)';
+    description = 'LLM headers aligned with vector embeddings.';
+  } else if (m === 'cache') {
+    label = 'Cached';
+    variant = 'llm';
+    description = 'Using cached header outline.';
   }
 
   tag.textContent = label;
@@ -159,6 +165,7 @@ function updateHeaderModeTag(mode) {
   tag.setAttribute('title', description);
   tag.hidden = false;
 }
+
 
 initDropZone({
   zone: elements.dropZone,
@@ -367,28 +374,35 @@ async function refreshHeaders() {
   updateHeaderModeTag(null);
 
   try {
-    const headersResult = await fetchHeaders(documentId);
+    // Force a fresh LLM run and wipe prior server-side header storage
+    const headersResult = await fetchHeaders(documentId, { force: true /*, trace: true */ });
     state.headers = headersResult;
+
+    // Normalize for quick match overlays / helpers
     state.headerMatches = deriveHeaderMatches(state.headers);
+
+    // Raw & outline panes
     renderHeaderRawResponse(elements.headersRawContent, state.headers);
     renderHeaderOutline(elements.headersContent, state.headers, {
       documentId,
       fetchSection: fetchSectionText,
     });
+
+    // Mode tag + any backend messages
     updateHeaderModeTag(state.headers?.mode ?? null);
     if (Array.isArray(state.headers?.messages)) {
-      state.headers.messages.forEach((message) => {
-        if (!message) {
-          return;
-        }
-        showToast(message, 'warning', 6000);
-      });
+      for (const message of state.headers.messages) {
+        if (message) showToast(message, 'warning', 6000);
+      }
     }
+
     showToast('Header search completed.');
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to run header search.';
     showToast(message, 'error');
+
     if (previousHeaders) {
+      // Fall back to the last known-good outline on failure
       state.headers = previousHeaders;
       state.headerMatches = deriveHeaderMatches(previousHeaders);
       renderHeaderRawResponse(elements.headersRawContent, previousHeaders);
@@ -407,6 +421,7 @@ async function refreshHeaders() {
     setHeaderRefreshBusy(false);
   }
 }
+
 
 function showHeaderSearchPrompt() {
   renderPanelStartPrompt(elements.headersContent, {

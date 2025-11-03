@@ -175,6 +175,26 @@ def _resolve_headers(
 
     return resolved
 
+def delete_sections_for_document(
+    *,
+    session: Session,
+    document_id: int,
+) -> int:
+    """Delete all persisted sections for the given document and commit.
+
+    Returns the number of rows deleted (best-effort; 0 if unavailable).
+    """
+    result = session.exec(
+        delete(DocumentSection).where(DocumentSection.document_id == document_id)
+    )
+    # SQLAlchemy's rowcount may not always be available depending on dialect.
+    try:
+        deleted = int(getattr(result, "rowcount", 0) or 0)
+    except Exception:  # pragma: no cover - defensive
+        deleted = 0
+    session.commit()
+    return deleted
+
 
 def build_section_spans(
     simpleheaders: Sequence[Mapping[str, object]],
@@ -424,5 +444,6 @@ __all__ = [
     "persist_sections",
     "route_query_to_sections",
     "search_in_sections",
+    "delete_sections_for_document",  # <-- add this
 ]
 

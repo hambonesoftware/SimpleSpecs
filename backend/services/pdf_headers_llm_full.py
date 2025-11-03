@@ -21,8 +21,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 FENCE_START = "-----BEGIN SIMPLEHEADERS JSON-----"
 FENCE_END = "-----END SIMPLEHEADERS JSON-----"
 
+# Safety wall for extremely large docs; actual token limit is min()'d with settings.
 HEADER_CHUNK_TOKEN_LIMIT = 120_000
-
 
 LOGGER = configure_logging().getChild(__name__)
 
@@ -37,7 +37,6 @@ class LLMFullHeadersResult:
 
     def combined_fenced(self) -> str:
         """Return a single fenced block for downstream consumers."""
-
         if self.fenced_blocks:
             cleaned = [block.strip("\n") for block in self.fenced_blocks if block.strip()]
             if cleaned:
@@ -74,6 +73,7 @@ def _extract_fenced_json(content: str) -> tuple[Dict, str]:
 def _build_text_blocks(
     lines: Sequence[Dict], excluded_pages: Iterable[int]
 ) -> List[str]:
+    """Return page-joined text blocks after filtering excluded/running content."""
     excluded = set(int(page) for page in excluded_pages)
     filtered = [
         line
@@ -108,45 +108,78 @@ async def get_headers_llm_full(
     settings: Settings,
     excluded_pages: Iterable[int] = (),
     tracer: "HeaderTracer | None" = None,
+    force: bool = False,  # NEW: bypass/purge cache and force fresh LLM call
 ) -> LLMFullHeadersResult:
-    """Return LLM extracted headers for a document."""
+    """Return LLM-extracted headers for a document.
+
+    When `force=True`:
+      - Skip reading the on-disk LLM cache entirely.
+      - Best-effort purge any existing cache file for this `doc_hash`.
+      - Always perform fresh OpenRouter calls and then overwrite cache.
+    """
 
     if tracer is not None:
         tracer.log_call(f"{__name__}.get_headers_llm_full")
 
-    cache_file = _cache_path(settings.headers_llm_cache_dir, doc_hash)
-    if cache_file.exists():
-        cached = json.loads(cache_file.read_text(encoding="utf-8"))
-        headers = cached.get("headers")
-        if isinstance(headers, list):
-            cleaned = [
-                {
-                    "text": str(entry.get("text", "")),
-                    "number": entry.get("number"),
-                    "level": int(entry.get("level", 1) or 1),
-                }
-                for entry in headers
-                if isinstance(entry, dict)
-            ]
-            return LLMFullHeadersResult(
-                headers=cleaned,
-                raw_responses=[
-                    str(entry)
-                    for entry in cached.get("raw_responses", [])
-                    if isinstance(entry, str)
-                ],
-                fenced_blocks=[
-                    str(entry)
-                    for entry in cached.get("fenced_blocks", [])
-                    if isinstance(entry, str)
-                ],
-            )
+    # --------- Cache resolution (robust against None/str/Path) ----------
+    cache_file: Path | None = None
+    cache_dir_cfg = getattr(settings, "headers_llm_cache_dir", None)
+    if cache_dir_cfg:
+        cache_dir = Path(cache_dir_cfg)
+        cache_file = _cache_path(cache_dir, doc_hash)
 
+    # If forced, purge any existing cache file and bypass reads.
+    if force and cache_file and cache_file.exists():
+        try:
+            cache_file.unlink()
+            if tracer is not None:
+                tracer.ev("llm_cache_purged", path=str(cache_file))
+        except Exception:
+            if tracer is not None:
+                tracer.ev("llm_cache_purge_failed", path=str(cache_file))
+
+    # If not forced, attempt cache read.
+    if (not force) and cache_file and cache_file.exists():
+        try:
+            cached = json.loads(cache_file.read_text(encoding="utf-8"))
+            headers = cached.get("headers")
+            if isinstance(headers, list):
+                cleaned = [
+                    {
+                        "text": str(entry.get("text", "")),
+                        "number": (entry.get("number") if entry.get("number") is not None else None),
+                        "level": int(entry.get("level", 1) or 1),
+                    }
+                    for entry in headers
+                    if isinstance(entry, dict)
+                ]
+                if tracer is not None:
+                    tracer.ev("llm_cache_hit", path=str(cache_file))
+                return LLMFullHeadersResult(
+                    headers=cleaned,
+                    raw_responses=[
+                        str(entry)
+                        for entry in cached.get("raw_responses", [])
+                        if isinstance(entry, str)
+                    ],
+                    fenced_blocks=[
+                        str(entry)
+                        for entry in cached.get("fenced_blocks", [])
+                        if isinstance(entry, str)
+                    ],
+                )
+        except Exception:
+            if tracer is not None:
+                tracer.ev("llm_cache_read_failed", path=str(cache_file))
+
+    if tracer is not None and cache_file:
+        tracer.ev("llm_cache_miss", path=str(cache_file))
+
+    # --------- Build LLM inputs ----------
     text_blocks = _build_text_blocks(lines, excluded_pages)
-    token_limit = min(settings.headers_llm_max_input_tokens, HEADER_CHUNK_TOKEN_LIMIT)
-    parts = split_by_token_limit(text_blocks, token_limit)
-    if not parts:
-        parts = ["\n".join(text_blocks)]
+    token_limit = min(int(settings.headers_llm_max_input_tokens), HEADER_CHUNK_TOKEN_LIMIT)
+    parts = split_by_token_limit(text_blocks, token_limit) or ["\n".join(text_blocks)]
+    total_parts = len(parts)
 
     client_params: dict[str, str] = {}
     if settings.openrouter_http_referer:
@@ -157,14 +190,14 @@ async def get_headers_llm_full(
     merged: list[Dict] = []
     raw_responses: list[str] = []
     fenced_blocks: list[str] = []
-    total_parts = len(parts)
 
+    # --------- Call OpenRouter part-by-part ----------
     for index, part in enumerate(parts, start=1):
         messages = [
             {
                 "role": "system",
                 "content": (
-                    "You are a technical document structure expert. Identify headings and "
+                    "You are a technical document-structure expert. Identify headings and "
                     "their nesting levels from the full document text."
                 ),
             },
@@ -199,6 +232,7 @@ async def get_headers_llm_full(
                 timeout_read=settings.headers_llm_timeout_s,
                 messages=[dict(message) for message in messages],
             )
+
         content = await loop.run_in_executor(
             None,
             lambda: chat(
@@ -213,9 +247,10 @@ async def get_headers_llm_full(
             "[headers.llm_full] Raw LLM response part %s/%s:\n%s",
             index,
             total_parts,
-            content.strip(),
+            (content or "").strip(),
         )
         raw_responses.append(content)
+
         try:
             data, fenced_block = _extract_fenced_json(content)
         except ValueError as exc:  # pragma: no cover - requires malformed provider output
@@ -224,16 +259,23 @@ async def get_headers_llm_full(
                 content=content,
                 part_index=index,
             ) from exc
-        fenced_blocks.append(fenced_block)
-        merged.extend(data.get("headers", []))
 
+        fenced_blocks.append(fenced_block)
+        headers_part = data.get("headers", [])
+        if isinstance(headers_part, list):
+            merged.extend(headers_part)
+
+    # --------- Normalize & de-duplicate ----------
     deduped: list[Dict] = []
     seen: set[tuple[str, str]] = set()
     for header in merged:
         text = str(header.get("text", "")).strip()
-        number = (header.get("number") or "").strip()
+        number_raw = header.get("number")
+        number = str(number_raw).strip() if number_raw is not None else ""
+        if not text:
+            continue
         key = (text.lower(), number.lower())
-        if key in seen or not text:
+        if key in seen:
             continue
         seen.add(key)
         deduped.append(
@@ -244,18 +286,26 @@ async def get_headers_llm_full(
             }
         )
 
-    cache_file.write_text(
-        json.dumps(
-            {
-                "headers": deduped,
-                "raw_responses": raw_responses,
-                "fenced_blocks": fenced_blocks,
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
+    # --------- Write cache (best-effort) ----------
+    if cache_file is not None:
+        try:
+            cache_file.write_text(
+                json.dumps(
+                    {
+                        "headers": deduped,
+                        "raw_responses": raw_responses,
+                        "fenced_blocks": fenced_blocks,
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+            if tracer is not None:
+                tracer.ev("llm_cache_write", path=str(cache_file))
+        except Exception:
+            if tracer is not None:
+                tracer.ev("llm_cache_write_failed", path=str(cache_file))
 
     return LLMFullHeadersResult(
         headers=deduped,
@@ -272,4 +322,3 @@ __all__ = [
     "FENCE_END",
     "HEADER_CHUNK_TOKEN_LIMIT",
 ]
-

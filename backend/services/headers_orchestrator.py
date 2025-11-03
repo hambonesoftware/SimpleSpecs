@@ -64,8 +64,14 @@ async def extract_headers_and_chunks(
     session: Session | None = None,
     document: Document | None = None,
     want_trace: bool = False,
+    force: bool = False,  # <—— NEW: bypass cache + re-fetch from LLM
 ) -> tuple[dict, HeaderTracer | None]:
-    """Return located headers and section ranges for the provided document."""
+    """Return located headers and section ranges for the provided document.
+
+    When `force=True`, previously cached HEADER_TREE artifacts for this document
+    are ignored (and purged if a delete helper is available), and a fresh LLM
+    header extraction is performed regardless of cache presence.
+    """
 
     trace_requested = want_trace or app_config.HEADERS_TRACE
     tracer: HeaderTracer | None = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR)
@@ -130,67 +136,89 @@ async def extract_headers_and_chunks(
         "header_locator_rev": "2025-10-31-seq-source-order",
     }
 
+    # ---------- Cache handling (respect `force`) ----------
     if session is not None and doc_id is not None:
-        cached = get_cached_artifact(
-            session=session,
-            document_id=doc_id,
-            artifact_type=DocumentArtifactType.HEADER_TREE,
-            key=settings.headers_mode.lower(),
-            inputs=cache_inputs,
-        )
-        if cached is not None:
-            payload = dict(cached.body)
-            located = list(payload.get("headers", []))
-            sections = list(payload.get("sections", []))
-            messages = list(payload.get("messages", []))
-            mode_used = payload.get("mode", "cache")
-            fenced_text = payload.get("fenced_text")
-            llm_failure_raw_response = payload.get("llm_failure_raw_response")
-            llm_headers = list(payload.get("llm_headers", []))
-            llm_raw_responses = list(payload.get("llm_raw_responses", []))
-            llm_fenced_blocks = list(payload.get("llm_fenced_blocks", []))
-            matched_titles = {str(item.get("text", "")).strip() for item in located}
-            expected_titles = [str(item.get("text", "")) for item in (native_headers or [])]
-            unresolved = [
-                title for title in expected_titles if title and title not in matched_titles
-            ]
-            elapsed = time.perf_counter() - start_time
-            if tracer:
-                tracer.ev(
-                    "llm_outline_received",
-                    count=len(located),
-                    headers=list(payload.get("headers", [])),
+        if force:
+            # Best-effort purge of any cached HEADER_TREE artifact for this doc.
+            # If delete isn't available, we just bypass cache (no-op).
+            try:
+                from .artifact_store import delete_artifact  # type: ignore
+                delete_artifact(
+                    session=session,
+                    document_id=doc_id,
+                    artifact_type=DocumentArtifactType.HEADER_TREE,
+                    key=settings.headers_mode.lower(),
+                    inputs_like=cache_inputs,
                 )
-                tracer.ev(
-                    "final_outline",
-                    headers=located,
-                    sections=sections,
-                    mode=mode_used,
-                    messages=messages,
-                    elapsed_s=elapsed,
-                )
-                tracer.ev(
-                    "end_run",
-                    elapsed_s=elapsed,
-                    total_headers=len(located),
-                    unresolved=unresolved,
-                    mode="cache",
-                    doc_hash=doc_hash,
-                )
-                tracer.flush_jsonl()
-                LOGGER.info("[headers] Trace written: %s", tracer.path)
-                LOGGER.info("[headers] Summary written: %s", tracer.summary_path)
-            return {
-                "headers": located,
-                "sections": sections,
-                "mode": mode_used,
-                "lines": lines,
-                "doc_hash": doc_hash,
-                "excluded_pages": sorted(excluded_pages),
-                "messages": messages,
-                "fenced_text": fenced_text,
-                "llm_failure_raw_response": llm_failure_raw_response,
-            }, tracer
+                if tracer:
+                    tracer.ev("cache_purged", reason="force", artifact="HEADER_TREE")
+            except Exception:
+                # Ignore if delete helper isn't available or purge fails.
+                if tracer:
+                    tracer.ev("cache_bypass", reason="force_no_delete_helper")
+        else:
+            # Normal path: try cached outline first
+            cached = get_cached_artifact(
+                session=session,
+                document_id=doc_id,
+                artifact_type=DocumentArtifactType.HEADER_TREE,
+                key=settings.headers_mode.lower(),
+                inputs=cache_inputs,
+            )
+            if cached is not None:
+                payload = dict(cached.body)
+                located = list(payload.get("headers", []))
+                sections = list(payload.get("sections", []))
+                messages = list(payload.get("messages", []))
+                mode_used = payload.get("mode", "cache")
+                fenced_text = payload.get("fenced_text")
+                llm_failure_raw_response = payload.get("llm_failure_raw_response")
+                llm_headers = list(payload.get("llm_headers", []))
+                llm_raw_responses = list(payload.get("llm_raw_responses", []))
+                llm_fenced_blocks = list(payload.get("llm_fenced_blocks", []))
+                matched_titles = {str(item.get("text", "")).strip() for item in located}
+                expected_titles = [str(item.get("text", "")) for item in (native_headers or [])]
+                unresolved = [
+                    title for title in expected_titles if title and title not in matched_titles
+                ]
+                elapsed = time.perf_counter() - start_time
+                if tracer:
+                    tracer.ev(
+                        "llm_outline_received",
+                        count=len(located),
+                        headers=list(payload.get("headers", [])),
+                    )
+                    tracer.ev(
+                        "final_outline",
+                        headers=located,
+                        sections=sections,
+                        mode=mode_used,
+                        messages=messages,
+                        elapsed_s=elapsed,
+                    )
+                    tracer.ev(
+                        "end_run",
+                        elapsed_s=elapsed,
+                        total_headers=len(located),
+                        unresolved=unresolved,
+                        mode="cache",
+                        doc_hash=doc_hash,
+                    )
+                    tracer.flush_jsonl()
+                    LOGGER.info("[headers] Trace written: %s", tracer.path)
+                    LOGGER.info("[headers] Summary written: %s", tracer.summary_path)
+                return {
+                    "headers": located,
+                    "sections": sections,
+                    "mode": mode_used,
+                    "lines": lines,
+                    "doc_hash": doc_hash,
+                    "excluded_pages": sorted(excluded_pages),
+                    "messages": messages,
+                    "fenced_text": fenced_text,
+                    "llm_failure_raw_response": llm_failure_raw_response,
+                }, tracer
+    # ------------------------------------------------------
 
     if settings.headers_mode.lower() == "llm_full":
         try:
@@ -416,6 +444,7 @@ async def extract_headers_and_chunks(
         "llm_raw_responses": llm_raw_responses,
         "llm_fenced_blocks": llm_fenced_blocks,
     }, tracer
+
 
 
 def _enforce_header_sequence(

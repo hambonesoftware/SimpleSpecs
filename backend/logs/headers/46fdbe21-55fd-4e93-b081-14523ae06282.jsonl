@@ -1,0 +1,168 @@
+{"t": 1762021462.8404644, "type": "start_run", "mode": "llm_full", "file_id": 1, "cfg": {"suppress_toc": true, "suppress_running": true}, "metadata": {"filename": "MFC-9M_R2001_E1988.pdf", "document_id": 1}}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 0, "text": "Copyrighted"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 1, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 1, "text": "material"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 1, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 2, "text": "licensed"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 1, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 3, "text": "REAFFIRMED 2001"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 1, "line_idx": 3, "raw": "REAFFIRMED 2001", "normalised": "reaffirmed 2001"}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 4, "text": "to"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 1, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 5, "text": "Stanford"}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 6, "text": "FOR CURRENT COMMITTEE PERSONNEL"}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 7, "text": "PLEASE E-MAIL CS@asme.org"}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 8, "text": "University"}
+{"t": 1762021463.1565206, "type": "pre_normalize_sample", "page": 1, "line_idx": 9, "text": "by"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 2, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 2, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 2, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 2, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 2, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 3, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 3, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 3, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 3, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1565206, "type": "normalized_line", "page": 3, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 4, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 4, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 4, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 4, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 4, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 5, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 5, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 5, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 5, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 5, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 6, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 6, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 6, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 6, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 6, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 7, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 7, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 7, "line_idx": 2, "raw": "licensed Table", "normalised": "licensed table"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 7, "line_idx": 3, "raw": "............................................................", "normalised": "............................................................"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 7, "line_idx": 4, "raw": "Symbols 1 3", "normalised": "symbols 1 3"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 8, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 8, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 8, "line_idx": 2, "raw": "MFC-9M-1988 ASME/ANSI", "normalised": "mfc-9m-1988 asme/ansi"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 8, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 8, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 9, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 9, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 9, "line_idx": 2, "raw": "MEASUREMENT OF LIQUID FLOW IN", "normalised": "measurement of liquid flow in"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 9, "line_idx": 3, "raw": "CLOSED CONQUITS WEIGHING METHOD BY", "normalised": "closed conquits weighing method by"}
+{"t": 1762021463.1585436, "type": "normalized_line", "page": 9, "line_idx": 4, "raw": "ASME/ANSI MFC-9M-1988", "normalised": "asme/ansi mfc-9m-1988"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 10, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 10, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 10, "line_idx": 2, "raw": "licensed ERRATA", "normalised": "licensed errata"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 10, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 10, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 11, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 11, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 11, "line_idx": 2, "raw": "MEASUREMENT OF LlQUlD.FLOW IN", "normalised": "measurement of llquld.flow in"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 11, "line_idx": 3, "raw": "ASME/ANSI MFC-SM-1988", "normalised": "asme/ansi mfc-sm-1988"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 11, "line_idx": 4, "raw": "BY CLOSED CONDUITS WEIGHING METHOD", "normalised": "by closed conduits weighing method"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 12, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 12, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 12, "line_idx": 2, "raw": "IN MEASUREMENT OF LIQUID FLOW", "normalised": "in measurement of liquid flow"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 12, "line_idx": 3, "raw": "WEIGHING ASME/ANSI MFC-9M-1988 CLOSED CONDUITS BY METHOD", "normalised": "weighing asme/ansi mfc-9m-1988 closed conduits by method"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 12, "line_idx": 4, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 13, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 13, "line_idx": 1, "raw": "material MEASUREMENT LIQUID FLOW IN OF", "normalised": "material measurement liquid flow in of"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 13, "line_idx": 2, "raw": "ASME/ANSI MFC-9M-1988 CLOSED CONDUITS WEIGHING METHOD BY", "normalised": "asme/ansi mfc-9m-1988 closed conduits weighing method by"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 13, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 13, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 14, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 14, "line_idx": 1, "raw": "MEASUREMENT OF LIQUID FLOW IN material", "normalised": "measurement of liquid flow in material"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 14, "line_idx": 2, "raw": "ASME/ANSI MFC-9M-1988 WEIGHING METHOD CLOSED CONDUITS BY", "normalised": "asme/ansi mfc-9m-1988 weighing method closed conduits by"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 14, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 14, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 15, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 15, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 15, "line_idx": 2, "raw": "MEASUREMENT OF LIQUID FLOW IN", "normalised": "measurement of liquid flow in"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 15, "line_idx": 3, "raw": "ASMElANSl MFC-9M-1988", "normalised": "asmelansl mfc-9m-1988"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 15, "line_idx": 4, "raw": "BY CLOSED CONDUITS WEIGHING METHOD", "normalised": "by closed conduits weighing method"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 16, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 16, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 16, "line_idx": 2, "raw": "IN MEASUREMENT OF LIQUID FLOW", "normalised": "in measurement of liquid flow"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 16, "line_idx": 3, "raw": "ASME/ANSI MFC-9M-1988 CLOSED CONDUITS WEIGHING METHOD BY", "normalised": "asme/ansi mfc-9m-1988 closed conduits weighing method by"}
+{"t": 1762021463.1605513, "type": "normalized_line", "page": 16, "line_idx": 4, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 17, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 17, "line_idx": 1, "raw": "MEASUREMENT OF LIQUID FLOW IN material", "normalised": "measurement of liquid flow in material"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 17, "line_idx": 2, "raw": "ASME/ANSI MFC-9M-1988 BY CLOSED CONDUITS WEIGHING METHOD", "normalised": "asme/ansi mfc-9m-1988 by closed conduits weighing method"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 17, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 17, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 18, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 18, "line_idx": 1, "raw": "MEASUREMENT OF LIQUID,FLOW !N", "normalised": "measurement of liquid,flow !n"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 18, "line_idx": 2, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 18, "line_idx": 3, "raw": "CLOSED CONDUITS BY WEIGHING METHOD ASME/ANSI MFC-SM-1988", "normalised": "closed conduits by weighing method asme/ansi mfc-sm-1988"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 18, "line_idx": 4, "raw": "about ambient temperature, an accuracy of O.YC In all cases it shall be carefully checked that no pipe", "normalised": "about ambient temperature, an accuracy of o.yc in all cases it shall be carefully checked that no pipe"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 19, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 19, "line_idx": 1, "raw": "MEASUREMENT 0.F LIQUID:F.LOW:IN", "normalised": "measurement 0.f liquid:f.low:in"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 19, "line_idx": 2, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 19, "line_idx": 3, "raw": "CLOSED,CONDUlTS BY WEIGHING METHOD", "normalised": "closed,condults by weighing method"}
+{"t": 1762021463.1625588, "type": "normalized_line", "page": 19, "line_idx": 4, "raw": "licensed In all cases it shall be carefully checked that no pipe about ambient temperature, an accuracy of", "normalised": "licensed in all cases it shall be carefully checked that no pipe about ambient temperature, an accuracy of"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 20, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 20, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 20, "line_idx": 2, "raw": "MEASUREMENT OF LIQUID FLOW IN", "normalised": "measurement of liquid flow in"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 20, "line_idx": 3, "raw": "ASME/ANSI MFC-9M-1988 CLOSED CONDUITS BY WEIGHING METHOD", "normalised": "asme/ansi mfc-9m-1988 closed conduits by weighing method"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 20, "line_idx": 4, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 21, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 21, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 21, "line_idx": 2, "raw": "MEASUREMENT LIQUID FLOW OF IN", "normalised": "measurement liquid flow of in"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 21, "line_idx": 3, "raw": "ASME/ANSI MFC-9M-1988 CLOSED CONDUITS WEIGHING METHOD BY", "normalised": "asme/ansi mfc-9m-1988 closed conduits weighing method by"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 21, "line_idx": 4, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 22, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 22, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 22, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 22, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1640654, "type": "normalized_line", "page": 22, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 23, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 23, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 23, "line_idx": 2, "raw": "AI licensed Slope mean of line = 7", "normalised": "ai licensed slope mean of line = 7"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 23, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 23, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 24, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 24, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 24, "line_idx": 2, "raw": "Generally, the decrease in impact force is equal and where", "normalised": "generally, the decrease in impact force is equal and where"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 24, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 24, "line_idx": 4, "raw": "so opposite to the additional weight of liquid collected a", "normalised": "so opposite to the additional weight of liquid collected a"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 25, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 25, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 25, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 25, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 25, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 26, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 26, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 26, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 26, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 26, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 27, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 27, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 27, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 27, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1762021463.1658134, "type": "normalized_line", "page": 27, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "asme/ansi mfc-9m-1988", "header_hits": 2, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "asme/ansi mfc-9m-1988 closed conduits weighing method by", "header_hits": 3, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "by closed conduits weighing method", "header_hits": 2, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "copyrighted", "header_hits": 27, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "distribution", "header_hits": 0, "footer_hits": 19}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "in measurement of liquid flow", "header_hits": 2, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "is", "header_hits": 0, "footer_hits": 23}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "licensed", "header_hits": 23, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "material", "header_hits": 24, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "measurement of liquid flow in", "header_hits": 3, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "measurement of liquid flow in material", "header_hits": 2, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "permitted.", "header_hits": 0, "footer_hits": 21}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "stanford", "header_hits": 25, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "to", "header_hits": 21, "footer_hits": 0}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "uncontrolled", "header_hits": 0, "footer_hits": 27}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "w", "header_hits": 0, "footer_hits": 23}
+{"t": 1762021463.1658134, "type": "running_header_filtered", "text": "when", "header_hits": 0, "footer_hits": 2}
+{"t": 1762021463.1678214, "type": "toc_detected", "page": 6, "reason": "toc", "sample": ["Copyrighted", "material", "licensed", "to", "Stanford", "CONTENTS"]}
+{"t": 1762021463.169827, "type": "doc_stats", "pages": 27, "lines": 1554, "bytes": 2783133, "excluded_pages": [6]}
+{"t": 1762021463.171836, "type": "llm_outline_received", "count": 0, "headers": []}
+{"t": 1762021463.171836, "type": "final_outline", "headers": [], "sections": [], "mode": "llm_full_error", "messages": ["LLM header extraction unavailable."], "elapsed_s": 0.33131259999936447}
+{"t": 1762021463.171836, "type": "end_run", "elapsed_s": 0.33131259999936447, "total_headers": 0, "unresolved": [], "mode": "cache", "doc_hash": "c7e5671948f761a792fafbc2b182c6cf1d1b02c8a6b9a3bf105e94591c98a85b"}

@@ -1,0 +1,34 @@
+{
+  "run_id": "268e6dfa-0e23-48da-9099-71ad106edf33",
+  "metadata": {
+    "mode": "llm_full",
+    "file_id": 1,
+    "cfg": {
+      "suppress_toc": true,
+      "suppress_running": true
+    },
+    "metadata": {
+      "filename": "MFC-9M_R2001_E1988.pdf",
+      "document_id": 1
+    }
+  },
+  "llm_headers": [],
+  "decisions": [
+    {
+      "t": 1762021220.8838224,
+      "type": "fallback_triggered",
+      "method": "llm_full",
+      "reason": "exception",
+      "message": "'list' object has no attribute 'headers'"
+    }
+  ],
+  "final_outline": {
+    "headers": [],
+    "sections": [],
+    "mode": "llm_full_error",
+    "messages": [
+      "LLM header extraction unavailable."
+    ]
+  },
+  "elapsed_s": 0.3618916999839712
+}

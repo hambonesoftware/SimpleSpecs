@@ -1,0 +1,197 @@
+{"t": 1761958022.182777, "type": "start_run", "mode": "llm_strict", "file_id": 1, "cfg": {"suppress_toc": true, "suppress_running": true}, "metadata": {"filename": "MFC-9M_R2001_E1988.pdf"}}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 0, "text": "Copyrighted"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 1, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 1, "text": "material"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 1, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 2, "text": "licensed"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 1, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 3, "text": "REAFFIRMED 2001"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 1, "line_idx": 3, "raw": "REAFFIRMED 2001", "normalised": "reaffirmed 2001"}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 4, "text": "to"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 1, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 5, "text": "Stanford"}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 6, "text": "FOR CURRENT COMMITTEE PERSONNEL"}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 7, "text": "PLEASE E-MAIL CS@asme.org"}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 8, "text": "University"}
+{"t": 1761958023.0235658, "type": "pre_normalize_sample", "page": 1, "line_idx": 9, "text": "by"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 2, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 2, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 2, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 2, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 2, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 3, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 3, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 3, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 3, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0235658, "type": "normalized_line", "page": 3, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0250828, "type": "normalized_line", "page": 4, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0250828, "type": "normalized_line", "page": 4, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0250828, "type": "normalized_line", "page": 4, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0250828, "type": "normalized_line", "page": 4, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0250828, "type": "normalized_line", "page": 4, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0261047, "type": "normalized_line", "page": 5, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0261047, "type": "normalized_line", "page": 5, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0261047, "type": "normalized_line", "page": 5, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0261047, "type": "normalized_line", "page": 5, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0267158, "type": "normalized_line", "page": 5, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0267158, "type": "normalized_line", "page": 6, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0267158, "type": "normalized_line", "page": 6, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0267158, "type": "normalized_line", "page": 6, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0267158, "type": "normalized_line", "page": 6, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0267158, "type": "normalized_line", "page": 6, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 7, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 7, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 7, "line_idx": 2, "raw": "licensed Table", "normalised": "licensed table"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 7, "line_idx": 3, "raw": "............................................................", "normalised": "............................................................"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 7, "line_idx": 4, "raw": "Symbols 1 3", "normalised": "symbols 1 3"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 8, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 8, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 8, "line_idx": 2, "raw": "MFC-9M-1988 ASME/ANSI", "normalised": "mfc-9m-1988 asme/ansi"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 8, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 8, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 9, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0277214, "type": "normalized_line", "page": 9, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0287278, "type": "normalized_line", "page": 9, "line_idx": 2, "raw": "MEASUREMENT OF LIQUID FLOW IN", "normalised": "measurement of liquid flow in"}
+{"t": 1761958023.0287278, "type": "normalized_line", "page": 9, "line_idx": 3, "raw": "CLOSED CONQUITS WEIGHING METHOD BY", "normalised": "closed conquits weighing method by"}
+{"t": 1761958023.0287278, "type": "normalized_line", "page": 9, "line_idx": 4, "raw": "ASME/ANSI MFC-9M-1988", "normalised": "asme/ansi mfc-9m-1988"}
+{"t": 1761958023.0287278, "type": "normalized_line", "page": 10, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0287278, "type": "normalized_line", "page": 10, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0287278, "type": "normalized_line", "page": 10, "line_idx": 2, "raw": "licensed ERRATA", "normalised": "licensed errata"}
+{"t": 1761958023.0287278, "type": "normalized_line", "page": 10, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0287278, "type": "normalized_line", "page": 10, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 11, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 11, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 11, "line_idx": 2, "raw": "MEASUREMENT OF LlQUlD.FLOW IN", "normalised": "measurement of llquld.flow in"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 11, "line_idx": 3, "raw": "ASME/ANSI MFC-SM-1988", "normalised": "asme/ansi mfc-sm-1988"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 11, "line_idx": 4, "raw": "BY CLOSED CONDUITS WEIGHING METHOD", "normalised": "by closed conduits weighing method"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 12, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 12, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 12, "line_idx": 2, "raw": "IN MEASUREMENT OF LIQUID FLOW", "normalised": "in measurement of liquid flow"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 12, "line_idx": 3, "raw": "WEIGHING ASME/ANSI MFC-9M-1988 CLOSED CONDUITS BY METHOD", "normalised": "weighing asme/ansi mfc-9m-1988 closed conduits by method"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 12, "line_idx": 4, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 13, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 13, "line_idx": 1, "raw": "material MEASUREMENT LIQUID FLOW IN OF", "normalised": "material measurement liquid flow in of"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 13, "line_idx": 2, "raw": "ASME/ANSI MFC-9M-1988 CLOSED CONDUITS WEIGHING METHOD BY", "normalised": "asme/ansi mfc-9m-1988 closed conduits weighing method by"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 13, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0297344, "type": "normalized_line", "page": 13, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 14, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 14, "line_idx": 1, "raw": "MEASUREMENT OF LIQUID FLOW IN material", "normalised": "measurement of liquid flow in material"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 14, "line_idx": 2, "raw": "ASME/ANSI MFC-9M-1988 WEIGHING METHOD CLOSED CONDUITS BY", "normalised": "asme/ansi mfc-9m-1988 weighing method closed conduits by"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 14, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 14, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 15, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 15, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 15, "line_idx": 2, "raw": "MEASUREMENT OF LIQUID FLOW IN", "normalised": "measurement of liquid flow in"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 15, "line_idx": 3, "raw": "ASMElANSl MFC-9M-1988", "normalised": "asmelansl mfc-9m-1988"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 15, "line_idx": 4, "raw": "BY CLOSED CONDUITS WEIGHING METHOD", "normalised": "by closed conduits weighing method"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 16, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 16, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 16, "line_idx": 2, "raw": "IN MEASUREMENT OF LIQUID FLOW", "normalised": "in measurement of liquid flow"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 16, "line_idx": 3, "raw": "ASME/ANSI MFC-9M-1988 CLOSED CONDUITS WEIGHING METHOD BY", "normalised": "asme/ansi mfc-9m-1988 closed conduits weighing method by"}
+{"t": 1761958023.0307279, "type": "normalized_line", "page": 16, "line_idx": 4, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 17, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 17, "line_idx": 1, "raw": "MEASUREMENT OF LIQUID FLOW IN material", "normalised": "measurement of liquid flow in material"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 17, "line_idx": 2, "raw": "ASME/ANSI MFC-9M-1988 BY CLOSED CONDUITS WEIGHING METHOD", "normalised": "asme/ansi mfc-9m-1988 by closed conduits weighing method"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 17, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 17, "line_idx": 4, "raw": "to", "normalised": "to"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 18, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 18, "line_idx": 1, "raw": "MEASUREMENT OF LIQUID,FLOW !N", "normalised": "measurement of liquid,flow !n"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 18, "line_idx": 2, "raw": "material", "normalised": "material"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 18, "line_idx": 3, "raw": "CLOSED CONDUITS BY WEIGHING METHOD ASME/ANSI MFC-SM-1988", "normalised": "closed conduits by weighing method asme/ansi mfc-sm-1988"}
+{"t": 1761958023.031232, "type": "normalized_line", "page": 18, "line_idx": 4, "raw": "about ambient temperature, an accuracy of O.YC In all cases it shall be carefully checked that no pipe", "normalised": "about ambient temperature, an accuracy of o.yc in all cases it shall be carefully checked that no pipe"}
+{"t": 1761958023.0322375, "type": "normalized_line", "page": 19, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0322375, "type": "normalized_line", "page": 19, "line_idx": 1, "raw": "MEASUREMENT 0.F LIQUID:F.LOW:IN", "normalised": "measurement 0.f liquid:f.low:in"}
+{"t": 1761958023.0322375, "type": "normalized_line", "page": 19, "line_idx": 2, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0322375, "type": "normalized_line", "page": 19, "line_idx": 3, "raw": "CLOSED,CONDUlTS BY WEIGHING METHOD", "normalised": "closed,condults by weighing method"}
+{"t": 1761958023.0322375, "type": "normalized_line", "page": 19, "line_idx": 4, "raw": "licensed In all cases it shall be carefully checked that no pipe about ambient temperature, an accuracy of", "normalised": "licensed in all cases it shall be carefully checked that no pipe about ambient temperature, an accuracy of"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 20, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 20, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 20, "line_idx": 2, "raw": "MEASUREMENT OF LIQUID FLOW IN", "normalised": "measurement of liquid flow in"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 20, "line_idx": 3, "raw": "ASME/ANSI MFC-9M-1988 CLOSED CONDUITS BY WEIGHING METHOD", "normalised": "asme/ansi mfc-9m-1988 closed conduits by weighing method"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 20, "line_idx": 4, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 21, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 21, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 21, "line_idx": 2, "raw": "MEASUREMENT LIQUID FLOW OF IN", "normalised": "measurement liquid flow of in"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 21, "line_idx": 3, "raw": "ASME/ANSI MFC-9M-1988 CLOSED CONDUITS WEIGHING METHOD BY", "normalised": "asme/ansi mfc-9m-1988 closed conduits weighing method by"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 21, "line_idx": 4, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 22, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 22, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 22, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 22, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0332375, "type": "normalized_line", "page": 22, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 23, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 23, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 23, "line_idx": 2, "raw": "AI licensed Slope mean of line = 7", "normalised": "ai licensed slope mean of line = 7"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 23, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 23, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 24, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 24, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 24, "line_idx": 2, "raw": "Generally, the decrease in impact force is equal and where", "normalised": "generally, the decrease in impact force is equal and where"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 24, "line_idx": 3, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0342376, "type": "normalized_line", "page": 24, "line_idx": 4, "raw": "so opposite to the additional weight of liquid collected a", "normalised": "so opposite to the additional weight of liquid collected a"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 25, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 25, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 25, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 25, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 25, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 26, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 26, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 26, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 26, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 26, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 27, "line_idx": 0, "raw": "Copyrighted", "normalised": "copyrighted"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 27, "line_idx": 1, "raw": "material", "normalised": "material"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 27, "line_idx": 2, "raw": "licensed", "normalised": "licensed"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 27, "line_idx": 3, "raw": "to", "normalised": "to"}
+{"t": 1761958023.0352387, "type": "normalized_line", "page": 27, "line_idx": 4, "raw": "Stanford", "normalised": "stanford"}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "asme/ansi mfc-9m-1988", "header_hits": 2, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "asme/ansi mfc-9m-1988 closed conduits weighing method by", "header_hits": 3, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "by closed conduits weighing method", "header_hits": 2, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "copyrighted", "header_hits": 27, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "distribution", "header_hits": 0, "footer_hits": 19}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "in measurement of liquid flow", "header_hits": 2, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "is", "header_hits": 0, "footer_hits": 23}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "licensed", "header_hits": 23, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "material", "header_hits": 24, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "measurement of liquid flow in", "header_hits": 3, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "measurement of liquid flow in material", "header_hits": 2, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "permitted.", "header_hits": 0, "footer_hits": 21}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "stanford", "header_hits": 25, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "to", "header_hits": 21, "footer_hits": 0}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "uncontrolled", "header_hits": 0, "footer_hits": 27}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "w", "header_hits": 0, "footer_hits": 23}
+{"t": 1761958023.0362864, "type": "running_header_filtered", "text": "when", "header_hits": 0, "footer_hits": 2}
+{"t": 1761958023.0382888, "type": "toc_detected", "page": 6, "reason": "toc", "sample": ["Copyrighted", "material", "licensed", "to", "Stanford", "CONTENTS"]}
+{"t": 1761958023.0462759, "type": "doc_stats", "pages": 27, "lines": 1554, "bytes": 2783133, "excluded_pages": [6]}
+{"t": 1761958023.0748503, "type": "llm_outline_received", "count": 27, "headers": [{"text": "1 General", "title": null, "number": "1", "level": 1}, {"text": "1.1 Scope and Field of Application", "title": null, "number": "1.1", "level": 2}, {"text": "1.2 References", "title": null, "number": "1.2", "level": 2}, {"text": "1.3 Definitions", "title": null, "number": "1.3", "level": 2}, {"text": "1.4 Symbols", "title": null, "number": "1.4", "level": 2}, {"text": "2 Principles", "title": null, "number": "2", "level": 1}, {"text": "2.1 Statement of the Principles", "title": null, "number": "2.1", "level": 2}, {"text": "2.1.1 Static Weighing", "title": null, "number": "2.1.1", "level": 3}, {"text": "2.1.2 Dynamic Weighing", "title": null, "number": "2.1.2", "level": 3}, {"text": "2.1.3 Comparison of Instantaneous and Mean Flow Rate", "title": null, "number": "2.1.3", "level": 3}, {"text": "2.2 Accuracy of the Method", "title": null, "number": "2.2", "level": 2}, {"text": "2.2.1 Overall Uncertainty on the Weighing Measurement", "title": null, "number": "2.2.1", "level": 3}, {"text": "2.2.2 Requirements for Accurate Measurements", "title": null, "number": "2.2.2", "level": 3}, {"text": "3 Apparatus", "title": null, "number": "3", "level": 1}, {"text": "3.1 Diverter", "title": null, "number": "3.1", "level": 2}, {"text": "3.2 Time-Measuring Apparatus", "title": null, "number": "3.2", "level": 2}, {"text": "3.3 Weighing Tank", "title": null, "number": "3.3", "level": 2}, {"text": "3.4 Weighing Device", "title": null, "number": "3.4", "level": 2}, {"text": "3.5 Auxiliary Measurements", "title": null, "number": "3.5", "level": 2}, {"text": "4 Procedure", "title": null, "number": "4", "level": 1}, {"text": "4.1 Static Weighing Method", "title": null, "number": "4.1", "level": 2}, {"text": "4.2 Dynamic Weighing Method", "title": null, "number": "4.2", "level": 2}, {"text": "4.3 Common Provisions", "title": null, "number": "4.3", "level": 2}, {"text": "5 Calculation of Flow Rate", "title": null, "number": "5", "level": 1}, {"text": "5.1 Calculation of Mass Flow Rate", "title": null, "number": "5.1", "level": 2}, {"text": "5.2 Calculation of Volume Flow Rate", "title": null, "number": "5.2", "level": 2}, {"text": "6 Uncertainties in the Measurement of Flow Rate", "title": null, "number": "6", "level": 1}]}
+{"t": 1761958023.1447382, "type": "toc_pages", "pages": [6, 8, 9, 18, 25]}
+{"t": 1761958023.1447382, "type": "anchor_resolved_strict", "number": "1", "title": "1 General", "page": 15, "idx": 769, "score": 100.0, "band": false, "toc_page": false, "strategy": "num+title", "want": "1 1 general", "text": "1"}
+{"t": 1761958023.149938, "type": "anchor_resolved_strict", "number": "1.1", "title": "1.1 Scope and Field of Application", "page": 20, "idx": 1126, "score": 100.0, "band": false, "toc_page": false, "strategy": "title_only", "want": "1.1 1.1 scope and field of application", "text": "and"}
+{"t": 1761958023.149938, "type": "anchor_unresolved_strict", "number": "1.2", "title": "1.2 References", "reason": "no_candidate"}
+{"t": 1761958023.159353, "type": "anchor_unresolved_strict", "number": "1.3", "title": "1.3 Definitions", "reason": "no_candidate"}
+{"t": 1761958023.163903, "type": "anchor_unresolved_strict", "number": "1.4", "title": "1.4 Symbols", "reason": "no_candidate"}
+{"t": 1761958023.1663263, "type": "anchor_unresolved_strict", "number": "2", "title": "2 Principles", "reason": "no_candidate"}
+{"t": 1761958023.17703, "type": "anchor_unresolved_strict", "number": "2.1", "title": "2.1 Statement of the Principles", "reason": "no_candidate"}
+{"t": 1761958023.1817536, "type": "anchor_resolved_strict", "number": "2.1.1", "title": "2.1.1 Static Weighing", "page": 22, "idx": 1272, "score": 83.33333333333333, "band": false, "toc_page": false, "strategy": "title_only", "want": "2.1.1 2.1.1 static weighing", "text": "A I STATIC WEIGHING METHOD by"}
+{"t": 1761958023.1851835, "type": "anchor_resolved_strict", "number": "2.1.2", "title": "2.1.2 Dynamic Weighing", "page": 23, "idx": 1345, "score": 84.21052631578948, "band": false, "toc_page": false, "strategy": "title_only", "want": "2.1.2 2.1.2 dynamic weighing", "text": "A2 DYNAMIC WEIGHING METHOD"}
+{"t": 1761958023.191228, "type": "anchor_unresolved_strict", "number": "2.1.3", "title": "2.1.3 Comparison of Instantaneous and Mean Flow Rate", "reason": "no_candidate"}
+{"t": 1761958023.195818, "type": "anchor_unresolved_strict", "number": "2.2", "title": "2.2 Accuracy of the Method", "reason": "no_candidate"}
+{"t": 1761958023.1997616, "type": "anchor_resolved_strict", "number": "2.2.1", "title": "2.2.1 Overall Uncertainty on the Weighing Measurement", "page": 24, "idx": 1407, "score": 100.0, "band": false, "toc_page": false, "strategy": "title_only", "want": "2.2.1 2.2.1 overall uncertainty on the weighing measurement", "text": "on"}
+{"t": 1761958023.1997616, "type": "anchor_unresolved_strict", "number": "2.2.2", "title": "2.2.2 Requirements for Accurate Measurements", "reason": "no_candidate"}
+{"t": 1761958023.1997616, "type": "anchor_resolved_strict", "number": "3", "title": "3 Apparatus", "page": 11, "idx": 640, "score": 90.0, "band": true, "toc_page": false, "strategy": "last_occurrence", "want": "3 3 apparatus", "text": "3"}
+{"t": 1761958023.1997616, "type": "anchor_resolved_strict", "number": "3.1", "title": "3.1 Diverter", "page": 16, "idx": 807, "score": 80.0, "band": false, "toc_page": false, "strategy": "title_only", "want": "3.1 3.1 diverter", "text": "FIG. EXAMPLES OF DIVERTER DESIGN 2"}
+{"t": 1761958023.1997616, "type": "anchor_resolved_strict", "number": "3.2", "title": "3.2 Time-Measuring Apparatus", "page": 17, "idx": 873, "score": 100.0, "band": false, "toc_page": false, "strategy": "num+title", "want": "3.2 3.2 time-measuring apparatus", "text": "3.2 Time-Measuring Apparatus"}
+{"t": 1761958023.2141225, "type": "anchor_resolved_strict", "number": "3.3", "title": "3.3 Weighing Tank", "page": 17, "idx": 877, "score": 100.0, "band": false, "toc_page": false, "strategy": "num+title", "want": "3.3 3.3 weighing tank", "text": "3.3 Weighing Tank -"}
+{"t": 1761958023.2161646, "type": "anchor_resolved_strict", "number": "3.4", "title": "3.4 Weighing Device", "page": 19, "idx": 1065, "score": 100.0, "band": false, "toc_page": false, "strategy": "num+title", "want": "3.4 3.4 weighing device", "text": "3.4 Weighing Device"}
+{"t": 1761958023.222162, "type": "anchor_unresolved_strict", "number": "3.5", "title": "3.5 Auxiliary Measurements", "reason": "no_candidate"}
+{"t": 1761958023.2241657, "type": "anchor_resolved_strict", "number": "4", "title": "4 Procedure", "page": 12, "idx": 672, "score": 90.0, "band": true, "toc_page": false, "strategy": "last_occurrence", "want": "4 4 procedure", "text": "4"}
+{"t": 1761958023.226736, "type": "anchor_resolved_strict", "number": "4.1", "title": "4.1 Static Weighing Method", "page": 14, "idx": 710, "score": 73.17073170731707, "band": true, "toc_page": false, "strategy": "title_only", "want": "4.1 4.1 static weighing method", "text": "ASME/ANSI MFC-9M-1988 WEIGHING METHOD CLOSED CONDUITS BY"}
+{"t": 1761958023.2298746, "type": "anchor_resolved_strict", "number": "4.2", "title": "4.2 Dynamic Weighing Method", "page": 15, "idx": 763, "score": 100.0, "band": false, "toc_page": false, "strategy": "title_only", "want": "4.2 4.2 dynamic weighing method", "text": "Weighing"}
+{"t": 1761958023.2298746, "type": "anchor_resolved_strict", "number": "4.3", "title": "4.3 Common Provisions", "page": 20, "idx": 1111, "score": 90.0, "band": true, "toc_page": false, "strategy": "num+title", "want": "4.3 4.3 common provisions", "text": "4.3 Common Provisions"}
+{"t": 1761958023.2298746, "type": "anchor_resolved_strict", "number": "5", "title": "5 Calculation of Flow Rate", "page": 20, "idx": 1132, "score": 100.0, "band": false, "toc_page": false, "strategy": "num+title", "want": "5 5 calculation of flow rate", "text": "5 CALCULATION OF FLOW RATE"}
+{"t": 1761958023.2298746, "type": "anchor_resolved_strict", "number": "5.1", "title": "5.1 Calculation of Mass Flow Rate", "page": 20, "idx": 1133, "score": 100.0, "band": false, "toc_page": false, "strategy": "title_only", "want": "5.1 5.1 calculation of mass flow rate", "text": "Flow 5.1 Calculation Mass Rate of (www.techstreet.com), Flow 5.2 Calculation Volume Rate of"}
+{"t": 1761958023.2298746, "type": "anchor_unresolved_strict", "number": "5.2", "title": "5.2 Calculation of Volume Flow Rate", "reason": "no_candidate"}
+{"t": 1761958023.2298746, "type": "anchor_resolved_strict", "number": "6", "title": "6 Uncertainties in the Measurement of Flow Rate", "page": 14, "idx": 739, "score": 90.0, "band": true, "toc_page": false, "strategy": "last_occurrence", "want": "6 6 uncertainties in the measurement of flow rate", "text": "6"}
+{"t": 1761958023.2298746, "type": "final_monotonic_pass", "fixed": 0}
+{"t": 1761958023.2438416, "type": "final_outline", "headers": [{"text": "3 Apparatus", "number": "3", "level": 1, "page": 11, "line_idx": 85, "global_idx": 640}, {"text": "4 Procedure", "number": "4", "level": 1, "page": 12, "line_idx": 29, "global_idx": 672}, {"text": "4.1 Static Weighing Method", "number": "4.1", "level": 2, "page": 14, "line_idx": 2, "global_idx": 710}, {"text": "6 Uncertainties in the Measurement of Flow Rate", "number": "6", "level": 1, "page": 14, "line_idx": 31, "global_idx": 739}, {"text": "4.2 Dynamic Weighing Method", "number": "4.2", "level": 2, "page": 15, "line_idx": 21, "global_idx": 763}, {"text": "1 General", "number": "1", "level": 1, "page": 15, "line_idx": 27, "global_idx": 769}, {"text": "3.1 Diverter", "number": "3.1", "level": 2, "page": 16, "line_idx": 16, "global_idx": 807}, {"text": "3.2 Time-Measuring Apparatus", "number": "3.2", "level": 2, "page": 17, "line_idx": 14, "global_idx": 873}, {"text": "3.3 Weighing Tank", "number": "3.3", "level": 2, "page": 17, "line_idx": 18, "global_idx": 877}, {"text": "3.4 Weighing Device", "number": "3.4", "level": 2, "page": 19, "line_idx": 27, "global_idx": 1065}, {"text": "4.3 Common Provisions", "number": "4.3", "level": 2, "page": 20, "line_idx": 5, "global_idx": 1111}, {"text": "1.1 Scope and Field of Application", "number": "1.1", "level": 2, "page": 20, "line_idx": 20, "global_idx": 1126}, {"text": "5 Calculation of Flow Rate", "number": "5", "level": 1, "page": 20, "line_idx": 26, "global_idx": 1132}, {"text": "5.1 Calculation of Mass Flow Rate", "number": "5.1", "level": 2, "page": 20, "line_idx": 27, "global_idx": 1133}, {"text": "2.1.1 Static Weighing", "number": "2.1.1", "level": 3, "page": 22, "line_idx": 42, "global_idx": 1272}, {"text": "2.1.2 Dynamic Weighing", "number": "2.1.2", "level": 3, "page": 23, "line_idx": 32, "global_idx": 1345}, {"text": "2.2.1 Overall Uncertainty on the Weighing Measurement", "number": "2.2.1", "level": 3, "page": 24, "line_idx": 33, "global_idx": 1407}], "sections": [{"header_text": "3 Apparatus", "header_number": "3", "level": 1, "start_global_idx": 640, "end_global_idx": 85, "start_page": 11, "end_page": 3}, {"header_text": "4 Procedure", "header_number": "4", "level": 1, "start_global_idx": 672, "end_global_idx": 29, "start_page": 12, "end_page": 2}, {"header_text": "4.1 Static Weighing Method", "header_number": "4.1", "level": 2, "start_global_idx": 710, "end_global_idx": 30, "start_page": 14, "end_page": 2}, {"header_text": "6 Uncertainties in the Measurement of Flow Rate", "header_number": "6", "level": 1, "start_global_idx": 739, "end_global_idx": 31, "start_page": 14, "end_page": 2}, {"header_text": "4.2 Dynamic Weighing Method", "header_number": "4.2", "level": 2, "start_global_idx": 763, "end_global_idx": 26, "start_page": 15, "end_page": 1}, {"header_text": "1 General", "header_number": "1", "level": 1, "start_global_idx": 769, "end_global_idx": 27, "start_page": 15, "end_page": 1}, {"header_text": "3.1 Diverter", "header_number": "3.1", "level": 2, "start_global_idx": 807, "end_global_idx": 16, "start_page": 16, "end_page": 1}, {"header_text": "3.2 Time-Measuring Apparatus", "header_number": "3.2", "level": 2, "start_global_idx": 873, "end_global_idx": 17, "start_page": 17, "end_page": 1}, {"header_text": "3.3 Weighing Tank", "header_number": "3.3", "level": 2, "start_global_idx": 877, "end_global_idx": 26, "start_page": 17, "end_page": 1}, {"header_text": "3.4 Weighing Device", "header_number": "3.4", "level": 2, "start_global_idx": 1065, "end_global_idx": 27, "start_page": 19, "end_page": 1}, {"header_text": "4.3 Common Provisions", "header_number": "4.3", "level": 2, "start_global_idx": 1111, "end_global_idx": 19, "start_page": 20, "end_page": 1}, {"header_text": "1.1 Scope and Field of Application", "header_number": "1.1", "level": 2, "start_global_idx": 1126, "end_global_idx": 25, "start_page": 20, "end_page": 1}, {"header_text": "5 Calculation of Flow Rate", "header_number": "5", "level": 1, "start_global_idx": 1132, "end_global_idx": 26, "start_page": 20, "end_page": 1}, {"header_text": "5.1 Calculation of Mass Flow Rate", "header_number": "5.1", "level": 2, "start_global_idx": 1133, "end_global_idx": 41, "start_page": 20, "end_page": 2}, {"header_text": "2.1.1 Static Weighing", "header_number": "2.1.1", "level": 3, "start_global_idx": 1272, "end_global_idx": 42, "start_page": 22, "end_page": 2}, {"header_text": "2.1.2 Dynamic Weighing", "header_number": "2.1.2", "level": 3, "start_global_idx": 1345, "end_global_idx": 32, "start_page": 23, "end_page": 2}, {"header_text": "2.2.1 Overall Uncertainty on the Weighing Measurement", "header_number": "2.2.1", "level": 3, "start_global_idx": 1407, "end_global_idx": 1553, "start_page": 24, "end_page": 27}], "mode": "llm_strict", "messages": [], "elapsed_s": 1.0597586999938358}
+{"t": 1761958023.2438416, "type": "end_run", "elapsed_s": 1.0597586999938358, "total_headers": 17, "unresolved": [], "mode": "llm_strict", "doc_hash": "c7e5671948f761a792fafbc2b182c6cf1d1b02c8a6b9a3bf105e94591c98a85b"}
