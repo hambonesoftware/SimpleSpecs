@@ -37,6 +37,18 @@ async def _run_extract(
         return lines, set(), "hash-value"
 
     async def _fake_llm(*args, **kwargs):  # noqa: ANN001 - test stub
+        tracer = kwargs.get("tracer")
+        if tracer is not None:
+            tracer.ev(
+                "llm_request",
+                part=1,
+                total_parts=1,
+                model="stub-model",
+                temperature=0.0,
+                timeout_read=0,
+                params={},
+                messages=[{"role": "user", "content": "stub"}],
+            )
         if llm_exception is not None:
             raise llm_exception
         return LLMFullHeadersResult(

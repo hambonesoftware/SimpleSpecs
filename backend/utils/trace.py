@@ -63,6 +63,7 @@ class HeaderTracer:
         events = self.as_list()
         metadata: Dict[str, Any] = {}
         llm_headers: List[Dict[str, Any]] = []
+        llm_requests: List[Dict[str, Any]] = []
         llm_raw_responses: List[str] = []
         llm_fenced_blocks: List[str] = []
         final_outline: Dict[str, Any] = {}
@@ -86,6 +87,18 @@ class HeaderTracer:
                 }
             elif event_type == "llm_outline_received":
                 llm_headers = list(event.get("headers", []))
+            elif event_type == "llm_request":
+                llm_requests.append(
+                    {
+                        "part": event.get("part"),
+                        "total_parts": event.get("total_parts"),
+                        "model": event.get("model"),
+                        "temperature": event.get("temperature"),
+                        "timeout_read": event.get("timeout_read"),
+                        "params": event.get("params"),
+                        "messages": event.get("messages", []),
+                    }
+                )
             elif event_type == "final_outline":
                 final_outline = {
                     "headers": list(event.get("headers", [])),
@@ -123,6 +136,7 @@ class HeaderTracer:
             "run_id": self.run_id,
             "metadata": metadata,
             "llm_headers": llm_headers,
+            "llm_requests": llm_requests,
             "llm_raw_responses": llm_raw_responses,
             "llm_fenced_blocks": llm_fenced_blocks,
             "decisions": decisions,
