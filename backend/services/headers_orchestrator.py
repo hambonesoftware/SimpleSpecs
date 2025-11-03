@@ -187,6 +187,7 @@ async def extract_headers_and_chunks(
                 doc_hash,
                 settings=settings,
                 excluded_pages=excluded_pages,
+                tracer=tracer,
             )
             llm_headers = llm_result.headers or []
             fenced_text = llm_result.combined_fenced()

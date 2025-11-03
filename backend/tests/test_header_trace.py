@@ -36,6 +36,18 @@ def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
         return sample_lines, set(), "hash-value"
 
     async def _fake_llm(*_args, **_kwargs):  # noqa: ANN001
+        tracer = _kwargs.get("tracer")
+        if tracer is not None:
+            tracer.ev(
+                "llm_request",
+                part=1,
+                total_parts=1,
+                model="stub-model",
+                temperature=0.0,
+                timeout_read=0,
+                params={},
+                messages=[{"role": "user", "content": "stub"}],
+            )
         return LLMFullHeadersResult(
             headers=[{"text": "Introduction", "number": "1", "level": 1}],
             raw_responses=["raw"],
@@ -90,6 +102,8 @@ def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
     assert summary_path.exists()
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     assert summary["llm_headers"]
+    assert summary["llm_requests"]
+    assert summary["llm_requests"][0]["messages"][0]["content"] == "stub"
     assert summary["llm_raw_responses"] == ["raw"]
     assert summary["llm_fenced_blocks"] == [
         "-----BEGIN SIMPLEHEADERS JSON-----\n{\"headers\": []}\n-----END SIMPLEHEADERS JSON-----"
@@ -123,6 +137,18 @@ def test_header_trace_summary_created_by_default(monkeypatch, tmp_path) -> None:
         return sample_lines, set(), "hash-value"
 
     async def _fake_llm(*_args, **_kwargs):  # noqa: ANN001
+        tracer = _kwargs.get("tracer")
+        if tracer is not None:
+            tracer.ev(
+                "llm_request",
+                part=1,
+                total_parts=1,
+                model="stub-model",
+                temperature=0.0,
+                timeout_read=0,
+                params={},
+                messages=[{"role": "user", "content": "stub"}],
+            )
         return LLMFullHeadersResult(
             headers=[{"text": "Intro", "number": "1", "level": 1}],
             raw_responses=["raw"],
@@ -153,6 +179,8 @@ def test_header_trace_summary_created_by_default(monkeypatch, tmp_path) -> None:
     assert summary_path.exists()
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     assert summary["llm_headers"][0]["text"] == "Intro"
+    assert summary["llm_requests"]
+    assert summary["llm_requests"][0]["messages"][0]["content"] == "stub"
     assert summary["llm_raw_responses"] == ["raw"]
     assert summary["llm_fenced_blocks"] == [
         "-----BEGIN SIMPLEHEADERS JSON-----\n{\"headers\": []}\n-----END SIMPLEHEADERS JSON-----"

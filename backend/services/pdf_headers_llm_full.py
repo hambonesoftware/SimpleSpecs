@@ -7,13 +7,16 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Sequence
+from typing import Dict, Iterable, List, Sequence, TYPE_CHECKING
 
 from backend.config import Settings
 
 from ..utils.logging import configure_logging
 from .openrouter_client import chat
 from .token_chunk import split_by_token_limit
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from ..utils.trace import HeaderTracer
 
 FENCE_START = "-----BEGIN SIMPLEHEADERS JSON-----"
 FENCE_END = "-----END SIMPLEHEADERS JSON-----"
@@ -102,6 +105,7 @@ async def get_headers_llm_full(
     *,
     settings: Settings,
     excluded_pages: Iterable[int] = (),
+    tracer: "HeaderTracer | None" = None,
 ) -> LLMFullHeadersResult:
     """Return LLM extracted headers for a document."""
 
@@ -180,6 +184,17 @@ async def get_headers_llm_full(
         ]
 
         loop = asyncio.get_running_loop()
+        if tracer is not None:
+            tracer.ev(
+                "llm_request",
+                part=index,
+                total_parts=total_parts,
+                model=settings.headers_llm_model,
+                temperature=0.2,
+                params=dict(client_params),
+                timeout_read=settings.headers_llm_timeout_s,
+                messages=[dict(message) for message in messages],
+            )
         content = await loop.run_in_executor(
             None,
             lambda: chat(
