@@ -136,6 +136,38 @@ def flatten_outline(nodes: Sequence[HeaderNode]) -> list[dict[str, object]]:
     return flattened
 
 
+def build_outline_from_simpleheaders(
+    entries: Sequence[Mapping[str, object]]
+) -> list[HeaderNode]:
+    """Convert a simple header list into ``HeaderNode`` hierarchy."""
+
+    payload: list[dict[str, object]] = []
+    for entry in entries:
+        text = str(entry.get("text", "")).strip()
+        if not text:
+            continue
+
+        number = entry.get("number")
+        level = entry.get("level")
+        try:
+            level_int = int(level) if level is not None else 1
+        except (TypeError, ValueError):
+            level_int = 1
+        page = entry.get("page")
+        page_int = page if isinstance(page, int) else None
+
+        payload.append(
+            {
+                "title": text,
+                "number": number,
+                "level": max(1, level_int),
+                "page": page_int,
+            }
+        )
+
+    return _build_outline_from_flat_entries(payload)
+
+
 def _normalise_text(text: str) -> str:
     """Normalise whitespace within a block."""
 
@@ -456,4 +488,5 @@ __all__ = [
     "HeadersLLMClient",
     "extract_headers",
     "flatten_outline",
+    "build_outline_from_simpleheaders",
 ]

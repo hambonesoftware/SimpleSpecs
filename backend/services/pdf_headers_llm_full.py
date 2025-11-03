@@ -21,6 +21,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 FENCE_START = "-----BEGIN SIMPLEHEADERS JSON-----"
 FENCE_END = "-----END SIMPLEHEADERS JSON-----"
 
+HEADER_CHUNK_TOKEN_LIMIT = 120_000
+
 
 LOGGER = configure_logging().getChild(__name__)
 
@@ -138,9 +140,8 @@ async def get_headers_llm_full(
             )
 
     text_blocks = _build_text_blocks(lines, excluded_pages)
-    parts = split_by_token_limit(
-        text_blocks, settings.headers_llm_max_input_tokens
-    )
+    token_limit = min(settings.headers_llm_max_input_tokens, HEADER_CHUNK_TOKEN_LIMIT)
+    parts = split_by_token_limit(text_blocks, token_limit)
     if not parts:
         parts = ["\n".join(text_blocks)]
 
@@ -266,4 +267,6 @@ __all__ = [
     "LLMFullHeadersParseError",
     "FENCE_START",
     "FENCE_END",
+    "HEADER_CHUNK_TOKEN_LIMIT",
 ]
+

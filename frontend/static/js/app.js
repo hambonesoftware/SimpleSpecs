@@ -39,6 +39,7 @@ const state = {
   approvalLoading: false,
   headerSearchAttempted: false,
   specsSearchAttempted: false,
+  headerMatches: [],
 };
 
 const elements = {
@@ -91,6 +92,31 @@ function renderPanelStartPrompt(container, { message, buttonLabel, onStart }) {
   wrapper.append(button);
 
   container.append(wrapper);
+}
+
+function deriveHeaderMatches(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return [];
+  }
+
+  const headers = Array.isArray(payload.simpleheaders) ? payload.simpleheaders : [];
+  return headers
+    .map((header) => {
+      const text = typeof header.text === 'string' ? header.text : '';
+      const number = header.number != null ? header.number : null;
+      const page = Number(header.page);
+      const line = Number(header.line_idx);
+      const globalIdx = Number(header.global_idx);
+
+      return {
+        text,
+        number,
+        page: Number.isFinite(page) ? page : null,
+        line: Number.isFinite(line) ? line : null,
+        globalIdx: Number.isFinite(globalIdx) ? globalIdx : null,
+      };
+    })
+    .filter((entry) => entry.text);
 }
 
 function updateHeaderModeTag(mode) {
@@ -240,6 +266,7 @@ async function selectDocument(documentId) {
   state.risk = null;
   state.headerSearchAttempted = false;
   state.specsSearchAttempted = false;
+  state.headerMatches = [];
 
   if (elements.workspaceSubtitle) {
     elements.workspaceSubtitle.textContent = 'Loading analysis results…';
@@ -342,7 +369,8 @@ async function refreshHeaders() {
   try {
     const headersResult = await fetchHeaders(documentId);
     state.headers = headersResult;
-    renderHeaderRawResponse(elements.headersRawContent, state.headers?.fenced_text ?? '');
+    state.headerMatches = deriveHeaderMatches(state.headers);
+    renderHeaderRawResponse(elements.headersRawContent, state.headers);
     renderHeaderOutline(elements.headersContent, state.headers, {
       documentId,
       fetchSection: fetchSectionText,
@@ -362,16 +390,15 @@ async function refreshHeaders() {
     showToast(message, 'error');
     if (previousHeaders) {
       state.headers = previousHeaders;
-      renderHeaderRawResponse(
-        elements.headersRawContent,
-        previousHeaders?.fenced_text ?? '',
-      );
+      state.headerMatches = deriveHeaderMatches(previousHeaders);
+      renderHeaderRawResponse(elements.headersRawContent, previousHeaders);
       renderHeaderOutline(elements.headersContent, previousHeaders, {
         documentId,
         fetchSection: fetchSectionText,
       });
       updateHeaderModeTag(previousHeaders?.mode ?? null);
     } else {
+      state.headerMatches = [];
       setPanelError(elements.headersRawContent, message);
       setPanelError(elements.headersContent, message);
       updateHeaderModeTag(null);

@@ -394,6 +394,32 @@ body {
   margin: 0;
 }
 
+.raw-response__details {
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 0.65rem 0.85rem;
+  background: color-mix(in srgb, var(--bg-panel) 96%, CanvasText 4%);
+  margin: 0 0 0.75rem;
+}
+
+.raw-response__details:last-child {
+  margin-bottom: 0;
+}
+
+.raw-response__details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  outline: none;
+}
+
+.raw-response__details[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
+.raw-response__details > .raw-response {
+  margin-top: 0.35rem;
+}
+
 .simpleheaders {
   display: grid;
   gap: 1.25rem;
@@ -423,6 +449,18 @@ body {
   padding: 0.45rem 0.65rem;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.simpleheaders__item-label {
+  display: block;
+  font-weight: 600;
+}
+
+.simpleheaders__item-meta {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
 }
 
 .simpleheaders__item:hover,

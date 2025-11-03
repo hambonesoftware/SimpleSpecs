@@ -12,7 +12,12 @@ from ..config import Settings, get_settings
 from ..database import get_session
 from ..models import Document, DocumentSection
 from ..services.header_match import find_header_occurrences
-from ..services.headers import HeadersLLMClient, extract_headers, flatten_outline
+from ..services.headers import (
+    HeadersLLMClient,
+    build_outline_from_simpleheaders,
+    extract_headers,
+    flatten_outline,
+)
 from ..services.headers_llm_simple import (
     InvalidLLMJSONError,
     get_headers_llm_json,
@@ -132,6 +137,10 @@ async def compute_headers(
     lines = list(orchestrated.get("lines", []))
     SimpleHeadersState.set(doc_id, doc_hash, lines)
 
+    llm_headers = list(orchestrated.get("llm_headers", []))
+    llm_raw_responses = list(orchestrated.get("llm_raw_responses", []))
+    llm_fenced_blocks = list(orchestrated.get("llm_fenced_blocks", []))
+
     persisted_sections = build_and_store_sections(
         session=session,
         document_id=doc_id,
@@ -161,17 +170,23 @@ async def compute_headers(
     else:
         sections_payload = [_serialise_section(section) for section in persisted_sections]
 
+    simpleheaders_source = orchestrated.get("headers", [])
     simpleheaders_payload = _serialise_simpleheaders(
-        orchestrated.get("headers", []), section_key_by_gid
+        simpleheaders_source, section_key_by_gid
     )
 
     fenced_text = orchestrated.get("fenced_text") or header_result.fenced_text
     messages = list(header_result.messages) + list(orchestrated.get("messages", []))
 
+    outline_payload = header_result.to_json()
+    if llm_headers:
+        outline_nodes = build_outline_from_simpleheaders(llm_headers)
+        outline_payload = [node.to_dict() for node in outline_nodes]
+
     response_payload: dict[str, object] = {
         "source": header_result.source,
         "document_id": doc_id,
-        "outline": header_result.to_json(),
+        "outline": outline_payload,
         "simpleheaders": simpleheaders_payload,
         "sections": sections_payload,
         "mode": orchestrated.get("mode"),
@@ -179,6 +194,9 @@ async def compute_headers(
         "fenced_text": fenced_text,
         "doc_hash": doc_hash,
         "excluded_pages": orchestrated.get("excluded_pages", []),
+        "llm_headers": llm_headers,
+        "llm_raw_responses": llm_raw_responses,
+        "llm_fenced_blocks": llm_fenced_blocks,
     }
 
     failure_raw = orchestrated.get("llm_failure_raw_response")

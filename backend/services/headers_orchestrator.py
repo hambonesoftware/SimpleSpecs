@@ -109,6 +109,9 @@ async def extract_headers_and_chunks(
     messages: list[str] = []
     fenced_text: str | None = None
     llm_failure_raw_response: str | None = None
+    llm_headers: list[dict] = []
+    llm_raw_responses: list[str] = []
+    llm_fenced_blocks: list[str] = []
 
     doc_id = document.id if document and document.id is not None else None
     cache_inputs = {
@@ -137,6 +140,9 @@ async def extract_headers_and_chunks(
             mode_used = payload.get("mode", "cache")
             fenced_text = payload.get("fenced_text")
             llm_failure_raw_response = payload.get("llm_failure_raw_response")
+            llm_headers = list(payload.get("llm_headers", []))
+            llm_raw_responses = list(payload.get("llm_raw_responses", []))
+            llm_fenced_blocks = list(payload.get("llm_fenced_blocks", []))
             matched_titles = {str(item.get("text", "")).strip() for item in located}
             expected_titles = [str(item.get("text", "")) for item in (native_headers or [])]
             unresolved = [
@@ -190,6 +196,8 @@ async def extract_headers_and_chunks(
                 tracer=tracer,
             )
             llm_headers = llm_result.headers or []
+            llm_raw_responses = list(llm_result.raw_responses)
+            llm_fenced_blocks = list(llm_result.fenced_blocks)
             fenced_text = llm_result.combined_fenced()
             strict_attempted = False
             vector_attempted = False
@@ -340,6 +348,9 @@ async def extract_headers_and_chunks(
                 "doc_hash": doc_hash,
                 "fenced_text": fenced_text,
                 "llm_failure_raw_response": llm_failure_raw_response,
+                "llm_headers": llm_headers,
+                "llm_raw_responses": llm_raw_responses,
+                "llm_fenced_blocks": llm_fenced_blocks,
             },
         )
 
@@ -379,6 +390,9 @@ async def extract_headers_and_chunks(
         "messages": messages,
         "fenced_text": fenced_text,
         "llm_failure_raw_response": llm_failure_raw_response,
+        "llm_headers": llm_headers,
+        "llm_raw_responses": llm_raw_responses,
+        "llm_fenced_blocks": llm_fenced_blocks,
     }, tracer
 
 
