@@ -156,6 +156,9 @@ def test_extract_headers_llm_failure_emits_message(monkeypatch, tmp_path) -> Non
     assert result["mode"] == "llm_full_error"
     assert result["messages"]
     assert "HTTP 403" in result["messages"][0]
+    assert result["llm_headers"] == []
+    assert result["llm_raw_responses"] == []
+    assert result["llm_fenced_blocks"] == []
 
 
 def test_extract_headers_llm_parse_error_returns_raw(monkeypatch, tmp_path) -> None:
@@ -179,6 +182,9 @@ def test_extract_headers_llm_parse_error_returns_raw(monkeypatch, tmp_path) -> N
     assert any(
         "invalid response" in message.lower() for message in result["messages"]
     )
+    assert result["llm_headers"] == []
+    assert result["llm_raw_responses"] == []
+    assert result["llm_fenced_blocks"] == []
 
 
 def test_extract_headers_llm_success_has_no_messages(monkeypatch, tmp_path) -> None:
@@ -187,6 +193,10 @@ def test_extract_headers_llm_success_has_no_messages(monkeypatch, tmp_path) -> N
     assert result["mode"] == "llm_full"
     assert result["messages"] == []
     assert result["fenced_text"]
+    assert result["llm_headers"]
+    assert result["llm_headers"][0]["text"] == "Intro"
+    assert result["llm_raw_responses"] == ["raw-response"]
+    assert result["llm_fenced_blocks"]
 
 
 def test_extract_headers_strict_mode(monkeypatch, tmp_path) -> None:
@@ -195,3 +205,5 @@ def test_extract_headers_strict_mode(monkeypatch, tmp_path) -> None:
     assert result["mode"] == "llm_strict"
     assert result["messages"] == []
     assert result["fenced_text"]
+    assert result["llm_headers"]
+    assert result["llm_raw_responses"] == ["raw-response"]

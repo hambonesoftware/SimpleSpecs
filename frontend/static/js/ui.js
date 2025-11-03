@@ -195,18 +195,98 @@ export function renderParseSummary(container, payload) {
   container.append(grid);
 }
 
-export function renderHeaderRawResponse(container, text) {
+export function renderHeaderRawResponse(container, payload) {
   if (!container) return;
-  if (!text || !String(text).trim()) {
+
+  let rawParts = [];
+  let fencedParts = [];
+  let fallbackText = '';
+
+  if (typeof payload === 'string') {
+    fallbackText = payload;
+  } else if (payload && typeof payload === 'object') {
+    if (Array.isArray(payload.llm_raw_responses)) {
+      rawParts = payload.llm_raw_responses
+        .map((part) => String(part ?? ''))
+        .filter((part) => part.trim().length);
+    }
+    if (Array.isArray(payload.llm_fenced_blocks)) {
+      fencedParts = payload.llm_fenced_blocks
+        .map((part) => String(part ?? ''))
+        .filter((part) => part.trim().length);
+    }
+    if (payload.fenced_text != null) {
+      fallbackText = String(payload.fenced_text);
+    }
+  } else {
+    fallbackText = '';
+  }
+
+  container.innerHTML = '';
+
+  if (rawParts.length) {
+    rawParts.forEach((part, index) => {
+      const details = document.createElement('details');
+      details.className = 'raw-response__details';
+      if (index === 0) {
+        details.open = true;
+      }
+      const summary = document.createElement('summary');
+      summary.textContent =
+        rawParts.length === 1
+          ? 'LLM raw response'
+          : `LLM raw response (part ${index + 1})`;
+      const pre = document.createElement('pre');
+      pre.className = 'raw-response';
+      pre.textContent = part;
+      details.append(summary, pre);
+      container.append(details);
+    });
+
+    if (fencedParts.length) {
+      fencedParts.forEach((block, index) => {
+        const details = document.createElement('details');
+        details.className = 'raw-response__details';
+        const summary = document.createElement('summary');
+        summary.textContent =
+          fencedParts.length === 1
+            ? 'Parsed SIMPLEHEADERS JSON'
+            : `Parsed SIMPLEHEADERS JSON (part ${index + 1})`;
+        const pre = document.createElement('pre');
+        pre.className = 'raw-response';
+        pre.textContent = block;
+        details.append(summary, pre);
+        container.append(details);
+      });
+    } else if (fallbackText && fallbackText.trim()) {
+      const details = document.createElement('details');
+      details.className = 'raw-response__details';
+      const summary = document.createElement('summary');
+      summary.textContent = 'Parsed SIMPLEHEADERS JSON';
+      const pre = document.createElement('pre');
+      pre.className = 'raw-response';
+      pre.textContent = fallbackText;
+      details.append(summary, pre);
+      container.append(details);
+    }
+
+    if (!container.childElementCount) {
+      container.innerHTML = '<p class="panel-status">Raw response unavailable.</p>';
+    }
+
+    return;
+  }
+
+  const fallback = fencedParts.length ? fencedParts.join('\n\n') : fallbackText;
+
+  if (!fallback || !String(fallback).trim()) {
     container.innerHTML = '<p class="panel-status">Raw response unavailable.</p>';
     return;
   }
 
   const pre = document.createElement('pre');
   pre.className = 'raw-response';
-  pre.textContent = String(text);
-
-  container.innerHTML = '';
+  pre.textContent = String(fallback);
   container.append(pre);
 }
 
@@ -283,12 +363,41 @@ function renderSimpleHeaders(container, payload, { documentId, fetchSection } = 
     button.className = 'simpleheaders__item';
     button.dataset.index = String(index);
     const label = header.number ? `${header.number} ${header.text}` : header.text;
-    button.textContent = label;
     button.style.paddingLeft = `${Math.max(0, Number(header.level || 1) - 1) * 12}px`;
     button.title = formatPageRange(sections[index]) ?? `Page ${Number(header.page ?? 0) + 1}`;
     if (header.section_key) {
       button.dataset.sectionKey = String(header.section_key);
     }
+
+    const labelEl = document.createElement('span');
+    labelEl.className = 'simpleheaders__item-label';
+    labelEl.textContent = label;
+
+    const metaEl = document.createElement('span');
+    metaEl.className = 'simpleheaders__item-meta';
+    const metaParts = [];
+    const pageNumber = Number(header.page);
+    if (Number.isFinite(pageNumber)) {
+      metaParts.push(`Page ${pageNumber + 1}`);
+    }
+    const lineNumber = Number(header.line_idx);
+    if (Number.isFinite(lineNumber)) {
+      metaParts.push(`Line ${lineNumber + 1}`);
+    }
+    const pageLabel = formatPageRange(sections[index]) ?? '';
+    if (!metaParts.length && pageLabel) {
+      metaParts.push(pageLabel);
+    }
+    if (metaParts.length) {
+      metaEl.textContent = metaParts.join(' · ');
+    }
+
+    button.textContent = '';
+    button.append(labelEl);
+    if (metaEl.textContent) {
+      button.append(metaEl);
+    }
+
     button.addEventListener('click', () => selectIndex(index));
     list.append(button);
     return button;
