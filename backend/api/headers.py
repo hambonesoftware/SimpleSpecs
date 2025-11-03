@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -11,6 +12,7 @@ from sqlmodel import Session, select
 from ..config import Settings, get_settings
 from ..database import get_session
 from ..models import Document, DocumentSection
+from ..services.artifact_store import get_or_create_parse_result
 from ..services.header_match import find_header_occurrences
 from ..services.headers import (
     HeadersLLMClient,
@@ -22,10 +24,11 @@ from ..services.headers_llm_simple import (
     InvalidLLMJSONError,
     get_headers_llm_json,
 )
-from ..services.headers_orchestrator import extract_headers_and_chunks
-from ..services.artifact_store import get_or_create_parse_result
+from ..services.headers_orchestrator import (
+    extract_headers_and_chunks as orchestrate_headers_and_chunks,
+)
 from ..services.pdf_native import parse_pdf
-from ..services.sections import build_and_store_sections
+from ..services.sections import build_and_store_sections, delete_sections_for_document
 from ..services.simpleheaders_state import SimpleHeadersState
 
 router = APIRouter(prefix="/api", tags=["headers"])
@@ -36,10 +39,33 @@ async def compute_headers(
     document_id: int,
     *,
     trace: bool = Query(False, description="Return inline trace events when available"),
+    force: bool = Query(
+        False,
+        description="Force new LLM headers; purge prior headers/sections and bypass caches.",
+    ),
     session: Session = Depends(get_session),
     settings: Settings = Depends(get_settings),
 ):
     """Return LLM-provided headers and alignment matches for ``document_id``."""
+
+    return await extract_headers_and_chunks(
+        document_id=document_id,
+        settings=settings,
+        session=session,
+        force=force,
+        trace=trace,
+    )
+
+
+async def extract_headers_and_chunks(
+    *,
+    document_id: int,
+    settings: Settings,
+    session: Session,
+    force: bool = False,
+    trace: bool = False,
+) -> Dict[str, Any] | JSONResponse:
+    """Core header extraction workflow shared by routers and tests."""
 
     document = session.get(Document, document_id)
     if document is None:
@@ -53,6 +79,16 @@ async def compute_headers(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Document is missing a primary key",
         )
+
+    doc_id = int(document.id)
+
+    if force:
+        try:
+            delete_sections_for_document(session=session, document_id=doc_id)
+        except Exception:
+            # Deletion failures should not block a re-run.
+            pass
+        SimpleHeadersState.clear(doc_id)
 
     use_simple_llm = (
         settings.headers_mode.lower() == "llm_simple"
@@ -72,7 +108,6 @@ async def compute_headers(
         )
         return {"llm_headers": llm_obj.get("headers", []), "matches": matches}
 
-    doc_id = int(document.id)
     document_path = settings.upload_dir / str(doc_id) / document.filename
     if not document_path.exists():
         raise HTTPException(
@@ -108,13 +143,13 @@ async def compute_headers(
     native_headers = flatten_outline(header_result.outline)
 
     document_bytes = document_path.read_bytes()
-    orchestrator_impl = extract_headers_and_chunks
+    orchestrator_impl = orchestrate_headers_and_chunks
     if headers_router is not None:
         orchestrator_impl = getattr(
-            headers_router, "extract_headers_and_chunks", extract_headers_and_chunks
+            headers_router, "extract_headers_and_chunks", orchestrate_headers_and_chunks
         )
 
-    orchestrator_kwargs = {
+    orchestrator_kwargs: Dict[str, Any] = {
         "settings": settings,
         "native_headers": native_headers,
         "metadata": {
@@ -124,6 +159,7 @@ async def compute_headers(
         "session": session,
         "document": document,
         "want_trace": trace,
+        "force": force,
     }
     accepted_params = set(inspect.signature(orchestrator_impl).parameters)
     for key in list(orchestrator_kwargs.keys()):
@@ -347,4 +383,4 @@ def section_text(
     return PlainTextResponse("\n".join(text_lines))
 
 
-__all__ = ["router"]
+__all__ = ["router", "extract_headers_and_chunks"]
