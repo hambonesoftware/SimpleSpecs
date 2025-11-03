@@ -2,7 +2,10 @@ import asyncio
 
 from backend.config import Settings
 from backend.services import headers_orchestrator
-from backend.services.pdf_headers_llm_full import LLMFullHeadersResult
+from backend.services.pdf_headers_llm_full import (
+    LLMFullHeadersParseError,
+    LLMFullHeadersResult,
+)
 
 
 async def _run_extract(
@@ -141,6 +144,29 @@ def test_extract_headers_llm_failure_emits_message(monkeypatch, tmp_path) -> Non
     assert result["mode"] == "llm_full_error"
     assert result["messages"]
     assert "HTTP 403" in result["messages"][0]
+
+
+def test_extract_headers_llm_parse_error_returns_raw(monkeypatch, tmp_path) -> None:
+    raw_payload = "LLM output without fences"
+
+    result = asyncio.run(
+        _run_extract(
+            monkeypatch,
+            tmp_path,
+            llm_exception=LLMFullHeadersParseError(
+                "missing fences",
+                content=raw_payload,
+                part_index=1,
+            ),
+        )
+    )
+
+    assert result["mode"] == "llm_full_error"
+    assert result["llm_failure_raw_response"] == raw_payload
+    assert result["fenced_text"] == raw_payload
+    assert any(
+        "invalid response" in message.lower() for message in result["messages"]
+    )
 
 
 def test_extract_headers_llm_success_has_no_messages(monkeypatch, tmp_path) -> None:
