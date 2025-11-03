@@ -9,6 +9,7 @@ from sqlmodel import Session
 from ..config import Settings, get_settings
 from ..database import get_session
 from ..models import Document
+from ..services.artifact_store import get_or_create_parse_result
 from ..services.pdf_native import parse_pdf
 from ..services.spec_compare import (
     ClauseMatch,
@@ -107,7 +108,13 @@ async def compare_specifications(
             status_code=status.HTTP_404_NOT_FOUND, detail="Document contents missing"
         )
 
-    parse_result = parse_pdf(document_path, settings=settings)
+    parse_result, _ = get_or_create_parse_result(
+        session=session,
+        document=document,
+        document_path=document_path,
+        settings=settings,
+        parse_func=parse_pdf,
+    )
     spec_llm = SpecLLMClient(settings)
     extraction = extract_specifications(
         parse_result, settings=settings, llm_client=spec_llm

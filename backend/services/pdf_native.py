@@ -12,6 +12,7 @@ import warnings
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any, Iterable, Mapping
 
 import fitz  # type: ignore
 import pdfplumber  # type: ignore
@@ -38,6 +39,17 @@ from .text_extraction import extract_lines
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pytesseract")
 
 LOGGER = logging.getLogger(__name__)
+
+
+def _coerce_optional_float(value: Any) -> float | None:
+    """Return ``value`` as a float when possible, otherwise ``None``."""
+
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 @dataclass
@@ -115,6 +127,87 @@ class ParseResult:
             "has_ocr": self.has_ocr,
             "used_mineru": self.used_mineru,
         }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "ParseResult":
+        """Rehydrate a :class:`ParseResult` instance from a cached payload."""
+
+        pages_payload = payload.get("pages") or []
+        pages: list[ParsedPage] = []
+        for entry in pages_payload:
+            if not isinstance(entry, Mapping):
+                continue
+            blocks_payload = entry.get("blocks") or []
+            blocks: list[ParsedBlock] = []
+            for block_entry in blocks_payload:
+                if not isinstance(block_entry, Mapping):
+                    continue
+                bbox_values = block_entry.get("bbox", (0.0, 0.0, 0.0, 0.0))
+                bbox_tuple = (0.0, 0.0, 0.0, 0.0)
+                if isinstance(bbox_values, Iterable) and not isinstance(
+                    bbox_values, (str, bytes)
+                ):
+                    try:
+                        coords = [float(value) for value in bbox_values]
+                    except (TypeError, ValueError):
+                        coords = []
+                    if len(coords) == 4:
+                        bbox_tuple = tuple(coords)
+                blocks.append(
+                    ParsedBlock(
+                        text=str(block_entry.get("text", "")),
+                        bbox=bbox_tuple,  # type: ignore[arg-type]
+                        font=block_entry.get("font"),
+                        font_size=_coerce_optional_float(block_entry.get("font_size")),
+                        source=str(block_entry.get("source", "")),
+                    )
+                )
+
+            tables_payload = entry.get("tables") or []
+            tables: list[ParsedTable] = []
+            for table_entry in tables_payload:
+                if not isinstance(table_entry, Mapping):
+                    continue
+                bbox_values = table_entry.get("bbox", (0.0, 0.0, 0.0, 0.0))
+                bbox_tuple = (0.0, 0.0, 0.0, 0.0)
+                if isinstance(bbox_values, Iterable) and not isinstance(
+                    bbox_values, (str, bytes)
+                ):
+                    try:
+                        coords = [float(value) for value in bbox_values]
+                    except (TypeError, ValueError):
+                        coords = []
+                    if len(coords) == 4:
+                        bbox_tuple = tuple(coords)
+                tables.append(
+                    ParsedTable(
+                        page_number=int(entry.get("page_number", 0)),
+                        bbox=bbox_tuple,  # type: ignore[arg-type]
+                        flavor=(
+                            str(table_entry.get("flavor"))
+                            if table_entry.get("flavor") is not None
+                            else None
+                        ),
+                        accuracy=_coerce_optional_float(table_entry.get("accuracy")),
+                    )
+                )
+
+            pages.append(
+                ParsedPage(
+                    page_number=int(entry.get("page_number", 0)),
+                    width=float(entry.get("width", 0.0)),
+                    height=float(entry.get("height", 0.0)),
+                    blocks=blocks,
+                    tables=tables,
+                    is_toc=bool(entry.get("is_toc", False)),
+                )
+            )
+
+        return cls(
+            pages=pages,
+            has_ocr=bool(payload.get("has_ocr", False)),
+            used_mineru=bool(payload.get("used_mineru", False)),
+        )
 
 
 class ParseError(RuntimeError):

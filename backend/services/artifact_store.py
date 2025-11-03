@@ -7,11 +7,12 @@ import json
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any, Callable, Iterable, Mapping
 
 from sqlalchemy import delete, select
 from sqlmodel import Session
 
+from ..config import Settings
 from ..models import (
     Document,
     DocumentArtifact,
@@ -19,7 +20,7 @@ from ..models import (
     DocumentPage,
     DocumentTable,
 )
-from ..services.pdf_native import ParseResult
+from ..services.pdf_native import ParseResult, parse_pdf
 
 PARSER_VERSION = "2025.01"
 PARSE_RESULT_ARTIFACT_KEY = "parse-result"
@@ -239,6 +240,29 @@ def cache_parse_result(
     )
 
 
+def get_or_create_parse_result(
+    *,
+    session: Session,
+    document: Document,
+    document_path: Path,
+    settings: Settings,
+    parse_func: Callable[[Path, Settings], ParseResult] | None = None,
+) -> tuple[ParseResult, bool]:
+    """Return a parse result, reusing cached artifacts when available."""
+
+    if document.id is None:
+        raise ValueError("Document must be persisted before parsing")
+
+    cached_payload = get_cached_parse_payload(session=session, document=document)
+    if cached_payload is not None:
+        return ParseResult.from_dict(cached_payload), True
+
+    parse_impl = parse_func or parse_pdf
+    result = parse_impl(document_path, settings=settings)
+    persist_parse_result(session=session, document=document, parse_result=result)
+    return result, False
+
+
 def get_cached_artifact(
     *,
     session: Session,
@@ -320,6 +344,7 @@ __all__ = [
     "PARSER_VERSION",
     "PARSE_RESULT_ARTIFACT_KEY",
     "cache_parse_result",
+    "get_or_create_parse_result",
     "get_cached_artifact",
     "get_cached_parse_payload",
     "persist_parse_result",
