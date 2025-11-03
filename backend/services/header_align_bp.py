@@ -130,7 +130,14 @@ def _in_band(line: Line, positions: Dict[int, Dict[int, int]]) -> bool:
     return position < HEADERS_BAND_LINES or position >= max(0, total - HEADERS_BAND_LINES)
 
 
-def align_headers_best(llm_headers: Sequence[Header], lines_input: Sequence[Line], tracer: HeaderTracer | None = None) -> List[Dict[str, object]]:
+def align_headers_best(
+    llm_headers: Sequence[Header],
+    lines_input: Sequence[Line],
+    tracer: HeaderTracer | None = None,
+) -> List[Dict[str, object]]:
+    if tracer:
+        tracer.log_call(f"{__name__}.align_headers_best")
+
     lines = _two_line_appendix_fuse(list(lines_input))
     sizes = [float(line.get("font_size") or 0.0) for line in lines if line.get("font_size") is not None]
     median_size = sorted(sizes)[len(sizes) // 2] if sizes else 0.0

@@ -111,6 +111,9 @@ async def get_headers_llm_full(
 ) -> LLMFullHeadersResult:
     """Return LLM extracted headers for a document."""
 
+    if tracer is not None:
+        tracer.log_call(f"{__name__}.get_headers_llm_full")
+
     cache_file = _cache_path(settings.headers_llm_cache_dir, doc_hash)
     if cache_file.exists():
         cached = json.loads(cache_file.read_text(encoding="utf-8"))

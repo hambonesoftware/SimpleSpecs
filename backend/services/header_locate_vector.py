@@ -58,6 +58,9 @@ def locate_headers_with_vectors(
 ) -> list[dict[str, object]]:
     """Return located headers using the vector locator."""
 
+    if tracer is not None:
+        tracer.log_call(f"{__name__}.locate_headers_with_vectors")
+
     canonical = _canonical_headers(simple_headers)
     if not canonical:
         return []

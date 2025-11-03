@@ -27,6 +27,7 @@ def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
 
     def _fake_collect(document_bytes, *_args, tracer=None, **_kwargs):  # noqa: ANN001
         if tracer is not None:
+            tracer.log_call("backend.services.pdf_native.collect_line_metrics")
             tracer.ev(
                 "pre_normalize_sample",
                 page=0,
@@ -38,6 +39,7 @@ def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
     async def _fake_llm(*_args, **_kwargs):  # noqa: ANN001
         tracer = _kwargs.get("tracer")
         if tracer is not None:
+            tracer.log_call("backend.services.pdf_headers_llm_full.get_headers_llm_full")
             tracer.ev(
                 "llm_request",
                 part=1,
@@ -109,6 +111,25 @@ def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
         "-----BEGIN SIMPLEHEADERS JSON-----\n{\"headers\": []}\n-----END SIMPLEHEADERS JSON-----"
     ]
     assert summary["final_outline"]["headers"]
+    call_names = [entry["name"] for entry in summary["function_calls"]]
+    assert call_names[0] == "backend.services.headers_orchestrator.extract_headers_and_chunks"
+    assert (
+        call_names.index("backend.services.pdf_native.collect_line_metrics")
+        > call_names.index("backend.services.headers_orchestrator.extract_headers_and_chunks")
+    )
+    assert (
+        call_names.index("backend.services.pdf_headers_llm_full.get_headers_llm_full")
+        > call_names.index("backend.services.pdf_native.collect_line_metrics")
+    )
+    assert (
+        call_names.index("backend.services.header_locator.locate_headers_in_lines")
+        > call_names.index("backend.services.pdf_headers_llm_full.get_headers_llm_full")
+    )
+    assert "backend.services.headers_sequential.align_headers_sequential" in call_names
+    assert (
+        call_names.index("backend.services.headers_orchestrator._enforce_header_sequence")
+        > call_names.index("backend.services.header_locator.locate_headers_in_lines")
+    )
 
 
 def test_header_trace_summary_created_by_default(monkeypatch, tmp_path) -> None:
@@ -128,6 +149,7 @@ def test_header_trace_summary_created_by_default(monkeypatch, tmp_path) -> None:
 
     def _fake_collect(document_bytes, *_args, tracer=None, **_kwargs):  # noqa: ANN001
         if tracer is not None:
+            tracer.log_call("backend.services.pdf_native.collect_line_metrics")
             tracer.ev(
                 "pre_normalize_sample",
                 page=0,
@@ -139,6 +161,7 @@ def test_header_trace_summary_created_by_default(monkeypatch, tmp_path) -> None:
     async def _fake_llm(*_args, **_kwargs):  # noqa: ANN001
         tracer = _kwargs.get("tracer")
         if tracer is not None:
+            tracer.log_call("backend.services.pdf_headers_llm_full.get_headers_llm_full")
             tracer.ev(
                 "llm_request",
                 part=1,
@@ -186,6 +209,9 @@ def test_header_trace_summary_created_by_default(monkeypatch, tmp_path) -> None:
         "-----BEGIN SIMPLEHEADERS JSON-----\n{\"headers\": []}\n-----END SIMPLEHEADERS JSON-----"
     ]
     assert summary["final_outline"]["headers"][0]["text"] == "Intro"
+    call_names = [entry["name"] for entry in summary["function_calls"]]
+    assert call_names[0] == "backend.services.headers_orchestrator.extract_headers_and_chunks"
+    assert "backend.services.header_locator.locate_headers_in_lines" in call_names
     assert payload["headers"]
 
 
