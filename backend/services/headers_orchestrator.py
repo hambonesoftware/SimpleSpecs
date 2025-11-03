@@ -228,6 +228,7 @@ async def extract_headers_and_chunks(
                 settings=settings,
                 excluded_pages=excluded_pages,
                 tracer=tracer,
+                force=force,
             )
             llm_headers = llm_result.headers or []
             llm_raw_responses = list(llm_result.raw_responses)

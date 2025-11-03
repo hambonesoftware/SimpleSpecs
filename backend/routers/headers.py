@@ -1,43 +1,77 @@
-"""Headers router that adds `force` semantics to Start Header Search.
-
-This module replaces the previous compat shim by defining the /api/headers/{document_id}
-route itself and threading a `force` flag into the underlying implementation.
-On force:
-  - previously stored sections/state for the document are purged
-  - any on-disk LLM cache (if a helper is available) is purged
-  - the orchestrator is invoked with cache-bypass semantics
-"""
+"""Compatibility router that delegates to :mod:`backend.api.headers`."""
 
 from __future__ import annotations
 
+import inspect
 from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session
 
-# The existing implementation lives under backend/api/headers.py
 from ..api import headers as headers_api
+from ..config import Settings, get_settings
 from ..database import get_session
-
-# Optional purge helpers — if these modules/functions don't exist yet,
-# the no-op fallbacks keep this router backward compatible.
-try:
-    from ..services.sections import delete_sections_for_document  # type: ignore
-except Exception:  # pragma: no cover
-    def delete_sections_for_document(session: Session, document_id: int) -> None:  # type: ignore
-        return None
-
-try:
-    from ..services.state import reset_simple_headers_state  # type: ignore
-except Exception:  # pragma: no cover
-    def reset_simple_headers_state(session: Session, document_id: int) -> None:  # type: ignore
-        return None
+from ..services.headers import HeadersLLMClient as HeadersLLMClientImpl
+from ..services.headers_orchestrator import (
+    extract_headers_and_chunks as orchestrator_extract_headers_and_chunks,
+)
+from ..services.pdf_native import parse_pdf as parse_pdf_impl
 
 router = APIRouter(prefix="/api", tags=["headers"])
 
 
+async def _call_extract_headers_and_chunks(
+    *,
+    document_id: int,
+    session: Session,
+    settings: Settings,
+    force: bool,
+) -> Any:
+    """Call into ``backend.api.headers.extract_headers_and_chunks`` safely."""
+
+    func = getattr(headers_api, "extract_headers_and_chunks", None)
+    if not callable(func):
+        raise HTTPException(status_code=500, detail="Header extraction unavailable")
+
+    signature = inspect.signature(func)
+    params = signature.parameters
+
+    kwargs: Dict[str, Any] = {}
+
+    if "document_id" in params:
+        kwargs["document_id"] = document_id
+    elif "doc_id" in params:
+        kwargs["doc_id"] = document_id
+    elif "id" in params:
+        kwargs["id"] = document_id
+
+    if "settings" in params:
+        kwargs["settings"] = settings
+    if "session" in params:
+        kwargs["session"] = session
+    if "force" in params:
+        kwargs["force"] = force
+
+    # Trace support is optional; only pass when accepted.
+    if "trace" in params:
+        kwargs.setdefault("trace", False)
+
+    try:
+        if not any(name in params for name in ("document_id", "doc_id", "id")):
+            result = func(document_id, **kwargs)  # type: ignore[misc]
+        else:
+            result = func(**kwargs)
+    except TypeError as exc:  # pragma: no cover - defensive
+        raise HTTPException(status_code=500, detail=f"Header extraction failed: {exc}") from exc
+
+    if inspect.isawaitable(result):
+        result = await result
+
+    return result
+
+
 @router.post("/headers/{document_id}")
-def compute_headers(
+async def compute_headers(
     document_id: int,
     *,
     force: bool = Query(
@@ -45,57 +79,31 @@ def compute_headers(
         description="Force new LLM headers; purge prior headers/sections and bypass caches.",
     ),
     session: Session = Depends(get_session),
-) -> Dict[str, Any]:
-    """Compute headers for a document.
+    settings: Settings = Depends(get_settings),
+):
+    """Forward the request to :func:`backend.api.headers.extract_headers_and_chunks`."""
 
-    If `force` is true, this will wipe prior header storage for the document
-    and force a fresh LLM header extraction (skipping any caches).
-    """
     if force:
-        # 1) Purge previously persisted artifacts for this document.
-        # These are safe to call even if there were no prior runs.
-        try:
-            delete_sections_for_document(session=session, document_id=document_id)
-        except Exception:
-            # Purge errors shouldn't block a new run.
-            pass
-
-        try:
-            reset_simple_headers_state(session=session, document_id=document_id)
-        except Exception:
-            pass
-
-        # 2) Optionally purge on-disk LLM cache if the api module exposes a helper.
-        # This is best-effort and will silently continue on failure.
-        try:
-            purge_cache = getattr(headers_api, "purge_llm_cache_for_document", None)
-            if callable(purge_cache):
+        purge_cache = getattr(headers_api, "purge_llm_cache_for_document", None)
+        if callable(purge_cache):
+            try:
                 purge_cache(document_id)
-        except Exception:
-            pass
+            except Exception:  # pragma: no cover - best-effort cleanup
+                pass
 
-        # 3) Delegate to the existing API function: it takes (document_id[, force])
-    try:
-        # Newer implementations may support a 'force' kwarg; pass it when available.
-        result = headers_api.extract_headers_and_chunks(document_id, force=force)  # type: ignore[call-arg]
-    except TypeError:
-        # Older signature without 'force'
-        result = headers_api.extract_headers_and_chunks(document_id)  # type: ignore[misc]
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Header extraction failed: {exc}") from exc
+    result = await _call_extract_headers_and_chunks(
+        document_id=document_id,
+        session=session,
+        settings=settings,
+        force=force,
+    )
 
-
-    if not result:
-        raise HTTPException(status_code=500, detail="Header extraction returned no result")
     return result
 
 
-# ---- Test patch points / public API compatibility --------------------------
-
-# Keep these available for tests and external imports
-parse_pdf = headers_api.parse_pdf
-extract_headers_and_chunks = headers_api.extract_headers_and_chunks
-HeadersLLMClient = headers_api.HeadersLLMClient
+parse_pdf = parse_pdf_impl
+extract_headers_and_chunks = orchestrator_extract_headers_and_chunks
+HeadersLLMClient = HeadersLLMClientImpl
 
 __all__ = [
     "router",
@@ -104,3 +112,4 @@ __all__ = [
     "extract_headers_and_chunks",
     "HeadersLLMClient",
 ]
+

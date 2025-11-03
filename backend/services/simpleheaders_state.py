@@ -28,4 +28,15 @@ class SimpleHeadersState:
         return value
 
 
+    @classmethod
+    def clear(cls, document_id: int | None = None) -> None:
+        """Remove cached state for ``document_id`` or clear all entries."""
+
+        if document_id is None:
+            cls._store.clear()
+            return
+
+        cls._store.pop(document_id, None)
+
+
 __all__ = ["SimpleHeadersState"]
