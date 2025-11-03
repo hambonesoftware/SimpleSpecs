@@ -375,7 +375,7 @@ async function refreshHeaders() {
 
   try {
     // Force a fresh LLM run and wipe prior server-side header storage
-    const headersResult = await fetchHeaders(documentId, { force: true /*, trace: true */ });
+    const headersResult = await fetchHeaders(documentId, { force: true });
     state.headers = headersResult;
 
     // Normalize for quick match overlays / helpers

@@ -298,6 +298,36 @@ class Settings(BaseModel):
     headers_window_pad_lines: int = Field(
         default_factory=lambda: int(os.getenv("HEADERS_WINDOW_PAD_LINES", "40"))
     )
+    headers_band_lines: int = Field(
+        default_factory=lambda: int(os.getenv("HEADERS_BAND_LINES", "5"))
+    )
+    headers_l1_require_numeric: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_L1_REQUIRE_NUMERIC", True)
+    )
+    headers_l1_lookahead_child_hint: int = Field(
+        default_factory=lambda: int(os.getenv("HEADERS_L1_LOOKAHEAD_CHILD_HINT", "30"))
+    )
+    headers_monotonic_strict: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_MONOTONIC_STRICT", True)
+    )
+    headers_reanchor_pass: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_REANCHOR_PASS", True)
+    )
+    headers_strict_invariants: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_STRICT_INVARIANTS", True)
+    )
+    headers_title_only_reanchor: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_TITLE_ONLY_REANCHOR", True)
+    )
+    headers_rescan_passes: int = Field(
+        default_factory=lambda: int(os.getenv("HEADERS_RESCAN_PASSES", "2"))
+    )
+    headers_dedupe_policy: str = Field(
+        default_factory=lambda: os.getenv("HEADERS_DEDUPE_POLICY", "best")
+    )
+    headers_trace: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_TRACE", False)
+    )
     headers_llm_strict: bool = Field(
         default_factory=lambda: _env_flag("HEADERS_LLM_STRICT", False)
     )
@@ -493,6 +523,31 @@ class Settings(BaseModel):
     @classmethod
     def _clamp_cosine(cls, value: float) -> float:
         return max(0.0, min(1.0, value))
+
+    @field_validator("headers_band_lines", mode="after")
+    @classmethod
+    def _clamp_band_lines(cls, value: int) -> int:
+        return max(0, int(value))
+
+    @field_validator("headers_l1_lookahead_child_hint", mode="after")
+    @classmethod
+    def _clamp_child_hint(cls, value: int) -> int:
+        return max(0, int(value))
+
+    @field_validator("headers_rescan_passes", mode="after")
+    @classmethod
+    def _clamp_rescan_passes(cls, value: int) -> int:
+        return max(0, int(value))
+
+    @field_validator("headers_align_strategy", mode="after")
+    @classmethod
+    def _normalise_align_strategy(cls, value: str) -> str:
+        return (value or "sequential").strip().lower() or "sequential"
+
+    @field_validator("headers_dedupe_policy", mode="after")
+    @classmethod
+    def _normalise_dedupe_policy(cls, value: str) -> str:
+        return (value or "best").strip().lower() or "best"
 
     @field_validator("embeddings_cache_dir", mode="after")
     @classmethod

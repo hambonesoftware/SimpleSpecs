@@ -7,15 +7,11 @@ import re
 from difflib import SequenceMatcher
 from typing import Dict, Iterable, List, Sequence
 
-from backend.config import (
-    HEADERS_ALIGN_STRATEGY,
-    HEADERS_FUZZY_THRESHOLD,
-    HEADERS_NORMALIZE_CONFUSABLES,
-    HEADERS_WINDOW_PAD_LINES,
-)
+from backend.config import HEADERS_ALIGN_STRATEGY
 
 from ..utils.trace import HeaderTracer
 from .headers_sequential import (
+    SequentialAlignmentConfig,
     align_headers_sequential,
     compile_number_regex,
     normalize,
@@ -194,12 +190,16 @@ def locate_headers_in_lines(
     *,
     excluded_pages: Iterable[int] = (),
     similarity_threshold: float = 0.88,
+    strategy: str | None = None,
+    sequential_config: SequentialAlignmentConfig | None = None,
     tracer: HeaderTracer | None = None,
 ) -> List[Dict]:
     if tracer:
         tracer.log_call(f"{__name__}.locate_headers_in_lines")
 
-    strategy = os.getenv("HEADERS_ALIGN_STRATEGY", HEADERS_ALIGN_STRATEGY).strip().lower()
+    strategy_value = strategy or os.getenv("HEADERS_ALIGN_STRATEGY", HEADERS_ALIGN_STRATEGY)
+    strategy_normalised = strategy_value.strip().lower()
+    config = sequential_config or SequentialAlignmentConfig()
 
     index_buckets: dict[tuple[str, str], list[int]] = {}
     for idx, header in enumerate(headers):
@@ -214,7 +214,7 @@ def locate_headers_in_lines(
             return bucket.pop(0)
         return len(headers) + 1000
 
-    if strategy == "sequential":
+    if strategy_normalised == "sequential":
         excluded = {int(page) for page in excluded_pages}
 
         def _eligible(line: Dict) -> bool:
@@ -230,9 +230,7 @@ def locate_headers_in_lines(
         sequential_headers = align_headers_sequential(
             headers,
             sequential_lines,
-            confusables=HEADERS_NORMALIZE_CONFUSABLES,
-            threshold=HEADERS_FUZZY_THRESHOLD,
-            window_pad=HEADERS_WINDOW_PAD_LINES,
+            config=config,
             tracer=tracer,
         )
 
@@ -260,12 +258,16 @@ def locate_headers_in_lines(
                 "page": int(entry.get("page", 0) or 0),
                 "line_idx": int(entry.get("line_idx", 0) or 0),
                 "global_idx": int(entry.get("global_idx", 0) or 0),
+                "source_idx": int(entry.get("source_idx", len(headers) + 1000)),
             }
             for entry in sequential_headers
         ]
 
         for entry in located:
-            entry["source_idx"] = _take_index(entry.get("number"), entry.get("text", ""))
+            if entry.get("source_idx", -1) == len(headers) + 1000:
+                entry["source_idx"] = _take_index(
+                    entry.get("number"), entry.get("text", "")
+                )
 
         matched_numbers = {str(entry.get("number")) for entry in sequential_headers if entry.get("number")}
         used_indices = {int(entry.get("global_idx", 0) or 0) for entry in sequential_headers}

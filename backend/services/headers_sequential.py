@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional, Sequence, Set, Tuple
+from dataclasses import dataclass, field, replace
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from rapidfuzz.fuzz import token_set_ratio
 
 from backend.config import (
+    HEADERS_NORMALIZE_CONFUSABLES,
     HEADERS_SUPPRESS_TOC,
     HEADERS_SUPPRESS_RUNNING,
     HEADERS_FUZZY_THRESHOLD,
+    HEADERS_WINDOW_PAD_LINES,
     HEADERS_BAND_LINES,
     HEADERS_L1_REQUIRE_NUMERIC,
     HEADERS_L1_LOOKAHEAD_CHILD_HINT,
@@ -27,6 +29,10 @@ try:  # pragma: no cover - optional dependency for tracing
     from backend.utils.trace import HeaderTracer
 except Exception:  # pragma: no cover - tracing is optional in tests
     HeaderTracer = None  # type: ignore
+
+
+if TYPE_CHECKING:  # pragma: no cover - type hints only
+    from backend.config import Settings
 
 
 NUM_RE = re.compile(r"^\s*(?P<num>(\d+(?:\.\d+)*))\b", re.I)
@@ -56,7 +62,49 @@ class HeaderItem:
     num: str
     title: str
     level: int
+    order: int
     tokens: tuple[str, ...] = field(default_factory=tuple)
+
+
+@dataclass(frozen=True)
+class SequentialAlignmentConfig:
+    """Configuration bundle for sequential alignment heuristics."""
+
+    confusables: bool = HEADERS_NORMALIZE_CONFUSABLES
+    threshold: int = HEADERS_FUZZY_THRESHOLD
+    window_pad: int = HEADERS_WINDOW_PAD_LINES
+    suppress_toc: bool = HEADERS_SUPPRESS_TOC
+    suppress_running: bool = HEADERS_SUPPRESS_RUNNING
+    band_lines: int = HEADERS_BAND_LINES
+    l1_require_numeric: bool = HEADERS_L1_REQUIRE_NUMERIC
+    l1_lookahead_child_hint: int = HEADERS_L1_LOOKAHEAD_CHILD_HINT
+    monotonic_strict: bool = HEADERS_MONOTONIC_STRICT
+    reanchor_pass: bool = HEADERS_REANCHOR_PASS
+    strict_invariants: bool = HEADERS_STRICT_INVARIANTS
+    title_only_reanchor: bool = HEADERS_TITLE_ONLY_REANCHOR
+    rescan_passes: int = HEADERS_RESCAN_PASSES
+    dedupe_policy: str = HEADERS_DEDUPE_POLICY
+
+    @classmethod
+    def from_settings(cls, settings: "Settings") -> "SequentialAlignmentConfig":
+        """Build a sequential alignment config from :class:`~backend.config.Settings`."""
+
+        return cls(
+            confusables=settings.headers_normalize_confusables,
+            threshold=settings.headers_fuzzy_threshold,
+            window_pad=settings.headers_window_pad_lines,
+            suppress_toc=settings.headers_suppress_toc,
+            suppress_running=settings.headers_suppress_running,
+            band_lines=settings.headers_band_lines,
+            l1_require_numeric=settings.headers_l1_require_numeric,
+            l1_lookahead_child_hint=settings.headers_l1_lookahead_child_hint,
+            monotonic_strict=settings.headers_monotonic_strict,
+            reanchor_pass=settings.headers_reanchor_pass,
+            strict_invariants=settings.headers_strict_invariants,
+            title_only_reanchor=settings.headers_title_only_reanchor,
+            rescan_passes=settings.headers_rescan_passes,
+            dedupe_policy=settings.headers_dedupe_policy,
+        )
 
 
 def normalize(value: str, confusables: bool = True) -> str:
@@ -233,7 +281,7 @@ def is_ineligible_runner_or_toc(
 
 def make_header_items(llm_headers: Iterable[Dict]) -> List[HeaderItem]:
     items: List[HeaderItem] = []
-    for header in llm_headers:
+    for order, header in enumerate(llm_headers):
         number = header.get("number") or extract_number(str(header.get("text", "")))
         title = str(header.get("title") or header.get("text") or "").strip()
         if not number:
@@ -247,10 +295,10 @@ def make_header_items(llm_headers: Iterable[Dict]) -> List[HeaderItem]:
                 num=str(number),
                 title=title,
                 level=level,
+                order=order,
                 tokens=tokens,
             )
         )
-    items.sort(key=lambda item: (number_key(item.tokens), item.level))
     return items
 
 
@@ -333,6 +381,9 @@ def score_l1_candidate(
     pos_map: Dict[int, Dict[int, int]],
     runners: set[str],
     toc_pages: set[int],
+    *,
+    band_lines: int,
+    lookahead_hint: int,
 ) -> Tuple[int, str]:
     line = lines[idx]
     if line.page in toc_pages:
@@ -348,7 +399,7 @@ def score_l1_candidate(
     if has_num:
         score += 25
         reason = "numeric+text"
-    if in_page_band(line, pos_map, HEADERS_BAND_LINES):
+    if in_page_band(line, pos_map, band_lines):
         score -= 20
         reason += "|band_penalty"
     if has_child_hint(
@@ -356,7 +407,7 @@ def score_l1_candidate(
         idx,
         want_num,
         confusables,
-        HEADERS_L1_LOOKAHEAD_CHILD_HINT,
+        lookahead_hint,
         runners,
         toc_pages,
     ):
@@ -392,6 +443,7 @@ def build_top_level_windows(
     confusables: bool,
     runners: set[str],
     toc_pages: set[int],
+    config: SequentialAlignmentConfig,
     tracer: HeaderTracer | None = None,
 ) -> Dict[str, Tuple[int, int, int]]:
     if tracer:
@@ -406,7 +458,7 @@ def build_top_level_windows(
         best_idx: Optional[int] = None
         best_score = -999
         best_reason = ""
-        passes = (1, 2) if HEADERS_L1_REQUIRE_NUMERIC else (2,)
+        passes = (1, 2) if config.l1_require_numeric else (2,)
         for pass_id in passes:
             for idx in range(cursor_idx + 1, len(lines)):
                 score, reason = score_l1_candidate(
@@ -418,10 +470,12 @@ def build_top_level_windows(
                     pos_map,
                     runners,
                     toc_pages,
+                    band_lines=config.band_lines,
+                    lookahead_hint=config.l1_lookahead_child_hint,
                 )
                 if pass_id == 1 and "numeric" not in reason:
                     continue
-                if HEADERS_MONOTONIC_STRICT and cursor_idx >= 0 and idx <= cursor_idx:
+                if config.monotonic_strict and cursor_idx >= 0 and idx <= cursor_idx:
                     if tracer:
                         tracer.ev(
                             "monotonic_reject",
@@ -440,7 +494,7 @@ def build_top_level_windows(
 
         if best_idx is not None:
             chosen = lines[best_idx]
-            if HEADERS_MONOTONIC_STRICT and cursor_idx >= 0 and chosen.global_idx <= lines[cursor_idx].global_idx:
+            if config.monotonic_strict and cursor_idx >= 0 and chosen.global_idx <= lines[cursor_idx].global_idx:
                 later = find_later_duplicate(
                     lines,
                     best_idx,
@@ -478,7 +532,19 @@ def build_top_level_windows(
             if tracer:
                 tracer.ev("anchor_unresolved_top", num=item.num)
 
-    ordered = sorted(anchors.items(), key=lambda kv: number_key(kv[0]))
+    ordered: List[Tuple[str, int]] = []
+    seen: Set[str] = set()
+    for item in tops:
+        idx = anchors.get(item.num)
+        if idx is None:
+            continue
+        ordered.append((item.num, idx))
+        seen.add(item.num)
+    for num, idx in anchors.items():
+        if num in seen:
+            continue
+        ordered.append((num, idx))
+
     windows: Dict[str, Tuple[int, int, int]] = {}
     for pos, (num, idx) in enumerate(ordered):
         start = idx
@@ -503,6 +569,7 @@ def find_in_window(
     toc_pages: set[int],
     threshold: int,
     *,
+    config: SequentialAlignmentConfig,
     tracer: HeaderTracer | None = None,
     pos_map: Optional[Dict[int, Dict[int, int]]] = None,
     cursor_idx: Optional[int] = None,
@@ -525,7 +592,7 @@ def find_in_window(
         if not re_num.search(norm):
             continue
         score = token_set_ratio(norm, want)
-        if pos_map and in_page_band(line, pos_map, HEADERS_BAND_LINES):
+        if pos_map and in_page_band(line, pos_map, config.band_lines):
             score -= 10
         if tracer:
             tracer.ev(
@@ -542,11 +609,7 @@ def find_in_window(
     if best is not None:
         _, idx = best
         line = lines[idx]
-        if (
-            cursor_idx is not None
-            and HEADERS_MONOTONIC_STRICT
-            and idx <= cursor_idx
-        ):
+        if cursor_idx is not None and config.monotonic_strict and idx <= cursor_idx:
             if tracer:
                 tracer.ev(
                     "monotonic_reject",
@@ -574,11 +637,7 @@ def find_in_window(
         if norm in runners:
             continue
         if re_num.search(norm):
-            if (
-                cursor_idx is not None
-                and HEADERS_MONOTONIC_STRICT
-                and idx <= cursor_idx
-            ):
+            if cursor_idx is not None and config.monotonic_strict and idx <= cursor_idx:
                 continue
             if tracer:
                 tracer.ev(
@@ -636,7 +695,7 @@ def compute_windows_from_anchors_and_children(
     if not lines or not anchors:
         return {}
 
-    l1s = sorted([h for h in llm_items if h.level == 1], key=lambda h: number_key(h.tokens))
+    l1s = sorted([h for h in llm_items if h.level == 1], key=lambda h: h.order)
     children_by_parent: Dict[str, List[int]] = {}
     for h in llm_items:
         if h.level >= 2 and h.num in anchors:
@@ -685,10 +744,11 @@ def enforce_invariants_and_autofix(
     toc_pages: Set[int],
     tracer: Optional[HeaderTracer],
     fuzzy_threshold: int,
+    config: SequentialAlignmentConfig,
 ) -> Dict[str, int]:
     """Enforce parent/child invariants and relocate anchors when needed."""
 
-    if not HEADERS_STRICT_INVARIANTS:
+    if not config.strict_invariants:
         return anchors
 
     items_by_num = {item.num: item for item in llm_items}
@@ -713,13 +773,13 @@ def enforce_invariants_and_autofix(
             if is_ineligible_runner_or_toc(line, norm_text, toc_pages, runners):
                 continue
             has_num = bool(number_regex.search(norm_text))
-            if not has_num and not HEADERS_TITLE_ONLY_REANCHOR:
+            if not has_num and not config.title_only_reanchor:
                 continue
             score = cand_score(
                 norm_text,
                 want_norm,
                 has_number=has_num,
-                in_band=in_page_band(line, pos_map, HEADERS_BAND_LINES),
+                in_band=in_page_band(line, pos_map, config.band_lines),
             )
             if score >= max(fuzzy_threshold, 70):
                 candidate = (score, line.global_idx, has_num)
@@ -764,7 +824,7 @@ def enforce_invariants_and_autofix(
                 if len(indices) <= 1:
                     continue
                 chosen_idx = None
-                if HEADERS_DEDUPE_POLICY == "earliest":
+                if config.dedupe_policy == "earliest":
                     chosen_idx = min(indices)
                 else:
                     item = items_by_num.get(num)
@@ -805,7 +865,7 @@ def enforce_invariants_and_autofix(
                         )
                 pos[num] = chosen_idx
 
-    for pass_idx in range(max(1, HEADERS_RESCAN_PASSES)):
+    for pass_idx in range(max(1, config.rescan_passes)):
         changed = False
         pc_map = parent_children_map()
         for parent_num, kids in pc_map.items():
@@ -848,7 +908,7 @@ def enforce_invariants_and_autofix(
                         norm_text,
                         want_norm,
                         has_number=True,
-                        in_band=in_page_band(line, pos_map, HEADERS_BAND_LINES),
+                        in_band=in_page_band(line, pos_map, config.band_lines),
                     )
                     if score >= fuzzy_threshold and score > best_score:
                         best_score = score
@@ -882,15 +942,29 @@ def align_headers_sequential(
     llm_headers: Iterable[Dict],
     lines_input: Iterable[Dict],
     *,
-    confusables: bool = True,
-    threshold: int = 80,
-    window_pad: int = 40,
+    config: SequentialAlignmentConfig | None = None,
+    confusables: bool | None = None,
+    threshold: int | None = None,
+    window_pad: int | None = None,
     tracer: HeaderTracer | None = None,
 ) -> List[Dict]:
     """Return aligned headers with positional metadata using sequential search."""
 
     if tracer:
         tracer.log_call(f"{__name__}.align_headers_sequential")
+
+    cfg = config or SequentialAlignmentConfig()
+    if any(param is not None for param in (confusables, threshold, window_pad)):
+        cfg = replace(
+            cfg,
+            confusables=cfg.confusables if confusables is None else confusables,
+            threshold=cfg.threshold if threshold is None else threshold,
+            window_pad=cfg.window_pad if window_pad is None else window_pad,
+        )
+
+    confusables = cfg.confusables
+    threshold = cfg.threshold
+    window_pad = cfg.window_pad
 
     lines: List[Line] = []
     for raw in lines_input:
@@ -914,8 +988,12 @@ def align_headers_sequential(
     if tracer:
         tracer.ev("sequential_start", items=len(items), lines=len(lines))
 
-    toc_pages = detect_toc_pages(lines) if HEADERS_SUPPRESS_TOC else set()
-    runners = detect_running_header_footer(lines) if HEADERS_SUPPRESS_RUNNING else set()
+    toc_pages = detect_toc_pages(lines) if cfg.suppress_toc else set()
+    runners = (
+        detect_running_header_footer(lines, cfg.band_lines)
+        if cfg.suppress_running
+        else set()
+    )
     if tracer:
         tracer.ev("toc_pages", pages=sorted(toc_pages))
         tracer.ev("running_headers_detected", count=len(runners))
@@ -929,6 +1007,7 @@ def align_headers_sequential(
         confusables=confusables,
         runners=runners,
         toc_pages=toc_pages,
+        config=cfg,
         tracer=tracer,
     )
 
@@ -957,7 +1036,7 @@ def align_headers_sequential(
         windows[num] = (anchor_idx, anchor_idx, end_idx)
 
     children = [item for item in items if item.level >= 2]
-    children.sort(key=lambda h: (number_key(h.tokens), h.level))
+    children.sort(key=lambda h: h.order)
 
     chain_cursor: Dict[str, int] = {num: idx for num, (idx, _, _) in windows.items()}
 
@@ -982,6 +1061,7 @@ def align_headers_sequential(
             runners=runners,
             toc_pages=toc_pages,
             threshold=threshold,
+            config=cfg,
             tracer=tracer,
             pos_map=pos_map,
             cursor_idx=cursor_idx,
@@ -1009,7 +1089,7 @@ def align_headers_sequential(
         chain_cursor[header.num] = idx
         windows[header.num] = (idx, idx, end)
 
-    if HEADERS_REANCHOR_PASS:
+    if cfg.reanchor_pass:
         if tracer:
             tracer.ev("reanchor_pass_begin")
         from collections import defaultdict
@@ -1049,7 +1129,7 @@ def align_headers_sequential(
                 if not number_regex.search(norm):
                     continue
                 score = token_set_ratio(norm, want_title_norm) + 25
-                if score >= max(HEADERS_FUZZY_THRESHOLD, threshold):
+                if score >= max(cfg.threshold, threshold):
                     new_idx = idx
                     break
             if new_idx is not None:
@@ -1079,11 +1159,39 @@ def align_headers_sequential(
         toc_pages=toc_pages,
         tracer=tracer,
         fuzzy_threshold=threshold,
+        config=cfg,
     )
 
     line_by_gid = {line.global_idx: line for line in lines}
-    results = []
-    for num, gid in anchors.items():
+    order_lookup = {item.num: item.order for item in items}
+
+    ordered: List[Dict] = []
+    seen: Set[str] = set()
+
+    for item in items:
+        gid = anchors.get(item.num)
+        if gid is None:
+            continue
+        line = line_by_gid.get(gid)
+        ordered.append(
+            {
+                "number": item.num,
+                "title": item.title,
+                "level": item.level,
+                "global_idx": gid,
+                "page": line.page if line else None,
+                "line_idx": line.line_idx if line else None,
+                "source_idx": item.order,
+            }
+        )
+        seen.add(item.num)
+
+    extras: List[Tuple[int, str]] = [
+        (gid, num) for num, gid in anchors.items() if num not in seen
+    ]
+    extras.sort(key=lambda pair: pair[0])
+
+    for gid, num in extras:
         line = line_by_gid.get(gid)
         item = items_by_num.get(num)
         level = item.level if item else num.count(".") + 1
@@ -1094,14 +1202,13 @@ def align_headers_sequential(
             "global_idx": gid,
             "page": line.page if line else None,
             "line_idx": line.line_idx if line else None,
+            "source_idx": order_lookup.get(num, len(order_lookup) + len(ordered)),
         }
-        results.append((gid, entry))
+        ordered.append(entry)
 
-    results.sort(key=lambda item: (item[0], item[1]["number"]))
-    ordered = [payload for _, payload in results]
     if tracer:
         tracer.ev("sequential_end", resolved=len(ordered))
     return ordered
 
 
-__all__ = ["align_headers_sequential", "normalize"]
+__all__ = ["align_headers_sequential", "normalize", "SequentialAlignmentConfig"]

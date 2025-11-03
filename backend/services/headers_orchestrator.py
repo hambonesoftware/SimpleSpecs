@@ -16,7 +16,7 @@ from .artifact_store import PARSER_VERSION, get_cached_artifact, store_artifact
 from .header_locate_vector import locate_headers_with_vectors
 from .header_locator import locate_headers_in_lines
 from .headers_llm_strict import align_headers_llm_strict
-from .headers_sequential import number_key
+from .headers_sequential import SequentialAlignmentConfig, number_key
 from .pdf_headers_llm_full import (
     LLMFullHeadersParseError,
     LLMFullHeadersResult,
@@ -65,6 +65,7 @@ async def extract_headers_and_chunks(
     document: Document | None = None,
     want_trace: bool = False,
     force: bool = False,  # <—— NEW: bypass cache + re-fetch from LLM
+    align: str | None = None,
 ) -> tuple[dict, HeaderTracer | None]:
     """Return located headers and section ranges for the provided document.
 
@@ -73,7 +74,9 @@ async def extract_headers_and_chunks(
     header extraction is performed regardless of cache presence.
     """
 
-    trace_requested = want_trace or app_config.HEADERS_TRACE
+    trace_requested = want_trace or settings.headers_trace or app_config.HEADERS_TRACE
+    align_strategy = (align or settings.headers_align_strategy).strip().lower()
+    sequential_config = SequentialAlignmentConfig.from_settings(settings)
     tracer: HeaderTracer | None = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR)
     if tracer:
         tracer.log_call(f"{__name__}.extract_headers_and_chunks")
@@ -84,10 +87,11 @@ async def extract_headers_and_chunks(
             "start_run",
             mode=settings.headers_mode,
             file_id=getattr(document, "id", None),
-            cfg={
-                "suppress_toc": settings.headers_suppress_toc,
-                "suppress_running": settings.headers_suppress_running,
-            },
+                cfg={
+                    "suppress_toc": settings.headers_suppress_toc,
+                    "suppress_running": settings.headers_suppress_running,
+                    "align": align_strategy,
+                },
             metadata=dict(metadata or {}),
         )
         if native_headers:
@@ -134,6 +138,7 @@ async def extract_headers_and_chunks(
         "suppress_running": settings.headers_suppress_running,
         "metadata": dict(metadata or {}),
         "header_locator_rev": "2025-10-31-seq-source-order",
+        "align_strategy": align_strategy,
     }
 
     # ---------- Cache handling (respect `force`) ----------
@@ -304,6 +309,8 @@ async def extract_headers_and_chunks(
                     llm_headers,
                     lines,
                     excluded_pages=excluded_pages,
+                    strategy=align_strategy,
+                    sequential_config=sequential_config,
                     tracer=tracer,
                 )
                 if vector_attempted and tracer:

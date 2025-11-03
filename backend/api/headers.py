@@ -39,6 +39,10 @@ async def compute_headers(
     document_id: int,
     *,
     trace: bool = Query(False, description="Return inline trace events when available"),
+    align: str | None = Query(
+        None,
+        description="Header alignment strategy (sequential, legacy).",
+    ),
     force: bool = Query(
         False,
         description="Force new LLM headers; purge prior headers/sections and bypass caches.",
@@ -54,6 +58,7 @@ async def compute_headers(
         session=session,
         force=force,
         trace=trace,
+        align=align,
     )
 
 
@@ -64,6 +69,7 @@ async def extract_headers_and_chunks(
     session: Session,
     force: bool = False,
     trace: bool = False,
+    align: str | None = None,
 ) -> Dict[str, Any] | JSONResponse:
     """Core header extraction workflow shared by routers and tests."""
 
@@ -90,9 +96,13 @@ async def extract_headers_and_chunks(
             pass
         SimpleHeadersState.clear(doc_id)
 
+    provider = settings.llm_provider.lower()
+    api_key_present = bool((settings.openrouter_api_key or "").strip())
     use_simple_llm = (
         settings.headers_mode.lower() == "llm_simple"
-        and settings.llm_provider.lower() != "disabled"
+        and not force
+        and provider != "disabled"
+        and api_key_present
     )
     if use_simple_llm:
         try:
@@ -160,6 +170,7 @@ async def extract_headers_and_chunks(
         "document": document,
         "want_trace": trace,
         "force": force,
+        "align": align,
     }
     accepted_params = set(inspect.signature(orchestrator_impl).parameters)
     for key in list(orchestrator_kwargs.keys()):

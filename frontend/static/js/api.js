@@ -193,7 +193,15 @@ export async function parseDocument(documentId) {
 export async function fetchHeaders(documentId, opts = {}) {
   const params = new URLSearchParams();
   if (opts.force) params.set('force', '1');
-  if (opts.trace) params.set('trace', '1');
+
+  const hasAlign = Object.prototype.hasOwnProperty.call(opts, 'align');
+  const alignValue = hasAlign ? opts.align : 'sequential';
+  if (alignValue) params.set('align', String(alignValue));
+
+  const hasTrace = Object.prototype.hasOwnProperty.call(opts, 'trace');
+  const traceValue = hasTrace ? opts.trace : true;
+  if (traceValue) params.set('trace', '1');
+
   const qs = params.toString();
   const path = qs ? `/api/headers/${documentId}?${qs}` : `/api/headers/${documentId}`;
   return request(path, { method: "POST" });
