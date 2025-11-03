@@ -6,6 +6,7 @@ import inspect
 from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import PlainTextResponse
 from sqlmodel import Session
 
 from ..api import headers as headers_api
@@ -26,6 +27,7 @@ async def _call_extract_headers_and_chunks(
     session: Session,
     settings: Settings,
     force: bool,
+    align: str | None,
 ) -> Any:
     """Call into ``backend.api.headers.extract_headers_and_chunks`` safely."""
 
@@ -51,6 +53,8 @@ async def _call_extract_headers_and_chunks(
         kwargs["session"] = session
     if "force" in params:
         kwargs["force"] = force
+    if "align" in params:
+        kwargs["align"] = align
 
     # Trace support is optional; only pass when accepted.
     if "trace" in params:
@@ -78,6 +82,10 @@ async def compute_headers(
         False,
         description="Force new LLM headers; purge prior headers/sections and bypass caches.",
     ),
+    align: str | None = Query(
+        None,
+        description="Header alignment strategy (sequential, legacy).",
+    ),
     session: Session = Depends(get_session),
     settings: Settings = Depends(get_settings),
 ):
@@ -96,6 +104,7 @@ async def compute_headers(
         session=session,
         settings=settings,
         force=force,
+        align=align,
     )
 
     return result
@@ -103,6 +112,26 @@ async def compute_headers(
 
 parse_pdf = parse_pdf_impl
 extract_headers_and_chunks = orchestrator_extract_headers_and_chunks
+
+
+@router.get("/headers/{document_id}/section-text", response_class=PlainTextResponse)
+def section_text(
+    document_id: int,
+    start: int,
+    end: int,
+    *,
+    section_key: str | None = Query(None),
+    session: Session = Depends(get_session),
+):
+    """Compatibility shim for :func:`backend.api.headers.section_text`."""
+
+    return headers_api.section_text(
+        document_id=document_id,
+        start=start,
+        end=end,
+        section_key=section_key,
+        session=session,
+    )
 HeadersLLMClient = HeadersLLMClientImpl
 
 __all__ = [
@@ -110,6 +139,7 @@ __all__ = [
     "compute_headers",
     "parse_pdf",
     "extract_headers_and_chunks",
+    "section_text",
     "HeadersLLMClient",
 ]
 
