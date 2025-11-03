@@ -90,6 +90,10 @@ def test_header_trace_enabled(monkeypatch, tmp_path) -> None:
     assert summary_path.exists()
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     assert summary["llm_headers"]
+    assert summary["llm_raw_responses"] == ["raw"]
+    assert summary["llm_fenced_blocks"] == [
+        "-----BEGIN SIMPLEHEADERS JSON-----\n{\"headers\": []}\n-----END SIMPLEHEADERS JSON-----"
+    ]
     assert summary["final_outline"]["headers"]
 
 
@@ -149,6 +153,10 @@ def test_header_trace_summary_created_by_default(monkeypatch, tmp_path) -> None:
     assert summary_path.exists()
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     assert summary["llm_headers"][0]["text"] == "Intro"
+    assert summary["llm_raw_responses"] == ["raw"]
+    assert summary["llm_fenced_blocks"] == [
+        "-----BEGIN SIMPLEHEADERS JSON-----\n{\"headers\": []}\n-----END SIMPLEHEADERS JSON-----"
+    ]
     assert summary["final_outline"]["headers"][0]["text"] == "Intro"
     assert payload["headers"]
 
