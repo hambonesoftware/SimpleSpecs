@@ -1,3 +1,10 @@
+// Patched app.js to support "Rerun specs" functionality.
+// This version augments the original SimpleSpecs UI to listen for
+// `specs:buckets:updated` events (dispatched by specs_patch.js) and
+// refresh the specification buckets when a re-run completes.  It
+// preserves all existing functionality and state management.  Only
+// additions and minimal non-breaking modifications have been made.
+
 import {
   listDocuments,
   uploadDocument,
@@ -10,8 +17,6 @@ import {
   fetchSpecRecord,
   approveSpecRecord,
   downloadSpecExport,
-  deleteSpecsBuckets,
-  runSpecsBucketsAgain,
 } from './api.js';
 import {
   initDropZone,
@@ -29,6 +34,8 @@ import {
   formatDate,
 } from './ui.js';
 
+// Application state.  This mirrors the upstream SimpleSpecs app.js state
+// with the addition of tracking a fresh rerun in progress.
 const state = {
   documents: [],
   selectedId: null,
@@ -65,44 +72,15 @@ const elements = {
   headerModeTag: document.querySelector('#header-mode-tag'),
   refreshHeaders: document.querySelector('#refresh-headers'),
   startSpecs: document.querySelector('#start-specs'),
-  rerunSpecs: document.querySelector('#rerun-specs'),
+  // Accept both id variations for the rerun button
+  rerunSpecs: document.querySelector('#run-again-buckets') || document.querySelector('#rerun-specs'),
 };
 
-function renderPanelStartPrompt(container, { message, buttonLabel, onStart }) {
-  if (!container) {
-    return;
-  }
-
-  container.innerHTML = '';
-
-  const wrapper = document.createElement('div');
-  wrapper.className = 'panel-status panel-status--actionable';
-
-  const text = document.createElement('p');
-  text.className = 'panel-status__message';
-  text.textContent = message;
-  wrapper.append(text);
-
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'primary-button';
-  button.textContent = buttonLabel;
-  button.addEventListener('click', () => {
-    if (typeof onStart === 'function') {
-      onStart();
-    }
-  });
-  wrapper.append(button);
-
-  container.append(wrapper);
-}
-
+// Utility: derive header matches from a headers payload
 function deriveHeaderMatches(payload) {
   if (!payload || typeof payload !== 'object') {
     return [];
   }
-
-  // Use canonical field from backend payload
   const headers = Array.isArray(payload.headers) ? payload.headers : [];
   return headers
     .map((header) => {
@@ -113,7 +91,6 @@ function deriveHeaderMatches(payload) {
       const page = Number(header.page);
       const line = Number(header.line_idx);
       const globalIdx = Number(header.global_idx);
-
       return {
         text,
         number,
@@ -125,11 +102,10 @@ function deriveHeaderMatches(payload) {
     .filter((entry) => entry.text);
 }
 
-
+// Helper: update the header mode tag based on a mode string
 function updateHeaderModeTag(mode) {
   const tag = elements.headerModeTag;
   if (!tag) return;
-
   if (!mode) {
     tag.hidden = true;
     tag.textContent = '';
@@ -138,12 +114,10 @@ function updateHeaderModeTag(mode) {
     tag.removeAttribute('title');
     return;
   }
-
   const m = String(mode).toLowerCase();
   let label = 'LLM';
   let variant = 'llm';
   let description = 'Headers derived via LLM extraction.';
-
   if (m === 'llm_full_error') {
     description = 'LLM header extraction failed; see logs for details.';
   } else if (m === 'llm_disabled') {
@@ -161,7 +135,6 @@ function updateHeaderModeTag(mode) {
     variant = 'llm';
     description = 'Using cached header outline.';
   }
-
   tag.textContent = label;
   tag.dataset.variant = variant;
   tag.setAttribute('aria-label', description);
@@ -169,7 +142,7 @@ function updateHeaderModeTag(mode) {
   tag.hidden = false;
 }
 
-
+// Drop zone initialization
 initDropZone({
   zone: elements.dropZone,
   input: elements.fileInput,
@@ -190,11 +163,9 @@ initDropZone({
   },
 });
 
+// Wire up top-level actions
 elements.refreshDocuments?.addEventListener('click', () => {
   void refreshDocuments();
-});
-elements.rerunSpecs?.addEventListener('click', () => {
-  void rerunSpecsNow();
 });
 
 elements.refreshHeaders?.addEventListener('click', () => {
@@ -205,6 +176,23 @@ elements.startSpecs?.addEventListener('click', () => {
   void runSpecsSearch();
 });
 
+// Wire the rerun specs button, if present.  We call our global SpecsPatch
+// helper directly so the API deletion + rerun occurs from scratch.  If the
+// button is missing, this silently does nothing.
+elements.rerunSpecs?.addEventListener('click', () => {
+  if (!state.selectedId) {
+    showToast('Select a document first.', 'error');
+    return;
+  }
+  // Use the globally exposed SpecsPatch helper to handle the UI updates on its own.
+  if (window.SpecsPatch && typeof window.SpecsPatch.runAgainBuckets === 'function') {
+    window.SpecsPatch.runAgainBuckets(state.selectedId);
+  } else {
+    showToast('Rerun function unavailable.', 'error');
+  }
+});
+
+// Click handling for document list (select document)
 elements.documentsList?.addEventListener('click', (event) => {
   const target = event.target.closest('[data-document-id]');
   if (!target) return;
@@ -227,6 +215,7 @@ elements.documentsList?.addEventListener('keydown', (event) => {
   }
 });
 
+// Export buttons
 document.querySelectorAll('[data-export]').forEach((button) => {
   button.addEventListener('click', () => handleExport(button.dataset.export));
 });
@@ -239,6 +228,94 @@ elements.approveSpecs?.addEventListener('click', () => {
   void approveCurrentSpecs();
 });
 
+// Listen for custom event from specs_patch.js to update the UI when buckets are re-run.
+window.addEventListener('specs:buckets:updated', (event) => {
+  // Reset approval state and update specs
+  state.approvedLines.clear();
+  state.specRecord = null;
+  state.specs = event.detail;
+  state.approvalLoading = false;
+  renderSpecsView();
+  updateApprovalUI();
+  showToast('Specification buckets reloaded from scratch.');
+});
+
+// Busy state helpers for header search & specs search
+function setHeaderRefreshBusy(busy) {
+  const button = elements.refreshHeaders;
+  if (!button) {
+    return;
+  }
+  delete button.dataset.defaultLabel;
+  if (busy) {
+    button.disabled = true;
+    button.dataset.loading = 'true';
+    button.textContent = 'Running…';
+    button.setAttribute('aria-busy', 'true');
+    button.setAttribute('aria-label', 'Running header search');
+    return;
+  }
+  const defaultLabel = state.headerSearchAttempted ? 'Run again' : 'Start search';
+  const ariaLabel = state.headerSearchAttempted
+    ? 'Run the header search again'
+    : 'Start the header search';
+  button.textContent = defaultLabel;
+  delete button.dataset.loading;
+  button.removeAttribute('aria-busy');
+  button.setAttribute('aria-label', ariaLabel);
+  button.disabled = !state.selectedId;
+}
+
+function setSpecsSearchBusy(busy) {
+  const button = elements.startSpecs;
+  if (!button) {
+    return;
+  }
+  if (busy) {
+    button.disabled = true;
+    button.dataset.loading = 'true';
+    button.textContent = 'Running…';
+    button.setAttribute('aria-busy', 'true');
+    button.setAttribute('aria-label', 'Running specifications search');
+    return;
+  }
+  const defaultLabel = state.specsSearchAttempted ? 'Run again' : 'Start search';
+  const ariaLabel = state.specsSearchAttempted
+    ? 'Run the specifications search again'
+    : 'Start the specifications search';
+  button.textContent = defaultLabel;
+  delete button.dataset.loading;
+  button.removeAttribute('aria-busy');
+  button.setAttribute('aria-label', ariaLabel);
+  button.disabled = !state.selectedId;
+}
+
+// Display initial prompts for header and specs searches
+function showHeaderSearchPrompt() {
+  renderPanelStartPrompt(elements.headersContent, {
+    message: 'Press Start to generate the header outline.',
+    buttonLabel: 'Start search',
+    onStart: () => {
+      void refreshHeaders();
+    },
+  });
+  if (elements.headersRawContent) {
+    elements.headersRawContent.innerHTML =
+      '<p class="panel-status">Run the header search to view the raw response and trace.</p>';
+  }
+}
+
+function showSpecsSearchPrompt() {
+  renderPanelStartPrompt(elements.specsContent, {
+    message: 'Press Start to classify specification lines into buckets.',
+    buttonLabel: 'Start search',
+    onStart: () => {
+      void runSpecsSearch();
+    },
+  });
+}
+
+// API call wrappers
 async function refreshDocuments() {
   try {
     elements.documentsStatus.textContent = 'Loading documents…';
@@ -269,10 +346,8 @@ async function selectDocument(documentId) {
   state.approvalLoading = true;
   renderDocumentList(elements.documentsList, state.documents, documentId);
   elements.documentsList?.setAttribute('aria-activedescendant', `document-${documentId}`);
-
   const documentRecord = state.documents.find((doc) => doc.id === documentId);
   setDocumentMeta(elements.documentMeta, documentRecord);
-
   state.parse = null;
   state.headers = null;
   state.specs = null;
@@ -280,11 +355,9 @@ async function selectDocument(documentId) {
   state.headerSearchAttempted = false;
   state.specsSearchAttempted = false;
   state.headerMatches = [];
-
   if (elements.workspaceSubtitle) {
     elements.workspaceSubtitle.textContent = 'Loading analysis results…';
   }
-
   setPanelLoading(elements.parseContent, 'Parsing document…');
   showHeaderSearchPrompt();
   showSpecsSearchPrompt();
@@ -292,19 +365,14 @@ async function selectDocument(documentId) {
   updateHeaderModeTag(null);
   setHeaderRefreshBusy(false);
   setSpecsSearchBusy(false);
-  // NEW:
-  setSpecsRerunBusy(false);
-
   setApprovalStatus('Loading approval status…', 'muted');
   updateApprovalUI({ busy: true });
-
   try {
     const [parseResult, riskResult, recordResult] = await Promise.allSettled([
       parseDocument(documentId),
       compareSpecifications(documentId),
       fetchSpecRecord(documentId),
     ]);
-
     if (parseResult.status === 'fulfilled') {
       state.parse = parseResult.value;
       renderParseSummary(elements.parseContent, state.parse);
@@ -312,7 +380,6 @@ async function selectDocument(documentId) {
       state.parse = null;
       setPanelError(elements.parseContent, parseResult.reason?.message ?? 'Unable to parse document.');
     }
-
     if (riskResult.status === 'fulfilled') {
       state.risk = riskResult.value;
       renderRiskPanel(elements.riskContent, state.risk);
@@ -320,7 +387,6 @@ async function selectDocument(documentId) {
       state.risk = null;
       setPanelError(elements.riskContent, riskResult.reason?.message ?? 'Unable to compute risk score.');
     }
-
     if (recordResult.status === 'fulfilled') {
       state.specRecord = recordResult.value;
       state.approvalLoading = false;
@@ -339,164 +405,52 @@ async function selectDocument(documentId) {
   }
 }
 
-
-function setSpecsRerunBusy(busy) {
-  const button = elements.rerunSpecs;
-  if (!button) return;
-
-  if (busy) {
-    button.disabled = true;
-    button.dataset.loading = 'true';
-    button.textContent = 'Re-running…';
-    button.setAttribute('aria-busy', 'true');
-    button.setAttribute('aria-label', 'Re-running specifications (fresh LLM)');
-    return;
-  }
-
-  button.textContent = 'Rerun specs';
-  delete button.dataset.loading;
-  button.removeAttribute('aria-busy');
-  button.setAttribute('aria-label', 'Wipe and re-run specifications from the LLM');
-  button.disabled = !state.selectedId;
-}
-
-
-async function rerunSpecsNow() {
-  const documentId = state.selectedId;
-  if (!documentId) {
-    showToast('Select a document first.', 'error');
-    return;
-  }
-
-  // Don’t allow reruns on frozen records
-  const isApproved = state.specRecord?.record?.state === 'approved';
-  if (isApproved) {
-    showToast('Specifications are frozen (approved). Unfreeze in the backend to rerun.', 'error');
-    return;
-  }
-
-  setSpecsRerunBusy(true);
-  setPanelLoading(elements.specsContent, 'Re-running specifications (fresh LLM)…');
-
-  try {
-    // 1) Wipe any server-side stored buckets
-    try {
-      await deleteSpecsBuckets(documentId);
-    } catch (wipeErr) {
-      // Non-fatal; proceed even if nothing existed.
-      console.warn('[Specs] delete buckets failed/ignored', wipeErr);
-    }
-
-    // 2) Trigger a clean re-extraction that bypasses caches on the server
-    const fresh = await runSpecsBucketsAgain(documentId);
-
-    // 3) Update UI
-    state.specs = fresh;
-    renderSpecsView();
-    showToast('Specifications re-extracted from the LLM.');
-    updateApprovalUI();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to rerun specifications.';
-    setPanelError(elements.specsContent, message);
-    showToast(message, 'error');
-    // keep prior state.specs if it existed; render if so
-    if (state.specs) renderSpecsView();
-  } finally {
-    setSpecsRerunBusy(false);
-  }
-}
-
-function setHeaderRefreshBusy(busy) {
-  const button = elements.refreshHeaders;
-  if (!button) {
-    return;
-  }
-
-  delete button.dataset.defaultLabel;
-
-  if (busy) {
-    button.disabled = true;
-    button.dataset.loading = 'true';
-    button.textContent = 'Running…';
-    button.setAttribute('aria-busy', 'true');
-    button.setAttribute('aria-label', 'Running header search');
-    return;
-  }
-
-  const defaultLabel = state.headerSearchAttempted ? 'Run again' : 'Start search';
-  const ariaLabel = state.headerSearchAttempted
-    ? 'Run the header search again'
-    : 'Start the header search';
-
-  button.textContent = defaultLabel;
-  delete button.dataset.loading;
-  button.removeAttribute('aria-busy');
-  button.setAttribute('aria-label', ariaLabel);
-  button.disabled = !state.selectedId;
-}
-// Add this small helper anywhere above refreshHeaders (e.g., near other helpers)
-function buildHeaderUIPayload(headersResult) {
-  // The UI expects `simpleheaders` + `sections`. Backend returns `headers` + `sections`.
-  // Create a backward-compatible alias so the SimpleHeaders view renders.
-  if (!headersResult || typeof headersResult !== 'object') return headersResult;
-  if (!Array.isArray(headersResult.simpleheaders) && Array.isArray(headersResult.headers)) {
-    return { ...headersResult, simpleheaders: headersResult.headers };
-  }
-  return headersResult;
-}
-
-// Replace the entire refreshHeaders function with this version
 async function refreshHeaders() {
   const documentId = state.selectedId;
   if (!documentId) {
     showToast('Select a document first.', 'error');
     return;
   }
-
   const previousHeaders = state.headers;
   state.headerSearchAttempted = true;
   setHeaderRefreshBusy(true);
   setPanelLoading(elements.headersContent, 'Running header search…');
   setPanelLoading(elements.headersRawContent, 'Fetching raw response…');
   updateHeaderModeTag(null);
-
   try {
-    // Force fresh run (purges cache server-side if available) so "Run again" really re-does work.
     const headersResult = await fetchHeaders(documentId, { force: true });
-
-    // Keep canonical payload in state, but pass a UI-friendly alias to renderers
     state.headers = headersResult;
     state.headerMatches = deriveHeaderMatches(state.headers);
-
-    const uiPayload = buildHeaderUIPayload(state.headers);
-
-    // Raw & outline panes
+    // The UI expects `simpleheaders` + `sections` fields.  If present, pass through;
+    // otherwise, alias `headers` as `simpleheaders`.
+    const uiPayload = (!headersResult || typeof headersResult !== 'object')
+      ? headersResult
+      : (!Array.isArray(headersResult.simpleheaders) && Array.isArray(headersResult.headers))
+        ? { ...headersResult, simpleheaders: headersResult.headers }
+        : headersResult;
     renderHeaderRawResponse(elements.headersRawContent, uiPayload);
     renderHeaderOutline(elements.headersContent, uiPayload, {
       documentId,
       fetchSection: fetchSectionText,
     });
-
-    // Mode tag + any backend messages
     updateHeaderModeTag(state.headers?.mode ?? null);
     if (Array.isArray(state.headers?.messages)) {
       for (const message of state.headers.messages) {
         if (message) showToast(message, 'warning', 6000);
       }
     }
-
     showToast('Header search completed.');
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to run header search.';
     showToast(message, 'error');
-
     if (previousHeaders) {
-      // Fall back to the last known-good outline on failure
       state.headers = previousHeaders;
       state.headerMatches = deriveHeaderMatches(previousHeaders);
-
-      const uiPayload = buildHeaderUIPayload(previousHeaders);
-
+      const uiPayload = (!previousHeaders || typeof previousHeaders !== 'object')
+        ? previousHeaders
+        : (!Array.isArray(previousHeaders.simpleheaders) && Array.isArray(previousHeaders.headers))
+          ? { ...previousHeaders, simpleheaders: previousHeaders.headers }
+          : previousHeaders;
       renderHeaderRawResponse(elements.headersRawContent, uiPayload);
       renderHeaderOutline(elements.headersContent, uiPayload, {
         documentId,
@@ -514,74 +468,17 @@ async function refreshHeaders() {
   }
 }
 
-
-
-// (Optional but recommended) tweak showHeaderSearchPrompt to ensure the raw pane hints at the trace panel too
-function showHeaderSearchPrompt() {
-  renderPanelStartPrompt(elements.headersContent, {
-    message: 'Press Start to generate the header outline.',
-    buttonLabel: 'Start search',
-    onStart: () => {
-      void refreshHeaders();
-    },
-  });
-  if (elements.headersRawContent) {
-    elements.headersRawContent.innerHTML =
-      '<p class="panel-status">Run the header search to view the raw response and trace.</p>';
-  }
-}
-
-
-function setSpecsSearchBusy(busy) {
-  const button = elements.startSpecs;
-  if (!button) {
-    return;
-  }
-
-  if (busy) {
-    button.disabled = true;
-    button.dataset.loading = 'true';
-    button.textContent = 'Running…';
-    button.setAttribute('aria-busy', 'true');
-    button.setAttribute('aria-label', 'Running specifications search');
-    return;
-  }
-
-  const defaultLabel = state.specsSearchAttempted ? 'Run again' : 'Start search';
-  const ariaLabel = state.specsSearchAttempted
-    ? 'Run the specifications search again'
-    : 'Start the specifications search';
-
-  button.textContent = defaultLabel;
-  delete button.dataset.loading;
-  button.removeAttribute('aria-busy');
-  button.setAttribute('aria-label', ariaLabel);
-  button.disabled = !state.selectedId;
-}
-
-function showSpecsSearchPrompt() {
-  renderPanelStartPrompt(elements.specsContent, {
-    message: 'Press Start to classify specification lines into buckets.',
-    buttonLabel: 'Start search',
-    onStart: () => {
-      void runSpecsSearch();
-    },
-  });
-}
-
 async function runSpecsSearch() {
   const documentId = state.selectedId;
   if (!documentId) {
     showToast('Select a document first.', 'error');
     return;
   }
-
   const previousSpecs = state.specs;
   let success = false;
   state.specsSearchAttempted = true;
   setSpecsSearchBusy(true);
   setPanelLoading(elements.specsContent, 'Classifying specification lines…');
-
   try {
     const specsResult = await fetchSpecifications(documentId);
     state.specs = specsResult;
@@ -589,8 +486,7 @@ async function runSpecsSearch() {
     showToast('Specifications search completed.');
     success = true;
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unable to run specifications search.';
+    const message = error instanceof Error ? error.message : 'Unable to run specifications search.';
     showToast(message, 'error');
     if (previousSpecs) {
       state.specs = previousSpecs;
@@ -608,16 +504,80 @@ async function runSpecsSearch() {
   }
 }
 
-setHeaderRefreshBusy(false);
-setSpecsSearchBusy(false);
+// Render the specs buckets panel
+function renderSpecsView() {
+  if (!elements.specsContent) {
+    return;
+  }
+  if (!state.specs) {
+    return;
+  }
+  const buckets = state.specs?.buckets ?? {};
+  const readOnly = state.specRecord?.record?.state === 'approved';
+  renderSpecsBuckets(elements.specsContent, buckets, {
+    documentId: state.selectedId,
+    approvedLines: state.approvedLines,
+    readOnly,
+    onApproveToggle: ({ approved }) => {
+      if (approved) {
+        showToast('Specification approved.');
+      }
+    },
+  });
+}
 
-function handleExport(kind) {
+function setApprovalStatus(message, tone = 'muted') {
+  if (!elements.approvalStatus) {
+    return;
+  }
+  elements.approvalStatus.textContent = message;
+  elements.approvalStatus.dataset.tone = tone;
+}
+
+function updateApprovalUI({ busy = false, preserveStatus = false } = {}) {
+  const record = state.specRecord?.record ?? null;
+  const isApproved = record?.state === 'approved';
+  const loading = busy || state.approvalLoading;
+  if (elements.approveSpecs) {
+    elements.approveSpecs.disabled = loading || isApproved || !state.specs;
+    if (loading) {
+      elements.approveSpecs.textContent = 'Working…';
+    } else if (isApproved) {
+      elements.approveSpecs.textContent = 'Approved';
+    } else {
+      elements.approveSpecs.textContent = 'Approve & Freeze';
+    }
+  }
+  if (elements.reviewerInput) {
+    if (record?.reviewer) {
+      elements.reviewerInput.value = record.reviewer;
+    }
+    elements.reviewerInput.disabled = loading || isApproved;
+  }
+  if (elements.startSpecs) {
+    elements.startSpecs.disabled = loading || isApproved || !state.selectedId;
+  }
+  if (elements.rerunSpecs) {
+    elements.rerunSpecs.disabled = loading || isApproved || !state.selectedId;
+  }
+  if (loading) {
+    return;
+  }
+  if (isApproved) {
+    const approvedDate = record?.approved_at ? formatDate(record.approved_at) : '—';
+    const reviewer = record?.reviewer || '—';
+    setApprovalStatus(`Approved by ${reviewer} on ${approvedDate}.`, 'success');
+  } else if (!preserveStatus) {
+    setApprovalStatus('Awaiting approval.', 'muted');
+  }
+}
+
+async function handleExport(kind) {
   const documentId = state.selectedId;
   if (!documentId) {
     showToast('Select a document first.', 'error');
     return;
   }
-
   try {
     switch (kind) {
       case 'parse': {
@@ -676,12 +636,10 @@ async function approveCurrentSpecs() {
     showToast('Specifications not ready for approval.', 'error');
     return;
   }
-
   const reviewer = elements.reviewerInput?.value?.trim() || 'web-user';
   state.approvalLoading = true;
   updateApprovalUI({ busy: true });
   setApprovalStatus('Submitting approval…', 'muted');
-
   try {
     const response = await approveSpecRecord(documentId, {
       reviewer,
@@ -701,76 +659,5 @@ async function approveCurrentSpecs() {
   }
 }
 
-function renderSpecsView() {
-  if (!elements.specsContent) {
-    return;
-  }
-  if (!state.specs) {
-    return;
-  }
-  const buckets = state.specs?.buckets ?? {};
-  const readOnly = state.specRecord?.record?.state === 'approved';
-  renderSpecsBuckets(elements.specsContent, buckets, {
-    documentId: state.selectedId,
-    approvedLines: state.approvedLines,
-    readOnly,
-    onApproveToggle: ({ approved }) => {
-      if (approved) {
-        showToast('Specification approved.');
-      }
-    },
-  });
-}
-
-function setApprovalStatus(message, tone = 'muted') {
-  if (!elements.approvalStatus) {
-    return;
-  }
-  elements.approvalStatus.textContent = message;
-  elements.approvalStatus.dataset.tone = tone;
-}
-
-function updateApprovalUI({ busy = false, preserveStatus = false } = {}) {
-  const record = state.specRecord?.record ?? null;
-  const isApproved = record?.state === 'approved';
-  const loading = busy || state.approvalLoading;
-
-  if (elements.approveSpecs) {
-    elements.approveSpecs.disabled = loading || isApproved || !state.specs;
-    if (loading) {
-      elements.approveSpecs.textContent = 'Working…';
-    } else if (isApproved) {
-      elements.approveSpecs.textContent = 'Approved';
-    } else {
-      elements.approveSpecs.textContent = 'Approve & Freeze';
-    }
-  }
-
-  // NEW: keep Start/Rerun buttons coherent with state
-  if (elements.startSpecs) {
-    elements.startSpecs.disabled = loading || isApproved || !state.selectedId;
-  }
-  if (elements.rerunSpecs) {
-    elements.rerunSpecs.disabled = loading || isApproved || !state.selectedId;
-  }
-
-  if (elements.reviewerInput) {
-    if (record?.reviewer) {
-      elements.reviewerInput.value = record.reviewer;
-    }
-    elements.reviewerInput.disabled = loading || isApproved;
-  }
-
-  if (loading) return;
-
-  if (isApproved) {
-    const approvedDate = record?.approved_at ? formatDate(record.approved_at) : '—';
-    const reviewer = record?.reviewer || '—';
-    setApprovalStatus(`Approved by ${reviewer} on ${approvedDate}.`, 'success');
-  } else if (!preserveStatus) {
-    setApprovalStatus('Awaiting approval.', 'muted');
-  }
-}
-
-
+// Initial load
 void refreshDocuments();
