@@ -97,6 +97,16 @@
               >
                 Start search
               </button>
+              <!-- NEW: Wipe & rerun specs -->
+              <button
+                type="button"
+                class="ghost-button"
+                id="run-again-buckets"
+                aria-label="Wipe and rerun specifications classification"
+                title="Wipe saved buckets and rerun the LLM per document section"
+              >
+                Rerun specs
+              </button>
               <button type="button" class="ghost-button" data-export="specs-json">Export JSON</button>
             </div>
           </div>
@@ -133,5 +143,7 @@
     </div>
     <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
     <script type="module" src="/static/js/app.js"></script>
+    <!-- NEW: helper that wires #run-again-buckets to DELETE+POST endpoints -->
+    <script type="module" src="/static/js/specs_patch.js"></script>
   </body>
 </html>

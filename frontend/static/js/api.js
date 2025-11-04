@@ -207,7 +207,6 @@ export async function fetchHeaders(documentId, opts = {}) {
   return request(path, { method: "POST" });
 }
 
-
 export async function fetchSectionText(documentId, start, end, sectionKey) {
   const params = new URLSearchParams({ start: String(start), end: String(end) });
   if (sectionKey) {
@@ -232,6 +231,23 @@ export async function fetchSpecifications(documentId) {
 export async function compareSpecifications(documentId) {
   return request(`/api/specs/compare/${documentId}`, { method: "POST" });
 }
+// Wipe all stored/spec-cached buckets for a document on the server
+export async function deleteSpecsBuckets(documentId) {
+  if (!Number.isFinite(Number(documentId))) {
+    throw new Error('deleteSpecsBuckets: invalid documentId');
+  }
+  return request(`/api/specs/${documentId}/buckets`, { method: 'DELETE' });
+}
+
+// Re-run extraction fresh (bypass caches) and return new buckets payload
+export async function runSpecsBucketsAgain(documentId) {
+  if (!Number.isFinite(Number(documentId))) {
+    throw new Error('runSpecsBucketsAgain: invalid documentId');
+  }
+  // This endpoint should trigger a full re-extract on the server
+  return request(`/api/specs/${documentId}/buckets/run-again`, { method: 'POST' });
+}
+
 
 export async function deleteDocument(documentId) {
   return request(`/api/files/${documentId}`, { method: "DELETE" });
@@ -275,6 +291,11 @@ export async function downloadSpecExport(documentId, format) {
     mediaType: response.headers.get("content-type") ?? "application/octet-stream",
   };
 }
+
+/* --------------------------
+ *  NEW: Buckets rerun API
+ * -------------------------- */
+
 
 export function toCsv(rows) {
   if (!Array.isArray(rows) || !rows.length) {

@@ -28,8 +28,8 @@ from .routers import (
     parse,
     search,
     specs,
+    specs_buckets,  # NEW: adds wipe + rerun endpoints for spec buckets
 )
-
 
 settings = get_settings()
 logger = logging.getLogger("uvicorn.error")
@@ -51,7 +51,6 @@ _cors_origin_pattern = (
 
 def _mask_api_key(value: str | None) -> str:
     """Return a masked representation of the OpenRouter API key."""
-
     if not value:
         return "<missing>"
 
@@ -68,7 +67,6 @@ def _mask_api_key(value: str | None) -> str:
 
 def _announce_openrouter_api_key(value: str | None) -> None:
     """Log the OpenRouter API key status to the command window."""
-
     if value and value.strip():
         masked = _mask_api_key(value)
         message = (
@@ -89,7 +87,6 @@ _announce_openrouter_api_key(settings.openrouter_api_key)
 
 def _ensure_storage_dirs() -> None:
     """Ensure upload/export directories exist before handling requests."""
-
     # Settings validators also create these paths, but ensure they exist even if
     # settings are overridden in tests.
     for path in {
@@ -105,7 +102,6 @@ def _ensure_storage_dirs() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialise application state for the FastAPI app."""
-
     init_db()
     _ensure_storage_dirs()
     yield
@@ -124,7 +120,6 @@ app.add_middleware(RequestIdMiddleware)
 app.add_middleware(RequestMetricsMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 
-
 ROUTERS: Iterable = (
     files.router,
     documents.router,
@@ -132,6 +127,7 @@ ROUTERS: Iterable = (
     health.router,
     parse.router,
     search.router,
+    specs_buckets.router,  # NEW: exposes /api/specs/{id}/buckets + /run-again
     specs.router,
     compare.router,
     observability.router,
@@ -146,7 +142,6 @@ async def handle_unexpected_exception(
     request: Request, exc: Exception
 ) -> JSONResponse:
     """Ensure unexpected exceptions return a JSON payload."""
-
     logger.exception(
         "Unhandled exception while processing %s %s", request.method, request.url.path
     )
@@ -194,7 +189,6 @@ if FRONTEND_DIR.exists():
     @app.get("/", include_in_schema=False)
     async def serve_frontend() -> FileResponse:
         """Return the compiled frontend HTML shell."""
-
         return FileResponse(FRONTEND_DIR / "index.html")
 
 

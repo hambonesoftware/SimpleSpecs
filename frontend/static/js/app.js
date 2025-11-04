@@ -10,6 +10,8 @@ import {
   fetchSpecRecord,
   approveSpecRecord,
   downloadSpecExport,
+  deleteSpecsBuckets,
+  runSpecsBucketsAgain,
 } from './api.js';
 import {
   initDropZone,
@@ -63,6 +65,7 @@ const elements = {
   headerModeTag: document.querySelector('#header-mode-tag'),
   refreshHeaders: document.querySelector('#refresh-headers'),
   startSpecs: document.querySelector('#start-specs'),
+  rerunSpecs: document.querySelector('#rerun-specs'),
 };
 
 function renderPanelStartPrompt(container, { message, buttonLabel, onStart }) {
@@ -190,6 +193,9 @@ initDropZone({
 elements.refreshDocuments?.addEventListener('click', () => {
   void refreshDocuments();
 });
+elements.rerunSpecs?.addEventListener('click', () => {
+  void rerunSpecsNow();
+});
 
 elements.refreshHeaders?.addEventListener('click', () => {
   void refreshHeaders();
@@ -286,6 +292,9 @@ async function selectDocument(documentId) {
   updateHeaderModeTag(null);
   setHeaderRefreshBusy(false);
   setSpecsSearchBusy(false);
+  // NEW:
+  setSpecsRerunBusy(false);
+
   setApprovalStatus('Loading approval status…', 'muted');
   updateApprovalUI({ busy: true });
 
@@ -327,6 +336,73 @@ async function selectDocument(documentId) {
     if (elements.workspaceSubtitle) {
       elements.workspaceSubtitle.textContent = `Document ${documentId} ready.`;
     }
+  }
+}
+
+
+function setSpecsRerunBusy(busy) {
+  const button = elements.rerunSpecs;
+  if (!button) return;
+
+  if (busy) {
+    button.disabled = true;
+    button.dataset.loading = 'true';
+    button.textContent = 'Re-running…';
+    button.setAttribute('aria-busy', 'true');
+    button.setAttribute('aria-label', 'Re-running specifications (fresh LLM)');
+    return;
+  }
+
+  button.textContent = 'Rerun specs';
+  delete button.dataset.loading;
+  button.removeAttribute('aria-busy');
+  button.setAttribute('aria-label', 'Wipe and re-run specifications from the LLM');
+  button.disabled = !state.selectedId;
+}
+
+
+async function rerunSpecsNow() {
+  const documentId = state.selectedId;
+  if (!documentId) {
+    showToast('Select a document first.', 'error');
+    return;
+  }
+
+  // Don’t allow reruns on frozen records
+  const isApproved = state.specRecord?.record?.state === 'approved';
+  if (isApproved) {
+    showToast('Specifications are frozen (approved). Unfreeze in the backend to rerun.', 'error');
+    return;
+  }
+
+  setSpecsRerunBusy(true);
+  setPanelLoading(elements.specsContent, 'Re-running specifications (fresh LLM)…');
+
+  try {
+    // 1) Wipe any server-side stored buckets
+    try {
+      await deleteSpecsBuckets(documentId);
+    } catch (wipeErr) {
+      // Non-fatal; proceed even if nothing existed.
+      console.warn('[Specs] delete buckets failed/ignored', wipeErr);
+    }
+
+    // 2) Trigger a clean re-extraction that bypasses caches on the server
+    const fresh = await runSpecsBucketsAgain(documentId);
+
+    // 3) Update UI
+    state.specs = fresh;
+    renderSpecsView();
+    showToast('Specifications re-extracted from the LLM.');
+    updateApprovalUI();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to rerun specifications.';
+    setPanelError(elements.specsContent, message);
+    showToast(message, 'error');
+    // keep prior state.specs if it existed; render if so
+    if (state.specs) renderSpecsView();
+  } finally {
+    setSpecsRerunBusy(false);
   }
 }
 
@@ -670,6 +746,14 @@ function updateApprovalUI({ busy = false, preserveStatus = false } = {}) {
     }
   }
 
+  // NEW: keep Start/Rerun buttons coherent with state
+  if (elements.startSpecs) {
+    elements.startSpecs.disabled = loading || isApproved || !state.selectedId;
+  }
+  if (elements.rerunSpecs) {
+    elements.rerunSpecs.disabled = loading || isApproved || !state.selectedId;
+  }
+
   if (elements.reviewerInput) {
     if (record?.reviewer) {
       elements.reviewerInput.value = record.reviewer;
@@ -677,9 +761,7 @@ function updateApprovalUI({ busy = false, preserveStatus = false } = {}) {
     elements.reviewerInput.disabled = loading || isApproved;
   }
 
-  if (loading) {
-    return;
-  }
+  if (loading) return;
 
   if (isApproved) {
     const approvedDate = record?.approved_at ? formatDate(record.approved_at) : '—';
@@ -689,5 +771,6 @@ function updateApprovalUI({ busy = false, preserveStatus = false } = {}) {
     setApprovalStatus('Awaiting approval.', 'muted');
   }
 }
+
 
 void refreshDocuments();

@@ -41,10 +41,184 @@ BUCKET_ARTIFACT_KEY = "spec_buckets"
 # Each bucket has a "name" and a "prompt" template. The document text is appended.
 # You can add your own prompts or swap these for your existing ones.
 BUCKETS: List[Dict[str, str]] = [
-    {"name": "mechanical", "prompt": "Extract a JSON list of mechanical specifications and units relevant to this document. Be concise and structured.\n\n-- Document --\n"},
-    {"name": "electrical", "prompt": "Extract a JSON list of electrical specifications (voltages, currents, interfaces). Be concise and structured.\n\n-- Document --\n"},
-    {"name": "controls", "prompt": "Extract a JSON list of PLC/HMI/controls-related specs and signals. Be concise and structured.\n\n-- Document --\n"},
-    {"name": "software", "prompt": "Extract a JSON list of software-related requirements (APIs, protocols, versions). Be concise and structured.\n\n-- Document --\n"},
+    {"name": "mechanical", "prompt": """You are a rigorous Mechanical Specifications Extractor.
+
+GOAL
+Extract ONLY mechanical-engineering requirements and best-practice specifications from the provided document SECTION. Focus on norms, constraints, limits, materials, finishes, tolerances, load/strength, fasteners, threads, torque, fits, GD&T, welding/brazing, machining, coatings, lubrication, pneumatics/hydraulics, guards/safety, ergonomics/maintenance/assembly, inspection/testing, documentation/marking/labels/packaging, environmental (temperature, dust, IP rating), vibration/noise, reliability/life, and referenced standards (ISO/ANSI/ASME/ASTM/etc.).
+
+SCOPE
+• Work strictly within the supplied SECTION text/metadata; do not infer outside facts.
+• Ignore TOCs, running headers/footers, figure/table captions unless they state normative requirements.
+• If the SECTION contains non-mechanical content, return an empty array.
+
+INCLUSION RULES
+Treat as mechanical when the clause is:
+• Normative: uses SHALL/MUST/REQUIRED/IS TO/NEVER/NOT PERMITTED
+• Strongly recommended best practice: SHOULD/RECOMMENDED
+• Hard constraints: numeric limits, units, tolerances, grades, classes, surface finish, hardness, torque, thread specification, material callouts, protection ratings, safety guards, interlocks, clearances, environmental ranges
+• Process/verification: inspection/test methods the mechanical engineer must follow
+
+EXCLUSION RULES
+• Purely administrative (dates, email, pricing), software-only, electrical-only unless they impose a mechanical constraint (e.g., clearance for conduit).
+• Vague narrative with no actionable constraint.
+
+OUTPUT RULES
+• Return a single JSON object in one fenced JSON block marked MECHSPECS.
+• Quote requirement text VERBATIM (no paraphrasing) in `text`. If a clause spans multiple lines, combine them; do not duplicate.
+• Use the provided metadata (page numbers, header path, global line indexes) if available; otherwise set null.
+• Classify each item precisely and add a brief rationale (one sentence).
+• Be conservative: high confidence only when the clause is clearly mechanical and normative/actionable.
+
+ENUMS
+• requirement_level: ["MUST","SHOULD","MAY","INFO"]
+• type: ["requirement","best_practice","constraint","test","documentation","safety","definition"]
+• category (pick the most specific, add more if needed): ["materials","coatings","tolerances","gdandt","loads","fasteners","threads","torque","fits","welding","machining","surface_finish","lubrication","hydraulics","pneumatics","guards","ergonomics","maintenance","inspection","testing","marking","packaging","environmental","reliability","nvh","other"]
+
+VALIDATION
+• Do not invent numbers or standards.
+• Units must appear in source text to record them.
+• confidence in [0.0–1.0].
+\n\n-- Document --\n"""},
+    {"name": "electrical", "prompt": """You are a rigorous Electrical Specifications Extractor.
+
+GOAL
+Extract ONLY electrical-engineering requirements and best-practice specifications from the provided document SECTION. Focus on norms, constraints, limits, and procedures a practicing electrical engineer must follow: voltage/current/power, phase/frequency, grounding & bonding, insulation, conductor sizing & ampacity, wiring methods (cable, tray, conduit), color codes, device ratings, circuit protection (breakers/fuses), short-circuit & available fault current, arc-flash boundaries/labels, isolation & LOTO, safety circuits (E-Stops, safety relays), SIL/PL targets, interlocks, enclosures (IP/NEMA), EMC/EMI & shielding/filtering, harmonics/power quality, panel building, PLC/controls & I/O wiring, sensors/actuators supply levels, connectors/terminations & torque, routing/segregation (power vs signal), labeling/marking, schematics, testing (IR/megger, hipot, continuity, FAT/SAT), documentation, environmental (temperature, humidity), and referenced standards (NEC/NFPA 70, NFPA 79, IEC 60204-1, UL/CE/CSA/IEC).
+
+SCOPE
+• Work strictly within the supplied SECTION text/metadata; do not add outside knowledge.
+• Ignore TOCs, running headers/footers, and purely illustrative figure/table captions unless they state normative requirements.
+• If the SECTION has no electrical content, return an empty array.
+
+INCLUSION RULES
+Count as electrical when the clause is:
+• Normative: SHALL/MUST/REQUIRED/IS TO/NOT PERMITTED
+• Strong recommendation: SHOULD/RECOMMENDED
+• Hard constraints: numeric limits, units, ratings, wire sizes, breaker sizes, clearances, temperature ranges, protection classes, enclosure ratings, torque values, color codes, EMC/EMI constraints
+• Process/verification the electrical engineer must perform (tests, inspections, labeling)
+
+EXCLUSION RULES
+• Administrative (dates, submittals, pricing), mechanical-only, or software-only unless they impose an electrical constraint (e.g., supply voltage for a sensor).
+• Vague narrative with no actionable constraint.
+
+OUTPUT RULES
+• Return ONE JSON object in a single fenced JSON block marked ELECSPECS.
+• Quote requirement text VERBATIM in `text` (no paraphrasing). If a clause spans lines, combine them into one item.
+• Use provided metadata fields if available; otherwise set null.
+• Classify precisely and add a one-sentence rationale.
+• Be conservative: high confidence only when clearly electrical AND normative/actionable.
+
+ENUMS
+• requirement_level: ["MUST","SHOULD","MAY","INFO"]
+• type: ["requirement","best_practice","constraint","test","documentation","safety","definition"]
+• category (pick most specific; add more if needed): [
+  "power_distribution","voltage_levels","current_power","frequency_phase",
+  "grounding_bonding","insulation","conductor_sizing","wiring_methods",
+  "cable_tray_conduit","color_codes","device_ratings","circuit_protection",
+  "short_circuit_fault_current","arc_flash","isolation_loto","safety_circuits",
+  "sil_pl","interlocks","enclosures","emc_emi","shielding_filtering",
+  "harmonics_power_quality","plc_controls","io_wiring","control_panels",
+  "sensors_actuators","connectors_terminations","torque",
+  "routing_segregation","labeling_marking","schematics",
+  "testing_inspection","documentation","environmental","other"
+]
+
+VALIDATION
+• Do not invent numbers or standards.
+• Units/ratings must appear in the source text to be recorded.
+• confidence must be in [0.0–1.0].
+\n\n-- Document --\n"""},
+    {"name": "controls", "prompt": """You are a rigorous Controls Specifications Extractor.
+
+GOAL
+Extract ONLY controls-engineering requirements and best-practice specifications from the provided document SECTION. Focus on constraints and procedures a controls engineer must follow: PLC/IPC standards (IEC 61131-3), program structure, naming conventions, modes & states (Auto/Manual/Maintenance), permissives & interlocks, alarms & events (ISA-18.2), HMI/SCADA (ISA-101 style/graphics), safety PLC & safety functions (ISO 13849, IEC 62061/61508), emergency stops, safety zones, risk reduction measures, I/O allocation & signal types, scaling/filters/debounce, sequencing/recipes/batch (ISA-88), motion/drives/VFD parameters & STO, robot/cell interfaces & handshakes, network/fieldbus (EtherNet/IP, PROFINET, Modbus, CANopen), addressing & determinism, time sync (PTP), performance/scan-cycle/latency/throughput, diagnostics/fault handling/retry/backoff/timeouts, data logging/historian/time stamping, traceability, user roles/authentication/authorization, audit logging, cybersecurity hardening (IEC 62443, NIST 800-82), FAT/SAT/IO checkout/validation/acceptance criteria, and required documentation (I/O list, C&E matrix, sequences, program printouts, alarm list).
+
+SCOPE
+• Work strictly within the supplied SECTION text/metadata; do not add outside facts.
+• Ignore TOCs, running headers/footers, and purely illustrative captions unless they state normative requirements.
+• If the SECTION has no controls content, return an empty array.
+
+INCLUSION RULES
+Count as controls when the clause is:
+• Normative: SHALL/MUST/REQUIRED/NOT PERMITTED
+• Strong recommendation: SHOULD/RECOMMENDED
+• Hard constraints: sequence rules, interlock conditions, alarm setpoints/priority/annunciation rules, program structure and naming, I/O type/scan class, PLC cycle time limits, motion/drives parameters, interface handshakes, safety logic behavior, cybersecurity settings, test/validation procedures.
+• Verification steps the controls engineer must perform (e.g., IO checkout, FAT/SAT, alarm testing).
+
+EXCLUSION RULES
+• Purely mechanical/electrical without a controls implication (e.g., wire gauge) unless it constrains logic, addressing, signals, or PLC hardware behavior.
+• Administrative text (pricing, dates, submittal routing) and vague narrative with no actionable constraint.
+
+OUTPUT RULES
+• Return ONE JSON object in a single fenced JSON block marked CTRLSPECS.
+• Quote requirement text VERBATIM in `text` (no paraphrasing). If a clause spans lines, combine into one item; do not duplicate.
+• Use provided metadata if available; otherwise set null.
+• Classify precisely and add a one-sentence rationale.
+• Be conservative: high confidence only when clearly controls-related AND normative/actionable.
+
+ENUMS
+• requirement_level: ["MUST","SHOULD","MAY","INFO"]
+• type: ["requirement","best_practice","constraint","test","documentation","safety","definition"]
+• category (pick the most specific; add more if needed):
+  ["plc_programming","safety_plc","modes_states","sequence_of_operations","permissives_interlocks",
+   "alarm_management","hmi_scada","io_allocation","signals_scaling","diagnostics_faults",
+   "motion_drives","robot_interface","batch_recipes","data_logging_historian","reporting_traceability",
+   "networking","fieldbus","time_sync","performance_timing","versioning_configuration",
+   "cybersecurity","user_management","audit_logging","testing_validation","fat_sat",
+   "documentation","naming_standards","standards_compliance","safety_zones","risk_assessment","other"]
+
+VALIDATION
+• Do not invent numbers, parameters, or standards.
+• Units/limits must appear in the source text to record them.
+• confidence must be in [0.0–1.0].
+\n\n-- Document --\n"""},
+    {"name": "software", "prompt": """You are a rigorous Software Specifications Extractor.
+
+GOAL
+Extract ONLY software-engineering requirements and best-practice specifications from the provided document SECTION. Focus on constraints and procedures a software engineer must follow: architecture/design (layers, modules, patterns), interfaces/APIs, protocols, data models & formats, configuration, state machines, error handling & retries/backoff, logging, observability (metrics, monitoring, alerting, tracing), security (authN/Z, roles, encryption, key/secrets management, input validation, OWASP/ASVS), privacy, audit logging, performance/latency/throughput/memory limits, scalability, availability/reliability (SLA/SLO), concurrency/real-time/timing, transactions/idempotency, databases/schemas/migrations, caching, messaging/queues/streaming, versioning/compatibility, deployment/runtime (containers, services), CI/CD, testing (unit/integration/system/e2e, coverage thresholds), static analysis/linting, code review, documentation/traceability, change control, SBOM/licensing/compliance, backups/DR (RTO/RPO), safety-related software compliance (e.g., IEC 61508) if present, and referenced standards (ISO/IEC, NIST, OWASP, etc.) that appear in the text.
+
+SCOPE
+• Work strictly within the supplied SECTION text/metadata; do not add outside facts.
+• Ignore TOCs, running headers/footers, and purely illustrative captions unless they state normative requirements.
+• If the SECTION has no software content, return an empty array.
+
+INCLUSION RULES
+Count as software when the clause is:
+• Normative (SHALL/MUST/REQUIRED/NOT PERMITTED/IS TO)
+• Strong recommendation (SHOULD/RECOMMENDED)
+• Hard constraints: numeric limits, units, SLAs/SLOs, thresholds, coverage %, encryption modes, protocol versions, API stability/compatibility rules, roles/permissions, timing windows, retry limits, memory/CPU caps, etc.
+• Verification steps the software engineer must perform (tests, evidence, documentation, sign-offs).
+
+EXCLUSION RULES
+• Purely mechanical/electrical/controls unless it imposes a software obligation (e.g., “software shall log E-stop events with timestamp and operator ID”).
+• Administrative text (pricing, contact lists) or vague narrative with no actionable constraint.
+
+OUTPUT RULES
+• Return ONE JSON object in a single fenced JSON block marked SWESPECS.
+• Quote requirement text VERBATIM in `text` (no paraphrasing). Merge multi-line clauses into one item; do not duplicate.
+• Use provided metadata fields if available; otherwise set null.
+• Classify precisely and add a one-sentence rationale.
+• Be conservative: high confidence only when clearly software-related AND normative/actionable.
+
+ENUMS
+• requirement_level: ["MUST","SHOULD","MAY","INFO"]
+• type: ["requirement","best_practice","constraint","test","documentation","safety","definition"]
+• category (pick the most specific; add more if needed):
+  ["architecture_design","interfaces_api","protocols","data_models","data_formats",
+   "configuration_management","state_machines","error_handling","logging",
+   "observability","performance","reliability_availability","scalability",
+   "concurrency_real_time","transactions_idempotency","database_storage",
+   "caching","messaging_eventing","versioning_release","compatibility",
+   "deployment_runtime","containers_orchestration","ci_cd",
+   "testing_unit","testing_integration","testing_system","testing_e2e","test_coverage",
+   "static_analysis","code_style_reviews","documentation","traceability","change_control",
+   "security_auth","security_encryption","security_input_validation","secrets_management",
+   "privacy","audit_logging","sbom_licensing","backups_dr","safety_compliance","other"]
+
+VALIDATION
+• Do not invent numbers, parameters, or standards.
+• Units/limits/standards must appear in the source text to record them.
+• confidence ∈ [0.0, 1.0].
+\n\n-- Document --\n"""},
 ]
 
 # ---------- Utilities ----------------------------------------------------------
