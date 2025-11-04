@@ -1,0 +1,308 @@
+{
+  "document_id": 3,
+  "overall_score": 0.0,
+  "coverage_by_discipline": {
+    "mechanical": 0.0,
+    "electrical": 0.0,
+    "controls": 0.0,
+    "software": 0.0,
+    "project_management": 0.0
+  },
+  "missing_clause_ids": [
+    "asme-pressure-relief",
+    "asme-material-traceability",
+    "iec-grounding",
+    "iec-cable-identification",
+    "iso-safety-integrity",
+    "iec-software-versioning",
+    "pm-change-control"
+  ],
+  "findings": [
+    {
+      "clause_id": "asme-pressure-relief",
+      "discipline": "mechanical",
+      "text": "Pressure relief valves shall comply with ASME Section VIII sizing requirements.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.4,
+      "missing_terms": [
+        "section",
+        "valve",
+        "viii"
+      ],
+      "best_line": {
+        "text": "5.4.2.2 Pressure relief device",
+        "page": 27,
+        "header_path": [
+          "The purchaser must provide details of operating conditions that will subject the PSTs to unbalanced phase currents and voltages that may exceed allowable standard limits. The manufacturer will provide for these conditions during the design of the PSTs. The following are examples of operating conditions that could produce such problems",
+          "5.4 Protection"
+        ],
+        "disciplines": [
+          "mechanical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 1.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 27,
+          "block_index": 5,
+          "line_index": 0,
+          "bbox": [
+            90.0,
+            357.046875,
+            226.62957763671875,
+            368.9462890625
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "asme-material-traceability",
+      "discipline": "mechanical",
+      "text": "Maintain full material traceability records for load bearing components.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "material",
+        "records",
+        "traceability"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-grounding",
+      "discipline": "electrical",
+      "text": "All control cabinets shall provide protective earth bonding in accordance with IEC 60204-1.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.2,
+      "missing_terms": [
+        "60204",
+        "bonding",
+        "earth",
+        "iec"
+      ],
+      "best_line": {
+        "text": "The protection scheme recommended for PSTs is similar to that for power transformers with one notable exception: differential relaying. In general, transformer differential relays are designed to allow for a difference between the primary and secondary currents of the transformer of at least 10% because of the voltage taps. This is done by means of restraint windings (or logic) that desensitize the relay during heavy through fault currents. For a PST with a phase angle difference of 25\u00b0 between the source and load currents, the current difference would be about 43%, so a special differential scheme is required. In 5.4.1, differential schemes for PSTs will be brie\ufb02y discussed with emphasis on the PST requirements. Ground protection is also included because of its close association with differential protection. For a more detailed discussion of differential and ground protection, see \u201cApplied Protective Relaying\u201d[B1], Brown, et al. [B4], Ibrahim, Stacom [B8], [B9], Li [B13], Plumptre [B22], and Sen, Craig [B23]. Other types of protection are discussed in 5.4.2.",
+        "page": 26,
+        "header_path": [
+          "The purchaser must provide details of operating conditions that will subject the PSTs to unbalanced phase currents and voltages that may exceed allowable standard limits. The manufacturer will provide for these conditions during the design of the PSTs. The following are examples of operating conditions that could produce such problems",
+          "5.4 Protection"
+        ],
+        "disciplines": [
+          "electrical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 4.0,
+          "mechanical": 0.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 26,
+          "block_index": 5,
+          "line_index": 0,
+          "bbox": [
+            90.0,
+            208.6875,
+            522.2036743164062,
+            339.8447265625
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "iec-cable-identification",
+      "discipline": "electrical",
+      "text": "Power and control conductors must be uniquely identified at both terminations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "conductors",
+        "identified",
+        "terminations"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iso-safety-integrity",
+      "discipline": "controls",
+      "text": "Safety functions shall meet ISO 13849 performance level calculations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.2,
+      "missing_terms": [
+        "13849",
+        "iso",
+        "level",
+        "safety"
+      ],
+      "best_line": {
+        "text": "The control system error shall be 1.0% or less. The accuracy is based upon the combined performance of the sensing apparatus (including instrument transformers, transducers, or other means of sensing as required) and the control device.",
+        "page": 33,
+        "header_path": [
+          "For throat connections that place barriers between both the tanks and the throat, the throat shall be equipped with the following accessories",
+          "9.2 Requirements",
+          "9.2.3 Accuracy"
+        ],
+        "disciplines": [
+          "controls"
+        ],
+        "scores": {
+          "controls": 1.0,
+          "electrical": 0.0,
+          "mechanical": 0.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 33,
+          "block_index": 3,
+          "line_index": 0,
+          "bbox": [
+            90.0,
+            163.6875,
+            522.1852416992188,
+            198.8447265625
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "iec-software-versioning",
+      "discipline": "software",
+      "text": "Firmware shall implement semantic versioning with rollback procedures.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "firmware",
+        "rollback",
+        "semantic",
+        "versioning"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "pm-change-control",
+      "discipline": "project_management",
+      "text": "Change control board approval is required before releasing revisions to the customer.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.5,
+      "missing_terms": [
+        "approval",
+        "board"
+      ],
+      "best_line": {
+        "text": "By using the change-over selector for inserting a coarse regulating winding, the achievable phase angle in one direction can be enlarged. If a change from advanced to retard position is required, an additional switching device, which has to be designed like an ARS, is necessary so that the switching can be performed without interruption of the load current. The ARS has to control the process of commutation which, in this case, is not only determined by the loop formed by the connecting leads but also by the impedance of the winding itself. If the reversing operation can be carried out with a de-energized transformer, an off-circuit tap changer is suf\ufb01cient. Figure 13 shows different arrangements with coarse change-over selectors (a, b) and, in addition, the use of two LTCs (c). Also the arrangement of an ARS for the exciting winding of the series transformer is shown in (b).",
+        "page": 21,
+        "header_path": [
+          "In special cases when a third winding with a low voltage level is speci\ufb01ed, it may be possible to use this winding instead of the shields. Shielding has, in addition, the advantage that it protects the regulating winding from capacitively transferred transients. If shielding is not possible, one of the following solutions has to be used to solve the problem"
+        ],
+        "disciplines": [
+          "electrical"
+        ],
+        "scores": {
+          "controls": 1.0,
+          "electrical": 3.0,
+          "mechanical": 0.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 21,
+          "block_index": 4,
+          "line_index": 0,
+          "bbox": [
+            90.0,
+            610.5625,
+            522.19970703125,
+            717.7197265625
+          ]
+        }
+      }
+    }
+  ],
+  "compliance_notes": [
+    {
+      "document_id": "3",
+      "missing_clauses": [
+        {
+          "clause_id": "asme-pressure-relief",
+          "actions": [
+            "Update specification to require PRVs to be sized and selected per ASME Section VIII Division 1 for the design conditions.",
+            "Add requirement for a Calculation Note identifying set pressure, relieving capacity, and verification per ASME code.",
+            "Confirm installer procurement datasheets specify ASME compliance and certification documentation.",
+            "Verify QA/inspection plan includes PRV identification, set pressure verification, and certificate retention."
+          ]
+        },
+        {
+          "clause_id": "asme-material-traceability",
+          "actions": [
+            "Add specification clause mandating full material traceability (heat numbers, MTCs) for load-bearing components and welds.",
+            "Require inclusion of traceable data in the final dossier and As-Built documentation.",
+            "Implement an incoming inspection procedure to capture and verify heat numbers and MTCs against the MTR before installation.",
+            "Add a hold point to ensure traceability is closed out before final documentation release."
+          ]
+        },
+        {
+          "clause_id": "iec-grounding",
+          "actions": [
+            "Add a requirement for protective earth bonding of control cabinets per IEC 60204-1 (CL 8.2, 18.x).",
+            "Include a new verification step in the FAT/SAT for continuity of protective conductors and equipotential bonding resistance.",
+            "Ensure documentation includes earthing conductor sizing, terminal identification, and test results.",
+            "Add a pre-shipment check that the cabinet meets insulation resistance and protective bonding requirements."
+          ]
+        },
+        {
+          "clause_id": "iec-cable-identification",
+          "actions": [
+            "Insert clause requiring unique conductor identification at both terminations for power and control cables per IEC 60204-1.",
+            "Update cable schedules and installation drawings to use a consistent identification scheme.",
+            "Add a pre-termination inspection to verify labels/markers match the cable schedule and that both ends are labeled.",
+            "Include test/inspection records that show identification is complete and correct at both ends."
+          ]
+        },
+        {
+          "clause_id": "iso-safety-integrity",
+          "actions": [
+            "Add requirement to define safety functions and perform SIL/PL performance level calculations per ISO 13849-1.",
+            "Require proof of architectural constraints (Category, PLr, DCavg, CCF) and validation per ISO 13849-2.",
+            "Add documentation of Subsystems (SRECS, sensors, actuators, logic), proof test intervals, and diagnostic coverage.",
+            "Include an ISO 13849-1 Annex I checklist in the verification dossier and a validation sign-off."
+          ]
+        },
+        {
+          "clause_id": "iec-software-versioning",
+          "actions": [
+            "Add a clause requiring semantic versioning (SemVer) for firmware and a documented rollback procedure per IEC 61508-3.",
+            "Require change logs with version compatibility notes and release acceptance in the Software Quality Assurance plan.",
+            "Implement verification that rollback to the previous stable version is supported and tested (SQA/FAT).",
+            "Include release approval criteria, defect remediation, and archived artifacts for each version."
+          ]
+        },
+        {
+          "clause_id": "pm-change-control",
+          "actions": [
+            "Add a change control board (CCB) clause requiring approval before customer release and documenting release status.",
+            "Establish a Release Readiness Checklist and a CAB/CCB sign-off step in the Release Management process.",
+            "Update the customer notification procedure to include release notes and version references.",
+            "Add a gate in the shipment process to confirm CCB approval and release traceability in the dossier."
+          ]
+        }
+      ]
+    }
+  ]
+}

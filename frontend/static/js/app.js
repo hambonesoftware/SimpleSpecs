@@ -358,7 +358,18 @@ function setHeaderRefreshBusy(busy) {
   button.setAttribute('aria-label', ariaLabel);
   button.disabled = !state.selectedId;
 }
+// Add this small helper anywhere above refreshHeaders (e.g., near other helpers)
+function buildHeaderUIPayload(headersResult) {
+  // The UI expects `simpleheaders` + `sections`. Backend returns `headers` + `sections`.
+  // Create a backward-compatible alias so the SimpleHeaders view renders.
+  if (!headersResult || typeof headersResult !== 'object') return headersResult;
+  if (!Array.isArray(headersResult.simpleheaders) && Array.isArray(headersResult.headers)) {
+    return { ...headersResult, simpleheaders: headersResult.headers };
+  }
+  return headersResult;
+}
 
+// Replace the entire refreshHeaders function with this version
 async function refreshHeaders() {
   const documentId = state.selectedId;
   if (!documentId) {
@@ -374,16 +385,18 @@ async function refreshHeaders() {
   updateHeaderModeTag(null);
 
   try {
-    // Force a fresh LLM run and wipe prior server-side header storage
+    // Force fresh run (purges cache server-side if available) so "Run again" really re-does work.
     const headersResult = await fetchHeaders(documentId, { force: true });
-    state.headers = headersResult;
 
-    // Normalize for quick match overlays / helpers
+    // Keep canonical payload in state, but pass a UI-friendly alias to renderers
+    state.headers = headersResult;
     state.headerMatches = deriveHeaderMatches(state.headers);
 
+    const uiPayload = buildHeaderUIPayload(state.headers);
+
     // Raw & outline panes
-    renderHeaderRawResponse(elements.headersRawContent, state.headers);
-    renderHeaderOutline(elements.headersContent, state.headers, {
+    renderHeaderRawResponse(elements.headersRawContent, uiPayload);
+    renderHeaderOutline(elements.headersContent, uiPayload, {
       documentId,
       fetchSection: fetchSectionText,
     });
@@ -405,8 +418,11 @@ async function refreshHeaders() {
       // Fall back to the last known-good outline on failure
       state.headers = previousHeaders;
       state.headerMatches = deriveHeaderMatches(previousHeaders);
-      renderHeaderRawResponse(elements.headersRawContent, previousHeaders);
-      renderHeaderOutline(elements.headersContent, previousHeaders, {
+
+      const uiPayload = buildHeaderUIPayload(previousHeaders);
+
+      renderHeaderRawResponse(elements.headersRawContent, uiPayload);
+      renderHeaderOutline(elements.headersContent, uiPayload, {
         documentId,
         fetchSection: fetchSectionText,
       });
@@ -423,6 +439,8 @@ async function refreshHeaders() {
 }
 
 
+
+// (Optional but recommended) tweak showHeaderSearchPrompt to ensure the raw pane hints at the trace panel too
 function showHeaderSearchPrompt() {
   renderPanelStartPrompt(elements.headersContent, {
     message: 'Press Start to generate the header outline.',
@@ -433,9 +451,10 @@ function showHeaderSearchPrompt() {
   });
   if (elements.headersRawContent) {
     elements.headersRawContent.innerHTML =
-      '<p class="panel-status">Run the header search to view the raw response.</p>';
+      '<p class="panel-status">Run the header search to view the raw response and trace.</p>';
   }
 }
+
 
 function setSpecsSearchBusy(busy) {
   const button = elements.startSpecs;

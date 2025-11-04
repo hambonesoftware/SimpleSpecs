@@ -1,0 +1,1365 @@
+{
+  "run_id": "f54ad6fb-0656-43d6-a188-2edfe99e2fa1",
+  "metadata": {
+    "mode": "llm_full",
+    "file_id": 1,
+    "cfg": {
+      "suppress_toc": true,
+      "suppress_running": true,
+      "align": "sequential"
+    },
+    "metadata": {
+      "filename": "MFC-9M_R2001_E1988.pdf",
+      "document_id": 1
+    }
+  },
+  "llm_headers": [
+    {
+      "text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+      "number": null,
+      "level": 1
+    },
+    {
+      "text": "GENERAL",
+      "number": "1",
+      "level": 1
+    },
+    {
+      "text": "Scope and Field of Application",
+      "number": "1.1",
+      "level": 2
+    },
+    {
+      "text": "References",
+      "number": "1.2",
+      "level": 2
+    },
+    {
+      "text": "Definitions",
+      "number": "1.3",
+      "level": 2
+    },
+    {
+      "text": "Symbols",
+      "number": "1.4",
+      "level": 2
+    },
+    {
+      "text": "PRINCIPLES",
+      "number": "2",
+      "level": 1
+    },
+    {
+      "text": "Statement of the Principles",
+      "number": "2.1",
+      "level": 2
+    },
+    {
+      "text": "Static Weighing",
+      "number": "2.1.1",
+      "level": 3
+    },
+    {
+      "text": "Dynamic Weighing",
+      "number": "2.1.2",
+      "level": 3
+    },
+    {
+      "text": "Comparison of Instantaneous and Mean Flow Rate",
+      "number": "2.1.3",
+      "level": 3
+    },
+    {
+      "text": "Accuracy of the Method",
+      "number": "2.2",
+      "level": 2
+    },
+    {
+      "text": "Overall Uncertainty on the Weighing Measurement",
+      "number": "2.2.1",
+      "level": 3
+    },
+    {
+      "text": "Requirements for Accurate Measurements",
+      "number": "2.2.2",
+      "level": 3
+    },
+    {
+      "text": "APPARATUS",
+      "number": "3",
+      "level": 1
+    },
+    {
+      "text": "Diverter",
+      "number": "3.1",
+      "level": 2
+    },
+    {
+      "text": "Time-Measuring Apparatus",
+      "number": "3.2",
+      "level": 2
+    },
+    {
+      "text": "Weighing Tank",
+      "number": "3.3",
+      "level": 2
+    },
+    {
+      "text": "Weighing Device",
+      "number": "3.4",
+      "level": 2
+    },
+    {
+      "text": "Auxiliary Measurements",
+      "number": "3.5",
+      "level": 2
+    },
+    {
+      "text": "PROCEDURE",
+      "number": "4",
+      "level": 1
+    },
+    {
+      "text": "Static Weighing Method",
+      "number": "4.1",
+      "level": 2
+    },
+    {
+      "text": "Dynamic Weighing Method",
+      "number": "4.2",
+      "level": 2
+    },
+    {
+      "text": "Common Provisions",
+      "number": "4.3",
+      "level": 2
+    },
+    {
+      "text": "CALCULATION OF FLOW RATE",
+      "number": "5",
+      "level": 1
+    },
+    {
+      "text": "Calculation of Mass Flow Rate",
+      "number": "5.1",
+      "level": 2
+    },
+    {
+      "text": "Calculation of Volume Flow Rate",
+      "number": "5.2",
+      "level": 2
+    },
+    {
+      "text": "UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+      "number": "6",
+      "level": 1
+    },
+    {
+      "text": "APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME",
+      "number": "A",
+      "level": 1
+    },
+    {
+      "text": "STATIC WEIGHING METHOD",
+      "number": "A1",
+      "level": 2
+    },
+    {
+      "text": "Method 1",
+      "number": "A1.1",
+      "level": 3
+    },
+    {
+      "text": "Method 2",
+      "number": "A1.2",
+      "level": 3
+    },
+    {
+      "text": "DYNAMIC WEIGHING METHOD",
+      "number": "A2",
+      "level": 2
+    },
+    {
+      "text": "APPENDIX B DENSITY OF PURE WATER",
+      "number": "B",
+      "level": 1
+    }
+  ],
+  "llm_requests": [
+    {
+      "part": 1,
+      "total_parts": 1,
+      "model": "minimax/minimax-m2:free",
+      "temperature": 0.2,
+      "timeout_read": 360,
+      "params": {
+        "http_referer": "http://localhost:3600",
+        "x_title": "SimpleSpecs (Dev)"
+      },
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are a technical document-structure expert. Identify headings and their nesting levels from the full document text."
+        },
+        {
+          "role": "user",
+          "content": "Goal: Return every heading and subheading that appears in the MAIN BODY of the document.\nHard rules:\n- EXCLUDE any content in a Table of Contents, Index, or Glossary.\n- Preserve the original document order.\n- If a heading has a visible numbering label (e.g., \"1\", \"1.2\", \"A.3.4\"), include it as \"number\"; otherwise set \"number\": null.\n- Assign a positive integer \"level\" (1 = top-level).\n- Do NOT invent headings; only list those present.\n- Output EXACTLY the fenced JSON:\n\n-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [ { \"text\": \"...\", \"number\": \"...\" | null, \"level\": 1 }, ... ] }\n-----END SIMPLEHEADERS JSON-----\n\nDocument part 1/1:\n<BEGIN DOCUMENT>\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled when\nAN AMERICAN NATIONAL STANDARD\nMeasurement of\nLiquid Flow in\nClosed Conduits by\nWeighing Method\nASME/ANSI MFC-9M-1988\nThe American Society of\nMechanical Engineers\n345 East 47th Street, New York, N.Y. 1001 7 -\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nDate of Issuance: February 28, 1989\nThis Standard will be revised when the Society approves the issuance of a new edition.\nThere will be no addenda or written interpretations of the requirements of this Standard\nissued to this edition.\nASME is the registered trademark of The American Society of Mechanical Engineers.\nThis code or standard was developed under procedures accredited as meeting the criteria for\nAmerican National Standards. The Consensus Committee that approved the code or standard was\nbalanced to assure that individuals from competent and concerned interests have had an opportunity\nto participate. The proposed code or standard was made available for public review and comment\nwhich provides an opportunity for additional public input from industry, academia, regulatory\nagencies, and the public-at-large.\nASME does not '.'approve,\" \"rate,\" or \"endorse\" any item, construction, proprietary device, or\nactivity.\nASME does not take any position with respect to the validity of any patent rights asserted in\nconnection with any items mentioned in this document, and does not undertake to insure anyone\nutilizing a standard against liability for infringement of any applicable Letters Patent, nor assume any\nsuch liability. Users of a code or standard are expressly advised that determination of the validity of\nany such patent rights, and the risk of infringement of such rights, is entirely their own responsibility.\nParticipation by federal agency representative(s) or person(s) affiliated with industry is not to be\ninterpreted as government or industry endorsement of this code or standard.\nASME accepts responsibility for only those interpretations issued in accordance with governing\nASME procedures and policies which preclude the issuance of interpretations by individual\nvolunteers.\nNo part of this document may be reproduced in any form,\nin an electronic retrieval system or otherwise,\nwithout the prior written permission of the publisher.\nCopyright 0 1989 by\nTHE AMERICAN SOCIETY OF MECHANICAL ENGINEERS\nAll Rights Reserved\nPrinted in U.S.A.\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nFOREWORD\n(This Foreword is not part of ASME/ANSI MFC-9M-1988.)\nThis Standard was prepared by the ASME Committee on Measurement of Fluid Flow in\nClosed Conduits (MFC). It is based on and closely parallels the International Organization\nfor Standardization (ISO) International Standard IS0 4185-1980, incorporating U.S. prac\u0002tices and terminology where they differ.\nThis Standard was approved by the American National Standards Institute (ANSI) as an\nAmerican National Standard on December 15, 1988.\niii\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nASME STANDARDS COMMITTEE MFC\nMeasurement of Fluid Flow in Closed Conduits\n(The following is the roster of the Committee at the time of approval of this Standard.)\nOFFICERS\nR. W. Miller, Chairman\nW. F. 2. Lee, Vice Chairman\nC. J. Gomez, Secretary\nCOMMITTEE PERSONNEL\nR. B. Abernethy\nN. A. Alston\nH. P. Bean\nS. R. Beitler\nM. Bradner\nE. E. Buxton\nJ. S. Castorina\nG. P. Corpron\nD. G. Darby\nR. H. Dieck\nR. B. Dowdell\nA. G. Ferron\nR. L. Galley\nD. Halmi\nZ. D. Husain\nB. T. Jeffries\nE. H. Jones, Jr.\nL. J. Kemp\nC. A. Kemper\nD. R. Keyser\nC. P. Kittredge\nC. G. Langford\nW. F. 2. Lee\nE. D. Mannherz\nG. E. Mattingly\nR. W. Miller\nM. H. November\nW. M. Reese, Jr.\nP. G. Scott\nH. E. Snider\nD. W. Spitzer\nD. A. Sullivan\nR. G. Teyssandier\nPERSONNEL OF SUBCOMMITTEE 14 - FLOW MEASUREMENT BY WEIGHING AND\nVOLUMETRIC MEASUREMENTS\nG. E. Mattingly, Chairman\nG. P. Corpron\nR. B. Dowdell\nD. Halmi\nG. A. Lenz\nR. W. Miller\nP. G. Scott\nR. G. Teyssandier\nV\nt\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nTable\n1 Symbols ............................................................ 3\nAppendices\nA Corrections on the Measurement of Filling Time ......................... 13\nB Density of Pure Water ............................................... 17\nFigure\nA1 Plotting of Results of Diverter Timer Actuator .......................... 14\n...\nVlll\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nASME/ANSI MFC-9M-1988\nMEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD\n1 GENERAL\n1.1 Scope and Field of Application\nThis Standard specifies a method of liquid flow rate\nmeasurement in closed conduits by measuring the\nmass of liquid delivered into a weighing tank in a\nknown time interval. It deals in particular with the\nmeasuring apparatus, procedure, and method for cal\u0002culating the flow rate and the uncertainties associated\nwith the measurement.\nThe method described may be applied to any liquid,\nprovided that its vapor pressure issuch that any escape\nof liquid from the weighing tank by vaporization is\nnot sufficient to affect the required measurement\naccuracy. Closed weighing tanks and their application\nto the flow measurement of liquids of high vapor pres\u0002sure are not considered in this Standard.\nThis Standard considers only the measurement\ntechniques and does not address any possible hazards\ninvolved in handling the liquid involved.\nTheoretically, there is no limit to the application of\nthis method, which is used generally in fixed labora\u0002tory installations only. However, for economic rea\u0002sons, typical hydraulic laboratories using this method\ncan produce accurate flow rates of 500 kg/s (3300\nlbm/sec) or less.\nOwing to its high potential accuracy, this method is\noften used as a primary method for calibration of\nother methods or devices for mass flow rate measure\u0002ment or volumetric flow rate measurement, provided\nthat the density of the liquid is known accurately.\nIt must be ensured that the pipeline is running full\nwith no air or vapor pockets present in the measuring\nsection.\n1.2 References\nThe American Society of Mechanical Engineers\nANSI/ASME MFC-1M (latest edition), Glossary\nof Terms Used in the Measurement of Fluid Flow in\nPipes\nANSI/ASME MFC-2M (latest edition), Measure\u0002ment Uncertainty for Fluid Flow in Closed Conduits\nInternational Organization of Legal Metrology'\nRecommendation No. 1, Cylindrical Weights From\n1 Gram to 10 Kilograms of Medium Accuracy Class\nRecommendation No. 2, Rectangular Bar Weights\nFrom 5 Kilograms to 50 Kilograms of Medium Accu\u0002racy Class\nRecommendation No. 3, Metrological Regulations\nfor Non-Automatic Weighing Machines\nRecommendation No. 20, Weights of Accuracy\nClasses E, E2 F, F2 M, From 50 Kilograms to 1 Milli\u0002gram\nRecommendation No. 28, Technical Regulations\nfor Non-Automatic Weighing Machines\nRecommendation No. 33, Conventional Value of\nthe Result of Weighing in Air\n1.3 Definitions\nThe following definitions are given for terms used\nin some special sense or for terms, the meaning of\nwhich seems useful to emphasize. A more comprehen\u0002sive list of definitions and symbols applicable to the\nmeasurement of fluid flow in closed conduits can be\nfound in ANSI/ASME MFC-1M and ANSI/ASME\nbuoyancy correction - correction made to the read\u0002ings of a weighing device to compensate for the up\u0002ward thrust exerted by the atmosphere on the liquid\nbeing weighed and on the reference weights used dur\u0002ing the calibration of the weighing machine\ndiverter - device which diverts the flow either to the\nweighing tank or its bypass without changing the flow\nrate during the measurement interval\ndynamic weighing - method in which the net mass of\nliquid collected is deduced from weighing made while\nfluid flow is being delivered into the weighing tank (a\ndiverter is not required with this method)\nflow stabilizer - structure forming part of the\nhydraulic system, ensuring a stable flow rate in the\nMFC-2M.\n'Available from the International Bureau of Legal Metrology, 11\nrue Turgot, 75009, Paris, France.\n1\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nASME/ANSI MFC-9M-1988\nMEASUREMENT OF LIQUID FLOW IN\nCLOSED CONQUITS BY WEIGHING METHOD\nconduit being supplied with liquid; for example, a\nconstant level head tank, the level of liquid which is\ncontrolled by a weir of sufficient capacity\nstatic weighing - method in which the net mass of\nliquid collected is deduced from tare and gross weigh\u0002ings made before and after the liquid has been diverted\nfor a measured time interval into the weighing tank\n1.4 Symbols\nTable 1 reproduces the symbols that are used in this\nStandard.\n2 PRINCIPLES\n2.1 Statement of the Principles\n2.1.1 Static Weighing. The principle of the flow\nrate measurement method by static weighing (for\nschematic diagrams of typical installation, see Figs.\nlA, lB, and 1C) is:\n(a) to determine the initial mass of the tank plus\nany residual liquid;\n(b) to divert the flow into the weighing tank (until it\nis considered to contain a sufficient quantity to attain\nthe desired accuracy) by operation of the diverter,\nwhich actuates a timer to measure the filling time;\n(c) to determine the final mass of the tank plus the\nliquid collected in it.\nThe flow rate is then derived from the mass col\u0002lected, the collection time, and other data as discussed\nin Section 5 and Appendix A.\n2.1.2 Dynamic Weighing. The principle of the\nflow rate measurement method by dynamic weighing\n(see Fig. 1D for a schematic diagram of a typical in\u0002stallation) is:\n(a) to let the liquid collect in the tank to a predeter\u0002mined initial mass, when the timer is then started;\n(b) to stop the timer when a predetermined final\nmass of collected liquid is reached.\nThe flow rate is then derived from the mass col\u0002lected, the collection time, and other data as discussed\nin Section 5 and Appendix A.\n2.1.3 Comparison of Instantaneous and Mean\nFlow Rate. It should, however, be emphasized that\nonly the mean value of flow rate for the filling is given\nby the weighing method. Instantaneous values of flow\nrate as obtained on another instrument or,meter in the\nflow circuit can be compared with the mean rate only\nif the flow is maintained stable during the measure\u0002ment interval by a flow-stabilizing system, or if the in\u0002stantaneous values are properly time-averaged during\nthe whole filling period.\n2.2 Accuracy of the Method\n2.2.1 Overall Uncertainty on the Weighing\nMeasurement. The weighing method gives an abso\u0002lute measurement of flow which, in principle, requires\nonly mass and time measurements. Provided that the\nprecautions listed in para. 2.2.2 are taken, this method\nmay be considered as one of the most accurate of all\nflow rate measuring methods, and for this reason it is\noften used as a calibration method. When the installa\u0002tion is carefully constructed, maintained, and used, an\nuncertainty of +0.1% (with 95% confidence limits\nfor the random part of that uncertainty) can be\nachieved.\n2.2.2 Requirements for Accurate Measure\u0002ments. The weighing method gives an accurate\nmeasurement of flow rate provided:\n(a) there is no leak in the flow circuit and there is no\nunmetered leakage flow across the diverter:\n(b) there is no accumulation (or depletion) of liquid\nin a part of the circuit by thermal contraction (or ex\u0002pansion), and there is no accumulation (or depletion)\nby change of vapor or gas volume contained unknow\u0002ingly in the flow circuit;\n(c) necessary corrections for the influence of\natmospheric buoyancy are made (this correction may\nbe made when calibrating the weighing apparatus);\n(d) the weighing device, the timer, and means\nfor starting and stopping it achieve the necessary\naccuracy;\n(e) the time required by the diverter for traversing is\nsmall with respect to the filling time, the timer being\nstarted and stopped while the diverter is crossing the\nhydraulic center line;\nu> in the case of the dynamic weighing method, the\neffects of the dynamic phenomena are sufficiently\nsmall.\n3 APPARATUS\n3.1 Diverter\nThe diverter is a moving device used to direct flow\nalternately along its normal course or toward the\nweighing tank. It can be made up of a conduit or mov\u0002ing gutter, or, better, by a baffle plate pivoting around\na horizontal or vertical axis (see Fig. 2).\nThe motion of the diverter should be sufficiently\nfast (less than 0.1 s, for example) to reduce the\n2\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nERRATA\nASME/ANSI MFC-9M-1988\nMEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS\nBY WEIGHING METHODS\nPage 3\n(1) In Table 1 for Symbol Qs, change Quantity J?+mz\nDensity of air (at 20°C and 1 bar*) to read:\nDensity of air\n(2) Delete asterisked footnote.\nDECEMBER 1989\nTHE AMERICAN SOCIETY OF MECHANICAL ENGINEERS\n346 East 47th Street, New York, N.Y. 10017\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled wh\nMEASUREMENT OF LlQUlD.FLOW IN\nCLOSED CONDUITS BY WEIGHING METHOD\nASME/ANSI MFC-SM-1988\nTABLE 1 SYMBOLS\nDimension SI (Metric) U.S. (Customary)\nSymbol ntity (111\nB Bias\nm Mass\nUnits Units\n... ... ...\nM kg Ibm\nQrn Mass flow rate MT- kg/s lbmlsec\nQv Volume flow rate L3T-' m3/s ft3/sec\nt Time T S sec\n... t95 Two-tailed Student's t ... .\nV Volume\n, ,<..\nL3 .. .-\n...\nm3 ft3\nuRSS ... u95 Uncertainty at the95% confidence ! ,I - level ., *. . *, ., :. \\\nUADD .,\n... ... ... u99 '.Uncertainty arithe 99% confidence\n. , , I , *.:\nlevel ... .~ .. ~\n. ....... - . , - -~ . .- .. -. ,,.\ne '.\n'Density of liquid:- . ,:, MiA3 -kg/m3 - Ibm/ft3\nML-3 kg/m3 Ibm/ft3\n........ iL .\nea Density of air (at 20\"C;and 1 bar\")\nDensity of standardweights. :. 1 '\n...... \"3 ' . i. .\n... ep .. ,ML t3 kg/m3 Ibm/ft3\nrc .. _. ....\nU Standard qeviaxion of-th2 sample __ . . -- . . ., . ... *;<-!\", , ..\n-- I. .........\n.. ,_..-.. Fr __ .\n*I bar = lo6 Pa\n3\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nASME/ANSI MFC-9M-1988\nMEASUREMENT OF LIQUID FLOW IN\nCLOSED CONDUITS BY WEIGHING METHOD\nFlow control\nFIG. 1A DIAGRAM OF AN INSTALLATION FOR CALIBRATION BY WEIGHING\n(Static Method, Supply by a Constant Level Head'Tank)\n4\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nMEASUREMENT OF LIQUID FLOW IN\nCLOSED CONDUITS BY WEIGHING METHOD ASME/ANSI MFC-9M-1988\nConstant level head tank\n-\n-- -\nSump -- -\nI\nFIG. 1 B DIAGRAM OF AN INSTALLATION FOR FLOW RATE MEASURE BY WEIGHING\n(Used for Hydraulic Machine Test; Static Method, Supply by a Constant Level Head Tank)\n5\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nASME/ANSI MFC-9M-1988\nMEASUREMENT OF LIQUID FLOW IN\nCLOSED CONDUITS BY WEIGHING METHOD\nFlow control\nvalve\n-- --\nPump\nFIG. 1C DIAGRAM OF AN INSTALLATION FOR CALIBRATION BY WEIGHING\n(Static Method, Direct Pumping Supply)\n6\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nMEASUREMENT OF LIQUID FLOW IN\nCLOSED CONDUITS BY WEIGHING METHOD\nConstant level head tank\nFlow control\nvalve\nII II Device under\ncalibration\nASMElANSl MFC-9M-1988\nWeighing\nTimer\nOverflow ---\n1\nHI Switches\n- ----\nPump\n- ---\n_-- Sump ---\nFIG. ID DIAGRAM OF AN INSTALLATION FOR CALIBRATION BY WEIGHING\n(Dynamic Method, Supply by a Constant Level Head Tank)\n7\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nASME/ANSI MFC-9M-1988\nFlow input\n\\ Flow output\nMEASUREMENT OF LIQUID FLOW IN\nCLOSED CONDUITS BY WEIGHING METHOD\nFIG. 2 EXAMPLES OF DIVERTER DESIGN\npossibility of a significant error occurring in the mea\u0002surement of the filling time. This is accomplished by\nrapid diverter travel through a thin liquid sheet as\nformed by a nozzle slot. Generally, this liquid sheet\nhas a length 15 to 50 times its width in the direction of\ndiverter travel. The pressure drop across the nozzle\nslot should not exceed about 20 kPa (3 psi) to avoid\nsplashing, air entrainment,' and flow across the di\u0002verter and turbulence in the weighing tank. This mo\u0002tion of the- diverter can be generated by various\nelectrical or mechanical devices - for example, by a\nspring or torsion bar or by electrical or pneumatic ac\u0002tuators. The diverter should in no way influence the\nflow in the circuit during any phase of the measuring\nprocedure.\nFor large flow rates which could involve excessive\nstresses, however, a diverter with a proportionately\nslow performance rate (1 s to 2 s, for example) can be\nused, provided the operating law is constant (see para.\n3.2 and Fig. 3) and the variation of the flow rate distri\u0002bution as a function of the diverter stroke is preferably\nlinear and is in any case known and can be verified.\n21n certain designs of nozzle slot, however, special vents to allow air\ningress to the fluid jet may be necessary to ensure stable flow within\nthe test circuit.\n8\nr Triggering point for timer\nI\nTime\nne of diverter motion *--- -\nFIG. 3 OPERATIONAL LAW OF DIVERTER\nCare shall be taken when designing the mechanical\nparts of the device and the diverter, as well as during\nfrequent checks in service, that no leak or splash of\nliquid occurs either toward the outside or from one\ndiverter channel to the other.\nBesides a thin flat liquid stream, other shapes of\nliquid stream are permissible in the diverter duct, if the\nnecessary corrections for the diverting time are\napplied as indicated in Appendix A.\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nMEASUREMENT OF LIQUID FLOW IN\nCLOSED CONDUITS BY WEIGHING METHOD ASME/ANSI MFC-9M-1988\nFIG. 4 TIME METERING FOR A DIVERTER, THE OPERATION LAW OF WHICH\nIS IDENTICAL IN BOTH DIRECTIONS\n3.2 Time-Measuring Apparatus\nThe time of discharge into the weighing tank is\nnormally measured by an electronic counter with a\nbuilt-in accurate time reference - for example, a\nquartz crystal. The diversion period can thus be read\nto 0.01 s or better. The error arising from this source\ncan be regarded as negligible, provided the resolution\nof the timer display is sufficiently high and the equip\u0002ment is checked periodically against a national time\nstandard - for example, the frequency signals trans\u0002mitted by certain radio stations.\nThe timer shall be actuated by the motion of the\ndiverter itself through a switch fitted on the diverter -\nfor example, optical or magnetic. Strictly speaking,\nthe time measurement shall be started (or stopped) at\nthe instant when the hatched areas in Fig. 3, which\nrepresent flow variation with time, are equal. In prac\u0002tice, however, it is generally accepted that this point\ncorresponds to the mid-travel position of the diverter\nin the fluid jet. The error will be negligible, provided\nthe time of passage of the diverter through the stream\nis negligible in comparison with the period of diver\u0002sion to the tank.\nIf a diverter is used, then the operating law of the\ndiverter should be identical in both directions (see Fig.\n4), and the timer may be started and stopped at the in\u0002stant when the motion of the diverter is started in each\ndirection; this is the case particularly when the time\u0002flow rate law is linear.\nIf the error in the filling time measurement arising\nfrom the operation of the diverter and starting and\nstopping of the timer is not negligible, then a correc\u0002tion should be made in accordance with the directions\nof Appendix A.\n3.3 Weighing Tank\nThe weighing tank shall be of sufficient capacity so\nthat the error in timing is negligible. Taking account\nof what is stated in paras. 3.1 and 3.2, the filling time\nfor the highest expected flow rate shall be at least 30 s.\nNevertheless, this time may be reduced provided that\nit is possible to determine experimentally, according\nto procedures such as described in Appendix A, that\nthe required accuracy is achieved.\nThe tank may be of any shape but it is essential that\nit is perfectly leak-tight, and care should be taken to\navoid liquid spillage. Internal walls or baffles may be\nrequired to reduce oscillations of the liquid in the tank\nand to improve structural rigidity.\nThe tank may be suspended from the weighing de\u0002vice or may constitute the platform of the latter, or\nmay be placed on one of the platforms. To prevent\nsudden overloads detrimental to the weighing appa\u0002ratus, it may be necessary to lock the tank in position\non the scale during filling.\nThe tank may be drained by different means:\n(a) by a valve at the base, the leak-tightness of\nwhich shall be capable of being verified (free dis\u0002charge, transparent hose, or leak detection circuit); or\n(b) by a siphon fitted with an efficient and check\u0002able siphon break; or\n(c) by a self-priming or submersible pump.\nThe rate of draining shall be sufficiently high so that\ntest runs can follow each other at short intervals.\n9\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nASME/ANSI MFC-SM-1988\nIn all cases it shall be carefully checked that no pipe\nconnections or electric wire links exist which are likely\nto transmit stresses between the weighing tank and the\nfixed parts of the installation; indispensable links shall\ntherefore be extremely flexible and their flexibility\nverified during the calibration of the weighing device.\n3.4 Weighing Device\nThe weighing machine may be of. any type - for\nexample, mechanical or with strain-gage load cells -\nprovided that it offers the required sensitivity, accu\u0002racy, and reliability. When the weighing method of\nmeasuring flow rate is applied for the purposes of le\u0002gal metrology, it is advisable to employ the weighing\nmachine according to OIML Recommendation Nos. 3\nand 28. ..\nAfter its installation in the test facility, the weighing\ndevice shall be calibrated over the whole measuring\nrange using standard weights. Here it is advisable to\nfollow OIML Recommendation Nos. 1,2,20, and 23.\nThe weighing device shall be regularly maintained\nand its calibration shall be periodically checked. If the\nweights available are not sufficient in number or size\nto cover the whole measuring range, a calibration shall\nbe made in steps by replacing the weights by liquid and\nby using standard weights to verify intervals accu\u0002rately. Uncertainties in calibration may increase, de\u0002pending on the techniques used.\nIt should be noted that in view of the difference in\nbuoyancy when calibrating the weighing device with\nweights and when weighing an equivalent mass of liq\u0002uid, a correction to the readings is necessary (see the\ncalculation in para. 5.1).,\n3.5 Auxiliary Measurembnts\n_: To obtain,the volume flow rate from mass measure\u0002ment, it is essential to know the density of the liquid\nthrough the flowmeter with the required accuracy at\nthe time of weighing.\nIf the liquid tobe measured is.reasonably pure and\nclean, it is acceptable to measure its temperature and\nto derive its density from a table of physical properties\n(seeAppendix B for the case of water). Temperature\nmay be measured with a simple mercury-in-glass the+\nmometer or, better, by any device such as a resistance\nprobe or thermocouple, which is installed to measure\nthe temperature of the fluid as it passes through the\nmeter(s). Devices should be placed downstream of the\ndevice under calibration. For water, taking into ac\u0002count the small variation of density with temperature\nMEASUREMENT OF LIQUID,FLOW !N\nCLOSED CONDUITS BY WEIGHING METHOD\nabout ambient temperature, an accuracy of O.YC\n(PF) is enough to ensure less than lop4 error on den\u0002sity evaluation.\nIf, however, the purity of the liquid is in doubt, it is\nessential to measure its density. To this end, a sample\ncan be collected and its density measured either by a\ndirect method;by weighing in a graduated cylinder on\nan analytical balance, orby an indirect method - for\nexample, by measuring the hydrostatic force exerted\non a calibrated float (hydrostatic balance): Whatever\nthe method used, the liquid temperature must be mea\u0002sured when measuring the density; in many cases it\nmay be assumed that the relative variation of density\nwith respecto temperature is the same as for the pure\nliquid.\n4 PROCEDURE\n4.1 Static Weighing Method\nIn order to eliminate the effect of residual liquid\nlikely to have remained in the bottom of the tank or\nadhering to the walls, a sufficient quantity of liquid\nshall first be discharged into the tank (or left at the end\nof draining after the preceding measurement)o reach\nthe operational threshold of the weighing device. This\ninitial mass m, will be recorded while the diverter di\u0002rects the flow to storage, and while the flow rate is be\u0002ing stabilized. After steady flow has been achieved,\nthe diverter is operated to direct the liquid into the\nweighing tank, this operation automatically starting\nthe timer. After collection of an appropriate quantity\nof liquid, the diverter is operated in the opposite direc\u0002tion to ‘return the liquid to storage, automatically\nstopping the timer and thus allowing the filling time t\nto be determined. When the oscillations in the tank\nhave subsided, -the apparent final mass lltl of the\nweighing tank is recorded. The tank shall then be\ndrained.\n4.2’ Dynamiq Weighing, Method ’ L\nAfter steady flow has been achieved, the drain valve\nof the weighing tank is closed. As the mass of liquid in\nthe tank increases, it overcomes the force due to coun\u0002terpoise ‘mass Mr on the end of the balance beam,\nwhich then rises and starts the timer. ,An additional\nmass Am is used as (m, - mo) in the subsequent,caIcu-,\nlation of the flow rate.\nThere exist other possible methods of measurement\n- for example, automatic reading of the *weighing de;\nvice indication. i.\n10\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled whe\nMEASUREMENT 0.F LIQUID:F.LOW:IN\nCLOSED,CONDUlTS BY WEIGHING METHOD\nIn all cases it shall be carefully checked that no pipe about ambient temperature, an accuracy of 0.5\"C\nconnections or electric wire links existiyhich are likely ( 1°F) is enough to ensure less than lop4 error on den\u0002to transmit stresses between the weighing tank and the sity evaluation.. ' '' .. :\nfixed parts of the installation; indispensable links shall ''. \" '.. If, however, the purity of the liquid is in doubt, it is\ntherefore be extremely flexible and their .flexibility essential to -measureits density. To this end, a sample\nverified during the calibration of the wetgqing device. can be collected and its density measured either by a\n?'. * , '\\,<., '! *. direct method,,by,weighipg in a graduated cylinder on ,i ~.. '\\ \\ _,' , . '.. f\n3.4 Weighing Device ?i,\\..,..\\ \\_' . 1 example, by measuring the hydrostatic force exerted\nThe weighing machine may be of@riy;t;pe - for on a calibrated,flaat.(hy@rostatic balance): Whatever\nexample, mechanical or with,~trainzgage:lbad:<ells--.. the method used; the liquid temperature must be mea\u0002provided that it offers the rchujred sensitivity, accu- I - :sured-.when measuring the density; in many cases it\nracy, and reliability. When the weighing method%of--- - may'be assumed- that. tie relative variation of density\nmeasuring flow rate is applied for the purposes of le- with respect to temperature is the same as for the pure\ngal metrology, it is advisable to employ the weighing liquid.\n. '. . ., ..\n.?\\ x, x., ., ,' an analytical ,balance, or$~y an indirect method - for\n.;. . ,, I\\. ,~. . , .\nmachine accoi~i,ig.to\"OIM,& . .~~,~ -_.. - .. ~~c~~~~~n'~~~~i~n~~os~ ~'?~~~;~.$~~~~ i,, i-4, ^i r: *:; 3' : -.' '* ., . , . A ;' :*. .'..: .. - . ., * .: ,\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nMEASUREMENT OF LIQUID FLOW IN\nCLOSED CONDUITS BY WEIGHING METHOD ASME/ANSI MFC-9M-1988\n4.3 Common Provisions\nIt is recommended that at least two (2) measure\u0002ments be carried out for each of a series of flow rate\nmeasurements if a subsequent analysis of random un\u0002certainties is to be carried out.\nThe various quantities to be measured may be noted\nmanually by an operator or transmitted by an auto\u0002matic data acquisition system to be recorded in nu\u0002merical form on a printer or provide direct entry into a\ncomputer.\n5 CALCULATION OF FLOW RATE\n5.1 Calculation of Mass Flow Rate\nThe mean mass flow rate during the filling time is\nobtained by dividing the real mass m of the liquid col\u0002lected by the filling time t:\nea 1 --\nX\u00021 --\nea\nm m, - ma\nq =-= ep\nmt t\ne\nIf necessary, tis corrected in concordance with one\nof the procedures described in Appendix A to take\ninto account the diverter timing error or the dynamic\nweighing timing error. The final term in this equation\nis a correction term introduced to take into account\nthe difference in buoyancy exerted by the atmosphere\non a given mass of liquid and on the equivalent mass in\nthe form of weights made - for example, of cast iron,\nused when calibrating the weighing machine.\nNOTE: In view of the relative magnitudes of the quantities, this\nequation can be written as follows with satisfactory approximation:\nwhere\nIn the case where the liquid is water, it is sufficient to calculate the\ncorrection factor from mean approximate values:\nea = 1.21 kg/m3 (at 20°C and 1 bar)\nep = 8 OOO kg/m3 (conventional mean value according\nto OIML Recommendation No. 33)\nHence,\nE = 1.06 X 10-~\nand\nqm = 1.001 06 ~\nm, - ma\nt\n5.2 Calculation of Volume Flow Rate\nThe volume flow rate is calculated from the mass\nflow rate as computed in para. 5.1, and from the den\u0002sity of the liquid at the temperature of operation, as\nread from standard tables - for example, as given in\nAppendix B for water in the range of ambient temper\u0002atures. (In exceptional cases, it may be necessary to\nmeasure the density directly.) .\n6 UNCERTAINTIES IN THE MEASUREMENT OF\nFLOW RATE\nUncertainty calculations shall be performed in ac\u0002cordance with ANWASME MFC-2M.\nFor the purpose of this Standard, as in ANSI/\nASME MFC-2M, the uncertainty interval is defined as\nan estimate of the error band, centered about the mea\u0002surement within which the true value must fall with\nhigh probability.\nThe uncertainty U can be expressed in absolute or\nrelative terms. The uncertainty interval is centered\nabout the results of the flow measurement and is de\u0002fined as qm f U. The uncertainty U may be either\nor\ne = 1 OOO kg/m3\n11\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nASME/ANSI MFC-9M-1988\nMEASUREMENT OF LIQUID FLOW IN\nCLOSED CONDUITS BY WEIGHING METHOD\nThe bias B is an estimate of the upper limit of the\ntrue bias error, and the precision u is the sample stan\u0002dard deviation.\nThe statistical parameter t,, is defined and tabled in\nANSI/ASME MFC-2M. When u is based on a large\nsample, greater than 30, t,, is set equal to 2.0.\nNOTE: For a comprehensive presentation of bias, precision, and\nuncertainty, see ANWASME MFC-2M. ANWASME MFC-2M\nalso includes several flow measurement uncertainty examples.\n12\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nAPPENDIX A\nCORRECTIONS ON THE MEASUREMENT OF FILLING TIME\n(This Appendix contains supplementary information for the convenience of the reader. It is not part Of\nASME/ANSI MFC-9M-1988.)\nExperience has shown that, for a well-designed sys\u0002tem, the error occuring due to switching the timer on\nand off for one start-stop cycle of the diverter may\ncorrespond to a value of 0 ms to 25 ms. This error is\ndependent upon the flow rate, the velocity of traverse\nin each direction of the diverter tip through the liquid\nflow, the exact location of the diverter tip through the\nliquid flow, and thexact location of the timer actua\u0002tor with respect to the liquid flow emerging from the\nnozzle slot. This error should not be assumed to be in\u0002significant, but should be evaluated by experimental\ntests, using the procedure described in this Appendix.\nAI STATIC WEIGHING METHOD\nAI .1 Method 1\nWhen steady flow is established at the flow control\nvalve, a standard test is run to determine the flow rate.\nThen a series of short flows or bursts oflow (as many\nas 25 bursts) are deflected into the weighing tank with\u0002out resetting the timer or the scales; the flow is then de\u0002termined from the totalized mass and totalized time.\nTo complete the run, a second standard determination\nis made on the steady flow, and the two standard de\u0002terminations are averaged. Results obtained are then\ncompared with the totalized flow determination.\nIf the totalized mass for n bursts is about equal\nto that of the standard run, it can be shown that the\naverage timing error At due to chronograph control\nfor one cycle is closely equal to:\nAt=f (-X q CyAmi / Cyti n - 1 q‘ (m, - m,)/t -\nwhere\nq and q ’ = flow rates during the standard run\nand during the n bursts, respectively,\nas measured by a self-contained me\u0002ter in the flow circuit. The corrective\nterm q/q’ takes into account the\nflow rate variations, if any, between\nboth measuring runs.\nEyAmi / Eyti = flow rate determined from the total\u0002ized mass and totalized time for n\nbursts\n(ml - rn,)/t = flow rate determined by the standard\nprocedure\nAfter this procedure has been repeated over a wide\nrange of flow rates, it will be possible, on any further\nmeasurement, to correct the measured filling time by\nthe value At so determined.\nAI .2 Method 2\nThe following alternative method of setting the\ndiverter timer actuator may also be employed.\nThe normal flow rate control mechanism of the\nhydraulic circuit should first be set to give a flow rate\nclose to the maximum flow rate capability of the sys\u0002tem, with a good quality flow rate meter in the circuit.\nThe system is run at this condition for several hours,\nduring which many successive measurements of flow\nrate are made using different diversion times. Sug\u0002gested times are normal, and 0.2,O. 1, and 0.05 of nor\u0002mal. The highest number of tests will be required at\nthe 0.05 of normal (or long), with the lowest number\nof tests at the normal diversion time. During each of\nthese times the average reading on the flow rate meter\nshould be taken as accurately as possible.\n13\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nSlope of mean line = AI 7\nFIG. A1 PLOTTING OF RESULTS OF DIVERTER TIMER ACTUATOR\nThe results obtained should be fitted into the If a significant value of At is obtained, the diverter\nfollowing equation, in which At is the required timing timer actuator should be adjusted to minimize the\nerror of the diverter system: value of the error as shown by repeated testing.\nThe procedure should be repeated at a few lower\nflow rates to examine whether or not the value of At\nicant changes in the At value are obtained, it will be\nnecessary to improve the operation of the diverter sys\u0002tem or to introduce a variable correction time At to be\napplied to the diversion time.\n(qi - qn) - (4ir - GnJ obtained is significantly flow rate dependent. If signif\u00024n\nwhere\ntqi = diversion time for a particular short test\ntqn = diversion time for the normal length test oc\u0002curring nearest in diurnal time in the testing\nsequence\nq; = flow rate calculated for the particular diver\u0002sion time t,;\nq, = flow rate calculated for the normal diversion\ntime t,, occurring nearest in diurnal time in\nthe testing sequence - qit = average flow rate meter reading time tqi\nqnr = average flow rate meter reading during time -\nThe values obtained for the right-hand side of this\nequation should be plotted against (l/tqj - l/tq,) as\nshown in Fig. Al. The points should define a straight\nline passing through the origin, the slope of which is\nequal to At.\nA2 DYNAMIC WEIGHING METHOD\nThis procedure involves movement of the beam of\nthe weighing device just prior to both start and stop\nactuations of the timer.\nFour important dynamic phenomena take place\nduring the dynamic weighing cycle, namely:\n(a) a change in the impact force of the falling liquid\nbetween the initial and final weighing points;\n(b) collection of an extra amount of liquid from the\nfalling column by the rising level in the tank;\n(c) forces due to waves in the tank;\n(d) a change in the inertia of the weighing device\nand liquid in the weighing tank, with a resultant\nchange of time required to accelerate the balance\nbeam to the timer actuation point.\n14\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nGenerally, the decrease in impact force is equal and\nopposite to the additional weight of liquid collected so\nthat these two effects cancel each other.\nOscillation of liquid within the weighing tank may\nhave a serious influence on the precision of the\nmethod. Devices prescribed in para. 3.3 can reduce,\nbut not eliminate completely, this undesirable\nphenomenon, which is always most pronounced at\nhigher rates of flow.\nChanges in inertia between the initial and final\nweighing points can affect indicated flow rate by up\nto 0.5% if the error At in measured time t is not\naccounted for. This error is approximately:’\nwhere\nLa = distance travelled by the end of a balance\nbeam of length L deflected through an angle\n(Y from rest to the timing point\nMI ordinarily will include the masses of the weigh\u0002ing tank and initial liquid therein, and possibly other\nmasses depending on the weighing device used.\nThe corrected collection time in this case is (t - At).\nThis error At can be reduced in conventional weigh\u0002ing applications by limiting the deflection (Y. Alterna\u0002tively, static weighing experiments can be compared\nwith those using the dynamic technique to determine\nAt; the results can then be used to test the above equa\u0002tion for applicability and to evaluate the constants\ntherein. On smaller dynamic weighing systems, the in\u0002ertia effect can be practically eliminated by using a\nsubstitute weighing technique.\n‘Shafer, M. R., and F. W. Ruegg “Liquid Flowmeter Calibration\nTechniques,” Transactions, ASME, Vol. 80, No. 7, October 1958.\n15\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nAPPENDIX B\nDENSITY OF PURE WATER\n(This Appendix contains supplementary information for the convenience of the reader. It is not Part Of\nASME/ANSI MFC-9M-1988.)\n\"C\nDensity\nkg1m3 \"F lbmlft\n0.00\n2.22\n4.44\n6.67\n8.89\n11.11\n13.33\n15.56\n17.78\n20.00\n22.22\n24.44\n26.67\n28.89\n31.1 1\n33.33\n999.839\n999.947\n999.970\n999.916\n999.788\n999.592\n999.333\n999.01 2\n998.634\n998.202\n997.718\n997.184\n996.602\n995.975\n995.304\n994.59 1\n32\n36\n40\n44\n48\n52\n56\n60\n64\n68\n72\n76\n80\n84\n88\n92\n62.41796\n62.42465\n62.4261 1\n62.42271\n62.41476\n62.40254\n62.38631\n62.36630\n62.34271\n62.31 572\n62.28549\n62.25216\n62.21587\n62.17673\n62.13484\n62.09032\n17\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nSTANDARDS FOR MEASUREMENT OF FLUID IN CLOSED CONDUITS\n(Published by the American Society of Mechanical Engineers)\nTITLE OF STANDARD\nGlossary of Terms Used in the Measurement of\nMeasurement Uncertainty for Fluid Flow in Closed\nMeasurement of Fluid Flow in Pipes Using Orifice, Nozzle,\nFluid Flow in Pipes ................................... MFC-lM-l979(Rl986)\nConduits ............................................ MFC-2M-l983(R1988)\nand Venturi ................................................. MFC-3M-1985\nMeasurement of Gas by Turbine Meters ........................ MFC-4M-1986\nMeasurement of Liquid Flow in Closed Conduits Using\nTransit-Time Ultrasonic Flowmeters .......................... MFC-5M-1985\nMeasurement of Fluid Flow in Pipes Using Vortex\nFlow Meters ................................................ MFC-6M-1987\nMeasurement of Gas Flow by Means of Critical Flow\nVenturi Nozzles ............................................. MFC-7M-1987\nFluid Flow in Closed Conduits - Connections for Pressure\nSignal Transmissions Between Primary and Secondary\nDevices .................................................... MFC-8M-1988\nMeasurement of Liquid Flow in Closed Conduits by\nWeighing Method ........................................... MFC-9M-1988\nMethod for Establishing Installation Effects on Flowmeters ...... MFC-1OM-1988\nThe ASME Publications Catalog shows a complete list of all the Standards\npublished by the Society.\nThe catalog and binders for holding these Standards are available upon request.\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled w\nCopyrighted material licensed to Stanford University by Thomson Scientific (www.techstreet.com), downloaded on Oct-05-2010 by Stanford University User. No further reproduction or distribution is permitted. Uncontrolled when\n<END DOCUMENT>\n"
+        }
+      ]
+    }
+  ],
+  "llm_raw_responses": [
+    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD\", \"number\": null, \"level\": 1 },\n  { \"text\": \"GENERAL\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"Scope and Field of Application\", \"number\": \"1.1\", \"level\": 2 },\n  { \"text\": \"References\", \"number\": \"1.2\", \"level\": 2 },\n  { \"text\": \"Definitions\", \"number\": \"1.3\", \"level\": 2 },\n  { \"text\": \"Symbols\", \"number\": \"1.4\", \"level\": 2 },\n  { \"text\": \"PRINCIPLES\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"Statement of the Principles\", \"number\": \"2.1\", \"level\": 2 },\n  { \"text\": \"Static Weighing\", \"number\": \"2.1.1\", \"level\": 3 },\n  { \"text\": \"Dynamic Weighing\", \"number\": \"2.1.2\", \"level\": 3 },\n  { \"text\": \"Comparison of Instantaneous and Mean Flow Rate\", \"number\": \"2.1.3\", \"level\": 3 },\n  { \"text\": \"Accuracy of the Method\", \"number\": \"2.2\", \"level\": 2 },\n  { \"text\": \"Overall Uncertainty on the Weighing Measurement\", \"number\": \"2.2.1\", \"level\": 3 },\n  { \"text\": \"Requirements for Accurate Measurements\", \"number\": \"2.2.2\", \"level\": 3 },\n  { \"text\": \"APPARATUS\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"Diverter\", \"number\": \"3.1\", \"level\": 2 },\n  { \"text\": \"Time-Measuring Apparatus\", \"number\": \"3.2\", \"level\": 2 },\n  { \"text\": \"Weighing Tank\", \"number\": \"3.3\", \"level\": 2 },\n  { \"text\": \"Weighing Device\", \"number\": \"3.4\", \"level\": 2 },\n  { \"text\": \"Auxiliary Measurements\", \"number\": \"3.5\", \"level\": 2 },\n  { \"text\": \"PROCEDURE\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"Static Weighing Method\", \"number\": \"4.1\", \"level\": 2 },\n  { \"text\": \"Dynamic Weighing Method\", \"number\": \"4.2\", \"level\": 2 },\n  { \"text\": \"Common Provisions\", \"number\": \"4.3\", \"level\": 2 },\n  { \"text\": \"CALCULATION OF FLOW RATE\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"Calculation of Mass Flow Rate\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"Calculation of Volume Flow Rate\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME\", \"number\": \"A\", \"level\": 1 },\n  { \"text\": \"STATIC WEIGHING METHOD\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"Method 1\", \"number\": \"A1.1\", \"level\": 3 },\n  { \"text\": \"Method 2\", \"number\": \"A1.2\", \"level\": 3 },\n  { \"text\": \"DYNAMIC WEIGHING METHOD\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"APPENDIX B DENSITY OF PURE WATER\", \"number\": \"B\", \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
+  ],
+  "llm_fenced_blocks": [
+    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD\", \"number\": null, \"level\": 1 },\n  { \"text\": \"GENERAL\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"Scope and Field of Application\", \"number\": \"1.1\", \"level\": 2 },\n  { \"text\": \"References\", \"number\": \"1.2\", \"level\": 2 },\n  { \"text\": \"Definitions\", \"number\": \"1.3\", \"level\": 2 },\n  { \"text\": \"Symbols\", \"number\": \"1.4\", \"level\": 2 },\n  { \"text\": \"PRINCIPLES\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"Statement of the Principles\", \"number\": \"2.1\", \"level\": 2 },\n  { \"text\": \"Static Weighing\", \"number\": \"2.1.1\", \"level\": 3 },\n  { \"text\": \"Dynamic Weighing\", \"number\": \"2.1.2\", \"level\": 3 },\n  { \"text\": \"Comparison of Instantaneous and Mean Flow Rate\", \"number\": \"2.1.3\", \"level\": 3 },\n  { \"text\": \"Accuracy of the Method\", \"number\": \"2.2\", \"level\": 2 },\n  { \"text\": \"Overall Uncertainty on the Weighing Measurement\", \"number\": \"2.2.1\", \"level\": 3 },\n  { \"text\": \"Requirements for Accurate Measurements\", \"number\": \"2.2.2\", \"level\": 3 },\n  { \"text\": \"APPARATUS\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"Diverter\", \"number\": \"3.1\", \"level\": 2 },\n  { \"text\": \"Time-Measuring Apparatus\", \"number\": \"3.2\", \"level\": 2 },\n  { \"text\": \"Weighing Tank\", \"number\": \"3.3\", \"level\": 2 },\n  { \"text\": \"Weighing Device\", \"number\": \"3.4\", \"level\": 2 },\n  { \"text\": \"Auxiliary Measurements\", \"number\": \"3.5\", \"level\": 2 },\n  { \"text\": \"PROCEDURE\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"Static Weighing Method\", \"number\": \"4.1\", \"level\": 2 },\n  { \"text\": \"Dynamic Weighing Method\", \"number\": \"4.2\", \"level\": 2 },\n  { \"text\": \"Common Provisions\", \"number\": \"4.3\", \"level\": 2 },\n  { \"text\": \"CALCULATION OF FLOW RATE\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"Calculation of Mass Flow Rate\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"Calculation of Volume Flow Rate\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME\", \"number\": \"A\", \"level\": 1 },\n  { \"text\": \"STATIC WEIGHING METHOD\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"Method 1\", \"number\": \"A1.1\", \"level\": 3 },\n  { \"text\": \"Method 2\", \"number\": \"A1.2\", \"level\": 3 },\n  { \"text\": \"DYNAMIC WEIGHING METHOD\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"APPENDIX B DENSITY OF PURE WATER\", \"number\": \"B\", \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
+  ],
+  "decisions": [
+    {
+      "t": 1762199805.201322,
+      "type": "candidate_found",
+      "number": null,
+      "title": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+      "page": 2,
+      "idx": 2,
+      "line_index": 1,
+      "score": 100.0,
+      "strategy": "title_only",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2033217,
+      "type": "candidate_found",
+      "number": "1",
+      "title": "GENERAL",
+      "page": 15,
+      "idx": 407,
+      "line_index": 11,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2053218,
+      "type": "candidate_found",
+      "number": "1.1",
+      "title": "Scope and Field of Application",
+      "page": 8,
+      "idx": 159,
+      "line_index": 3,
+      "score": 100.0,
+      "strategy": "last_occurrence",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2078278,
+      "type": "candidate_found",
+      "number": "1.2",
+      "title": "References",
+      "page": 8,
+      "idx": 186,
+      "line_index": 30,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.209834,
+      "type": "candidate_found",
+      "number": "1.3",
+      "title": "Definitions",
+      "page": 8,
+      "idx": 205,
+      "line_index": 49,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2108345,
+      "type": "candidate_found",
+      "number": "1.4",
+      "title": "Symbols",
+      "page": 9,
+      "idx": 236,
+      "line_index": 9,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2128344,
+      "type": "candidate_found",
+      "number": "2",
+      "title": "PRINCIPLES",
+      "page": 9,
+      "idx": 239,
+      "line_index": 12,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.215339,
+      "type": "candidate_found",
+      "number": "2.1",
+      "title": "Statement of the Principles",
+      "page": 9,
+      "idx": 240,
+      "line_index": 13,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2183452,
+      "type": "candidate_found",
+      "number": "2.1.1",
+      "title": "Static Weighing",
+      "page": 9,
+      "idx": 241,
+      "line_index": 14,
+      "score": 72.72727272727272,
+      "strategy": "num+title-weak",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2203453,
+      "type": "candidate_found",
+      "number": "2.1.2",
+      "title": "Dynamic Weighing",
+      "page": 9,
+      "idx": 255,
+      "line_index": 28,
+      "score": 74.28571428571428,
+      "strategy": "num+title-weak",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2233505,
+      "type": "candidate_found",
+      "number": "2.1.3",
+      "title": "Comparison of Instantaneous and Mean Flow Rate",
+      "page": 9,
+      "idx": 263,
+      "line_index": 36,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.225423,
+      "type": "candidate_found",
+      "number": "2.2",
+      "title": "Accuracy of the Method",
+      "page": 9,
+      "idx": 271,
+      "line_index": 44,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2275002,
+      "type": "candidate_found",
+      "number": "2.2.1",
+      "title": "Overall Uncertainty on the Weighing Measurement",
+      "page": 9,
+      "idx": 272,
+      "line_index": 45,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2285004,
+      "type": "candidate_found",
+      "number": "2.2.2",
+      "title": "Requirements for Accurate Measurements",
+      "page": 9,
+      "idx": 282,
+      "line_index": 55,
+      "score": 82.66666666666667,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2305026,
+      "type": "candidate_found",
+      "number": "3",
+      "title": "APPARATUS",
+      "page": 9,
+      "idx": 302,
+      "line_index": 75,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2314997,
+      "type": "candidate_found",
+      "number": "3.1",
+      "title": "Diverter",
+      "page": 9,
+      "idx": 303,
+      "line_index": 76,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2335002,
+      "type": "candidate_found",
+      "number": "3.2",
+      "title": "Time-Measuring Apparatus",
+      "page": 17,
+      "idx": 463,
+      "line_index": 4,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2344997,
+      "type": "candidate_found",
+      "number": "3.3",
+      "title": "Weighing Tank",
+      "page": 17,
+      "idx": 490,
+      "line_index": 31,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2365005,
+      "type": "candidate_found",
+      "number": "3.4",
+      "title": "Weighing Device",
+      "page": 18,
+      "idx": 524,
+      "line_index": 7,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.238503,
+      "type": "candidate_found",
+      "number": "3.5",
+      "title": "Auxiliary Measurements",
+      "page": 18,
+      "idx": 545,
+      "line_index": 28,
+      "score": 96.15384615384616,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.239501,
+      "type": "candidate_found",
+      "number": "4",
+      "title": "PROCEDURE",
+      "page": 18,
+      "idx": 574,
+      "line_index": 57,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.240501,
+      "type": "candidate_found",
+      "number": "4.1",
+      "title": "Static Weighing Method",
+      "page": 18,
+      "idx": 575,
+      "line_index": 58,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2430825,
+      "type": "candidate_found",
+      "number": "4.2",
+      "title": "Dynamic Weighing Method",
+      "page": 18,
+      "idx": 592,
+      "line_index": 75,
+      "score": 86.66666666666667,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2440805,
+      "type": "candidate_found",
+      "number": "4.3",
+      "title": "Common Provisions",
+      "page": 20,
+      "idx": 625,
+      "line_index": 2,
+      "score": 90.0,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2460802,
+      "type": "candidate_found",
+      "number": "5",
+      "title": "CALCULATION OF FLOW RATE",
+      "page": 20,
+      "idx": 631,
+      "line_index": 8,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2480805,
+      "type": "candidate_found",
+      "number": "5.1",
+      "title": "Calculation of Mass Flow Rate",
+      "page": 20,
+      "idx": 632,
+      "line_index": 9,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2490819,
+      "type": "candidate_found",
+      "number": "5.2",
+      "title": "Calculation of Volume Flow Rate",
+      "page": 20,
+      "idx": 665,
+      "line_index": 42,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2510798,
+      "type": "candidate_found",
+      "number": "6",
+      "title": "UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+      "page": 20,
+      "idx": 671,
+      "line_index": 48,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2530816,
+      "type": "candidate_found",
+      "number": "A",
+      "title": "APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME",
+      "page": 22,
+      "idx": 698,
+      "line_index": 0,
+      "score": 90.0,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.254084,
+      "type": "candidate_found",
+      "number": "A1",
+      "title": "STATIC WEIGHING METHOD",
+      "page": 23,
+      "idx": 756,
+      "line_index": 1,
+      "score": 24.21052631578948,
+      "strategy": "num+title-weak",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2556245,
+      "type": "candidate_found",
+      "number": "A1.1",
+      "title": "Method 1",
+      "page": 23,
+      "idx": 780,
+      "line_index": 25,
+      "score": 85.71428571428571,
+      "strategy": "title_only",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2577004,
+      "type": "candidate_found",
+      "number": "A1.2",
+      "title": "Method 2",
+      "page": 26,
+      "idx": 919,
+      "line_index": 20,
+      "score": 85.71428571428571,
+      "strategy": "title_only",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2592418,
+      "type": "candidate_found",
+      "number": "A2",
+      "title": "DYNAMIC WEIGHING METHOD",
+      "page": 23,
+      "idx": 780,
+      "line_index": 25,
+      "score": 100.0,
+      "strategy": "last_occurrence",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2612925,
+      "type": "candidate_found",
+      "number": "B",
+      "title": "APPENDIX B DENSITY OF PURE WATER",
+      "page": 20,
+      "idx": 669,
+      "line_index": 46,
+      "score": 91.52542372881356,
+      "strategy": "last_occurrence",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762199805.2677922,
+      "type": "monotonic_violation",
+      "iteration": 1,
+      "gaps": [
+        {
+          "after_index": 15,
+          "components": [
+            {
+              "raw": "2",
+              "normalized": "2",
+              "kind": "numeric",
+              "value": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "after_index": 15,
+          "components": [
+            {
+              "raw": "3",
+              "normalized": "3",
+              "kind": "numeric",
+              "value": 3
+            }
+          ],
+          "level": 1
+        }
+      ]
+    },
+    {
+      "t": 1762199805.2677922,
+      "type": "anchor_resolved",
+      "target": "2 and Fig. 3) and the variation of the flow rate distri\u0002bution as a function of the diverter stroke is preferably",
+      "page": 16,
+      "line_idx": 21,
+      "global_idx": 438,
+      "monotonic_ok": true,
+      "method": "gap_fill"
+    },
+    {
+      "t": 1762199805.2687898,
+      "type": "monotonic_violation",
+      "iteration": 2,
+      "gaps": [
+        {
+          "after_index": 15,
+          "components": [
+            {
+              "raw": "2",
+              "normalized": "2",
+              "kind": "numeric",
+              "value": 2
+            }
+          ],
+          "level": 1
+        }
+      ]
+    },
+    {
+      "t": 1762199805.2687898,
+      "type": "fallback_triggered",
+      "method": "gap_fill",
+      "reason": "unresolved"
+    }
+  ],
+  "final_outline": {
+    "headers": [
+      {
+        "text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+        "number": null,
+        "level": 1,
+        "page": 2,
+        "line_idx": 0,
+        "global_idx": 2
+      },
+      {
+        "text": "Scope and Field of Application",
+        "number": "1.1",
+        "level": 2,
+        "page": 8,
+        "line_idx": 0,
+        "global_idx": 159
+      },
+      {
+        "text": "References",
+        "number": "1.2",
+        "level": 2,
+        "page": 8,
+        "line_idx": 0,
+        "global_idx": 186
+      },
+      {
+        "text": "Definitions",
+        "number": "1.3",
+        "level": 2,
+        "page": 8,
+        "line_idx": 0,
+        "global_idx": 205
+      },
+      {
+        "text": "Symbols",
+        "number": "1.4",
+        "level": 2,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 236
+      },
+      {
+        "text": "PRINCIPLES",
+        "number": "2",
+        "level": 1,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 239
+      },
+      {
+        "text": "Statement of the Principles",
+        "number": "2.1",
+        "level": 2,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 240
+      },
+      {
+        "text": "Static Weighing",
+        "number": "2.1.1",
+        "level": 3,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 241
+      },
+      {
+        "text": "Dynamic Weighing",
+        "number": "2.1.2",
+        "level": 3,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 255
+      },
+      {
+        "text": "Comparison of Instantaneous and Mean Flow Rate",
+        "number": "2.1.3",
+        "level": 3,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 263
+      },
+      {
+        "text": "Accuracy of the Method",
+        "number": "2.2",
+        "level": 2,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 271
+      },
+      {
+        "text": "Overall Uncertainty on the Weighing Measurement",
+        "number": "2.2.1",
+        "level": 3,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 272
+      },
+      {
+        "text": "Requirements for Accurate Measurements",
+        "number": "2.2.2",
+        "level": 3,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 282
+      },
+      {
+        "text": "APPARATUS",
+        "number": "3",
+        "level": 1,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 302
+      },
+      {
+        "text": "Diverter",
+        "number": "3.1",
+        "level": 2,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 303
+      },
+      {
+        "text": "GENERAL",
+        "number": "1",
+        "level": 1,
+        "page": 15,
+        "line_idx": 0,
+        "global_idx": 407
+      },
+      {
+        "text": "2 and Fig. 3) and the variation of the flow rate distri\u0002bution as a function of the diverter stroke is preferably",
+        "number": "3",
+        "level": 1,
+        "page": 16,
+        "line_idx": 21,
+        "global_idx": 438
+      },
+      {
+        "text": "Time-Measuring Apparatus",
+        "number": "3.2",
+        "level": 2,
+        "page": 17,
+        "line_idx": 0,
+        "global_idx": 463
+      },
+      {
+        "text": "Weighing Tank",
+        "number": "3.3",
+        "level": 2,
+        "page": 17,
+        "line_idx": 0,
+        "global_idx": 490
+      },
+      {
+        "text": "Weighing Device",
+        "number": "3.4",
+        "level": 2,
+        "page": 18,
+        "line_idx": 0,
+        "global_idx": 524
+      },
+      {
+        "text": "Auxiliary Measurements",
+        "number": "3.5",
+        "level": 2,
+        "page": 18,
+        "line_idx": 0,
+        "global_idx": 545
+      },
+      {
+        "text": "PROCEDURE",
+        "number": "4",
+        "level": 1,
+        "page": 18,
+        "line_idx": 0,
+        "global_idx": 574
+      },
+      {
+        "text": "Static Weighing Method",
+        "number": "4.1",
+        "level": 2,
+        "page": 18,
+        "line_idx": 0,
+        "global_idx": 575
+      },
+      {
+        "text": "Dynamic Weighing Method",
+        "number": "4.2",
+        "level": 2,
+        "page": 18,
+        "line_idx": 0,
+        "global_idx": 592
+      },
+      {
+        "text": "Common Provisions",
+        "number": "4.3",
+        "level": 2,
+        "page": 20,
+        "line_idx": 0,
+        "global_idx": 625
+      },
+      {
+        "text": "CALCULATION OF FLOW RATE",
+        "number": "5",
+        "level": 1,
+        "page": 20,
+        "line_idx": 0,
+        "global_idx": 631
+      },
+      {
+        "text": "Calculation of Mass Flow Rate",
+        "number": "5.1",
+        "level": 2,
+        "page": 20,
+        "line_idx": 0,
+        "global_idx": 632
+      },
+      {
+        "text": "Calculation of Volume Flow Rate",
+        "number": "5.2",
+        "level": 2,
+        "page": 20,
+        "line_idx": 0,
+        "global_idx": 665
+      },
+      {
+        "text": "APPENDIX B DENSITY OF PURE WATER",
+        "number": "B",
+        "level": 1,
+        "page": 20,
+        "line_idx": 0,
+        "global_idx": 669
+      },
+      {
+        "text": "UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+        "number": "6",
+        "level": 1,
+        "page": 20,
+        "line_idx": 0,
+        "global_idx": 671
+      },
+      {
+        "text": "APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME",
+        "number": "A",
+        "level": 1,
+        "page": 22,
+        "line_idx": 0,
+        "global_idx": 698
+      },
+      {
+        "text": "STATIC WEIGHING METHOD",
+        "number": "A1",
+        "level": 2,
+        "page": 23,
+        "line_idx": 0,
+        "global_idx": 756
+      },
+      {
+        "text": "DYNAMIC WEIGHING METHOD",
+        "number": "A2",
+        "level": 2,
+        "page": 23,
+        "line_idx": 0,
+        "global_idx": 780
+      },
+      {
+        "text": "Method 1",
+        "number": "A1.1",
+        "level": 3,
+        "page": 23,
+        "line_idx": 0,
+        "global_idx": 780
+      },
+      {
+        "text": "Method 2",
+        "number": "A1.2",
+        "level": 3,
+        "page": 26,
+        "line_idx": 0,
+        "global_idx": 919
+      }
+    ],
+    "sections": [
+      {
+        "header_text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 2,
+        "end_global_idx": 158,
+        "start_page": 2,
+        "end_page": 8
+      },
+      {
+        "header_text": "Scope and Field of Application",
+        "header_number": "1.1",
+        "level": 2,
+        "start_global_idx": 159,
+        "end_global_idx": 185,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "References",
+        "header_number": "1.2",
+        "level": 2,
+        "start_global_idx": 186,
+        "end_global_idx": 204,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "Definitions",
+        "header_number": "1.3",
+        "level": 2,
+        "start_global_idx": 205,
+        "end_global_idx": 235,
+        "start_page": 8,
+        "end_page": 9
+      },
+      {
+        "header_text": "Symbols",
+        "header_number": "1.4",
+        "level": 2,
+        "start_global_idx": 236,
+        "end_global_idx": 238,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "PRINCIPLES",
+        "header_number": "2",
+        "level": 1,
+        "start_global_idx": 239,
+        "end_global_idx": 239,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Statement of the Principles",
+        "header_number": "2.1",
+        "level": 2,
+        "start_global_idx": 240,
+        "end_global_idx": 240,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Static Weighing",
+        "header_number": "2.1.1",
+        "level": 3,
+        "start_global_idx": 241,
+        "end_global_idx": 254,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Dynamic Weighing",
+        "header_number": "2.1.2",
+        "level": 3,
+        "start_global_idx": 255,
+        "end_global_idx": 262,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Comparison of Instantaneous and Mean Flow Rate",
+        "header_number": "2.1.3",
+        "level": 3,
+        "start_global_idx": 263,
+        "end_global_idx": 270,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Accuracy of the Method",
+        "header_number": "2.2",
+        "level": 2,
+        "start_global_idx": 271,
+        "end_global_idx": 271,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Overall Uncertainty on the Weighing Measurement",
+        "header_number": "2.2.1",
+        "level": 3,
+        "start_global_idx": 272,
+        "end_global_idx": 281,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Requirements for Accurate Measurements",
+        "header_number": "2.2.2",
+        "level": 3,
+        "start_global_idx": 282,
+        "end_global_idx": 301,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "APPARATUS",
+        "header_number": "3",
+        "level": 1,
+        "start_global_idx": 302,
+        "end_global_idx": 302,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Diverter",
+        "header_number": "3.1",
+        "level": 2,
+        "start_global_idx": 303,
+        "end_global_idx": 406,
+        "start_page": 9,
+        "end_page": 15
+      },
+      {
+        "header_text": "GENERAL",
+        "header_number": "1",
+        "level": 1,
+        "start_global_idx": 407,
+        "end_global_idx": 437,
+        "start_page": 15,
+        "end_page": 16
+      },
+      {
+        "header_text": "2 and Fig. 3) and the variation of the flow rate distri\u0002bution as a function of the diverter stroke is preferably",
+        "header_number": "3",
+        "level": 1,
+        "start_global_idx": 438,
+        "end_global_idx": 462,
+        "start_page": 16,
+        "end_page": 17
+      },
+      {
+        "header_text": "Time-Measuring Apparatus",
+        "header_number": "3.2",
+        "level": 2,
+        "start_global_idx": 463,
+        "end_global_idx": 489,
+        "start_page": 17,
+        "end_page": 17
+      },
+      {
+        "header_text": "Weighing Tank",
+        "header_number": "3.3",
+        "level": 2,
+        "start_global_idx": 490,
+        "end_global_idx": 523,
+        "start_page": 17,
+        "end_page": 18
+      },
+      {
+        "header_text": "Weighing Device",
+        "header_number": "3.4",
+        "level": 2,
+        "start_global_idx": 524,
+        "end_global_idx": 544,
+        "start_page": 18,
+        "end_page": 18
+      },
+      {
+        "header_text": "Auxiliary Measurements",
+        "header_number": "3.5",
+        "level": 2,
+        "start_global_idx": 545,
+        "end_global_idx": 573,
+        "start_page": 18,
+        "end_page": 18
+      },
+      {
+        "header_text": "PROCEDURE",
+        "header_number": "4",
+        "level": 1,
+        "start_global_idx": 574,
+        "end_global_idx": 574,
+        "start_page": 18,
+        "end_page": 18
+      },
+      {
+        "header_text": "Static Weighing Method",
+        "header_number": "4.1",
+        "level": 2,
+        "start_global_idx": 575,
+        "end_global_idx": 591,
+        "start_page": 18,
+        "end_page": 18
+      },
+      {
+        "header_text": "Dynamic Weighing Method",
+        "header_number": "4.2",
+        "level": 2,
+        "start_global_idx": 592,
+        "end_global_idx": 624,
+        "start_page": 18,
+        "end_page": 20
+      },
+      {
+        "header_text": "Common Provisions",
+        "header_number": "4.3",
+        "level": 2,
+        "start_global_idx": 625,
+        "end_global_idx": 630,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "CALCULATION OF FLOW RATE",
+        "header_number": "5",
+        "level": 1,
+        "start_global_idx": 631,
+        "end_global_idx": 631,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "Calculation of Mass Flow Rate",
+        "header_number": "5.1",
+        "level": 2,
+        "start_global_idx": 632,
+        "end_global_idx": 664,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "Calculation of Volume Flow Rate",
+        "header_number": "5.2",
+        "level": 2,
+        "start_global_idx": 665,
+        "end_global_idx": 668,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "APPENDIX B DENSITY OF PURE WATER",
+        "header_number": "B",
+        "level": 1,
+        "start_global_idx": 669,
+        "end_global_idx": 670,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+        "header_number": "6",
+        "level": 1,
+        "start_global_idx": 671,
+        "end_global_idx": 697,
+        "start_page": 20,
+        "end_page": 21
+      },
+      {
+        "header_text": "APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME",
+        "header_number": "A",
+        "level": 1,
+        "start_global_idx": 698,
+        "end_global_idx": 755,
+        "start_page": 22,
+        "end_page": 23
+      },
+      {
+        "header_text": "STATIC WEIGHING METHOD",
+        "header_number": "A1",
+        "level": 2,
+        "start_global_idx": 756,
+        "end_global_idx": 779,
+        "start_page": 23,
+        "end_page": 23
+      },
+      {
+        "header_text": "DYNAMIC WEIGHING METHOD",
+        "header_number": "A2",
+        "level": 2,
+        "start_global_idx": 780,
+        "end_global_idx": 780,
+        "start_page": 23,
+        "end_page": 23
+      },
+      {
+        "header_text": "Method 1",
+        "header_number": "A1.1",
+        "level": 3,
+        "start_global_idx": 780,
+        "end_global_idx": 918,
+        "start_page": 23,
+        "end_page": 26
+      },
+      {
+        "header_text": "Method 2",
+        "header_number": "A1.2",
+        "level": 3,
+        "start_global_idx": 919,
+        "end_global_idx": 925,
+        "start_page": 26,
+        "end_page": 27
+      }
+    ],
+    "mode": "llm_strict",
+    "messages": []
+  },
+  "elapsed_s": 25.236457999999402,
+  "function_calls": [
+    {
+      "order": 1,
+      "name": "backend.services.headers_orchestrator.extract_headers_and_chunks"
+    },
+    {
+      "order": 2,
+      "name": "backend.services.pdf_native.collect_line_metrics"
+    },
+    {
+      "order": 3,
+      "name": "backend.services.pdf_native.collect_line_metrics"
+    },
+    {
+      "order": 4,
+      "name": "backend.services.pdf_headers_llm_full.get_headers_llm_full"
+    },
+    {
+      "order": 5,
+      "name": "backend.services.headers_llm_strict.align_headers_llm_strict"
+    },
+    {
+      "order": 6,
+      "name": "backend.services.headers_llm_strict.align_headers_llm_strict"
+    },
+    {
+      "order": 7,
+      "name": "backend.services.headers_orchestrator._enforce_header_sequence"
+    },
+    {
+      "order": 8,
+      "name": "backend.services.headers_orchestrator._enforce_header_sequence"
+    }
+  ]
+}

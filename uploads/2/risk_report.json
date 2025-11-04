@@ -1,0 +1,302 @@
+{
+  "document_id": 2,
+  "overall_score": 0.0,
+  "coverage_by_discipline": {
+    "mechanical": 0.0,
+    "electrical": 0.0,
+    "controls": 0.0,
+    "software": 0.0,
+    "project_management": 0.0
+  },
+  "missing_clause_ids": [
+    "asme-pressure-relief",
+    "asme-material-traceability",
+    "iec-grounding",
+    "iec-cable-identification",
+    "iso-safety-integrity",
+    "iec-software-versioning",
+    "pm-change-control"
+  ],
+  "findings": [
+    {
+      "clause_id": "asme-pressure-relief",
+      "discipline": "mechanical",
+      "text": "Pressure relief valves shall comply with ASME Section VIII sizing requirements.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.2,
+      "missing_terms": [
+        "relief",
+        "section",
+        "valve",
+        "viii"
+      ],
+      "best_line": {
+        "text": "Magnetic flowmeters have high inherent rangeability. Therefore, it is normally feasible to select a primary of the same nominal size as the connecting pipe. When this is the case, the pressure drop through the Primary can be considered the same as that of an;equivalent length of pipe. This sizing ability usually affords a process friendly installation, particularly with regard to the mea- surement of abrasive and fast-settling slurry flows.",
+        "page": 9,
+        "header_path": [
+          "6 APPLICATION CONSIDERATIONS",
+          "6.2 Process Hydrodynamics",
+          "6.2.3 Slippage"
+        ],
+        "disciplines": [
+          "mechanical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 1.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 9,
+          "block_index": 25,
+          "line_index": 0,
+          "bbox": [
+            331.70001220703125,
+            375.177978515625,
+            562.7056884765625,
+            469.1847229003906
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "asme-material-traceability",
+      "discipline": "mechanical",
+      "text": "Maintain full material traceability records for load bearing components.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.333,
+      "missing_terms": [
+        "records",
+        "traceability"
+      ],
+      "best_line": {
+        "text": "The Primary, which is an integral portion of the piping system, must be designed, manufactured, and certified to meet or exceed industry standards for piping codes (i.e., ASME B 16 Series, etc.) and classifications. If this is not feasible in a given application, the user and manufacturer must agree on what ratings are to apply. User require- ments for specific location piping codes, material trace- ability, primary cleanability, x-rays, etc., need to be ne- gotiated on an individual basis between manufacturer and user.",
+        "page": 12,
+        "header_path": [
+          "Construction",
+          "6.7 Safety",
+          "6.7.2 Mechanical Safety"
+        ],
+        "disciplines": [
+          "mechanical"
+        ],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 1.5,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 12,
+          "block_index": 16,
+          "line_index": 0,
+          "bbox": [
+            307.19915771484375,
+            203.899169921875,
+            537.015380859375,
+            321.3401184082031
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "iec-grounding",
+      "discipline": "electrical",
+      "text": "All control cabinets shall provide protective earth bonding in accordance with IEC 60204-1.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "60204",
+        "bonding",
+        "earth",
+        "iec",
+        "protective"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iec-cable-identification",
+      "discipline": "electrical",
+      "text": "Power and control conductors must be uniquely identified at both terminations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "conductors",
+        "identified",
+        "terminations"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "iso-safety-integrity",
+      "discipline": "controls",
+      "text": "Safety functions shall meet ISO 13849 performance level calculations.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.2,
+      "missing_terms": [
+        "13849",
+        "iso",
+        "level",
+        "safety"
+      ],
+      "best_line": {
+        "text": "Due to differences in design of the various electromagnetic flowmeters in the marketplace, this Standard cannot address detailed performance limitations in specific applications. It does, however, cover issues that are common to all meters, including application considerations.",
+        "page": 3,
+        "header_path": [
+          "Mechanical Engineers"
+        ],
+        "disciplines": [],
+        "scores": {
+          "controls": 0.0,
+          "electrical": 0.0,
+          "mechanical": 0.0,
+          "project_management": 0.0,
+          "software": 0.0
+        },
+        "source": "rule",
+        "provenance": {
+          "page": 3,
+          "block_index": 2,
+          "line_index": 0,
+          "bbox": [
+            118.84432220458984,
+            341.0081787109375,
+            502.4324951171875,
+            375.5607604980469
+          ]
+        }
+      }
+    },
+    {
+      "clause_id": "iec-software-versioning",
+      "discipline": "software",
+      "text": "Firmware shall implement semantic versioning with rollback procedures.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "firmware",
+        "rollback",
+        "semantic",
+        "versioning"
+      ],
+      "best_line": null
+    },
+    {
+      "clause_id": "pm-change-control",
+      "discipline": "project_management",
+      "text": "Change control board approval is required before releasing revisions to the customer.",
+      "mandatory": true,
+      "matched": false,
+      "score": 0.0,
+      "missing_terms": [
+        "approval",
+        "board",
+        "change",
+        "control"
+      ],
+      "best_line": null
+    }
+  ],
+  "compliance_notes": [
+    {
+      "document_id": "2",
+      "remediation": [
+        {
+          "clause_id": "asme-pressure-relief",
+          "actions": [
+            "Adopt ASME Section VIII Division 1 UG-134 as the minimum PRV sizing standard for all pressure relief applications.",
+            "Develop a PRV sizing package per project including: design conditions, relief capacity verification (set pressure, backpressure, relieving capacity), and flow analysis, signed by a Professional Engineer.",
+            "Update the procurement specification to require PRV manufacturer datasheets and compliance statements; retain certificates and test reports in the document repository.",
+            "Verify installation and commissioning: set pressure verification, nameplate data, and discharge arrangements per code; capture in the FAT/SAT."
+          ],
+          "evidence": "PRV sizing calculations, P&IDs, PRV datasheets, manufacturer compliance letters, installation checklists, test records.",
+          "owner": "Pressure Systems Engineer",
+          "due_days": 30
+        },
+        {
+          "clause_id": "asme-material-traceability",
+          "actions": [
+            "Update the material traceability procedure to require full traceability for all load-bearing components: base materials, forgings/castings, fasteners, weld filler.",
+            "Tag all load-bearing items with unique IDs; record heat/lot numbers, MTCs, chemical/mechanical properties, and heat treatment in a centralized traceability system (ERP/LIMS).",
+            "Update supplier onboarding to require MTC submission and acceptance before release to manufacturing.",
+            "Implement receiving inspection with chemical composition spot checks as needed and complete documentation checks."
+          ],
+          "evidence": "Material IDs linked to heat/lot numbers, MTCs, test reports, receiving inspection records, traceability logs, supplier audit notes.",
+          "owner": "Materials/Quality Manager",
+          "due_days": 45
+        },
+        {
+          "clause_id": "iec-grounding",
+          "actions": [
+            "Add an explicit requirement to all electrical design packages: protective earth bonding of control cabinets per IEC 60204-1 (4.2.2 and Table 2).",
+            "Create grounding details including conductor sizing, lugs, star washers, equipotential bonding straps, and labeling; maintain continuity across all panels.",
+            "Perform protective earth continuity testing at final inspection and retain test records.",
+            "Update the electrical installation standard with acceptance criteria (e.g., \u226410 m\u03a9 typical between earthing points where specified) and corrective actions."
+          ],
+          "evidence": "Updated drawings and specifications, grounding details, cabinet build records, continuity test reports, panel labels.",
+          "owner": "Electrical Design Lead",
+          "due_days": 20
+        },
+        {
+          "clause_id": "iec-cable-identification",
+          "actions": [
+            "Define and adopt a cable/conductor identification scheme that ensures uniqueness at both ends; include power and control conductors (e.g., functional numbering with color coding).",
+            "Update the wiring standard to require markers at all terminations; prefer printed sleeves or tags with clear text/symbols; include numbering plans in the As-Built set.",
+            "Implement receiving and pre-wiring inspections to verify marking presence; escalate non-conformances before mechanical completion.",
+            "Retain cable schedules and As-Built mark-ups in the documentation package."
+          ],
+          "evidence": "Identification standard, wiring drawings/cable schedules, marked cable ends (photos), inspection checklists, as-builts.",
+          "owner": "Electrical/Assembly Supervisor",
+          "due_days": 15
+        },
+        {
+          "clause_id": "iso-safety-integrity",
+          "actions": [
+            "Adopt ISO 13849-1/-2 methodology for all safety functions; maintain a register of safety functions and target Performance Levels (PLr).",
+            "Perform PL calculations for each safety function using validated tools (e.g., SISTEMA); document category, diagnostic coverage (DCavg), common cause factors (CCF), MTTFd, proof test intervals.",
+            "Create validation records (functional/environmental tests) and management of change documents for any safety-related modifications.",
+            "Ensure safety components are selected from proven sources (data sheets with PL/SIL ratings) and that safety-related control logic is verified independently."
+          ],
+          "evidence": "Safety function register, PL calculation packages (SISTEMA), component data sheets, validation plans/results, MOC records.",
+          "owner": "Functional Safety Engineer",
+          "due_days": 30
+        },
+        {
+          "clause_id": "iec-software-versioning",
+          "actions": [
+            "Establish a semantic versioning policy (MAJOR.MINOR.PATCH) for firmware; define release channels and deprecation timelines.",
+            "Implement secure rollback procedures with validated recovery to the previous stable release and supporting change logs.",
+            "Maintain a version control and release approval process; require release notes, risk assessments, and test results (including regression) before customer release.",
+            "Introduce binary signing and/or checksum verification where supported to assure integrity of deployed images."
+          ],
+          "evidence": "Versioning policy, firmware release notes, rollback test records, release approvals, change logs, binary integrity checks.",
+          "owner": "Firmware/Software Manager",
+          "due_days": 25
+        },
+        {
+          "clause_id": "pm-change-control",
+          "actions": [
+            "Charter a Change Control Board (CCB) with defined roles: Chair, Engineering, QA, Safety, Product Management, and Customer Representative as applicable.",
+            "Mandate CCB approval for all customer-impacting revisions; establish risk/impact assessment (product, quality, safety, regulatory, schedule, cost).",
+            "Update the Release Management SOP with gating criteria, required artifacts, and exception handling; enforce using the document repository.",
+            "Communicate approved changes and anticipated customer impact with clear milestones and rollout plans."
+          ],
+          "evidence": "CCB charter, release SOP, change requests with risk assessments, approval minutes, communication records, release notes.",
+          "owner": "Program/Release Manager",
+          "due_days": 20
+        }
+      ]
+    }
+  ]
+}

@@ -195,6 +195,7 @@ export function renderParseSummary(container, payload) {
   container.append(grid);
 }
 
+// ⬇️ Drop-in replacement
 export function renderHeaderRawResponse(container, payload) {
   if (!container) return;
 
@@ -228,14 +229,10 @@ export function renderHeaderRawResponse(container, payload) {
     rawParts.forEach((part, index) => {
       const details = document.createElement('details');
       details.className = 'raw-response__details';
-      if (index === 0) {
-        details.open = true;
-      }
+      if (index === 0) details.open = true;
       const summary = document.createElement('summary');
       summary.textContent =
-        rawParts.length === 1
-          ? 'LLM raw response'
-          : `LLM raw response (part ${index + 1})`;
+        rawParts.length === 1 ? 'LLM raw response' : `LLM raw response (part ${index + 1})`;
       const pre = document.createElement('pre');
       pre.className = 'raw-response';
       pre.textContent = part;
@@ -270,10 +267,20 @@ export function renderHeaderRawResponse(container, payload) {
       container.append(details);
     }
 
+    // 🔎 NEW: Append trace/decisions panel if available
+    if (payload?.trace) {
+      const traceDetails = document.createElement('details');
+      traceDetails.className = 'raw-response__details';
+      traceDetails.open = false;
+      const summary = document.createElement('summary');
+      summary.textContent = 'Trace: decisions & chunking';
+      traceDetails.append(summary, buildTraceView(payload.trace));
+      container.append(traceDetails);
+    }
+
     if (!container.childElementCount) {
       container.innerHTML = '<p class="panel-status">Raw response unavailable.</p>';
     }
-
     return;
   }
 
@@ -281,6 +288,16 @@ export function renderHeaderRawResponse(container, payload) {
 
   if (!fallback || !String(fallback).trim()) {
     container.innerHTML = '<p class="panel-status">Raw response unavailable.</p>';
+    // 🔎 NEW: show trace even if no raw output
+    if (payload?.trace) {
+      const traceDetails = document.createElement('details');
+      traceDetails.className = 'raw-response__details';
+      traceDetails.open = true;
+      const summary = document.createElement('summary');
+      summary.textContent = 'Trace: decisions & chunking';
+      traceDetails.append(summary, buildTraceView(payload.trace));
+      container.append(traceDetails);
+    }
     return;
   }
 
@@ -288,8 +305,155 @@ export function renderHeaderRawResponse(container, payload) {
   pre.className = 'raw-response';
   pre.textContent = String(fallback);
   container.append(pre);
+
+  // 🔎 NEW: Append trace/decisions panel
+  if (payload?.trace) {
+    const traceDetails = document.createElement('details');
+    traceDetails.className = 'raw-response__details';
+    traceDetails.open = false;
+    const summary = document.createElement('summary');
+    summary.textContent = 'Trace: decisions & chunking';
+    traceDetails.append(summary, buildTraceView(payload.trace));
+    container.append(traceDetails);
+  }
 }
 
+// Internal helper used by renderHeaderRawResponse and renderHeaderTrace
+function buildTraceView(trace) {
+  const root = document.createElement('div');
+  root.className = 'trace';
+
+  const events = Array.isArray(trace?.events) ? trace.events : [];
+  const decisionTypes = new Set([
+    'candidate_found',
+    'anchor_resolved',
+    'fallback_triggered',
+    'monotonic_violation',
+    // chunking visibility
+    'chunking_start',
+    'line_index_map_built',
+    'header_missing_global',
+    'header_not_in_lines',
+    'chunk_bounds_resolved',
+    'chunk_skipped_inverted',
+    'chunk_built',
+    'chunking_complete',
+    // cache-state
+    'cache_purged',
+    'cache_bypassed',
+  ]);
+  const decisions = events.filter((e) => decisionTypes.has(e?.type));
+
+  // Quick chunking summary from events
+  const counts = (type) => decisions.filter((e) => e?.type === type).length;
+  const chunkBuilt = decisions.filter((e) => e?.type === 'chunk_built');
+  const summary = document.createElement('div');
+  summary.className = 'trace-summary';
+  summary.innerHTML = `
+    <div class="trace-kv">
+      <span class="kv-label">Chunks built</span>
+      <span class="kv-value">${chunkBuilt.length}</span>
+    </div>
+    <div class="trace-kv">
+      <span class="kv-label">Bounds resolved</span>
+      <span class="kv-value">${counts('chunk_bounds_resolved')}</span>
+    </div>
+    <div class="trace-kv">
+      <span class="kv-label">Skipped (inverted)</span>
+      <span class="kv-value">${counts('chunk_skipped_inverted')}</span>
+    </div>
+    <div class="trace-kv">
+      <span class="kv-label">Missing global</span>
+      <span class="kv-value">${counts('header_missing_global')}</span>
+    </div>
+    <div class="trace-kv">
+      <span class="kv-label">Not in lines</span>
+      <span class="kv-value">${counts('header_not_in_lines')}</span>
+    </div>
+  `;
+  root.append(summary);
+
+  if (chunkBuilt.length) {
+    const built = document.createElement('details');
+    built.open = false;
+    const sum = document.createElement('summary');
+    sum.textContent = 'Built chunks';
+    built.append(sum);
+
+    const list = document.createElement('ul');
+    list.className = 'decision-list';
+    chunkBuilt.forEach((ev) => {
+      const li = document.createElement('li');
+      li.className = 'decision-item';
+      const label = document.createElement('div');
+      label.className = 'decision-title';
+      const pos = isFinite(ev?.position) ? ` #${ev.position}` : '';
+      label.textContent = `chunk_built${pos} · L${ev.level ?? '—'} · [${ev.start_global_idx ?? '—'}–${ev.end_global_idx ?? '—'}] (p${(ev.start_page ?? 0) + 1}–p${(ev.end_page ?? 0) + 1})`;
+      const sub = document.createElement('div');
+      sub.className = 'decision-sub';
+      const headerTxt = (ev?.header_text ?? '').toString();
+      sub.textContent = headerTxt ? headerTxt : '(no header text)';
+      li.append(label, sub);
+      list.append(li);
+    });
+    built.append(list);
+    root.append(built);
+  }
+
+  // All decisions (chronological)
+  if (decisions.length) {
+    const all = document.createElement('details');
+    all.open = false;
+    const sum = document.createElement('summary');
+    sum.textContent = `All decisions (${decisions.length})`;
+    all.append(sum);
+
+    const list = document.createElement('ul');
+    list.className = 'decision-list';
+    decisions.forEach((ev) => {
+      const li = document.createElement('li');
+      li.className = 'decision-item';
+      const title = document.createElement('div');
+      title.className = 'decision-title';
+      const when = ev?.t ? new Date(ev.t * 1000).toLocaleTimeString() : '';
+      title.textContent = `${ev.type}${when ? ' · ' + when : ''}`;
+
+      const sub = document.createElement('div');
+      sub.className = 'decision-sub';
+      const dataPreview = { ...ev };
+      delete dataPreview.t;
+      delete dataPreview.type;
+      sub.textContent = JSON.stringify(dataPreview);
+
+      li.append(title, sub);
+      list.append(li);
+    });
+    all.append(list);
+    root.append(all);
+  }
+
+  // Paths (helpful for debugging)
+  if (trace?.path || trace?.summary_path) {
+    const paths = document.createElement('div');
+    paths.className = 'trace-paths';
+    if (trace.path) {
+      const p = document.createElement('div');
+      p.textContent = `trace: ${trace.path}`;
+      paths.append(p);
+    }
+    if (trace.summary_path) {
+      const s = document.createElement('div');
+      s.textContent = `summary: ${trace.summary_path}`;
+      paths.append(s);
+    }
+    root.append(paths);
+  }
+
+  return root;
+}
+
+
+// ⬇️ Optional: small enhancement to renderHeaderOutline to surface a quick chunking hint if trace present
 export function renderHeaderOutline(container, payload, options = {}) {
   if (!container) return;
   if (
@@ -311,7 +475,19 @@ export function renderHeaderOutline(container, payload, options = {}) {
     return;
   }
   if (Array.isArray(payload?.simpleheaders) && payload.simpleheaders.length && Array.isArray(payload.sections) && payload.sections.length) {
-    renderSimpleHeaders(container, payload, options);
+    // Quick banner showing number of chunks if trace exists
+    container.innerHTML = '';
+    if (payload?.trace?.events) {
+      const chunksBuilt = payload.trace.events.filter((e) => e.type === 'chunk_built').length;
+      const banner = document.createElement('p');
+      banner.className = 'panel-status';
+      banner.textContent = `Sections: ${payload.sections.length} • Chunks built: ${chunksBuilt}`;
+      container.append(banner);
+    }
+    // Render the regular SimpleHeaders UI beneath
+    const holder = document.createElement('div');
+    container.append(holder);
+    renderSimpleHeaders(holder, payload, options);
     return;
   }
   if (!payload?.outline?.length) {
@@ -326,6 +502,7 @@ export function renderHeaderOutline(container, payload, options = {}) {
   container.innerHTML = '';
   container.append(list);
 }
+
 
 function renderSimpleHeaders(container, payload, { documentId, fetchSection } = {}) {
   const headers = Array.isArray(payload.simpleheaders) ? payload.simpleheaders : [];
