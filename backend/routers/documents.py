@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import desc
 from sqlmodel import Session, select
 
+from ..config import Settings, get_settings
 from ..database import get_session
 from ..models import (
     Document,
@@ -17,6 +18,8 @@ from ..models import (
     DocumentPage,
     DocumentTable,
 )
+from ..services.pdf_native import collect_line_metrics
+from ..services.simpleheaders_state import SimpleHeadersState
 
 router = APIRouter(prefix="/api", tags=["documents"])
 
@@ -163,6 +166,50 @@ async def get_document_tables(
     return payload
 
 
+def _ensure_section_cache(
+    *,
+    document: Document,
+    doc_hash: str,
+    settings: Settings,
+) -> None:
+    """Populate :class:`SimpleHeadersState` when missing for ``document``."""
+
+    if document.id is None:
+        return
+
+    cached = SimpleHeadersState.get(document.id)
+    if cached is not None:
+        cached_hash, cached_lines = cached
+        if cached_lines and (not doc_hash or cached_hash == doc_hash):
+            return
+
+    document_path = settings.upload_dir / str(document.id) / document.filename
+    if not document_path.exists():
+        return
+
+    try:
+        document_bytes = document_path.read_bytes()
+    except OSError:
+        return
+
+    try:
+        lines, _, computed_hash = collect_line_metrics(
+            document_bytes,
+            {"document_id": document.id, "filename": document.filename},
+            suppress_toc=settings.headers_suppress_toc,
+            suppress_running=settings.headers_suppress_running,
+            tracer=None,
+        )
+    except Exception:
+        return
+
+    if not lines:
+        return
+
+    cache_hash = doc_hash or computed_hash
+    SimpleHeadersState.set(document.id, cache_hash, lines)
+
+
 @router.get(
     "/documents/{document_id}/headers", response_model=StoredHeadersResponse
 )
@@ -170,6 +217,7 @@ async def get_cached_headers(
     document_id: int,
     *,
     session: Session = Depends(get_session),
+    settings: Settings = Depends(get_settings),
 ) -> StoredHeadersResponse:
     """Return the most recent cached header tree for a document."""
 
@@ -194,6 +242,8 @@ async def get_cached_headers(
         )
 
     payload = dict(artifact.body or {})
+    doc_hash = str(payload.get("doc_hash", "") or "")
+    _ensure_section_cache(document=document, doc_hash=doc_hash, settings=settings)
     return StoredHeadersResponse(
         headers=list(payload.get("headers", [])),
         sections=list(payload.get("sections", [])),
