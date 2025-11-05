@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlmodel import Session
@@ -292,7 +292,7 @@ async def export_spec_record_endpoint(
 # ---- RERUN SPECS SUPPORT ----------------------------------------------------
 
 
-@router.delete("/specs/{document_id}/buckets", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/specs/{document_id}/buckets", response_class=Response)
 async def delete_spec_buckets(
     document_id: int,
     *,
@@ -309,7 +309,7 @@ async def delete_spec_buckets(
         )
 
     wipe_spec_buckets_for_document(session, document_id=document_id)
-    return None
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 __all__ = ["router"]

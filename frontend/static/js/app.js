@@ -10,6 +10,7 @@ import {
   uploadDocument,
   parseDocument,
   fetchHeaders,
+  fetchCachedHeaders,
   fetchSectionText,
   fetchSpecifications,
   compareSpecifications,
@@ -100,6 +101,16 @@ function deriveHeaderMatches(payload) {
       };
     })
     .filter((entry) => entry.text);
+}
+
+function normaliseHeadersForUi(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return payload;
+  }
+  if (!Array.isArray(payload.simpleheaders) && Array.isArray(payload.headers)) {
+    return { ...payload, simpleheaders: payload.headers };
+  }
+  return payload;
 }
 
 // Helper: update the header mode tag based on a mode string
@@ -231,13 +242,33 @@ elements.approveSpecs?.addEventListener('click', () => {
 // Listen for custom event from specs_patch.js to update the UI when buckets are re-run.
 window.addEventListener('specs:buckets:updated', (event) => {
   // Reset approval state and update specs
+  const detail = event.detail ?? {};
   state.approvedLines.clear();
   state.specRecord = null;
-  state.specs = event.detail;
+  state.specs = detail;
+  state.specsSearchAttempted = true;
   state.approvalLoading = false;
   renderSpecsView();
   updateApprovalUI();
   showToast('Specification buckets reloaded from scratch.');
+  setSpecsSearchBusy(false);
+  if (state.selectedId) {
+    void (async () => {
+      try {
+        const refreshedRecord = await fetchSpecRecord(state.selectedId);
+        state.specRecord = refreshedRecord;
+        const refreshedPayload = refreshedRecord?.record?.payload ?? null;
+        if (refreshedPayload && typeof refreshedPayload === 'object') {
+          state.specs = refreshedPayload;
+          renderSpecsView();
+        }
+      } catch (error) {
+        console.error('[Specs] Unable to refresh spec record after rerun:', error);
+      } finally {
+        updateApprovalUI();
+      }
+    })();
+  }
 });
 
 // Busy state helpers for header search & specs search
@@ -394,10 +425,16 @@ async function selectDocument(documentId) {
   setApprovalStatus('Loading approval status…', 'muted');
   updateApprovalUI({ busy: true });
   try {
-    const [parseResult, riskResult, recordResult] = await Promise.allSettled([
+    const [
+      parseResult,
+      riskResult,
+      recordResult,
+      cachedHeadersResult,
+    ] = await Promise.allSettled([
       parseDocument(documentId),
       compareSpecifications(documentId),
       fetchSpecRecord(documentId),
+      fetchCachedHeaders(documentId),
     ]);
     if (parseResult.status === 'fulfilled') {
       state.parse = parseResult.value;
@@ -413,17 +450,48 @@ async function selectDocument(documentId) {
       state.risk = null;
       setPanelError(elements.riskContent, riskResult.reason?.message ?? 'Unable to compute risk score.');
     }
+    if (cachedHeadersResult.status === 'fulfilled') {
+      state.headers = cachedHeadersResult.value;
+      state.headerMatches = deriveHeaderMatches(state.headers);
+      const uiPayload = normaliseHeadersForUi(state.headers);
+      renderHeaderRawResponse(elements.headersRawContent, uiPayload);
+      renderHeaderOutline(elements.headersContent, uiPayload, {
+        documentId,
+        fetchSection: fetchSectionText,
+      });
+      updateHeaderModeTag(state.headers?.mode ?? null);
+      state.headerSearchAttempted = true;
+      setHeaderRefreshBusy(false);
+    } else if (cachedHeadersResult.status === 'rejected') {
+      const message = cachedHeadersResult.reason?.message ?? '';
+      const isNotFound = typeof message === 'string' && /^404\b/.test(message);
+      if (!isNotFound && message) {
+        setPanelError(elements.headersRawContent, message);
+        setPanelError(elements.headersContent, message);
+      }
+    }
+    if (cachedHeadersResult.status !== 'fulfilled') {
+      setHeaderRefreshBusy(false);
+    }
     if (recordResult.status === 'fulfilled') {
       state.specRecord = recordResult.value;
+      const payload = recordResult.value?.record?.payload ?? null;
+      if (payload && typeof payload === 'object') {
+        state.specs = payload;
+        state.specsSearchAttempted = true;
+        renderSpecsView();
+      } else {
+        state.specs = null;
+      }
       state.approvalLoading = false;
       updateApprovalUI();
-      renderSpecsView();
     } else {
       state.specRecord = null;
       state.approvalLoading = false;
       setApprovalStatus('Unable to load approval status.', 'error');
       updateApprovalUI({ preserveStatus: true });
     }
+    setSpecsSearchBusy(false);
   } finally {
     if (elements.workspaceSubtitle) {
       elements.workspaceSubtitle.textContent = `Document ${documentId} ready.`;
@@ -449,11 +517,7 @@ async function refreshHeaders() {
     state.headerMatches = deriveHeaderMatches(state.headers);
     // The UI expects `simpleheaders` + `sections` fields.  If present, pass through;
     // otherwise, alias `headers` as `simpleheaders`.
-    const uiPayload = (!headersResult || typeof headersResult !== 'object')
-      ? headersResult
-      : (!Array.isArray(headersResult.simpleheaders) && Array.isArray(headersResult.headers))
-        ? { ...headersResult, simpleheaders: headersResult.headers }
-        : headersResult;
+    const uiPayload = normaliseHeadersForUi(headersResult);
     renderHeaderRawResponse(elements.headersRawContent, uiPayload);
     renderHeaderOutline(elements.headersContent, uiPayload, {
       documentId,
@@ -472,11 +536,7 @@ async function refreshHeaders() {
     if (previousHeaders) {
       state.headers = previousHeaders;
       state.headerMatches = deriveHeaderMatches(previousHeaders);
-      const uiPayload = (!previousHeaders || typeof previousHeaders !== 'object')
-        ? previousHeaders
-        : (!Array.isArray(previousHeaders.simpleheaders) && Array.isArray(previousHeaders.headers))
-          ? { ...previousHeaders, simpleheaders: previousHeaders.headers }
-          : previousHeaders;
+      const uiPayload = normaliseHeadersForUi(previousHeaders);
       renderHeaderRawResponse(elements.headersRawContent, uiPayload);
       renderHeaderOutline(elements.headersContent, uiPayload, {
         documentId,
