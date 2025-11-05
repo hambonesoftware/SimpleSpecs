@@ -1,13 +1,24 @@
 const SAME_ORIGIN_KEYS = new Set(["", "/", ".", "auto", "same-origin"]);
 
+function apiDebug(message, payload) {
+  if (payload !== undefined) {
+    console.debug(`[API] ${message}`, payload);
+  } else {
+    console.debug(`[API] ${message}`);
+  }
+}
+
 function normaliseBase(value) {
+  apiDebug('normaliseBase invoked', { value });
   if (typeof value !== "string") {
+    apiDebug('normaliseBase returning null (non-string input)', { value });
     return null;
   }
 
   const trimmed = value.trim();
   const lower = trimmed.toLowerCase();
   if (SAME_ORIGIN_KEYS.has(lower)) {
+    apiDebug('normaliseBase resolved same-origin', { trimmed });
     return "";
   }
 
@@ -32,28 +43,42 @@ function normaliseBase(value) {
 
       const needsBrackets = host.includes(":") && !(host.startsWith("[") && host.endsWith("]"));
       const safeHost = needsBrackets ? `[${host}]` : host;
-      return `${protocol}//${safeHost}${trimmed}`.replace(/\/+$/, "");
+      const computed = `${protocol}//${safeHost}${trimmed}`.replace(/\/+$/, "");
+      apiDebug('normaliseBase port-only override with window', { computed, host: safeHost });
+      return computed;
     }
-    return trimmed.replace(/\/+$/, "");
+    const fallback = trimmed.replace(/\/+$/, "");
+    apiDebug('normaliseBase port-only override without window', { fallback });
+    return fallback;
   }
 
   if (trimmed.startsWith("//")) {
-    return `${window.location.protocol}${trimmed}`.replace(/\/+$/, "");
+    const computed = `${window.location.protocol}${trimmed}`.replace(/\/+$/, "");
+    apiDebug('normaliseBase protocol-relative URL', { computed });
+    return computed;
   }
 
   if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed.replace(/\/+$/, "");
+    const cleaned = trimmed.replace(/\/+$/, "");
+    apiDebug('normaliseBase absolute URL', { cleaned });
+    return cleaned;
   }
 
   if (trimmed.startsWith("/")) {
-    return `${window.location.origin}${trimmed}`.replace(/\/+$/, "");
+    const combined = `${window.location.origin}${trimmed}`.replace(/\/+$/, "");
+    apiDebug('normaliseBase origin-relative URL', { combined });
+    return combined;
   }
 
-  return trimmed.replace(/\/+$/, "");
+  const cleaned = trimmed.replace(/\/+$/, "");
+  apiDebug('normaliseBase fallback URL', { cleaned });
+  return cleaned;
 }
 
 function resolveApiBase() {
+  apiDebug('resolveApiBase invoked');
   if (typeof window === "undefined") {
+    apiDebug('resolveApiBase returning empty (no window)');
     return "";
   }
 
@@ -65,36 +90,49 @@ function resolveApiBase() {
   for (const candidate of candidates) {
     const normalised = normaliseBase(candidate);
     if (typeof normalised === "string") {
+      apiDebug('resolveApiBase selected candidate', { candidate, normalised });
       return normalised;
     }
   }
 
+  apiDebug('resolveApiBase using empty default');
   return "";
 }
 
 export const API_BASE = resolveApiBase();
 
 function buildUrl(path) {
+  apiDebug('buildUrl invoked', { path, API_BASE });
   if (/^https?:\/\//i.test(path)) {
+    apiDebug('buildUrl returning absolute path', { path });
     return path;
   }
 
   const normalisedPath = path.startsWith("/") ? path : `/${path}`;
+  apiDebug('buildUrl normalised path', { normalisedPath });
 
   if (!API_BASE) {
+    apiDebug('buildUrl using normalised path without base', { normalisedPath });
     return normalisedPath;
   }
 
   const base = API_BASE.replace(/\/+$/, "");
+  apiDebug('buildUrl computed base', { base });
 
   if (/^https?:\/\//i.test(base)) {
     if (normalisedPath.startsWith("/api/") && base.endsWith("/api")) {
-      return `${base}${normalisedPath.slice(4)}`;
+      const combined = `${base}${normalisedPath.slice(4)}`;
+      apiDebug('buildUrl combining with base ending in /api', { combined });
+      return combined;
     }
-    return `${base}${normalisedPath}`;
+    const combined = `${base}${normalisedPath}`;
+    apiDebug('buildUrl combining with absolute base', { combined });
+    return combined;
   }
 
-  return `${base}${normalisedPath}`;
+  const combined = `${base}${normalisedPath}`;
+  apiDebug('buildUrl combining with relative base', { combined });
+  return combined;
 }
 
 function serialiseQuery(params = {}) {
@@ -119,28 +157,46 @@ async function request(path, options = {}) {
     ...options,
   };
 
+  apiDebug('request starting', { path, url, config });
   const response = await fetch(url, config);
+  apiDebug('request response received', {
+    url,
+    status: response.status,
+    statusText: response.statusText,
+  });
   const text = await response.text();
+  apiDebug('request response text snippet', { url, snippet: text.slice(0, 200) });
 
   if (!response.ok) {
     const snippet = text.slice(0, 500);
+    apiDebug('request throwing due to non-ok response', {
+      url,
+      status: response.status,
+      statusText: response.statusText,
+      snippet,
+    });
     throw new Error(`${response.status} ${response.statusText}: ${snippet}`.trim());
   }
 
   if (response.status === 204 || text.length === 0) {
+    apiDebug('request returning null payload', { url, status: response.status });
     return null;
   }
 
   const contentType = response.headers.get("content-type") ?? "";
+  apiDebug('request evaluating content type', { url, contentType });
   if (contentType.includes("application/json")) {
     try {
-      return JSON.parse(text);
+      const parsed = JSON.parse(text);
+      apiDebug('request returning parsed JSON', { url, keys: Object.keys(parsed ?? {}) });
+      return parsed;
     } catch (error) {
       console.warn("[API] Failed to parse JSON response", { url, text, error });
       return text;
     }
   }
 
+  apiDebug('request returning raw text', { url, length: text.length });
   return text;
 }
 
@@ -237,19 +293,31 @@ export async function fetchCachedHeaders(documentId) {
 }
 // Wipe all stored/spec-cached buckets for a document on the server
 export async function deleteSpecsBuckets(documentId) {
+  apiDebug('deleteSpecsBuckets invoked', { documentId });
   if (!Number.isFinite(Number(documentId))) {
+    apiDebug('deleteSpecsBuckets invalid document id', { documentId });
     throw new Error('deleteSpecsBuckets: invalid documentId');
   }
-  return request(`/api/specs/${documentId}/buckets`, { method: 'DELETE' });
+  const result = await request(`/api/specs/${documentId}/buckets`, { method: 'DELETE' });
+  apiDebug('deleteSpecsBuckets completed', { documentId, result });
+  return result;
 }
 
 // Re-run extraction fresh (bypass caches) and return new buckets payload
 export async function runSpecsBucketsAgain(documentId) {
+  apiDebug('runSpecsBucketsAgain invoked', { documentId });
   if (!Number.isFinite(Number(documentId))) {
+    apiDebug('runSpecsBucketsAgain invalid document id', { documentId });
     throw new Error('runSpecsBucketsAgain: invalid documentId');
   }
   // This endpoint should trigger a full re-extract on the server
-  return request(`/api/specs/${documentId}/buckets/run-again`, { method: 'POST' });
+  const result = await request(`/api/specs/${documentId}/buckets/run-again`, { method: 'POST' });
+  apiDebug('runSpecsBucketsAgain completed', {
+    documentId,
+    resultType: result == null ? 'null' : typeof result,
+    resultKeys: result && typeof result === 'object' ? Object.keys(result) : null,
+  });
+  return result;
 }
 
 
