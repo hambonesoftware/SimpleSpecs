@@ -278,7 +278,9 @@ async def _openrouter_chat(prompt: str) -> str:
             return json.dumps({"error": "Unexpected response", "raw": data})
 
 
-def _best_doc_text_from_cache(session: Session, document: Document) -> Tuple[str, Optional[str]]:
+def _best_doc_text_from_cache(
+    session: Session, document: Document, *, settings: Any | None = None
+) -> Tuple[str, Optional[str]]:
     """
     Try to obtain the best available "full text" for the document from the artifact store.
     Returns (text, doc_hash?|None).
@@ -318,6 +320,66 @@ def _best_doc_text_from_cache(session: Session, document: Document) -> Tuple[str
     # Fall back to reading the PDF and extracting on the fly (basic PyMuPDF approach).
     # We avoid adding new heavy deps; SimpleSpecs likely already uses PyMuPDF elsewhere.
     try:
+        from pathlib import Path
+
+        logger.debug(
+            "[specs_worker] _best_doc_text_from_cache falling back to PyMuPDF",
+            {
+                "document_id": document.id,
+                "filename": document.filename,
+                "settings_upload_dir": getattr(settings, "upload_dir", None),
+            },
+        )
+        import fitz  # PyMuPDF
+
+        candidate_dirs: List[Path] = []
+        if settings and getattr(settings, "upload_dir", None):
+            candidate_dirs.append(Path(settings.upload_dir))
+        try:
+            from backend.paths import UPLOAD_DIR  # type: ignore
+
+            candidate_dirs.append(Path(UPLOAD_DIR))  # type: ignore[arg-type]
+        except Exception:
+            logger.debug(
+                "[specs_worker] _best_doc_text_from_cache default upload dir unavailable",
+                {"document_id": document.id},
+            )
+
+        checked_paths: List[str] = []
+        for base_dir in candidate_dirs:
+            if not document.filename:
+                continue
+            for relative in (
+                Path(str(document.id or "")) / document.filename,
+                Path(document.filename),
+            ):
+                pdf_path = (base_dir / relative).resolve()
+                checked_paths.append(str(pdf_path))
+                if not pdf_path.exists():
+                    continue
+                text_parts: List[str] = []
+                with fitz.open(pdf_path) as doc_obj:
+                    for page in doc_obj:
+                        text_parts.append(page.get_text("text"))
+                joined = "\n".join(text_parts)
+                logger.debug(
+                    "[specs_worker] _best_doc_text_from_cache extracted via PyMuPDF",
+                    {
+                        "document_id": document.id,
+                        "text_length": len(joined),
+                        "pdf_path": str(pdf_path),
+                    },
+                )
+                return joined, None
+
+        logger.error(
+            "[specs_worker] _best_doc_text_from_cache no PDF path found",
+            {
+                "document_id": document.id,
+                "filename": document.filename,
+                "checked_paths": checked_paths,
+            },
+        )
         logger.debug(
             "[specs_worker] _best_doc_text_from_cache falling back to PyMuPDF",
             {"document_id": document.id, "filename": document.filename},
@@ -343,6 +405,7 @@ def _best_doc_text_from_cache(session: Session, document: Document) -> Tuple[str
             document.id,
             exc_info=True,
         )
+    return "", None
         return "", None
 
 
@@ -392,7 +455,9 @@ async def run_all_buckets_concurrently(
             "bucket_names": [bucket["name"] for bucket in BUCKETS],
         },
     )
-    doc_text, doc_hash = _best_doc_text_from_cache(session, document)
+    doc_text, doc_hash = _best_doc_text_from_cache(
+        session, document, settings=settings
+    )
     logger.debug(
         "[specs_worker] run_all_buckets_concurrently document text status",
         {
