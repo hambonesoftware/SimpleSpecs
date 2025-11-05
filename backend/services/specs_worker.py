@@ -380,6 +380,25 @@ def _best_doc_text_from_cache(
                 "checked_paths": checked_paths,
             },
         )
+        logger.debug(
+            "[specs_worker] _best_doc_text_from_cache falling back to PyMuPDF",
+            {"document_id": document.id, "filename": document.filename},
+        )
+        import fitz  # PyMuPDF
+        # Document is typically saved in uploads/ by filename; try that.
+        from backend.paths import UPLOAD_DIR  # type: ignore
+        import os
+        pdf_path = os.path.join(UPLOAD_DIR, document.filename)  # type: ignore[attr-defined]
+        text_parts: List[str] = []
+        with fitz.open(pdf_path) as doc:
+            for page in doc:
+                text_parts.append(page.get_text("text"))
+        joined = "\n".join(text_parts)
+        logger.debug(
+            "[specs_worker] _best_doc_text_from_cache extracted via PyMuPDF",
+            {"document_id": document.id, "text_length": len(joined)},
+        )
+        return joined, None
     except Exception:
         logger.exception(
             "[specs_worker] _best_doc_text_from_cache fallback failed (document_id=%s)",
@@ -387,6 +406,7 @@ def _best_doc_text_from_cache(
             exc_info=True,
         )
     return "", None
+        return "", None
 
 
 async def _run_single_bucket(bucket: Dict[str, str], doc_text: str) -> Dict[str, Any]:
