@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -25,6 +26,8 @@ from backend.services.artifact_store import (
     get_cached_artifact,
     store_artifact,
 )  # type: ignore
+
+logger = logging.getLogger(__name__)
 
 # ---------- Configuration (env-driven so we don't edit config module) ----------
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
@@ -229,6 +232,11 @@ async def _openrouter_chat(prompt: str) -> str:
     """
     import httpx  # SimpleSpecs already depends on httpx via other paths
 
+    logger.debug(
+        "[specs_worker] _openrouter_chat invoked",
+        {"prompt_preview": prompt[:200], "prompt_length": len(prompt)},
+    )
+
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "HTTP-Referer": "https://github.com/hambonesoftware/SimpleSpecs",
@@ -247,12 +255,26 @@ async def _openrouter_chat(prompt: str) -> str:
 
     timeout = httpx.Timeout(SPECS_LLM_TIMEOUT_S)
     async with httpx.AsyncClient(timeout=timeout) as client:
+        logger.debug(
+            "[specs_worker] _openrouter_chat sending request",
+            {"model": SPECS_LLM_MODEL, "temperature": body["temperature"]},
+        )
         r = await client.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=body)
+        logger.debug(
+            "[specs_worker] _openrouter_chat received response",
+            {"status_code": r.status_code, "headers": dict(r.headers)},
+        )
         r.raise_for_status()
         data = r.json()
         try:
-            return data["choices"][0]["message"]["content"]
+            content = data["choices"][0]["message"]["content"]
+            logger.debug(
+                "[specs_worker] _openrouter_chat parsed content",
+                {"content_preview": content[:200], "content_length": len(content)},
+            )
+            return content
         except Exception:
+            logger.exception("[specs_worker] _openrouter_chat unexpected response structure", exc_info=True)
             return json.dumps({"error": "Unexpected response", "raw": data})
 
 
@@ -261,8 +283,16 @@ def _best_doc_text_from_cache(session: Session, document: Document) -> Tuple[str
     Try to obtain the best available "full text" for the document from the artifact store.
     Returns (text, doc_hash?|None).
     """
+    logger.debug(
+        "[specs_worker] _best_doc_text_from_cache invoked",
+        {"document_id": document.id},
+    )
     # Prefer a dedicated PARSED_TEXT artifact if your repo writes one.
     for key in ("parsed_text", "fulltext", "plain_text"):
+        logger.debug(
+            "[specs_worker] _best_doc_text_from_cache attempting cache lookup",
+            {"document_id": document.id, "key": key},
+        )
         cached = get_cached_artifact(
             session=session,
             document_id=document.id,
@@ -273,11 +303,25 @@ def _best_doc_text_from_cache(session: Session, document: Document) -> Tuple[str
         if cached and isinstance(cached.body, dict):
             text = cached.body.get("text") or cached.body.get("content") or ""
             if text:
-                return text, cached.body.get("doc_hash")
+                doc_hash = cached.body.get("doc_hash")
+                logger.debug(
+                    "[specs_worker] _best_doc_text_from_cache cache hit",
+                    {
+                        "document_id": document.id,
+                        "key": key,
+                        "text_length": len(text),
+                        "doc_hash": doc_hash,
+                    },
+                )
+                return text, doc_hash
 
     # Fall back to reading the PDF and extracting on the fly (basic PyMuPDF approach).
     # We avoid adding new heavy deps; SimpleSpecs likely already uses PyMuPDF elsewhere.
     try:
+        logger.debug(
+            "[specs_worker] _best_doc_text_from_cache falling back to PyMuPDF",
+            {"document_id": document.id, "filename": document.filename},
+        )
         import fitz  # PyMuPDF
         # Document is typically saved in uploads/ by filename; try that.
         from backend.paths import UPLOAD_DIR  # type: ignore
@@ -287,8 +331,18 @@ def _best_doc_text_from_cache(session: Session, document: Document) -> Tuple[str
         with fitz.open(pdf_path) as doc:
             for page in doc:
                 text_parts.append(page.get_text("text"))
-        return "\n".join(text_parts), None
+        joined = "\n".join(text_parts)
+        logger.debug(
+            "[specs_worker] _best_doc_text_from_cache extracted via PyMuPDF",
+            {"document_id": document.id, "text_length": len(joined)},
+        )
+        return joined, None
     except Exception:
+        logger.exception(
+            "[specs_worker] _best_doc_text_from_cache fallback failed (document_id=%s)",
+            document.id,
+            exc_info=True,
+        )
         return "", None
 
 
@@ -296,14 +350,31 @@ async def _run_single_bucket(bucket: Dict[str, str], doc_text: str) -> Dict[str,
     name = bucket["name"]
     prompt = bucket["prompt"] + doc_text
     try:
+        logger.debug(
+            "[specs_worker] _run_single_bucket starting",
+            {"bucket": name, "prompt_length": len(prompt)},
+        )
         raw = await _openrouter_chat(prompt)
         # Try to coerce to JSON when possible
         try:
             data = json.loads(raw)
         except Exception:
             data = {"raw": raw}
+        logger.debug(
+            "[specs_worker] _run_single_bucket success",
+            {
+                "bucket": name,
+                "response_preview": raw[:200],
+                "parsed_keys": list(data.keys()) if isinstance(data, dict) else None,
+            },
+        )
         return {"name": name, "ok": True, "data": data}
     except Exception as exc:
+        logger.exception(
+            "[specs_worker] _run_single_bucket failed (bucket=%s)",
+            name,
+            exc_info=True,
+        )
         return {"name": name, "ok": False, "error": str(exc)}
 
 
@@ -314,9 +385,29 @@ async def run_all_buckets_concurrently(
     Orchestrates a single concurrent run of all BUCKETS for one document.
     Returns a dictionary with "buckets" (mapping) and light run metadata.
     """
+    logger.debug(
+        "[specs_worker] run_all_buckets_concurrently invoked",
+        {
+            "document_id": document.id,
+            "bucket_names": [bucket["name"] for bucket in BUCKETS],
+        },
+    )
     doc_text, doc_hash = _best_doc_text_from_cache(session, document)
+    logger.debug(
+        "[specs_worker] run_all_buckets_concurrently document text status",
+        {
+            "document_id": document.id,
+            "doc_hash": doc_hash,
+            "text_available": bool(doc_text),
+            "text_length": len(doc_text or ""),
+        },
+    )
     if not doc_text:
         # We don't fail hard; return an informative structure
+        logger.debug(
+            "[specs_worker] run_all_buckets_concurrently no doc text",
+            {"document_id": document.id},
+        )
         return {
             "doc_id": document.id,
             "doc_hash": doc_hash,
@@ -325,12 +416,26 @@ async def run_all_buckets_concurrently(
         }
 
     sem = asyncio.Semaphore(SPECS_MAX_CONCURRENCY)
+    logger.debug(
+        "[specs_worker] run_all_buckets_concurrently semaphore created",
+        {"max_concurrency": SPECS_MAX_CONCURRENCY},
+    )
 
     async def guarded(bucket):
         async with sem:
+            logger.debug("[specs_worker] run_all_buckets_concurrently entering bucket", {"bucket": bucket["name"]})
             return await _run_single_bucket(bucket, doc_text)
 
     results = await asyncio.gather(*(guarded(b) for b in BUCKETS))
+    logger.debug(
+        "[specs_worker] run_all_buckets_concurrently gathered results",
+        {
+            "document_id": document.id,
+            "result_count": len(results),
+            "ok_buckets": [r["name"] for r in results if r.get("ok")],
+            "error_buckets": [r["name"] for r in results if not r.get("ok")],
+        },
+    )
 
     buckets_out: Dict[str, Any] = {}
     messages: List[str] = []
@@ -342,6 +447,14 @@ async def run_all_buckets_concurrently(
             buckets_out[name] = {"error": item.get("error", "unknown")}
             messages.append(f"Bucket {name} failed: {item.get('error')}")
 
+    logger.debug(
+        "[specs_worker] run_all_buckets_concurrently assembled output",
+        {
+            "document_id": document.id,
+            "bucket_keys": list(buckets_out.keys()),
+            "messages": messages,
+        },
+    )
     return {
         "doc_id": document.id,
         "doc_hash": doc_hash,
