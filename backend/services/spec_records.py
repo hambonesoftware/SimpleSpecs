@@ -18,6 +18,10 @@ from sqlmodel import Session, select
 from ..config import Settings
 from ..middleware import get_request_id
 from ..models import Document, SpecAuditEntry, SpecRecord
+from sqlmodel import select
+from ..models import SpecRecord
+# If you have an artifact store for buckets, import its delete helper:
+# from .artifact_store import delete_artifact, DocumentArtifactType
 
 
 class SpecRecordError(RuntimeError):
@@ -318,3 +322,42 @@ __all__ = [
     "export_spec_record",
     "fetch_spec_record",
 ]
+
+def wipe_spec_buckets_for_document(session, *, document_id: int) -> None:
+    """
+    Clear any persisted specification state for a document so a fresh
+    LLM extraction will run on the next request.
+
+    - Resets (or creates) a SpecRecord to a clean draft with empty payload.
+    - Optionally deletes any cached bucket artifacts (uncomment if you use them).
+    """
+    rec = session.exec(
+        select(SpecRecord).where(SpecRecord.document_id == document_id)
+    ).first()
+
+    if rec is None:
+        # If your app expects a record to exist, you could create one here.
+        # Otherwise just no-op.
+        return
+
+    rec.state = "draft"
+    rec.reviewer = None
+    rec.content_hash = None
+    rec.payload = {}  # wipe frozen/spec payload
+    rec.approved_at = None
+    rec.frozen_at = None
+    session.add(rec)
+
+    # If you persist bucket artifacts separately, delete them here.
+    # try:
+    #     delete_artifact(
+    #         session,
+    #         document_id=document_id,
+    #         artifact_type=DocumentArtifactType.SPEC_BUCKETS,
+    #         key="buckets",
+    #     )
+    # except Exception:
+    #     # Don't fail the wipe on artifact deletion issues.
+    #     pass
+
+    session.commit()

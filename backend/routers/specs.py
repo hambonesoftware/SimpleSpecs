@@ -27,6 +27,7 @@ from ..services.spec_records import (
     ensure_document,
     export_spec_record,
     fetch_spec_record,
+    wipe_spec_buckets_for_document,  # <-- required for rerun
 )
 
 router = APIRouter(prefix="/api", tags=["specifications"])
@@ -34,7 +35,6 @@ router = APIRouter(prefix="/api", tags=["specifications"])
 
 def _document_id(document: Document) -> int:
     """Return the document id or raise an internal error if missing."""
-
     if document.id is None:
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -102,7 +102,6 @@ async def extract_specs_endpoint(
     settings: Settings = Depends(get_settings),
 ) -> SpecExtractionResponse:
     """Return classified specification lines for a stored document."""
-
     document = session.get(Document, document_id)
     if document is None:
         raise HTTPException(
@@ -200,7 +199,6 @@ async def get_spec_record(
     session: Session = Depends(get_session),
 ) -> SpecRecordEnvelope:
     """Return the frozen specification record (if available) and audit trail."""
-
     try:
         document = ensure_document(session, document_id)
     except SpecRecordError as exc:
@@ -220,7 +218,6 @@ async def approve_spec_record(
     session: Session = Depends(get_session),
 ) -> SpecRecordEnvelope:
     """Freeze specification payload for a document and record an audit entry."""
-
     try:
         document = ensure_document(session, document_id)
     except SpecRecordError as exc:
@@ -261,7 +258,6 @@ async def export_spec_record_endpoint(
     settings: Settings = Depends(get_settings),
 ) -> FileResponse:
     """Generate a CSV bundle or DOCX export for an approved specification record."""
-
     try:
         document = ensure_document(session, document_id)
     except SpecRecordError as exc:
@@ -291,6 +287,29 @@ async def export_spec_record_endpoint(
         ) from exc
 
     return FileResponse(path, media_type=media_type, filename=path.name)
+
+
+# ---- RERUN SPECS SUPPORT ----------------------------------------------------
+
+
+@router.delete("/specs/{document_id}/buckets", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_spec_buckets(
+    document_id: int,
+    *,
+    session: Session = Depends(get_session),
+) -> None:
+    """
+    Wipe any persisted spec buckets / record state for this document so that the
+    next extraction call recomputes everything from scratch.
+    """
+    document = session.get(Document, document_id)
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+        )
+
+    wipe_spec_buckets_for_document(session, document_id=document_id)
+    return None
 
 
 __all__ = ["router"]

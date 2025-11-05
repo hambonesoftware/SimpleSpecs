@@ -1,47 +1,27 @@
 {
   "headers": [
     {
-      "text": "Foreword",
-      "number": null,
-      "level": 1
-    },
-    {
-      "text": "Standards Committee Roster",
-      "number": null,
-      "level": 1
-    },
-    {
-      "text": "1 Scope",
+      "text": "1 SCOPE",
       "number": "1",
       "level": 1
     },
     {
-      "text": "2 References",
+      "text": "2 REFERENCES",
       "number": "2",
       "level": 1
     },
     {
-      "text": "3 Terminology",
+      "text": "3 TERMINOLOGY",
       "number": "3",
       "level": 1
     },
     {
-      "text": "4 Theory and Measurement Technique",
+      "text": "4 THEORY AND MEASUREMENT TECHNIQUE",
       "number": "4",
       "level": 1
     },
     {
-      "text": "A1 Theory",
-      "number": "A1",
-      "level": 2
-    },
-    {
-      "text": "A2 Measurement Technique",
-      "number": "A2",
-      "level": 2
-    },
-    {
-      "text": "5 Flowmeter Description",
+      "text": "5 FLOWMETER DESCRIPTION",
       "number": "5",
       "level": 1
     },
@@ -61,12 +41,12 @@
       "level": 2
     },
     {
-      "text": "5.4 Outputs from the Secondary",
+      "text": "5.4 Outputs from the Secondary Section",
       "number": "5.4",
       "level": 2
     },
     {
-      "text": "6 Application Considerations",
+      "text": "6 APPLICATION CONSIDERATIONS",
       "number": "6",
       "level": 1
     },
@@ -176,6 +156,16 @@
       "level": 4
     },
     {
+      "text": "(a) Abrasive Slurries",
+      "number": null,
+      "level": 5
+    },
+    {
+      "text": "(b) Solids Settling-Out",
+      "number": null,
+      "level": 5
+    },
+    {
       "text": "6.4.1.6 Location with Regard to Electrical Interference",
       "number": "6.4.1.6",
       "level": 4
@@ -281,7 +271,7 @@
       "level": 3
     },
     {
-      "text": "7 Equipment Markings",
+      "text": "7 EQUIPMENT MARKINGS",
       "number": "7",
       "level": 1
     },
@@ -316,7 +306,7 @@
       "level": 3
     },
     {
-      "text": "8 Liquid Calibration",
+      "text": "8 LIQUID CALIBRATION",
       "number": "8",
       "level": 1
     },
@@ -356,45 +346,55 @@
       "level": 2
     },
     {
-      "text": "APPENDIX A ADDED DETAILS REGARDING THEORY AND MEASUREMENT TECHNIQUE",
+      "text": "APPENDIX A - ADDED DETAILS REGARDING THEORY AND MEASUREMENT TECHNIQUE",
       "number": "A",
       "level": 1
     },
     {
-      "text": "APPENDIX B ITEMS OF POTENTIAL INTEREST TO USERS",
+      "text": "A1 THEORY",
+      "number": "A1",
+      "level": 2
+    },
+    {
+      "text": "A2 MEASUREMENT TECHNIQUE",
+      "number": "A2",
+      "level": 2
+    },
+    {
+      "text": "APPENDIX B - ITEMS OF POTENTIAL INTEREST TO USERS",
       "number": "B",
       "level": 1
     },
     {
-      "text": "B1 Primary",
+      "text": "B1 PRIMARY",
       "number": "B1",
       "level": 2
     },
     {
-      "text": "B2 Secondary",
+      "text": "B2 SECONDARY",
       "number": "B2",
       "level": 2
     },
     {
-      "text": "B3 System",
+      "text": "B3 SYSTEM",
       "number": "B3",
       "level": 2
     },
     {
-      "text": "APPENDIX C LINER MATERIAL GUIDELINES",
+      "text": "APPENDIX C - LINER MATERIAL GUIDELINES",
       "number": "C",
       "level": 1
     },
     {
-      "text": "APPENDIX D BIBLIOGRAPHY",
+      "text": "APPENDIX D - BIBLIOGRAPHY",
       "number": "D",
       "level": 1
     }
   ],
   "raw_responses": [
-    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"Foreword\", \"number\": null, \"level\": 1 },\n  { \"text\": \"Standards Committee Roster\", \"number\": null, \"level\": 1 },\n  { \"text\": \"1 Scope\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"2 References\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"3 Terminology\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"4 Theory and Measurement Technique\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"A1 Theory\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"A2 Measurement Technique\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"5 Flowmeter Description\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"5.1 Overview\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"5.2 Primary Device\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"5.3 Secondary Device\", \"number\": \"5.3\", \"level\": 2 },\n  { \"text\": \"5.4 Outputs from the Secondary\", \"number\": \"5.4\", \"level\": 2 },\n  { \"text\": \"6 Application Considerations\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"6.1 Process Liquid\", \"number\": \"6.1\", \"level\": 2 },\n  { \"text\": \"6.1.1 Liquid Electrical Conductivity\", \"number\": \"6.1.1\", \"level\": 3 },\n  { \"text\": \"6.1.2 Noisy Flow Signal\", \"number\": \"6.1.2\", \"level\": 3 },\n  { \"text\": \"6.2 Process Hydrodynamics\", \"number\": \"6.2\", \"level\": 2 },\n  { \"text\": \"6.2.1 Reynolds Number Effect\", \"number\": \"6.2.1\", \"level\": 3 },\n  { \"text\": \"6.2.2 Velocity Profile Effect\", \"number\": \"6.2.2\", \"level\": 3 },\n  { \"text\": \"6.2.3 Slippage\", \"number\": \"6.2.3\", \"level\": 3 },\n  { \"text\": \"6.3 Primary Device - Sizing Considerations\", \"number\": \"6.3\", \"level\": 2 },\n  { \"text\": \"6.3.1 General Considerations\", \"number\": \"6.3.1\", \"level\": 3 },\n  { \"text\": \"6.3.2 Special Process Considerations\", \"number\": \"6.3.2\", \"level\": 3 },\n  { \"text\": \"6.3.2.1 Accuracy\", \"number\": \"6.3.2.1\", \"level\": 4 },\n  { \"text\": \"6.3.2.2 Jet Effect\", \"number\": \"6.3.2.2\", \"level\": 4 },\n  { \"text\": \"6.3.2.3 Abrasive Slurries\", \"number\": \"6.3.2.3\", \"level\": 4 },\n  { \"text\": \"6.3.2.4 Fast-Settling Slurries\", \"number\": \"6.3.2.4\", \"level\": 4 },\n  { \"text\": \"6.4 Primary Device - Location, Installation, and Maintenance\", \"number\": \"6.4\", \"level\": 2 },\n  { \"text\": \"6.4.1 Primary Device Location and Orientation\", \"number\": \"6.4.1\", \"level\": 3 },\n  { \"text\": \"6.4.1.1 Piping Effects\", \"number\": \"6.4.1.1\", \"level\": 4 },\n  { \"text\": \"6.4.1.2 Full Pipe Requirements\", \"number\": \"6.4.1.2\", \"level\": 4 },\n  { \"text\": \"6.4.1.3 Electrode Position - Horizontal Installations\", \"number\": \"6.4.1.3\", \"level\": 4 },\n  { \"text\": \"6.4.1.4 In-Situ Zero Checking\", \"number\": \"6.4.1.4\", \"level\": 4 },\n  { \"text\": \"6.4.1.5 Entrained Solids (Slurries)\", \"number\": \"6.4.1.5\", \"level\": 4 },\n  { \"text\": \"6.4.1.6 Location with Regard to Electrical Interference\", \"number\": \"6.4.1.6\", \"level\": 4 },\n  { \"text\": \"6.4.2 Installation of Primary Device\", \"number\": \"6.4.2\", \"level\": 3 },\n  { \"text\": \"6.4.2.1 Installation Design\", \"number\": \"6.4.2.1\", \"level\": 4 },\n  { \"text\": \"6.4.2.2 Handling of the Primary Device\", \"number\": \"6.4.2.2\", \"level\": 4 },\n  { \"text\": \"6.4.2.3 Pipework Alignment and Connectors\", \"number\": \"6.4.2.3\", \"level\": 4 },\n  { \"text\": \"6.4.2.4 Transition Piping\", \"number\": \"6.4.2.4\", \"level\": 4 },\n  { \"text\": \"6.4.3 Electrical Installation\", \"number\": \"6.4.3\", \"level\": 3 },\n  { \"text\": \"6.4.3.1 General Requirements\", \"number\": \"6.4.3.1\", \"level\": 4 },\n  { \"text\": \"6.4.3.2 Power Factor (AC Systems Only)\", \"number\": \"6.4.3.2\", \"level\": 4 },\n  { \"text\": \"6.4.3.3 Cathodic Protection\", \"number\": \"6.4.3.3\", \"level\": 4 },\n  { \"text\": \"6.4.4 Coatings and Deposits\", \"number\": \"6.4.4\", \"level\": 3 },\n  { \"text\": \"6.5 Primary Device - Materials of Construction\", \"number\": \"6.5\", \"level\": 2 },\n  { \"text\": \"6.5.1 General Guidelines\", \"number\": \"6.5.1\", \"level\": 3 },\n  { \"text\": \"6.5.2 Liner Materials\", \"number\": \"6.5.2\", \"level\": 3 },\n  { \"text\": \"6.5.3 Electrode Materials\", \"number\": \"6.5.3\", \"level\": 3 },\n  { \"text\": \"6.6 Secondary Device - Installation\", \"number\": \"6.6\", \"level\": 2 },\n  { \"text\": \"6.6.1 Location of Secondary Device\", \"number\": \"6.6.1\", \"level\": 3 },\n  { \"text\": \"6.6.2 Electrical Installation\", \"number\": \"6.6.2\", \"level\": 3 },\n  { \"text\": \"6.7 Safety\", \"number\": \"6.7\", \"level\": 2 },\n  { \"text\": \"6.7.1 Electrical Safety\", \"number\": \"6.7.1\", \"level\": 3 },\n  { \"text\": \"6.7.2 Mechanical Safety\", \"number\": \"6.7.2\", \"level\": 3 },\n  { \"text\": \"7 Equipment Markings\", \"number\": \"7\", \"level\": 1 },\n  { \"text\": \"7.1 Introduction\", \"number\": \"7.1\", \"level\": 2 },\n  { \"text\": \"7.2 Primary Device\", \"number\": \"7.2\", \"level\": 2 },\n  { \"text\": \"7.2.1 Mandatory Information\", \"number\": \"7.2.1\", \"level\": 3 },\n  { \"text\": \"7.2.2 Optional Information\", \"number\": \"7.2.2\", \"level\": 3 },\n  { \"text\": \"7.3 Secondary Device\", \"number\": \"7.3\", \"level\": 2 },\n  { \"text\": \"7.3.1 Mandatory Information\", \"number\": \"7.3.1\", \"level\": 3 },\n  { \"text\": \"8 Liquid Calibration\", \"number\": \"8\", \"level\": 1 },\n  { \"text\": \"8.1 Overview\", \"number\": \"8.1\", \"level\": 2 },\n  { \"text\": \"8.2 Calibration Conditions\", \"number\": \"8.2\", \"level\": 2 },\n  { \"text\": \"8.3 Calibration Facilities\", \"number\": \"8.3\", \"level\": 2 },\n  { \"text\": \"8.4 Calibration of the Primary\", \"number\": \"8.4\", \"level\": 2 },\n  { \"text\": \"8.5 Calibration of the Secondary\", \"number\": \"8.5\", \"level\": 2 },\n  { \"text\": \"8.6 Spanning of the Secondary\", \"number\": \"8.6\", \"level\": 2 },\n  { \"text\": \"8.7 Installation Effects\", \"number\": \"8.7\", \"level\": 2 },\n  { \"text\": \"APPENDIX A ADDED DETAILS REGARDING THEORY AND MEASUREMENT TECHNIQUE\", \"number\": \"A\", \"level\": 1 },\n  { \"text\": \"APPENDIX B ITEMS OF POTENTIAL INTEREST TO USERS\", \"number\": \"B\", \"level\": 1 },\n  { \"text\": \"B1 Primary\", \"number\": \"B1\", \"level\": 2 },\n  { \"text\": \"B2 Secondary\", \"number\": \"B2\", \"level\": 2 },\n  { \"text\": \"B3 System\", \"number\": \"B3\", \"level\": 2 },\n  { \"text\": \"APPENDIX C LINER MATERIAL GUIDELINES\", \"number\": \"C\", \"level\": 1 },\n  { \"text\": \"APPENDIX D BIBLIOGRAPHY\", \"number\": \"D\", \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
+    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"1 SCOPE\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"2 REFERENCES\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"3 TERMINOLOGY\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"4 THEORY AND MEASUREMENT TECHNIQUE\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"5 FLOWMETER DESCRIPTION\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"5.1 Overview\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"5.2 Primary Device\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"5.3 Secondary Device\", \"number\": \"5.3\", \"level\": 2 },\n  { \"text\": \"5.4 Outputs from the Secondary Section\", \"number\": \"5.4\", \"level\": 2 },\n  { \"text\": \"6 APPLICATION CONSIDERATIONS\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"6.1 Process Liquid\", \"number\": \"6.1\", \"level\": 2 },\n  { \"text\": \"6.1.1 Liquid Electrical Conductivity\", \"number\": \"6.1.1\", \"level\": 3 },\n  { \"text\": \"6.1.2 Noisy Flow Signal\", \"number\": \"6.1.2\", \"level\": 3 },\n  { \"text\": \"6.2 Process Hydrodynamics\", \"number\": \"6.2\", \"level\": 2 },\n  { \"text\": \"6.2.1 Reynolds Number Effect\", \"number\": \"6.2.1\", \"level\": 3 },\n  { \"text\": \"6.2.2 Velocity Profile Effect\", \"number\": \"6.2.2\", \"level\": 3 },\n  { \"text\": \"6.2.3 Slippage\", \"number\": \"6.2.3\", \"level\": 3 },\n  { \"text\": \"6.3 Primary Device - Sizing Considerations\", \"number\": \"6.3\", \"level\": 2 },\n  { \"text\": \"6.3.1 General Considerations\", \"number\": \"6.3.1\", \"level\": 3 },\n  { \"text\": \"6.3.2 Special Process Considerations\", \"number\": \"6.3.2\", \"level\": 3 },\n  { \"text\": \"6.3.2.1 Accuracy\", \"number\": \"6.3.2.1\", \"level\": 4 },\n  { \"text\": \"6.3.2.2 Jet Effect\", \"number\": \"6.3.2.2\", \"level\": 4 },\n  { \"text\": \"6.3.2.3 Abrasive Slurries\", \"number\": \"6.3.2.3\", \"level\": 4 },\n  { \"text\": \"6.3.2.4 Fast-Settling Slurries\", \"number\": \"6.3.2.4\", \"level\": 4 },\n  { \"text\": \"6.4 Primary Device - Location, Installation, and Maintenance\", \"number\": \"6.4\", \"level\": 2 },\n  { \"text\": \"6.4.1 Primary Device Location and Orientation\", \"number\": \"6.4.1\", \"level\": 3 },\n  { \"text\": \"6.4.1.1 Piping Effects\", \"number\": \"6.4.1.1\", \"level\": 4 },\n  { \"text\": \"6.4.1.2 Full Pipe Requirements\", \"number\": \"6.4.1.2\", \"level\": 4 },\n  { \"text\": \"6.4.1.3 Electrode Position - Horizontal Installations\", \"number\": \"6.4.1.3\", \"level\": 4 },\n  { \"text\": \"6.4.1.4 In-Situ Zero Checking\", \"number\": \"6.4.1.4\", \"level\": 4 },\n  { \"text\": \"6.4.1.5 Entrained Solids (Slurries)\", \"number\": \"6.4.1.5\", \"level\": 4 },\n  { \"text\": \"(a) Abrasive Slurries\", \"number\": null, \"level\": 5 },\n  { \"text\": \"(b) Solids Settling-Out\", \"number\": null, \"level\": 5 },\n  { \"text\": \"6.4.1.6 Location with Regard to Electrical Interference\", \"number\": \"6.4.1.6\", \"level\": 4 },\n  { \"text\": \"6.4.2 Installation of Primary Device\", \"number\": \"6.4.2\", \"level\": 3 },\n  { \"text\": \"6.4.2.1 Installation Design\", \"number\": \"6.4.2.1\", \"level\": 4 },\n  { \"text\": \"6.4.2.2 Handling of the Primary Device\", \"number\": \"6.4.2.2\", \"level\": 4 },\n  { \"text\": \"6.4.2.3 Pipework Alignment and Connectors\", \"number\": \"6.4.2.3\", \"level\": 4 },\n  { \"text\": \"6.4.2.4 Transition Piping\", \"number\": \"6.4.2.4\", \"level\": 4 },\n  { \"text\": \"6.4.3 Electrical Installation\", \"number\": \"6.4.3\", \"level\": 3 },\n  { \"text\": \"6.4.3.1 General Requirements\", \"number\": \"6.4.3.1\", \"level\": 4 },\n  { \"text\": \"6.4.3.2 Power Factor (AC Systems Only)\", \"number\": \"6.4.3.2\", \"level\": 4 },\n  { \"text\": \"6.4.3.3 Cathodic Protection\", \"number\": \"6.4.3.3\", \"level\": 4 },\n  { \"text\": \"6.4.4 Coatings and Deposits\", \"number\": \"6.4.4\", \"level\": 3 },\n  { \"text\": \"6.5 Primary Device - Materials of Construction\", \"number\": \"6.5\", \"level\": 2 },\n  { \"text\": \"6.5.1 General Guidelines\", \"number\": \"6.5.1\", \"level\": 3 },\n  { \"text\": \"6.5.2 Liner Materials\", \"number\": \"6.5.2\", \"level\": 3 },\n  { \"text\": \"6.5.3 Electrode Materials\", \"number\": \"6.5.3\", \"level\": 3 },\n  { \"text\": \"6.6 Secondary Device - Installation\", \"number\": \"6.6\", \"level\": 2 },\n  { \"text\": \"6.6.1 Location of Secondary Device\", \"number\": \"6.6.1\", \"level\": 3 },\n  { \"text\": \"6.6.2 Electrical Installation\", \"number\": \"6.6.2\", \"level\": 3 },\n  { \"text\": \"6.7 Safety\", \"number\": \"6.7\", \"level\": 2 },\n  { \"text\": \"6.7.1 Electrical Safety\", \"number\": \"6.7.1\", \"level\": 3 },\n  { \"text\": \"6.7.2 Mechanical Safety\", \"number\": \"6.7.2\", \"level\": 3 },\n  { \"text\": \"7 EQUIPMENT MARKINGS\", \"number\": \"7\", \"level\": 1 },\n  { \"text\": \"7.1 Introduction\", \"number\": \"7.1\", \"level\": 2 },\n  { \"text\": \"7.2 Primary Device\", \"number\": \"7.2\", \"level\": 2 },\n  { \"text\": \"7.2.1 Mandatory Information\", \"number\": \"7.2.1\", \"level\": 3 },\n  { \"text\": \"7.2.2 Optional Information\", \"number\": \"7.2.2\", \"level\": 3 },\n  { \"text\": \"7.3 Secondary Device\", \"number\": \"7.3\", \"level\": 2 },\n  { \"text\": \"7.3.1 Mandatory Information\", \"number\": \"7.3.1\", \"level\": 3 },\n  { \"text\": \"8 LIQUID CALIBRATION\", \"number\": \"8\", \"level\": 1 },\n  { \"text\": \"8.1 Overview\", \"number\": \"8.1\", \"level\": 2 },\n  { \"text\": \"8.2 Calibration Conditions\", \"number\": \"8.2\", \"level\": 2 },\n  { \"text\": \"8.3 Calibration Facilities\", \"number\": \"8.3\", \"level\": 2 },\n  { \"text\": \"8.4 Calibration of the Primary\", \"number\": \"8.4\", \"level\": 2 },\n  { \"text\": \"8.5 Calibration of the Secondary\", \"number\": \"8.5\", \"level\": 2 },\n  { \"text\": \"8.6 Spanning of the Secondary\", \"number\": \"8.6\", \"level\": 2 },\n  { \"text\": \"8.7 Installation Effects\", \"number\": \"8.7\", \"level\": 2 },\n  { \"text\": \"APPENDIX A - ADDED DETAILS REGARDING THEORY AND MEASUREMENT TECHNIQUE\", \"number\": \"A\", \"level\": 1 },\n  { \"text\": \"A1 THEORY\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"A2 MEASUREMENT TECHNIQUE\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"APPENDIX B - ITEMS OF POTENTIAL INTEREST TO USERS\", \"number\": \"B\", \"level\": 1 },\n  { \"text\": \"B1 PRIMARY\", \"number\": \"B1\", \"level\": 2 },\n  { \"text\": \"B2 SECONDARY\", \"number\": \"B2\", \"level\": 2 },\n  { \"text\": \"B3 SYSTEM\", \"number\": \"B3\", \"level\": 2 },\n  { \"text\": \"APPENDIX C - LINER MATERIAL GUIDELINES\", \"number\": \"C\", \"level\": 1 },\n  { \"text\": \"APPENDIX D - BIBLIOGRAPHY\", \"number\": \"D\", \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
   ],
   "fenced_blocks": [
-    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"Foreword\", \"number\": null, \"level\": 1 },\n  { \"text\": \"Standards Committee Roster\", \"number\": null, \"level\": 1 },\n  { \"text\": \"1 Scope\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"2 References\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"3 Terminology\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"4 Theory and Measurement Technique\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"A1 Theory\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"A2 Measurement Technique\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"5 Flowmeter Description\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"5.1 Overview\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"5.2 Primary Device\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"5.3 Secondary Device\", \"number\": \"5.3\", \"level\": 2 },\n  { \"text\": \"5.4 Outputs from the Secondary\", \"number\": \"5.4\", \"level\": 2 },\n  { \"text\": \"6 Application Considerations\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"6.1 Process Liquid\", \"number\": \"6.1\", \"level\": 2 },\n  { \"text\": \"6.1.1 Liquid Electrical Conductivity\", \"number\": \"6.1.1\", \"level\": 3 },\n  { \"text\": \"6.1.2 Noisy Flow Signal\", \"number\": \"6.1.2\", \"level\": 3 },\n  { \"text\": \"6.2 Process Hydrodynamics\", \"number\": \"6.2\", \"level\": 2 },\n  { \"text\": \"6.2.1 Reynolds Number Effect\", \"number\": \"6.2.1\", \"level\": 3 },\n  { \"text\": \"6.2.2 Velocity Profile Effect\", \"number\": \"6.2.2\", \"level\": 3 },\n  { \"text\": \"6.2.3 Slippage\", \"number\": \"6.2.3\", \"level\": 3 },\n  { \"text\": \"6.3 Primary Device - Sizing Considerations\", \"number\": \"6.3\", \"level\": 2 },\n  { \"text\": \"6.3.1 General Considerations\", \"number\": \"6.3.1\", \"level\": 3 },\n  { \"text\": \"6.3.2 Special Process Considerations\", \"number\": \"6.3.2\", \"level\": 3 },\n  { \"text\": \"6.3.2.1 Accuracy\", \"number\": \"6.3.2.1\", \"level\": 4 },\n  { \"text\": \"6.3.2.2 Jet Effect\", \"number\": \"6.3.2.2\", \"level\": 4 },\n  { \"text\": \"6.3.2.3 Abrasive Slurries\", \"number\": \"6.3.2.3\", \"level\": 4 },\n  { \"text\": \"6.3.2.4 Fast-Settling Slurries\", \"number\": \"6.3.2.4\", \"level\": 4 },\n  { \"text\": \"6.4 Primary Device - Location, Installation, and Maintenance\", \"number\": \"6.4\", \"level\": 2 },\n  { \"text\": \"6.4.1 Primary Device Location and Orientation\", \"number\": \"6.4.1\", \"level\": 3 },\n  { \"text\": \"6.4.1.1 Piping Effects\", \"number\": \"6.4.1.1\", \"level\": 4 },\n  { \"text\": \"6.4.1.2 Full Pipe Requirements\", \"number\": \"6.4.1.2\", \"level\": 4 },\n  { \"text\": \"6.4.1.3 Electrode Position - Horizontal Installations\", \"number\": \"6.4.1.3\", \"level\": 4 },\n  { \"text\": \"6.4.1.4 In-Situ Zero Checking\", \"number\": \"6.4.1.4\", \"level\": 4 },\n  { \"text\": \"6.4.1.5 Entrained Solids (Slurries)\", \"number\": \"6.4.1.5\", \"level\": 4 },\n  { \"text\": \"6.4.1.6 Location with Regard to Electrical Interference\", \"number\": \"6.4.1.6\", \"level\": 4 },\n  { \"text\": \"6.4.2 Installation of Primary Device\", \"number\": \"6.4.2\", \"level\": 3 },\n  { \"text\": \"6.4.2.1 Installation Design\", \"number\": \"6.4.2.1\", \"level\": 4 },\n  { \"text\": \"6.4.2.2 Handling of the Primary Device\", \"number\": \"6.4.2.2\", \"level\": 4 },\n  { \"text\": \"6.4.2.3 Pipework Alignment and Connectors\", \"number\": \"6.4.2.3\", \"level\": 4 },\n  { \"text\": \"6.4.2.4 Transition Piping\", \"number\": \"6.4.2.4\", \"level\": 4 },\n  { \"text\": \"6.4.3 Electrical Installation\", \"number\": \"6.4.3\", \"level\": 3 },\n  { \"text\": \"6.4.3.1 General Requirements\", \"number\": \"6.4.3.1\", \"level\": 4 },\n  { \"text\": \"6.4.3.2 Power Factor (AC Systems Only)\", \"number\": \"6.4.3.2\", \"level\": 4 },\n  { \"text\": \"6.4.3.3 Cathodic Protection\", \"number\": \"6.4.3.3\", \"level\": 4 },\n  { \"text\": \"6.4.4 Coatings and Deposits\", \"number\": \"6.4.4\", \"level\": 3 },\n  { \"text\": \"6.5 Primary Device - Materials of Construction\", \"number\": \"6.5\", \"level\": 2 },\n  { \"text\": \"6.5.1 General Guidelines\", \"number\": \"6.5.1\", \"level\": 3 },\n  { \"text\": \"6.5.2 Liner Materials\", \"number\": \"6.5.2\", \"level\": 3 },\n  { \"text\": \"6.5.3 Electrode Materials\", \"number\": \"6.5.3\", \"level\": 3 },\n  { \"text\": \"6.6 Secondary Device - Installation\", \"number\": \"6.6\", \"level\": 2 },\n  { \"text\": \"6.6.1 Location of Secondary Device\", \"number\": \"6.6.1\", \"level\": 3 },\n  { \"text\": \"6.6.2 Electrical Installation\", \"number\": \"6.6.2\", \"level\": 3 },\n  { \"text\": \"6.7 Safety\", \"number\": \"6.7\", \"level\": 2 },\n  { \"text\": \"6.7.1 Electrical Safety\", \"number\": \"6.7.1\", \"level\": 3 },\n  { \"text\": \"6.7.2 Mechanical Safety\", \"number\": \"6.7.2\", \"level\": 3 },\n  { \"text\": \"7 Equipment Markings\", \"number\": \"7\", \"level\": 1 },\n  { \"text\": \"7.1 Introduction\", \"number\": \"7.1\", \"level\": 2 },\n  { \"text\": \"7.2 Primary Device\", \"number\": \"7.2\", \"level\": 2 },\n  { \"text\": \"7.2.1 Mandatory Information\", \"number\": \"7.2.1\", \"level\": 3 },\n  { \"text\": \"7.2.2 Optional Information\", \"number\": \"7.2.2\", \"level\": 3 },\n  { \"text\": \"7.3 Secondary Device\", \"number\": \"7.3\", \"level\": 2 },\n  { \"text\": \"7.3.1 Mandatory Information\", \"number\": \"7.3.1\", \"level\": 3 },\n  { \"text\": \"8 Liquid Calibration\", \"number\": \"8\", \"level\": 1 },\n  { \"text\": \"8.1 Overview\", \"number\": \"8.1\", \"level\": 2 },\n  { \"text\": \"8.2 Calibration Conditions\", \"number\": \"8.2\", \"level\": 2 },\n  { \"text\": \"8.3 Calibration Facilities\", \"number\": \"8.3\", \"level\": 2 },\n  { \"text\": \"8.4 Calibration of the Primary\", \"number\": \"8.4\", \"level\": 2 },\n  { \"text\": \"8.5 Calibration of the Secondary\", \"number\": \"8.5\", \"level\": 2 },\n  { \"text\": \"8.6 Spanning of the Secondary\", \"number\": \"8.6\", \"level\": 2 },\n  { \"text\": \"8.7 Installation Effects\", \"number\": \"8.7\", \"level\": 2 },\n  { \"text\": \"APPENDIX A ADDED DETAILS REGARDING THEORY AND MEASUREMENT TECHNIQUE\", \"number\": \"A\", \"level\": 1 },\n  { \"text\": \"APPENDIX B ITEMS OF POTENTIAL INTEREST TO USERS\", \"number\": \"B\", \"level\": 1 },\n  { \"text\": \"B1 Primary\", \"number\": \"B1\", \"level\": 2 },\n  { \"text\": \"B2 Secondary\", \"number\": \"B2\", \"level\": 2 },\n  { \"text\": \"B3 System\", \"number\": \"B3\", \"level\": 2 },\n  { \"text\": \"APPENDIX C LINER MATERIAL GUIDELINES\", \"number\": \"C\", \"level\": 1 },\n  { \"text\": \"APPENDIX D BIBLIOGRAPHY\", \"number\": \"D\", \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
+    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"1 SCOPE\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"2 REFERENCES\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"3 TERMINOLOGY\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"4 THEORY AND MEASUREMENT TECHNIQUE\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"5 FLOWMETER DESCRIPTION\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"5.1 Overview\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"5.2 Primary Device\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"5.3 Secondary Device\", \"number\": \"5.3\", \"level\": 2 },\n  { \"text\": \"5.4 Outputs from the Secondary Section\", \"number\": \"5.4\", \"level\": 2 },\n  { \"text\": \"6 APPLICATION CONSIDERATIONS\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"6.1 Process Liquid\", \"number\": \"6.1\", \"level\": 2 },\n  { \"text\": \"6.1.1 Liquid Electrical Conductivity\", \"number\": \"6.1.1\", \"level\": 3 },\n  { \"text\": \"6.1.2 Noisy Flow Signal\", \"number\": \"6.1.2\", \"level\": 3 },\n  { \"text\": \"6.2 Process Hydrodynamics\", \"number\": \"6.2\", \"level\": 2 },\n  { \"text\": \"6.2.1 Reynolds Number Effect\", \"number\": \"6.2.1\", \"level\": 3 },\n  { \"text\": \"6.2.2 Velocity Profile Effect\", \"number\": \"6.2.2\", \"level\": 3 },\n  { \"text\": \"6.2.3 Slippage\", \"number\": \"6.2.3\", \"level\": 3 },\n  { \"text\": \"6.3 Primary Device - Sizing Considerations\", \"number\": \"6.3\", \"level\": 2 },\n  { \"text\": \"6.3.1 General Considerations\", \"number\": \"6.3.1\", \"level\": 3 },\n  { \"text\": \"6.3.2 Special Process Considerations\", \"number\": \"6.3.2\", \"level\": 3 },\n  { \"text\": \"6.3.2.1 Accuracy\", \"number\": \"6.3.2.1\", \"level\": 4 },\n  { \"text\": \"6.3.2.2 Jet Effect\", \"number\": \"6.3.2.2\", \"level\": 4 },\n  { \"text\": \"6.3.2.3 Abrasive Slurries\", \"number\": \"6.3.2.3\", \"level\": 4 },\n  { \"text\": \"6.3.2.4 Fast-Settling Slurries\", \"number\": \"6.3.2.4\", \"level\": 4 },\n  { \"text\": \"6.4 Primary Device - Location, Installation, and Maintenance\", \"number\": \"6.4\", \"level\": 2 },\n  { \"text\": \"6.4.1 Primary Device Location and Orientation\", \"number\": \"6.4.1\", \"level\": 3 },\n  { \"text\": \"6.4.1.1 Piping Effects\", \"number\": \"6.4.1.1\", \"level\": 4 },\n  { \"text\": \"6.4.1.2 Full Pipe Requirements\", \"number\": \"6.4.1.2\", \"level\": 4 },\n  { \"text\": \"6.4.1.3 Electrode Position - Horizontal Installations\", \"number\": \"6.4.1.3\", \"level\": 4 },\n  { \"text\": \"6.4.1.4 In-Situ Zero Checking\", \"number\": \"6.4.1.4\", \"level\": 4 },\n  { \"text\": \"6.4.1.5 Entrained Solids (Slurries)\", \"number\": \"6.4.1.5\", \"level\": 4 },\n  { \"text\": \"(a) Abrasive Slurries\", \"number\": null, \"level\": 5 },\n  { \"text\": \"(b) Solids Settling-Out\", \"number\": null, \"level\": 5 },\n  { \"text\": \"6.4.1.6 Location with Regard to Electrical Interference\", \"number\": \"6.4.1.6\", \"level\": 4 },\n  { \"text\": \"6.4.2 Installation of Primary Device\", \"number\": \"6.4.2\", \"level\": 3 },\n  { \"text\": \"6.4.2.1 Installation Design\", \"number\": \"6.4.2.1\", \"level\": 4 },\n  { \"text\": \"6.4.2.2 Handling of the Primary Device\", \"number\": \"6.4.2.2\", \"level\": 4 },\n  { \"text\": \"6.4.2.3 Pipework Alignment and Connectors\", \"number\": \"6.4.2.3\", \"level\": 4 },\n  { \"text\": \"6.4.2.4 Transition Piping\", \"number\": \"6.4.2.4\", \"level\": 4 },\n  { \"text\": \"6.4.3 Electrical Installation\", \"number\": \"6.4.3\", \"level\": 3 },\n  { \"text\": \"6.4.3.1 General Requirements\", \"number\": \"6.4.3.1\", \"level\": 4 },\n  { \"text\": \"6.4.3.2 Power Factor (AC Systems Only)\", \"number\": \"6.4.3.2\", \"level\": 4 },\n  { \"text\": \"6.4.3.3 Cathodic Protection\", \"number\": \"6.4.3.3\", \"level\": 4 },\n  { \"text\": \"6.4.4 Coatings and Deposits\", \"number\": \"6.4.4\", \"level\": 3 },\n  { \"text\": \"6.5 Primary Device - Materials of Construction\", \"number\": \"6.5\", \"level\": 2 },\n  { \"text\": \"6.5.1 General Guidelines\", \"number\": \"6.5.1\", \"level\": 3 },\n  { \"text\": \"6.5.2 Liner Materials\", \"number\": \"6.5.2\", \"level\": 3 },\n  { \"text\": \"6.5.3 Electrode Materials\", \"number\": \"6.5.3\", \"level\": 3 },\n  { \"text\": \"6.6 Secondary Device - Installation\", \"number\": \"6.6\", \"level\": 2 },\n  { \"text\": \"6.6.1 Location of Secondary Device\", \"number\": \"6.6.1\", \"level\": 3 },\n  { \"text\": \"6.6.2 Electrical Installation\", \"number\": \"6.6.2\", \"level\": 3 },\n  { \"text\": \"6.7 Safety\", \"number\": \"6.7\", \"level\": 2 },\n  { \"text\": \"6.7.1 Electrical Safety\", \"number\": \"6.7.1\", \"level\": 3 },\n  { \"text\": \"6.7.2 Mechanical Safety\", \"number\": \"6.7.2\", \"level\": 3 },\n  { \"text\": \"7 EQUIPMENT MARKINGS\", \"number\": \"7\", \"level\": 1 },\n  { \"text\": \"7.1 Introduction\", \"number\": \"7.1\", \"level\": 2 },\n  { \"text\": \"7.2 Primary Device\", \"number\": \"7.2\", \"level\": 2 },\n  { \"text\": \"7.2.1 Mandatory Information\", \"number\": \"7.2.1\", \"level\": 3 },\n  { \"text\": \"7.2.2 Optional Information\", \"number\": \"7.2.2\", \"level\": 3 },\n  { \"text\": \"7.3 Secondary Device\", \"number\": \"7.3\", \"level\": 2 },\n  { \"text\": \"7.3.1 Mandatory Information\", \"number\": \"7.3.1\", \"level\": 3 },\n  { \"text\": \"8 LIQUID CALIBRATION\", \"number\": \"8\", \"level\": 1 },\n  { \"text\": \"8.1 Overview\", \"number\": \"8.1\", \"level\": 2 },\n  { \"text\": \"8.2 Calibration Conditions\", \"number\": \"8.2\", \"level\": 2 },\n  { \"text\": \"8.3 Calibration Facilities\", \"number\": \"8.3\", \"level\": 2 },\n  { \"text\": \"8.4 Calibration of the Primary\", \"number\": \"8.4\", \"level\": 2 },\n  { \"text\": \"8.5 Calibration of the Secondary\", \"number\": \"8.5\", \"level\": 2 },\n  { \"text\": \"8.6 Spanning of the Secondary\", \"number\": \"8.6\", \"level\": 2 },\n  { \"text\": \"8.7 Installation Effects\", \"number\": \"8.7\", \"level\": 2 },\n  { \"text\": \"APPENDIX A - ADDED DETAILS REGARDING THEORY AND MEASUREMENT TECHNIQUE\", \"number\": \"A\", \"level\": 1 },\n  { \"text\": \"A1 THEORY\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"A2 MEASUREMENT TECHNIQUE\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"APPENDIX B - ITEMS OF POTENTIAL INTEREST TO USERS\", \"number\": \"B\", \"level\": 1 },\n  { \"text\": \"B1 PRIMARY\", \"number\": \"B1\", \"level\": 2 },\n  { \"text\": \"B2 SECONDARY\", \"number\": \"B2\", \"level\": 2 },\n  { \"text\": \"B3 SYSTEM\", \"number\": \"B3\", \"level\": 2 },\n  { \"text\": \"APPENDIX C - LINER MATERIAL GUIDELINES\", \"number\": \"C\", \"level\": 1 },\n  { \"text\": \"APPENDIX D - BIBLIOGRAPHY\", \"number\": \"D\", \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
   ]
 }

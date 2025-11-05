@@ -1,180 +1,180 @@
 {
   "headers": [
     {
-      "text": "MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD",
+      "text": "FOREWORD",
       "number": null,
       "level": 1
     },
     {
-      "text": "1 GENERAL",
+      "text": "GENERAL",
       "number": "1",
       "level": 1
     },
     {
-      "text": "1.1 Scope and Field of Application",
+      "text": "Scope and Field of Application",
       "number": "1.1",
       "level": 2
     },
     {
-      "text": "1.2 References",
+      "text": "References",
       "number": "1.2",
       "level": 2
     },
     {
-      "text": "1.3 Definitions",
+      "text": "Definitions",
       "number": "1.3",
       "level": 2
     },
     {
-      "text": "1.4 Symbols",
+      "text": "Symbols",
       "number": "1.4",
       "level": 2
     },
     {
-      "text": "2 PRINCIPLES",
+      "text": "PRINCIPLES",
       "number": "2",
       "level": 1
     },
     {
-      "text": "2.1 Statement of the Principles",
+      "text": "Statement of the Principles",
       "number": "2.1",
       "level": 2
     },
     {
-      "text": "2.1.1 Static Weighing",
+      "text": "Static Weighing",
       "number": "2.1.1",
       "level": 3
     },
     {
-      "text": "2.1.2 Dynamic Weighing",
+      "text": "Dynamic Weighing",
       "number": "2.1.2",
       "level": 3
     },
     {
-      "text": "2.1.3 Comparison of Instantaneous and Mean Flow Rate",
+      "text": "Comparison of Instantaneous and Mean Flow Rate",
       "number": "2.1.3",
       "level": 3
     },
     {
-      "text": "2.2 Accuracy of the Method",
+      "text": "Accuracy of the Method",
       "number": "2.2",
       "level": 2
     },
     {
-      "text": "2.2.1 Overall Uncertainty on the Weighing Measurement",
+      "text": "Overall Uncertainty on the Weighing Measurement",
       "number": "2.2.1",
       "level": 3
     },
     {
-      "text": "2.2.2 Requirements for Accurate Measurements",
+      "text": "Requirements for Accurate Measurements",
       "number": "2.2.2",
       "level": 3
     },
     {
-      "text": "3 APPARATUS",
+      "text": "APPARATUS",
       "number": "3",
       "level": 1
     },
     {
-      "text": "3.1 Diverter",
+      "text": "Diverter",
       "number": "3.1",
       "level": 2
     },
     {
-      "text": "3.2 Time-Measuring Apparatus",
+      "text": "Time-Measuring Apparatus",
       "number": "3.2",
       "level": 2
     },
     {
-      "text": "3.3 Weighing Tank",
+      "text": "Weighing Tank",
       "number": "3.3",
       "level": 2
     },
     {
-      "text": "3.4 Weighing Device",
+      "text": "Weighing Device",
       "number": "3.4",
       "level": 2
     },
     {
-      "text": "3.5 Auxiliary Measurements",
+      "text": "Auxiliary Measurements",
       "number": "3.5",
       "level": 2
     },
     {
-      "text": "4 PROCEDURE",
+      "text": "PROCEDURE",
       "number": "4",
       "level": 1
     },
     {
-      "text": "4.1 Static Weighing Method",
+      "text": "Static Weighing Method",
       "number": "4.1",
       "level": 2
     },
     {
-      "text": "4.2 Dynamic Weighing Method",
+      "text": "Dynamic Weighing Method",
       "number": "4.2",
       "level": 2
     },
     {
-      "text": "4.3 Common Provisions",
+      "text": "Common Provisions",
       "number": "4.3",
       "level": 2
     },
     {
-      "text": "5 CALCULATION OF FLOW RATE",
+      "text": "CALCULATION OF FLOW RATE",
       "number": "5",
       "level": 1
     },
     {
-      "text": "5.1 Calculation of Mass Flow Rate",
+      "text": "Calculation of Mass Flow Rate",
       "number": "5.1",
       "level": 2
     },
     {
-      "text": "5.2 Calculation of Volume Flow Rate",
+      "text": "Calculation of Volume Flow Rate",
       "number": "5.2",
       "level": 2
     },
     {
-      "text": "6 UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
+      "text": "UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE",
       "number": "6",
       "level": 1
     },
     {
       "text": "APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME",
-      "number": null,
+      "number": "A",
       "level": 1
     },
     {
-      "text": "A1 STATIC WEIGHING METHOD",
+      "text": "STATIC WEIGHING METHOD",
       "number": "A1",
       "level": 2
     },
     {
-      "text": "A1.1 Method 1",
+      "text": "Method 1",
       "number": "A1.1",
       "level": 3
     },
     {
-      "text": "A1.2 Method 2",
+      "text": "Method 2",
       "number": "A1.2",
       "level": 3
     },
     {
-      "text": "A2 DYNAMIC WEIGHING METHOD",
+      "text": "DYNAMIC WEIGHING METHOD",
       "number": "A2",
       "level": 2
     },
     {
       "text": "APPENDIX B DENSITY OF PURE WATER",
-      "number": null,
+      "number": "B",
       "level": 1
     }
   ],
   "raw_responses": [
-    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD\", \"number\": null, \"level\": 1 },\n  { \"text\": \"1 GENERAL\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"1.1 Scope and Field of Application\", \"number\": \"1.1\", \"level\": 2 },\n  { \"text\": \"1.2 References\", \"number\": \"1.2\", \"level\": 2 },\n  { \"text\": \"1.3 Definitions\", \"number\": \"1.3\", \"level\": 2 },\n  { \"text\": \"1.4 Symbols\", \"number\": \"1.4\", \"level\": 2 },\n  { \"text\": \"2 PRINCIPLES\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"2.1 Statement of the Principles\", \"number\": \"2.1\", \"level\": 2 },\n  { \"text\": \"2.1.1 Static Weighing\", \"number\": \"2.1.1\", \"level\": 3 },\n  { \"text\": \"2.1.2 Dynamic Weighing\", \"number\": \"2.1.2\", \"level\": 3 },\n  { \"text\": \"2.1.3 Comparison of Instantaneous and Mean Flow Rate\", \"number\": \"2.1.3\", \"level\": 3 },\n  { \"text\": \"2.2 Accuracy of the Method\", \"number\": \"2.2\", \"level\": 2 },\n  { \"text\": \"2.2.1 Overall Uncertainty on the Weighing Measurement\", \"number\": \"2.2.1\", \"level\": 3 },\n  { \"text\": \"2.2.2 Requirements for Accurate Measurements\", \"number\": \"2.2.2\", \"level\": 3 },\n  { \"text\": \"3 APPARATUS\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"3.1 Diverter\", \"number\": \"3.1\", \"level\": 2 },\n  { \"text\": \"3.2 Time-Measuring Apparatus\", \"number\": \"3.2\", \"level\": 2 },\n  { \"text\": \"3.3 Weighing Tank\", \"number\": \"3.3\", \"level\": 2 },\n  { \"text\": \"3.4 Weighing Device\", \"number\": \"3.4\", \"level\": 2 },\n  { \"text\": \"3.5 Auxiliary Measurements\", \"number\": \"3.5\", \"level\": 2 },\n  { \"text\": \"4 PROCEDURE\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"4.1 Static Weighing Method\", \"number\": \"4.1\", \"level\": 2 },\n  { \"text\": \"4.2 Dynamic Weighing Method\", \"number\": \"4.2\", \"level\": 2 },\n  { \"text\": \"4.3 Common Provisions\", \"number\": \"4.3\", \"level\": 2 },\n  { \"text\": \"5 CALCULATION OF FLOW RATE\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"5.1 Calculation of Mass Flow Rate\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"5.2 Calculation of Volume Flow Rate\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"6 UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME\", \"number\": null, \"level\": 1 },\n  { \"text\": \"A1 STATIC WEIGHING METHOD\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"A1.1 Method 1\", \"number\": \"A1.1\", \"level\": 3 },\n  { \"text\": \"A1.2 Method 2\", \"number\": \"A1.2\", \"level\": 3 },\n  { \"text\": \"A2 DYNAMIC WEIGHING METHOD\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"APPENDIX B DENSITY OF PURE WATER\", \"number\": null, \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
+    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"FOREWORD\", \"number\": null, \"level\": 1 },\n  { \"text\": \"GENERAL\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"Scope and Field of Application\", \"number\": \"1.1\", \"level\": 2 },\n  { \"text\": \"References\", \"number\": \"1.2\", \"level\": 2 },\n  { \"text\": \"Definitions\", \"number\": \"1.3\", \"level\": 2 },\n  { \"text\": \"Symbols\", \"number\": \"1.4\", \"level\": 2 },\n  { \"text\": \"PRINCIPLES\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"Statement of the Principles\", \"number\": \"2.1\", \"level\": 2 },\n  { \"text\": \"Static Weighing\", \"number\": \"2.1.1\", \"level\": 3 },\n  { \"text\": \"Dynamic Weighing\", \"number\": \"2.1.2\", \"level\": 3 },\n  { \"text\": \"Comparison of Instantaneous and Mean Flow Rate\", \"number\": \"2.1.3\", \"level\": 3 },\n  { \"text\": \"Accuracy of the Method\", \"number\": \"2.2\", \"level\": 2 },\n  { \"text\": \"Overall Uncertainty on the Weighing Measurement\", \"number\": \"2.2.1\", \"level\": 3 },\n  { \"text\": \"Requirements for Accurate Measurements\", \"number\": \"2.2.2\", \"level\": 3 },\n  { \"text\": \"APPARATUS\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"Diverter\", \"number\": \"3.1\", \"level\": 2 },\n  { \"text\": \"Time-Measuring Apparatus\", \"number\": \"3.2\", \"level\": 2 },\n  { \"text\": \"Weighing Tank\", \"number\": \"3.3\", \"level\": 2 },\n  { \"text\": \"Weighing Device\", \"number\": \"3.4\", \"level\": 2 },\n  { \"text\": \"Auxiliary Measurements\", \"number\": \"3.5\", \"level\": 2 },\n  { \"text\": \"PROCEDURE\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"Static Weighing Method\", \"number\": \"4.1\", \"level\": 2 },\n  { \"text\": \"Dynamic Weighing Method\", \"number\": \"4.2\", \"level\": 2 },\n  { \"text\": \"Common Provisions\", \"number\": \"4.3\", \"level\": 2 },\n  { \"text\": \"CALCULATION OF FLOW RATE\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"Calculation of Mass Flow Rate\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"Calculation of Volume Flow Rate\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME\", \"number\": \"A\", \"level\": 1 },\n  { \"text\": \"STATIC WEIGHING METHOD\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"Method 1\", \"number\": \"A1.1\", \"level\": 3 },\n  { \"text\": \"Method 2\", \"number\": \"A1.2\", \"level\": 3 },\n  { \"text\": \"DYNAMIC WEIGHING METHOD\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"APPENDIX B DENSITY OF PURE WATER\", \"number\": \"B\", \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
   ],
   "fenced_blocks": [
-    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"MEASUREMENT OF LIQUID FLOW IN CLOSED CONDUITS BY WEIGHING METHOD\", \"number\": null, \"level\": 1 },\n  { \"text\": \"1 GENERAL\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"1.1 Scope and Field of Application\", \"number\": \"1.1\", \"level\": 2 },\n  { \"text\": \"1.2 References\", \"number\": \"1.2\", \"level\": 2 },\n  { \"text\": \"1.3 Definitions\", \"number\": \"1.3\", \"level\": 2 },\n  { \"text\": \"1.4 Symbols\", \"number\": \"1.4\", \"level\": 2 },\n  { \"text\": \"2 PRINCIPLES\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"2.1 Statement of the Principles\", \"number\": \"2.1\", \"level\": 2 },\n  { \"text\": \"2.1.1 Static Weighing\", \"number\": \"2.1.1\", \"level\": 3 },\n  { \"text\": \"2.1.2 Dynamic Weighing\", \"number\": \"2.1.2\", \"level\": 3 },\n  { \"text\": \"2.1.3 Comparison of Instantaneous and Mean Flow Rate\", \"number\": \"2.1.3\", \"level\": 3 },\n  { \"text\": \"2.2 Accuracy of the Method\", \"number\": \"2.2\", \"level\": 2 },\n  { \"text\": \"2.2.1 Overall Uncertainty on the Weighing Measurement\", \"number\": \"2.2.1\", \"level\": 3 },\n  { \"text\": \"2.2.2 Requirements for Accurate Measurements\", \"number\": \"2.2.2\", \"level\": 3 },\n  { \"text\": \"3 APPARATUS\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"3.1 Diverter\", \"number\": \"3.1\", \"level\": 2 },\n  { \"text\": \"3.2 Time-Measuring Apparatus\", \"number\": \"3.2\", \"level\": 2 },\n  { \"text\": \"3.3 Weighing Tank\", \"number\": \"3.3\", \"level\": 2 },\n  { \"text\": \"3.4 Weighing Device\", \"number\": \"3.4\", \"level\": 2 },\n  { \"text\": \"3.5 Auxiliary Measurements\", \"number\": \"3.5\", \"level\": 2 },\n  { \"text\": \"4 PROCEDURE\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"4.1 Static Weighing Method\", \"number\": \"4.1\", \"level\": 2 },\n  { \"text\": \"4.2 Dynamic Weighing Method\", \"number\": \"4.2\", \"level\": 2 },\n  { \"text\": \"4.3 Common Provisions\", \"number\": \"4.3\", \"level\": 2 },\n  { \"text\": \"5 CALCULATION OF FLOW RATE\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"5.1 Calculation of Mass Flow Rate\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"5.2 Calculation of Volume Flow Rate\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"6 UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME\", \"number\": null, \"level\": 1 },\n  { \"text\": \"A1 STATIC WEIGHING METHOD\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"A1.1 Method 1\", \"number\": \"A1.1\", \"level\": 3 },\n  { \"text\": \"A1.2 Method 2\", \"number\": \"A1.2\", \"level\": 3 },\n  { \"text\": \"A2 DYNAMIC WEIGHING METHOD\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"APPENDIX B DENSITY OF PURE WATER\", \"number\": null, \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
+    "-----BEGIN SIMPLEHEADERS JSON-----\n{ \"headers\": [\n  { \"text\": \"FOREWORD\", \"number\": null, \"level\": 1 },\n  { \"text\": \"GENERAL\", \"number\": \"1\", \"level\": 1 },\n  { \"text\": \"Scope and Field of Application\", \"number\": \"1.1\", \"level\": 2 },\n  { \"text\": \"References\", \"number\": \"1.2\", \"level\": 2 },\n  { \"text\": \"Definitions\", \"number\": \"1.3\", \"level\": 2 },\n  { \"text\": \"Symbols\", \"number\": \"1.4\", \"level\": 2 },\n  { \"text\": \"PRINCIPLES\", \"number\": \"2\", \"level\": 1 },\n  { \"text\": \"Statement of the Principles\", \"number\": \"2.1\", \"level\": 2 },\n  { \"text\": \"Static Weighing\", \"number\": \"2.1.1\", \"level\": 3 },\n  { \"text\": \"Dynamic Weighing\", \"number\": \"2.1.2\", \"level\": 3 },\n  { \"text\": \"Comparison of Instantaneous and Mean Flow Rate\", \"number\": \"2.1.3\", \"level\": 3 },\n  { \"text\": \"Accuracy of the Method\", \"number\": \"2.2\", \"level\": 2 },\n  { \"text\": \"Overall Uncertainty on the Weighing Measurement\", \"number\": \"2.2.1\", \"level\": 3 },\n  { \"text\": \"Requirements for Accurate Measurements\", \"number\": \"2.2.2\", \"level\": 3 },\n  { \"text\": \"APPARATUS\", \"number\": \"3\", \"level\": 1 },\n  { \"text\": \"Diverter\", \"number\": \"3.1\", \"level\": 2 },\n  { \"text\": \"Time-Measuring Apparatus\", \"number\": \"3.2\", \"level\": 2 },\n  { \"text\": \"Weighing Tank\", \"number\": \"3.3\", \"level\": 2 },\n  { \"text\": \"Weighing Device\", \"number\": \"3.4\", \"level\": 2 },\n  { \"text\": \"Auxiliary Measurements\", \"number\": \"3.5\", \"level\": 2 },\n  { \"text\": \"PROCEDURE\", \"number\": \"4\", \"level\": 1 },\n  { \"text\": \"Static Weighing Method\", \"number\": \"4.1\", \"level\": 2 },\n  { \"text\": \"Dynamic Weighing Method\", \"number\": \"4.2\", \"level\": 2 },\n  { \"text\": \"Common Provisions\", \"number\": \"4.3\", \"level\": 2 },\n  { \"text\": \"CALCULATION OF FLOW RATE\", \"number\": \"5\", \"level\": 1 },\n  { \"text\": \"Calculation of Mass Flow Rate\", \"number\": \"5.1\", \"level\": 2 },\n  { \"text\": \"Calculation of Volume Flow Rate\", \"number\": \"5.2\", \"level\": 2 },\n  { \"text\": \"UNCERTAINTIES IN THE MEASUREMENT OF FLOW RATE\", \"number\": \"6\", \"level\": 1 },\n  { \"text\": \"APPENDIX A CORRECTIONS ON THE MEASUREMENT OF FILLING TIME\", \"number\": \"A\", \"level\": 1 },\n  { \"text\": \"STATIC WEIGHING METHOD\", \"number\": \"A1\", \"level\": 2 },\n  { \"text\": \"Method 1\", \"number\": \"A1.1\", \"level\": 3 },\n  { \"text\": \"Method 2\", \"number\": \"A1.2\", \"level\": 3 },\n  { \"text\": \"DYNAMIC WEIGHING METHOD\", \"number\": \"A2\", \"level\": 2 },\n  { \"text\": \"APPENDIX B DENSITY OF PURE WATER\", \"number\": \"B\", \"level\": 1 }\n] }\n-----END SIMPLEHEADERS JSON-----"
   ]
 }

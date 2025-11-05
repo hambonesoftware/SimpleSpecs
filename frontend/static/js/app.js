@@ -289,6 +289,32 @@ function setSpecsSearchBusy(busy) {
   button.setAttribute('aria-label', ariaLabel);
   button.disabled = !state.selectedId;
 }
+// --- Add this helper to app.js (above showHeaderSearchPrompt) ---
+function renderPanelStartPrompt(container, { message, buttonLabel, onStart }) {
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'panel-status panel-status--actionable';
+
+  const text = document.createElement('p');
+  text.className = 'panel-status__message';
+  text.textContent = message;
+  wrapper.append(text);
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'primary-button';
+  button.textContent = buttonLabel;
+  button.addEventListener('click', () => {
+    if (typeof onStart === 'function') onStart();
+  });
+
+  wrapper.append(button);
+  container.append(wrapper);
+}
+// --- end helper ---
 
 // Display initial prompts for header and specs searches
 function showHeaderSearchPrompt() {
