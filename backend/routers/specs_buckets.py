@@ -33,6 +33,7 @@ try:
         BUCKET_ARTIFACT_KEY,
         SPEC_BUCKET_ARTIFACT_TYPE,
     )
+    from backend.utils.spec_trace import SpecTracer
     from backend.services.documents import get_document_or_404  # if present
 except Exception:
     # minimal fallbacks to keep this file importable even if some modules moved
@@ -48,6 +49,7 @@ except Exception:
         store_spec_buckets_result,
         wipe_spec_buckets_for_document,
     )
+    from backend.utils.spec_trace import SpecTracer  # type: ignore
 
     def get_document_or_404(session: Session, document_id: int) -> Document:  # type: ignore
         from backend.models import Document  # type: ignore
@@ -143,78 +145,162 @@ async def run_again(
     Wipes cached bucket results (best-effort) then re-runs all bucket prompts concurrently.
     Returns a JSON object: {"ok": true, "buckets": {...}, "messages": [...]}.
     """
+    tracer = SpecTracer(metadata={"trigger": "run_again", "document_id": document_id})
+    tracer.function_call("run_again", document_id=document_id)
     logger.debug("[specs_buckets] run_again invoked", {"document_id": document_id})
-    # Purge cache first (no-op if unavailable)
-    try:
-        logger.debug("[specs_buckets] run_again calling delete_buckets_cache", {"document_id": document_id})
-        delete_buckets_cache(document_id, session=session, settings=settings)  # type: ignore[arg-type]
-    except Exception:
-        logger.exception("[specs_buckets] run_again delete_buckets_cache raised", exc_info=True)
-        pass
 
-    # Resolve document and run the worker
-    doc = get_document_or_404(session, document_id)
-    logger.debug(
-        "[specs_buckets] run_again resolved document",
-        {
-            "document_id": document_id,
-            "doc_hash": getattr(doc, "doc_hash", None) or getattr(doc, "hash", None),
-            "filename": getattr(doc, "filename", None),
-        },
-    )
-
-    # Ensure any previous spec payload is cleared so the new run stores a fresh draft.
-    try:
-        logger.debug("[specs_buckets] run_again wiping spec record", {"document_id": document_id})
-        wipe_spec_buckets_for_document(session, document_id=document_id)
-    except Exception:
-        logger.exception("[specs_buckets] run_again wipe_spec_buckets_for_document raised", exc_info=True)
-        pass
-    # Expect PDFs to already be parsed/available on disk; we only need the text content.
-    # The worker will fetch the parsed text (via artifact store) or re-parse if necessary.
-    result = await run_all_buckets_concurrently(
-        session=session,
-        document=doc,
-        settings=settings,
-    )
-    logger.debug(
-        "[specs_buckets] run_again worker result",
-        {
-            "document_id": document_id,
-            "result_keys": list(result.keys()),
-            "messages": result.get("messages"),
-        },
-    )
-
-    # Persist a single artifact blob with all bucket outputs for this doc.
-    try:
-        logger.debug("[specs_buckets] run_again storing artifact", {"document_id": document_id})
-        store_artifact(
-            session=session,
-            document_id=doc.id,
-            artifact_type=SPEC_BUCKET_ARTIFACT_TYPE,
-            key=BUCKET_ARTIFACT_KEY,
-            inputs=_artifact_inputs(result.get("doc_hash")),
-            body=result,
-        )
-    except Exception:
-        # Do not fail the request just because caching failed.
-        logger.exception("[specs_buckets] run_again store_artifact raised", exc_info=True)
-        pass
-
+    trace_path: str | None = None
+    result: Dict[str, Any] | None = None
     stored_record = None
+    artifact_stored = False
+
     try:
-        logger.debug("[specs_buckets] run_again storing spec record", {"document_id": document_id})
-        stored_record = store_spec_buckets_result(
-            session,
-            document_id=document_id,
-            payload=result,
+        # Purge cache first (no-op if unavailable)
+        try:
+            logger.debug("[specs_buckets] run_again calling delete_buckets_cache", {"document_id": document_id})
+            delete_buckets_cache(document_id, session=session, settings=settings)  # type: ignore[arg-type]
+            tracer.decision("delete_buckets_cache", status="ok", document_id=document_id)
+        except Exception as exc:
+            logger.exception("[specs_buckets] run_again delete_buckets_cache raised", exc_info=True)
+            tracer.decision(
+                "delete_buckets_cache",
+                status="error",
+                document_id=document_id,
+                error=str(exc),
+            )
+
+        # Resolve document and run the worker
+        doc = get_document_or_404(session, document_id)
+        doc_hash = getattr(doc, "doc_hash", None) or getattr(doc, "hash", None)
+        filename = getattr(doc, "filename", None)
+        tracer.metadata(document_hash=doc_hash, document_filename=filename)
+        logger.debug(
+            "[specs_buckets] run_again resolved document",
+            {
+                "document_id": document_id,
+                "doc_hash": doc_hash,
+                "filename": filename,
+            },
         )
+
+        # Ensure any previous spec payload is cleared so the new run stores a fresh draft.
+        try:
+            logger.debug("[specs_buckets] run_again wiping spec record", {"document_id": document_id})
+            wipe_spec_buckets_for_document(session, document_id=document_id)
+            tracer.decision("wipe_spec_record", status="ok", document_id=document_id)
+        except Exception as exc:
+            logger.exception("[specs_buckets] run_again wipe_spec_buckets_for_document raised", exc_info=True)
+            tracer.decision(
+                "wipe_spec_record",
+                status="error",
+                document_id=document_id,
+                error=str(exc),
+            )
+
+        # Expect PDFs to already be parsed/available on disk; we only need the text content.
+        # The worker will fetch the parsed text (via artifact store) or re-parse if necessary.
+        try:
+            result = await run_all_buckets_concurrently(
+                session=session,
+                document=doc,
+                settings=settings,
+                tracer=tracer,
+            )
+        except Exception as exc:
+            tracer.outcome(
+                "run_again_worker",
+                document_id=document_id,
+                ok=False,
+                error=str(exc),
+            )
+            raise
+
+        tracer.decision(
+            "worker_result",
+            document_id=document_id,
+            bucket_count=len(result.get("buckets", {})),
+            message_count=len(result.get("messages", [])),
+            doc_hash=result.get("doc_hash"),
+        )
+        logger.debug(
+            "[specs_buckets] run_again worker result",
+            {
+                "document_id": document_id,
+                "result_keys": list(result.keys()),
+                "messages": result.get("messages"),
+            },
+        )
+
+        # Persist a single artifact blob with all bucket outputs for this doc.
+        try:
+            logger.debug("[specs_buckets] run_again storing artifact", {"document_id": document_id})
+            store_artifact(
+                session=session,
+                document_id=doc.id,
+                artifact_type=SPEC_BUCKET_ARTIFACT_TYPE,
+                key=BUCKET_ARTIFACT_KEY,
+                inputs=_artifact_inputs(result.get("doc_hash")),
+                body=result,
+            )
+            tracer.decision("store_artifact", status="ok", document_id=document_id)
+            artifact_stored = True
+        except Exception as exc:
+            # Do not fail the request just because caching failed.
+            logger.exception("[specs_buckets] run_again store_artifact raised", exc_info=True)
+            tracer.decision(
+                "store_artifact",
+                status="error",
+                document_id=document_id,
+                error=str(exc),
+            )
+
+        try:
+            logger.debug("[specs_buckets] run_again storing spec record", {"document_id": document_id})
+            stored_record = store_spec_buckets_result(
+                session,
+                document_id=document_id,
+                payload=result,
+            )
+            tracer.decision(
+                "store_spec_record",
+                status="ok",
+                document_id=document_id,
+                record_id=getattr(stored_record, "id", None),
+            )
+        except Exception as exc:
+            logger.exception("[specs_buckets] run_again store_spec_buckets_result raised", exc_info=True)
+            tracer.decision(
+                "store_spec_record",
+                status="error",
+                document_id=document_id,
+                error=str(exc),
+            )
+
+        tracer.outcome(
+            "run_again",
+            document_id=document_id,
+            ok=True,
+            artifact_stored=artifact_stored,
+            record_stored=stored_record is not None,
+        )
+
     except Exception:
-        logger.exception("[specs_buckets] run_again store_spec_buckets_result raised", exc_info=True)
-        pass
+        tracer.outcome("run_again", document_id=document_id, ok=False)
+        trace_path = tracer.flush()
+        raise
+    finally:
+        if trace_path is None:
+            trace_path = tracer.flush()
+
+    assert result is not None  # for mypy/static tools
+    result["trace_path"] = trace_path
 
     response: Dict[str, Any] = {"ok": True, **result, "persisted": stored_record is not None}
+    metadata = response.get("metadata")
+    if not isinstance(metadata, dict):
+        metadata = {}
+        response["metadata"] = metadata
+    metadata["trace_path"] = trace_path
     logger.debug(
         "[specs_buckets] run_again response summary",
         {
