@@ -399,15 +399,7 @@ def _best_doc_text_from_cache(
             {"document_id": document.id, "text_length": len(joined)},
         )
         return joined, None
-    except Exception:
-        logger.exception(
-            "[specs_worker] _best_doc_text_from_cache fallback failed (document_id=%s)",
-            document.id,
-            exc_info=True,
-        )
-    return "", None
-        return "", None
-
+   
 
 async def _run_single_bucket(bucket: Dict[str, str], doc_text: str) -> Dict[str, Any]:
     name = bucket["name"]
