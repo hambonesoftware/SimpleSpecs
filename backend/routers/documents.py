@@ -6,8 +6,8 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import desc, select
-from sqlmodel import Session
+from sqlalchemy import desc
+from sqlmodel import Session, select
 
 from ..database import get_session
 from ..models import (
@@ -193,7 +193,7 @@ async def get_cached_headers(
             status_code=status.HTTP_404_NOT_FOUND, detail="No cached headers"
         )
 
-    payload = dict(artifact.body)
+    payload = dict(artifact.body or {})
     return StoredHeadersResponse(
         headers=list(payload.get("headers", [])),
         sections=list(payload.get("sections", [])),
