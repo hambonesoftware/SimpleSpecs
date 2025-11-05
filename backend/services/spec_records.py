@@ -6,6 +6,7 @@ import csv
 import hashlib
 import io
 import json
+import logging
 import zipfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -18,6 +19,8 @@ from sqlmodel import Session, select
 from ..config import Settings
 from ..middleware import get_request_id
 from ..models import Document, SpecAuditEntry, SpecRecord
+
+logger = logging.getLogger(__name__)
 # If you have an artifact store for buckets, import its delete helper:
 # from .artifact_store import delete_artifact, DocumentArtifactType
 
@@ -29,9 +32,15 @@ class SpecRecordError(RuntimeError):
 def ensure_document(session: Session, document_id: int) -> Document:
     """Return the document for the given id or raise an error."""
 
+    logger.debug("[spec_records] ensure_document invoked", {"document_id": document_id})
     document = session.get(Document, document_id)
     if document is None:
+        logger.debug("[spec_records] ensure_document missing document", {"document_id": document_id})
         raise SpecRecordError(f"Document {document_id} not found")
+    logger.debug(
+        "[spec_records] ensure_document resolved document",
+        {"document_id": document_id, "filename": getattr(document, "filename", None)},
+    )
     return document
 
 
@@ -327,14 +336,20 @@ __all__ = [
 def wipe_spec_buckets_for_document(session, *, document_id: int) -> None:
     """Reset any persisted specification payload for ``document_id`` to a clean draft."""
 
+    logger.debug("[spec_records] wipe_spec_buckets_for_document invoked", {"document_id": document_id})
     rec = session.exec(
         select(SpecRecord).where(SpecRecord.document_id == document_id)
     ).first()
 
     if rec is None:
+        logger.debug("[spec_records] wipe_spec_buckets_for_document no record", {"document_id": document_id})
         return
 
     now = datetime.now(UTC)
+    logger.debug(
+        "[spec_records] wipe_spec_buckets_for_document resetting record",
+        {"document_id": document_id, "record_id": rec.id},
+    )
     rec.state = "draft"
     rec.reviewer = None
     rec.content_hash = None
@@ -344,6 +359,7 @@ def wipe_spec_buckets_for_document(session, *, document_id: int) -> None:
     rec.updated_at = now
     session.add(rec)
     session.commit()
+    logger.debug("[spec_records] wipe_spec_buckets_for_document completed", {"document_id": document_id, "record_id": rec.id})
 
 
 def store_spec_buckets_result(
@@ -351,6 +367,10 @@ def store_spec_buckets_result(
 ) -> SpecRecord:
     """Persist the latest specification buckets payload for a document as a draft."""
 
+    logger.debug(
+        "[spec_records] store_spec_buckets_result invoked",
+        {"document_id": document_id, "payload_type": type(payload).__name__},
+    )
     document = ensure_document(session, document_id)
     data = _serialise_payload(payload)
     now = datetime.now(UTC)
@@ -360,6 +380,10 @@ def store_spec_buckets_result(
     ).first()
 
     if rec is None:
+        logger.debug(
+            "[spec_records] store_spec_buckets_result creating record",
+            {"document_id": document_id},
+        )
         rec = SpecRecord(
             document_id=document.id,
             state="draft",
@@ -373,6 +397,10 @@ def store_spec_buckets_result(
         )
         session.add(rec)
     else:
+        logger.debug(
+            "[spec_records] store_spec_buckets_result updating record",
+            {"document_id": document_id, "record_id": rec.id},
+        )
         rec.state = "draft"
         rec.reviewer = None
         rec.approved_at = None
@@ -384,4 +412,8 @@ def store_spec_buckets_result(
 
     session.commit()
     session.refresh(rec)
+    logger.debug(
+        "[spec_records] store_spec_buckets_result completed",
+        {"document_id": document_id, "record_id": rec.id},
+    )
     return rec

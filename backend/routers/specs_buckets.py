@@ -9,6 +9,7 @@ Drop-in router that you can include from your FastAPI app.
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
@@ -56,6 +57,8 @@ except Exception:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
         return doc
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/specs", tags=["specs"])
 
 
@@ -64,6 +67,10 @@ def _artifact_inputs(doc_hash: str | None = None) -> Dict[str, Any]:
     inputs = {"kind": "spec_buckets"}
     if doc_hash:
         inputs["doc_hash"] = doc_hash
+    logger.debug(
+        "[specs_buckets] _artifact_inputs",
+        {"doc_hash": doc_hash, "inputs": inputs},
+    )
     return inputs
 
 
@@ -77,21 +84,37 @@ def delete_buckets_cache(
     Best-effort purge of cached Spec Bucket artifacts for the given document.
     Safe to call even if cache is empty or the delete helper isn't present.
     """
+    logger.debug("[specs_buckets] delete_buckets_cache invoked", {"document_id": document_id})
     doc = get_document_or_404(session, document_id)
+    logger.debug(
+        "[specs_buckets] delete_buckets_cache resolved document",
+        {
+            "document_id": document_id,
+            "doc_hash": getattr(doc, "doc_hash", None) or getattr(doc, "hash", None),
+            "filename": getattr(doc, "filename", None),
+        },
+    )
 
     # Clear any persisted spec record payload before wiping cached artifacts.
     try:
+        logger.debug("[specs_buckets] delete_buckets_cache wiping spec record", {"document_id": document_id})
         wipe_spec_buckets_for_document(session, document_id=document_id)
     except Exception:
+        logger.exception("[specs_buckets] delete_buckets_cache wipe failed", exc_info=True)
         pass
 
     # Fetch a doc_hash if you store it on Document; otherwise skip (inputs filter remains generic).
     doc_hash = getattr(doc, "doc_hash", None) or getattr(doc, "hash", None)
+    logger.debug(
+        "[specs_buckets] delete_buckets_cache using doc_hash",
+        {"document_id": document_id, "doc_hash": doc_hash},
+    )
 
     # Try targeted delete if helper is available
     try:
         _ = _delete_artifact  # type: ignore[name-defined]
     except Exception:
+        logger.debug("[specs_buckets] delete_buckets_cache delete helper unavailable")
         return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     try:
@@ -104,7 +127,9 @@ def delete_buckets_cache(
         )
     except Exception:
         # swallow; we only want to make "Run again" never crash
+        logger.exception("[specs_buckets] delete_buckets_cache delete_artifact raised", exc_info=True)
         return Response(status_code=status.HTTP_204_NO_CONTENT)
+    logger.debug("[specs_buckets] delete_buckets_cache completed", {"document_id": document_id})
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -118,19 +143,32 @@ async def run_again(
     Wipes cached bucket results (best-effort) then re-runs all bucket prompts concurrently.
     Returns a JSON object: {"ok": true, "buckets": {...}, "messages": [...]}.
     """
+    logger.debug("[specs_buckets] run_again invoked", {"document_id": document_id})
     # Purge cache first (no-op if unavailable)
     try:
+        logger.debug("[specs_buckets] run_again calling delete_buckets_cache", {"document_id": document_id})
         delete_buckets_cache(document_id, session=session, settings=settings)  # type: ignore[arg-type]
     except Exception:
+        logger.exception("[specs_buckets] run_again delete_buckets_cache raised", exc_info=True)
         pass
 
     # Resolve document and run the worker
     doc = get_document_or_404(session, document_id)
+    logger.debug(
+        "[specs_buckets] run_again resolved document",
+        {
+            "document_id": document_id,
+            "doc_hash": getattr(doc, "doc_hash", None) or getattr(doc, "hash", None),
+            "filename": getattr(doc, "filename", None),
+        },
+    )
 
     # Ensure any previous spec payload is cleared so the new run stores a fresh draft.
     try:
+        logger.debug("[specs_buckets] run_again wiping spec record", {"document_id": document_id})
         wipe_spec_buckets_for_document(session, document_id=document_id)
     except Exception:
+        logger.exception("[specs_buckets] run_again wipe_spec_buckets_for_document raised", exc_info=True)
         pass
     # Expect PDFs to already be parsed/available on disk; we only need the text content.
     # The worker will fetch the parsed text (via artifact store) or re-parse if necessary.
@@ -139,9 +177,18 @@ async def run_again(
         document=doc,
         settings=settings,
     )
+    logger.debug(
+        "[specs_buckets] run_again worker result",
+        {
+            "document_id": document_id,
+            "result_keys": list(result.keys()),
+            "messages": result.get("messages"),
+        },
+    )
 
     # Persist a single artifact blob with all bucket outputs for this doc.
     try:
+        logger.debug("[specs_buckets] run_again storing artifact", {"document_id": document_id})
         store_artifact(
             session=session,
             document_id=doc.id,
@@ -152,19 +199,30 @@ async def run_again(
         )
     except Exception:
         # Do not fail the request just because caching failed.
+        logger.exception("[specs_buckets] run_again store_artifact raised", exc_info=True)
         pass
 
     stored_record = None
     try:
+        logger.debug("[specs_buckets] run_again storing spec record", {"document_id": document_id})
         stored_record = store_spec_buckets_result(
             session,
             document_id=document_id,
             payload=result,
         )
     except Exception:
+        logger.exception("[specs_buckets] run_again store_spec_buckets_result raised", exc_info=True)
         pass
 
     response: Dict[str, Any] = {"ok": True, **result, "persisted": stored_record is not None}
+    logger.debug(
+        "[specs_buckets] run_again response summary",
+        {
+            "document_id": document_id,
+            "persisted": stored_record is not None,
+            "response_keys": list(response.keys()),
+        },
+    )
     if stored_record is not None:
         response["record"] = {
             "id": stored_record.id,
@@ -173,5 +231,13 @@ async def run_again(
             if stored_record.updated_at
             else None,
         }
+        logger.debug(
+            "[specs_buckets] run_again stored record",
+            {
+                "document_id": document_id,
+                "record_id": stored_record.id,
+                "state": stored_record.state,
+            },
+        )
 
     return response
