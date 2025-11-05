@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session
 
 try:
@@ -23,6 +23,10 @@ try:
         get_cached_artifact, store_artifact
     )
     from backend.services.artifact_store import delete_artifact as _delete_artifact  # optional in older revs
+    from backend.services.spec_records import (
+        store_spec_buckets_result,
+        wipe_spec_buckets_for_document,
+    )
     from backend.services.specs_worker import (
         run_all_buckets_concurrently,
         BUCKET_ARTIFACT_KEY,
@@ -39,6 +43,10 @@ except Exception:
         BUCKET_ARTIFACT_KEY,
         SPEC_BUCKET_ARTIFACT_TYPE,
     )  # type: ignore
+    from backend.services.spec_records import (  # type: ignore
+        store_spec_buckets_result,
+        wipe_spec_buckets_for_document,
+    )
 
     def get_document_or_404(session: Session, document_id: int) -> Document:  # type: ignore
         from backend.models import Document  # type: ignore
@@ -59,7 +67,7 @@ def _artifact_inputs(doc_hash: str | None = None) -> Dict[str, Any]:
     return inputs
 
 
-@router.delete("/{document_id}/buckets", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{document_id}/buckets", response_class=Response)
 def delete_buckets_cache(
     document_id: int,
     session: Session = Depends(get_session),
@@ -71,6 +79,12 @@ def delete_buckets_cache(
     """
     doc = get_document_or_404(session, document_id)
 
+    # Clear any persisted spec record payload before wiping cached artifacts.
+    try:
+        wipe_spec_buckets_for_document(session, document_id=document_id)
+    except Exception:
+        pass
+
     # Fetch a doc_hash if you store it on Document; otherwise skip (inputs filter remains generic).
     doc_hash = getattr(doc, "doc_hash", None) or getattr(doc, "hash", None)
 
@@ -78,7 +92,7 @@ def delete_buckets_cache(
     try:
         _ = _delete_artifact  # type: ignore[name-defined]
     except Exception:
-        return  # older artifact store without delete; nothing to do
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     try:
         _delete_artifact(
@@ -90,7 +104,8 @@ def delete_buckets_cache(
         )
     except Exception:
         # swallow; we only want to make "Run again" never crash
-        return
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/{document_id}/buckets/run-again")
@@ -111,6 +126,12 @@ async def run_again(
 
     # Resolve document and run the worker
     doc = get_document_or_404(session, document_id)
+
+    # Ensure any previous spec payload is cleared so the new run stores a fresh draft.
+    try:
+        wipe_spec_buckets_for_document(session, document_id=document_id)
+    except Exception:
+        pass
     # Expect PDFs to already be parsed/available on disk; we only need the text content.
     # The worker will fetch the parsed text (via artifact store) or re-parse if necessary.
     result = await run_all_buckets_concurrently(
@@ -133,4 +154,24 @@ async def run_again(
         # Do not fail the request just because caching failed.
         pass
 
-    return {"ok": True, **result}
+    stored_record = None
+    try:
+        stored_record = store_spec_buckets_result(
+            session,
+            document_id=document_id,
+            payload=result,
+        )
+    except Exception:
+        pass
+
+    response: Dict[str, Any] = {"ok": True, **result, "persisted": stored_record is not None}
+    if stored_record is not None:
+        response["record"] = {
+            "id": stored_record.id,
+            "state": stored_record.state,
+            "updated_at": stored_record.updated_at.isoformat()
+            if stored_record.updated_at
+            else None,
+        }
+
+    return response

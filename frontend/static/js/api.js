@@ -231,6 +231,10 @@ export async function fetchSpecifications(documentId) {
 export async function compareSpecifications(documentId) {
   return request(`/api/specs/compare/${documentId}`, { method: "POST" });
 }
+
+export async function fetchCachedHeaders(documentId) {
+  return request(`/api/documents/${documentId}/headers`);
+}
 // Wipe all stored/spec-cached buckets for a document on the server
 export async function deleteSpecsBuckets(documentId) {
   if (!Number.isFinite(Number(documentId))) {

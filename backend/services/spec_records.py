@@ -18,8 +18,6 @@ from sqlmodel import Session, select
 from ..config import Settings
 from ..middleware import get_request_id
 from ..models import Document, SpecAuditEntry, SpecRecord
-from sqlmodel import select
-from ..models import SpecRecord
 # If you have an artifact store for buckets, import its delete helper:
 # from .artifact_store import delete_artifact, DocumentArtifactType
 
@@ -321,43 +319,69 @@ __all__ = [
     "ensure_document",
     "export_spec_record",
     "fetch_spec_record",
+    "store_spec_buckets_result",
+    "wipe_spec_buckets_for_document",
 ]
 
-def wipe_spec_buckets_for_document(session, *, document_id: int) -> None:
-    """
-    Clear any persisted specification state for a document so a fresh
-    LLM extraction will run on the next request.
 
-    - Resets (or creates) a SpecRecord to a clean draft with empty payload.
-    - Optionally deletes any cached bucket artifacts (uncomment if you use them).
-    """
+def wipe_spec_buckets_for_document(session, *, document_id: int) -> None:
+    """Reset any persisted specification payload for ``document_id`` to a clean draft."""
+
     rec = session.exec(
         select(SpecRecord).where(SpecRecord.document_id == document_id)
     ).first()
 
     if rec is None:
-        # If your app expects a record to exist, you could create one here.
-        # Otherwise just no-op.
         return
 
+    now = datetime.now(UTC)
     rec.state = "draft"
     rec.reviewer = None
     rec.content_hash = None
-    rec.payload = {}  # wipe frozen/spec payload
+    rec.payload = {}
     rec.approved_at = None
     rec.frozen_at = None
+    rec.updated_at = now
     session.add(rec)
+    session.commit()
 
-    # If you persist bucket artifacts separately, delete them here.
-    # try:
-    #     delete_artifact(
-    #         session,
-    #         document_id=document_id,
-    #         artifact_type=DocumentArtifactType.SPEC_BUCKETS,
-    #         key="buckets",
-    #     )
-    # except Exception:
-    #     # Don't fail the wipe on artifact deletion issues.
-    #     pass
+
+def store_spec_buckets_result(
+    session: Session, *, document_id: int, payload: Any
+) -> SpecRecord:
+    """Persist the latest specification buckets payload for a document as a draft."""
+
+    document = ensure_document(session, document_id)
+    data = _serialise_payload(payload)
+    now = datetime.now(UTC)
+
+    rec = session.exec(
+        select(SpecRecord).where(SpecRecord.document_id == document.id)
+    ).first()
+
+    if rec is None:
+        rec = SpecRecord(
+            document_id=document.id,
+            state="draft",
+            reviewer=None,
+            created_at=now,
+            updated_at=now,
+            approved_at=None,
+            frozen_at=None,
+            content_hash=None,
+            payload=data,
+        )
+        session.add(rec)
+    else:
+        rec.state = "draft"
+        rec.reviewer = None
+        rec.approved_at = None
+        rec.frozen_at = None
+        rec.content_hash = None
+        rec.payload = data
+        rec.updated_at = now
+        session.add(rec)
 
     session.commit()
+    session.refresh(rec)
+    return rec

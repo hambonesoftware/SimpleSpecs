@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import time
 from typing import Iterable, Mapping, Sequence
@@ -55,6 +56,27 @@ def _format_llm_failure(exc: Exception) -> str:
     return "LLM header extraction unavailable."
 
 
+def _run_section_chunking(headers, lines, *, tracer):
+    """Call :func:`single_chunks_from_headers` tolerating older signatures."""
+
+    try:
+        return single_chunks_from_headers(headers, lines, tracer=tracer)
+    except TypeError:
+        return single_chunks_from_headers(headers, lines)
+
+
+def _persist_trace(tracer: HeaderTracer, *, write_trace_json: bool) -> str | None:
+    """Persist tracer outputs and return the trace path when written."""
+
+    if write_trace_json:
+        return tracer.flush_jsonl()
+
+    summary_payload = tracer._build_summary()  # noqa: SLF001 - internal helper
+    with open(tracer.summary_path, "w", encoding="utf-8") as handle:
+        json.dump(summary_payload, handle, ensure_ascii=False, indent=2)
+    return None
+
+
 async def extract_headers_and_chunks(
     document_bytes: bytes,
     *,
@@ -76,10 +98,10 @@ async def extract_headers_and_chunks(
     LLM extraction/alignment is performed.
     """
 
-    trace_requested = want_trace or settings.headers_trace or app_config.HEADERS_TRACE
+    write_trace_json = bool(want_trace or settings.headers_trace or app_config.HEADERS_TRACE)
     align_strategy = (align or settings.headers_align_strategy).strip().lower()
     sequential_config = SequentialAlignmentConfig.from_settings(settings)
-    tracer: HeaderTracer | None = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR) if trace_requested else None
+    tracer: HeaderTracer | None = HeaderTracer(out_dir=app_config.HEADERS_TRACE_DIR)
     if tracer:
         tracer.log_call(f"{__name__}.extract_headers_and_chunks")
 
@@ -205,8 +227,9 @@ async def extract_headers_and_chunks(
                         mode="cache",
                         doc_hash=doc_hash,
                     )
-                    tracer.flush_jsonl()
-                    LOGGER.info("[headers] Trace written: %s", tracer.path)
+                    trace_path = _persist_trace(tracer, write_trace_json=write_trace_json)
+                    if trace_path:
+                        LOGGER.info("[headers] Trace written: %s", trace_path)
                     LOGGER.info("[headers] Summary written: %s", tracer.summary_path)
 
                 trace_payload = _trace_payload(tracer)
@@ -285,7 +308,7 @@ async def extract_headers_and_chunks(
                         excluded_pages=excluded_pages,
                         tracer=tracer,
                         doc_hash=doc_hash,
-                        write_trace_json=trace_requested,
+                        write_trace_json=write_trace_json,
                     )
                     if located_headers:
                         mode_used = "llm_vector"
@@ -419,8 +442,9 @@ async def extract_headers_and_chunks(
             mode=mode_used,
             doc_hash=doc_hash,
         )
-        trace_path = tracer.flush_jsonl()
-        LOGGER.info("[headers] Trace written: %s", trace_path)
+        trace_path = _persist_trace(tracer, write_trace_json=write_trace_json)
+        if trace_path:
+            LOGGER.info("[headers] Trace written: %s", trace_path)
         LOGGER.info("[headers] Summary written: %s", tracer.summary_path)
 
     trace_payload = _trace_payload(tracer)
@@ -511,7 +535,7 @@ def _enforce_header_sequence(
     working_headers.sort(key=_order_key)
 
     # Build the initial sections (trace will include 'chunking_start'/'chunk_built' events).
-    sections = single_chunks_from_headers(working_headers, lines, tracer=tracer)
+    sections = _run_section_chunking(working_headers, lines, tracer=tracer)
 
     # -------- Gap fill using numbering (does not change global ordering rule) --------
     iteration = 0
@@ -572,7 +596,7 @@ def _enforce_header_sequence(
             working_headers.insert(insert_position, candidate)
 
             # Recompute sections with the updated list (trace emits chunk events again).
-            sections = single_chunks_from_headers(working_headers, lines, tracer=tracer)
+            sections = _run_section_chunking(working_headers, lines, tracer=tracer)
             inserted = True
 
             if tracer:
@@ -594,7 +618,7 @@ def _enforce_header_sequence(
 
         # Important: re-apply ONLY the LLM-first ordering, never number-based.
         working_headers.sort(key=_order_key)
-        sections = single_chunks_from_headers(working_headers, lines, tracer=tracer)
+        sections = _run_section_chunking(working_headers, lines, tracer=tracer)
     # -------------------------------------------------------------------------------
 
     # Final ordering and cleanup.
