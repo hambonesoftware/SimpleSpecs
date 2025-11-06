@@ -34,15 +34,28 @@ The server creates the `uploads/` and `exports/` directories on startup if they 
 
 ### Header extraction configuration
 
-SimpleSpecs sends the full document text to OpenRouter for a high-fidelity outline. Configure behaviour via the following environment variables (also available in `.env.template`):
+SimpleSpecs now runs a hardened header orchestrator that progressively retries the request before falling back to legacy heuristics. Keep `HEADERS_MODE=llm_full` to enable the ladder and adjust its behaviour via the following environment variables (see `.env.template` for defaults):
 
-- `HEADERS_MODE`: keep `llm_full` to enable the OpenRouter pipeline.
-- `HEADERS_LLM_MODEL`: fully qualified OpenRouter model identifier (default `anthropic/claude-3.5-sonnet`).
-- `HEADERS_LLM_MAX_INPUT_TOKENS`: approximate token budget per request chunk (default `120000`).
-- `HEADERS_LLM_TIMEOUT_S`: request timeout in seconds (default `120`).
-- `HEADERS_LLM_CACHE_DIR`: on-disk cache for previously processed documents.
+- `HEADERS_LLM_MODEL`: preferred OpenRouter model.
+- `HEADERS_LLM_MODEL_FALLBACK`: secondary model used when the primary exhausts its retries.
+- `HEADERS_LLM_TIMEOUT_S`: read timeout (seconds) applied to every completion.
+- `HEADERS_LLM_MAX_INPUT_TOKENS`: soft limit that controls how much page text is sent at once.
+- `HEADERS_LLM_CACHE_DIR`: persistent cache for previously successful runs.
+- `HEADERS_LLM_CHUNKING`: `off`, `auto`, or `force`; when enabled the orchestrator splits the PDF into page groups that stay under `HEADERS_LLM_CHUNK_TARGET_TOKENS` before merging the responses.
+- `HEADERS_LLM_RETRY_MAX`: number of retries for transient failures (malformed JSON, missing fence, empty payloads).
+- `HEADERS_LLM_BACKOFF_S`: seconds to wait between retries.
 
-The pipeline requires `OPENROUTER_API_KEY`. Cached responses avoid repeated model invocations for unchanged documents.
+At runtime the ladder proceeds as follows:
+
+1. Primary model with the default prompt.
+2. Primary model with a tightened instruction set and a smaller token allowance.
+3. Automatic chunking when the input remains too large (or when `HEADERS_LLM_CHUNKING=force`).
+4. Fallback model when the primary fails or refuses.
+5. Legacy locator heuristics when every LLM attempt reports `ABORT`, invalid JSON, or times out. The API reports `ok: false` when no rung succeeds.
+
+Every attempt enforces the same fence contract: the LLM must emit exactly one ```SIMPLEHEADERS``` block containing strict JSON, or the literal string `ABORT`. Each rung is recorded in the telemetry payload returned from `POST /api/headers/{document_id}` so operators can inspect ladder progression and failure reasons such as `missing_fence`, `invalid_json`, `abort_token`, or `timeout`.
+
+The pipeline still requires `OPENROUTER_API_KEY`. Cached responses avoid repeated model invocations for unchanged documents.
 
 #### Sequential alignment strategy
 
@@ -60,6 +73,8 @@ HEADERS_L1_REQUIRE_NUMERIC=1      # insist on numeric prefixes for L1 anchors be
 HEADERS_L1_LOOKAHEAD_CHILD_HINT=30  # scan ahead for 1.1-style hints when ranking anchors
 HEADERS_MONOTONIC_STRICT=1        # enforce forward-only anchoring with duplicate retries
 HEADERS_REANCHOR_PASS=1           # repair parents that landed after their children
+HEADERS_STRICT_INVARIANTS=1       # enable invariant sweeps before alignment returns
+HEADERS_TITLE_ONLY_REANCHOR=1     # allow title-only passes to repair ambiguous anchors
 ```
 
 Recent hardening adds:
