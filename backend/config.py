@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Tuple
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, BaseSettings, Field, field_validator
 
 
 def _env_flag(name: str, default: bool) -> bool:
@@ -319,6 +319,8 @@ class Settings(BaseModel):
     headers_title_only_reanchor: bool = Field(
         default_factory=lambda: _env_flag("HEADERS_TITLE_ONLY_REANCHOR", True)
     )
+
+
     headers_rescan_passes: int = Field(
         default_factory=lambda: int(os.getenv("HEADERS_RESCAN_PASSES", "2"))
     )
@@ -612,3 +614,18 @@ def reset_settings_cache() -> None:
     """Clear the cached settings so that subsequent calls reload from the environment."""
 
     get_settings.cache_clear()
+
+
+class SpecSearchSettings(BaseSettings):
+    """Settings specific to the spec-search LLM pipeline."""
+
+    PRIMARY_MODEL: str = "anthropic/claude-3.5-sonnet"
+    FALLBACK_MODEL: str = "openai/gpt-4.1-mini"
+    TIMEOUT_S: int = 240
+    MAX_TOKENS: int = 80_000
+    CHUNK_TARGET_TOKENS: int = 35_000
+    RETRY_MAX: int = 4
+    BACKOFF_S: float = 2.0
+
+
+spec_search_settings = SpecSearchSettings()
