@@ -18,42 +18,14 @@ from .header_locate_vector import locate_headers_with_vectors
 from .header_locator import locate_headers_in_lines
 from .headers_llm_strict import align_headers_llm_strict
 from .headers_sequential import SequentialAlignmentConfig, number_key
-from .pdf_headers_llm_full import (
-    LLMFullHeadersParseError,
-    LLMFullHeadersResult,
-    get_headers_llm_full,
-)
+from backend.headers.extract_headers import HeadersConfig as LLMHeadersConfig
+from backend.headers.extract_headers import extract_headers as run_llm_extractor
 from .pdf_native import collect_line_metrics
 from .section_chunking import single_chunks_from_headers
 from ..utils.logging import configure_logging
 from ..utils.trace import HeaderTracer
 
 LOGGER = configure_logging().getChild(__name__)
-
-
-def _format_llm_failure(exc: Exception) -> str:
-    """Return a concise message describing an LLM extraction failure."""
-
-    text = str(exc).strip()
-    if not text:
-        text = exc.__class__.__name__
-
-    match = re.search(r"\b(\d{3})\b", text)
-    if match:
-        code = match.group(1)
-        if code in {"401", "403"}:
-            return (
-                "LLM header extraction unavailable (HTTP {code}). "
-                "Verify the OpenRouter API key and referer configuration."
-            ).format(code=code)
-        if code == "429":
-            return (
-                "LLM header extraction temporarily unavailable (HTTP 429). "
-                "Rate limit exceeded; retry later."
-            )
-        return "LLM header extraction unavailable (HTTP {code}).".format(code=code)
-
-    return "LLM header extraction unavailable."
 
 
 def _run_section_chunking(headers, lines, *, tracer):
@@ -152,6 +124,7 @@ async def extract_headers_and_chunks(
     llm_headers: list[dict] = []
     llm_raw_responses: list[str] = []
     llm_fenced_blocks: list[str] = []
+    llm_attempts: list[dict] = []
 
     doc_id = document.id if document and document.id is not None else None
     cache_inputs = {
@@ -234,6 +207,7 @@ async def extract_headers_and_chunks(
 
                 trace_payload = _trace_payload(tracer)
                 return {
+                    "ok": True,
                     "headers": located,
                     "sections": sections,
                     "mode": mode_used,
@@ -248,137 +222,135 @@ async def extract_headers_and_chunks(
     # ------------------------------------------------------
 
     if settings.headers_mode.lower() == "llm_full":
-        try:
-            llm_result: LLMFullHeadersResult = await get_headers_llm_full(
+        page_map: dict[int, list[str]] = {}
+        for entry in lines:
+            try:
+                page_no = int(entry.get("page", 0) or 0)
+            except Exception:
+                page_no = 0
+            page_map.setdefault(page_no, []).append(str(entry.get("text", "")))
+        ordered_pages = [
+            "\n".join(page_map[key])
+            for key in sorted(page_map)
+            if any(text.strip() for text in page_map[key])
+        ]
+        headers_config = LLMHeadersConfig.from_settings(settings)
+        llm_result = await run_llm_extractor(ordered_pages, config=headers_config)
+        llm_headers = [
+            {
+                "text": item.title,
+                "number": item.number,
+                "level": item.level,
+                "page": item.page,
+            }
+            for item in llm_result.headers
+        ]
+        llm_raw_responses = list(llm_result.meta.get("raw_responses", []))
+        llm_fenced_blocks = list(llm_result.meta.get("fenced_blocks", []))
+        llm_attempts = list(llm_result.meta.get("attempts", []))
+        fenced_text = "\n".join(llm_fenced_blocks)
+        strict_attempted = False
+        vector_attempted = False
+
+        if not llm_result.ok:
+            mode_used = "llm_full_error"
+            messages.append("LLM header extraction failed.")
+            if tracer:
+                tracer.ev("llm_outline_received", count=0, headers=[])
+            return (
+                {
+                    "ok": False,
+                    "error": llm_result.error or "extraction_failed",
+                    "meta": llm_result.meta,
+                },
+                tracer,
+            )
+
+        if settings.headers_llm_strict and llm_headers:
+            strict_attempted = True
+            if tracer:
+                tracer.log_call(
+                    f"{align_headers_llm_strict.__module__}.{align_headers_llm_strict.__qualname__}"
+                )
+            strict_resolved = align_headers_llm_strict(
+                llm_headers,
                 lines,
-                doc_hash,
-                settings=settings,
-                excluded_pages=excluded_pages,
                 tracer=tracer,
-                force=force,
             )
-            llm_headers = llm_result.headers or []
-            llm_raw_responses = list(llm_result.raw_responses)
-            llm_fenced_blocks = list(llm_result.fenced_blocks)
-            fenced_text = llm_result.combined_fenced()
-            strict_attempted = False
-            vector_attempted = False
+            if strict_resolved:
+                located_headers = [
+                    {
+                        "text": str(item["header"].get("text", "")).strip(),
+                        "number": item["header"].get("number"),
+                        "level": int(item["header"].get("level", 1)),
+                        "page": int(item["line"].get("page", 0)),
+                        "line_idx": int(item["line"].get("line_idx", 0)),
+                        "global_idx": int(item["line"].get("global_idx", 0)),
+                        "source_idx": int(item["header"].get("_orig_index", -1)),
+                        "strategy": item.get("strategy"),
+                        "score": item.get("score"),
+                    }
+                    for item in strict_resolved
+                ]
+                mode_used = "llm_strict"
 
-            if settings.headers_llm_strict and llm_headers:
-                strict_attempted = True
+        if not located_headers and settings.header_locate_use_embeddings:
+            try:
+                vector_attempted = True
                 if tracer:
                     tracer.log_call(
-                        f"{align_headers_llm_strict.__module__}.{align_headers_llm_strict.__qualname__}"
+                        f"{locate_headers_with_vectors.__module__}.{locate_headers_with_vectors.__qualname__}"
                     )
-                strict_resolved = align_headers_llm_strict(
-                    llm_headers,
-                    lines,
-                    tracer=tracer,
-                )
-                if strict_resolved:
-                    located_headers = [
-                        {
-                            "text": str(item["header"].get("text", "")).strip(),
-                            "number": item["header"].get("number"),
-                            "level": int(item["header"].get("level", 1)),
-                            "page": int(item["line"].get("page", 0)),
-                            "line_idx": int(item["line"].get("line_idx", 0)),
-                            "global_idx": int(item["line"].get("global_idx", 0)),
-                            "source_idx": int(item["header"].get("_orig_index", -1)),
-                            "strategy": item.get("strategy"),
-                            "score": item.get("score"),
-                        }
-                        for item in strict_resolved
-                    ]
-                    mode_used = "llm_strict"
-
-            if not located_headers and settings.header_locate_use_embeddings:
-                try:
-                    vector_attempted = True
-                    if tracer:
-                        tracer.log_call(
-                            f"{locate_headers_with_vectors.__module__}.{locate_headers_with_vectors.__qualname__}"
-                        )
-                    located_headers = locate_headers_with_vectors(
-                        session=session,
-                        document_id=doc_id or 0,
-                        simple_headers=llm_headers,
-                        lines=lines,
-                        settings=settings,
-                        excluded_pages=excluded_pages,
-                        tracer=tracer,
-                        doc_hash=doc_hash,
-                        write_trace_json=write_trace_json,
-                    )
-                    if located_headers:
-                        mode_used = "llm_vector"
-                except Exception as exc:  # pragma: no cover - defensive log
-                    LOGGER.warning("Vector header locator failed: %s", exc, exc_info=True)
-                    if tracer:
-                        tracer.ev(
-                            "fallback_triggered",
-                            method="vector",
-                            reason="exception",
-                            message=str(exc),
-                        )
-                    messages.append("Vector header locator unavailable; using sequential alignment.")
-                    located_headers = []
-
-            if not located_headers:
-                if tracer:
-                    tracer.log_call(
-                        f"{locate_headers_in_lines.__module__}.{locate_headers_in_lines.__qualname__}"
-                    )
-                located_headers = locate_headers_in_lines(
-                    llm_headers,
-                    lines,
+                located_headers = locate_headers_with_vectors(
+                    session=session,
+                    document_id=doc_id or 0,
+                    simple_headers=llm_headers,
+                    lines=lines,
+                    settings=settings,
                     excluded_pages=excluded_pages,
-                    strategy=align_strategy,
-                    sequential_config=sequential_config,
                     tracer=tracer,
+                    doc_hash=doc_hash,
+                    write_trace_json=write_trace_json,
                 )
-                if vector_attempted and tracer:
-                    tracer.ev("fallback_triggered", method="vector", reason="no_candidates")
-                if strict_attempted and tracer:
-                    tracer.ev("fallback_triggered", method="llm_strict", reason="no_candidates")
+                if located_headers:
+                    mode_used = "llm_vector"
+            except Exception as exc:  # pragma: no cover - defensive log
+                LOGGER.warning("Vector header locator failed: %s", exc, exc_info=True)
+                if tracer:
+                    tracer.ev(
+                        "fallback_triggered",
+                        method="vector",
+                        reason="exception",
+                        message=str(exc),
+                    )
+                messages.append("Vector header locator unavailable; using sequential alignment.")
+                located_headers = []
 
+        if not located_headers:
             if tracer:
-                tracer.ev("llm_outline_received", count=len(llm_headers), headers=llm_headers)
-                tracer.ev("llm_raw_response", parts=llm_result.raw_responses, fenced=llm_result.fenced_blocks)
-
-        except LLMFullHeadersParseError as exc:
-            LOGGER.warning("LLM response parse failed: %s", exc)
-            located_headers = []
-            mode_used = "llm_full_error"
-            llm_failure_raw_response = exc.content
-            fenced_text = exc.content
-            messages.append(
-                "LLM header extraction returned an invalid response; raw output is available for review."
+                tracer.log_call(
+                    f"{locate_headers_in_lines.__module__}.{locate_headers_in_lines.__qualname__}"
+                )
+            located_headers = locate_headers_in_lines(
+                llm_headers,
+                lines,
+                excluded_pages=excluded_pages,
+                strategy=align_strategy,
+                sequential_config=sequential_config,
+                tracer=tracer,
             )
-            if tracer:
-                tracer.ev("llm_outline_received", count=0, headers=[])
+            if vector_attempted and tracer:
+                tracer.ev("fallback_triggered", method="vector", reason="no_candidates")
+            if strict_attempted and tracer:
+                tracer.ev("fallback_triggered", method="llm_strict", reason="no_candidates")
+
+        if tracer:
+            tracer.ev("llm_outline_received", count=len(llm_headers), headers=llm_headers)
+            if llm_raw_responses or llm_fenced_blocks:
                 tracer.ev(
-                    "fallback_triggered",
-                    method="llm_full",
-                    reason="invalid_response",
-                    message=str(exc),
-                )
-        except Exception as exc:  # pragma: no cover - network/runtime dependent
-            LOGGER.warning("LLM header extraction failed: %s", exc)
-            located_headers = []
-            messages.append(_format_llm_failure(exc))
-            mode_used = "llm_full_error"
-            raw_from_exc = getattr(exc, "content", None)
-            if isinstance(raw_from_exc, str) and raw_from_exc.strip():
-                llm_failure_raw_response = raw_from_exc
-                fenced_text = raw_from_exc
-            if tracer:
-                tracer.ev("llm_outline_received", count=0, headers=[])
-                tracer.ev(
-                    "fallback_triggered",
-                    method="llm_full",
-                    reason="exception",
-                    message=str(exc),
+                    "llm_raw_response",
+                    parts=llm_raw_responses,
+                    fenced=llm_fenced_blocks,
                 )
     else:
         mode_used = "llm_disabled"
@@ -407,6 +379,7 @@ async def extract_headers_and_chunks(
             "llm_headers": llm_headers,
             "llm_raw_responses": llm_raw_responses,
             "llm_fenced_blocks": llm_fenced_blocks,
+            "llm_attempts": llm_attempts,
         }
         if tracer:
             body["trace_path"] = getattr(tracer, "path", None)
@@ -449,6 +422,7 @@ async def extract_headers_and_chunks(
 
     trace_payload = _trace_payload(tracer)
     return {
+        "ok": True,
         "headers": located_headers,
         "sections": sections,
         "mode": mode_used,
@@ -461,6 +435,7 @@ async def extract_headers_and_chunks(
         "llm_headers": llm_headers,
         "llm_raw_responses": llm_raw_responses,
         "llm_fenced_blocks": llm_fenced_blocks,
+        "llm_attempts": llm_attempts,
         "trace": trace_payload,  # expose trace info (including chunking decisions)
     }, tracer
 
