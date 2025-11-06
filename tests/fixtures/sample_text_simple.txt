@@ -1,0 +1,2 @@
+The enclosure shall be stainless steel and include mounting brackets.
+The controller firmware should log all calibration events.
