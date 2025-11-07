@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Iterable
 import re
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -190,6 +190,21 @@ if FRONTEND_DIR.exists():
     async def serve_frontend() -> FileResponse:
         """Return the compiled frontend HTML shell."""
         return FileResponse(FRONTEND_DIR / "index.html")
+
+    @app.get("/{asset_name}.{extension}", include_in_schema=False)
+    async def serve_frontend_asset(asset_name: str, extension: str) -> FileResponse:
+        """Serve first-level frontend assets such as CSS or JavaScript files."""
+
+        candidate = (FRONTEND_DIR / f"{asset_name}.{extension}").resolve()
+        try:
+            candidate.relative_to(FRONTEND_DIR.resolve())
+        except ValueError as exc:  # pragma: no cover - safety net
+            raise HTTPException(status_code=404) from exc
+
+        if not candidate.is_file():
+            raise HTTPException(status_code=404)
+
+        return FileResponse(candidate)
 
 
 __all__ = ["app", "UPLOAD_DIR", "EXPORT_DIR", "FRONTEND_DIR"]
