@@ -13,7 +13,9 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # Provide stub modules so importing ``backend`` does not require optional extras.
-if "python_multipart" not in sys.modules:
+try:
+    import python_multipart  # noqa: F401 - prefer the real package when available
+except ModuleNotFoundError:
     stub = types.ModuleType("python_multipart")
     stub.multipart = types.ModuleType("python_multipart.multipart")
     sys.modules["python_multipart"] = stub
@@ -25,10 +27,16 @@ if "dotenv" not in sys.modules:
     def _load_dotenv(*_args, **_kwargs):  # pragma: no cover - simple stub
         return None
 
+    def _dotenv_values(*_args, **_kwargs):  # pragma: no cover - simple stub
+        return {}
+
     dotenv_stub.load_dotenv = _load_dotenv
+    dotenv_stub.dotenv_values = _dotenv_values
     sys.modules["dotenv"] = dotenv_stub
 
-if "pydantic" not in sys.modules:
+try:
+    import pydantic  # noqa: F401 - prefer the real package when available
+except ModuleNotFoundError:
     pydantic_stub = types.ModuleType("pydantic")
 
     class _FieldInfo:
@@ -127,6 +135,19 @@ if "pydantic" not in sys.modules:
     pydantic_stub.Field = Field
     pydantic_stub.field_validator = field_validator
     sys.modules["pydantic"] = pydantic_stub
+
+try:
+    import pydantic_settings  # noqa: F401 - prefer real package
+except ModuleNotFoundError:
+    settings_stub = types.ModuleType("pydantic_settings")
+    try:
+        from pydantic import BaseSettings as _BaseSettings  # type: ignore
+    except Exception:  # pragma: no cover - simple compatibility shim
+        class _BaseSettings:  # type: ignore
+            pass
+
+    settings_stub.BaseSettings = _BaseSettings
+    sys.modules["pydantic_settings"] = settings_stub
 
 
 def pytest_pyfunc_call(pyfuncitem):
