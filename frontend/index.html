@@ -1,65 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SimpleSpecs – Spec Search</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <meta name="api-base" content="same-origin" />
+    <title>SimpleSpecs</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
   </head>
   <body>
-    <main class="container">
-      <header class="header">
-        <h1>Spec Search Playground</h1>
-        <p>Paste technical text, pick the buckets, and inspect the extraction attempts.</p>
-      </header>
+    <div class="app-shell" data-theme="light">
+      <aside class="app-sidebar">
+        <header class="sidebar-header">
+          <h1 class="brand">SimpleSpecs</h1>
+          <p class="subtitle">Upload, analyse, and approve specification packages.</p>
+        </header>
+        <section class="upload-card" aria-labelledby="upload-title">
+          <h2 id="upload-title">Upload documents</h2>
+          <p id="upload-hint" class="muted">Drag and drop PDFs or browse your files.</p>
+          <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-describedby="upload-hint">
+            <span class="drop-zone__icon" aria-hidden="true">⇪</span>
+            <span class="drop-zone__text">Drop PDF files here</span>
+            <button id="browse-button" type="button" class="ghost-button">Browse</button>
+            <input
+              id="file-input"
+              type="file"
+              accept="application/pdf"
+              multiple
+              hidden
+              aria-hidden="true"
+            />
+          </div>
+          <ul id="upload-progress" class="upload-progress" aria-live="polite"></ul>
+        </section>
+        <section class="documents-card" aria-labelledby="documents-title">
+          <div class="card-header">
+            <h2 id="documents-title">Documents</h2>
+            <button id="refresh-documents" type="button" class="ghost-button">Refresh</button>
+          </div>
+          <p id="documents-status" class="muted" role="status">Loading documents…</p>
+          <div id="documents-list" class="documents-list" role="listbox" aria-activedescendant=""></div>
+        </section>
+      </aside>
+      <main class="app-main">
+        <header class="app-main__header">
+          <div>
+            <h2 id="workspace-title">Document workspace</h2>
+            <p id="workspace-subtitle" class="muted">Select a document to view analysis results.</p>
+          </div>
+          <div class="document-meta" id="document-meta"></div>
+        </header>
 
-      <section class="input-card">
-        <label class="field">
-          <span class="field-label">Document ID (optional)</span>
-          <input type="text" id="document-id" placeholder="DOC-1234" />
-        </label>
+        <section class="panel" id="panel-parse" aria-labelledby="panel-parse-title">
+          <div class="panel-header">
+            <h3 id="panel-parse-title">Parse overview</h3>
+            <button type="button" class="ghost-button" data-export="parse">Download JSON</button>
+          </div>
+          <div class="panel-body" id="parse-content" aria-live="polite"></div>
+        </section>
 
-        <label class="field">
-          <span class="field-label">Specification text</span>
-          <textarea id="spec-text" rows="10" placeholder="Paste spec pages or sentences here..."></textarea>
-        </label>
+        <section class="panel" id="panel-header-raw" aria-labelledby="panel-header-raw-title">
+          <div class="panel-header">
+            <h3 id="panel-header-raw-title">LLM raw response</h3>
+          </div>
+          <div class="panel-body" id="headers-raw-content" aria-live="polite"></div>
+        </section>
 
-        <fieldset class="bucket-list">
-          <legend>Buckets</legend>
-          <label><input type="checkbox" value="mechanical" checked /> Mechanical</label>
-          <label><input type="checkbox" value="electrical" checked /> Electrical</label>
-          <label><input type="checkbox" value="software" checked /> Software</label>
-          <label><input type="checkbox" value="controls" checked /> Controls</label>
-        </fieldset>
+        <section class="panel" id="panel-headers" aria-labelledby="panel-headers-title">
+          <div class="panel-header">
+            <div class="panel-header__title">
+              <h3 id="panel-headers-title">Header outline</h3>
+              <span id="header-mode-tag" class="panel-tag" hidden></span>
+              <button
+                id="refresh-headers"
+                type="button"
+                class="ghost-button panel-inline-button"
+                aria-label="Start or refresh the header search"
+              >
+                Start search
+              </button>
+            </div>
+            <button type="button" class="ghost-button" data-export="headers">Download JSON</button>
+          </div>
+          <div class="panel-body" id="headers-content" aria-live="polite"></div>
+        </section>
 
-        <button id="run-search" type="button" class="primary">Run search</button>
-        <p id="status" class="status" role="status"></p>
-      </section>
+        <section class="panel" id="panel-specs" aria-labelledby="panel-specs-title">
+          <div class="panel-header">
+            <h3 id="panel-specs-title">Specification buckets</h3>
+            <div class="panel-actions">
+              <button
+                type="button"
+                class="ghost-button"
+                id="start-specs"
+                aria-label="Start or refresh the specifications search"
+              >
+                Start search
+              </button>
+              <!-- NEW: Wipe & rerun specs -->
+              <button
+                type="button"
+                class="ghost-button"
+                id="run-again-buckets"
+                aria-label="Wipe and rerun specifications classification"
+                title="Wipe saved buckets and rerun the LLM per document section"
+              >
+                Rerun specs
+              </button>
+              <button type="button" class="ghost-button" data-export="specs-json">Export JSON</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="approval-controls" id="approval-controls">
+              <label class="approval-controls__field" for="reviewer-name">
+                <span class="approval-controls__label">Reviewer</span>
+                <input
+                  id="reviewer-name"
+                  name="reviewer-name"
+                  type="text"
+                  placeholder="Quality engineer"
+                  autocomplete="name"
+                />
+              </label>
+              <button type="button" class="primary-button" id="approve-specs">Approve &amp; Freeze</button>
+              <div class="approval-controls__spacer" aria-hidden="true"></div>
+              <button type="button" class="ghost-button" data-server-export="csv">Download CSV bundle</button>
+              <button type="button" class="ghost-button" data-server-export="docx">Download DOCX</button>
+              <span id="approval-status" class="approval-status" role="status"></span>
+            </div>
+            <div id="specs-content" aria-live="polite"></div>
+          </div>
+        </section>
 
-      <section class="results" aria-live="polite">
-        <h2>Results</h2>
-        <div id="results"></div>
-      </section>
-
-      <section class="telemetry">
-        <h2>Telemetry</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Rung</th>
-              <th>Model</th>
-              <th>Parsed</th>
-              <th>Reason</th>
-              <th>Input tokens</th>
-              <th>Response bytes</th>
-            </tr>
-          </thead>
-          <tbody id="telemetry-body"></tbody>
-        </table>
-        <div id="warnings" class="warnings" aria-live="polite"></div>
-      </section>
-    </main>
-
-    <script type="module" src="./app.js"></script>
+        <section class="panel" id="panel-risk" aria-labelledby="panel-risk-title">
+          <div class="panel-header">
+            <h3 id="panel-risk-title">Risk &amp; compliance</h3>
+            <button type="button" class="ghost-button" data-export="risk">Download report</button>
+          </div>
+          <div class="panel-body" id="risk-content" aria-live="polite"></div>
+        </section>
+      </main>
+    </div>
+    <div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
+    <script type="module" src="/static/js/app.js"></script>
+    <!-- NEW: helper that wires #run-again-buckets to DELETE+POST endpoints -->
+    <script type="module" src="/static/js/specs_patch.js"></script>
   </body>
 </html>

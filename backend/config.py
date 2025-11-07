@@ -9,7 +9,6 @@ from typing import Tuple
 
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, field_validator
-from pydantic_settings import BaseSettings
 
 
 def _env_flag(name: str, default: bool) -> bool:
@@ -320,8 +319,6 @@ class Settings(BaseModel):
     headers_title_only_reanchor: bool = Field(
         default_factory=lambda: _env_flag("HEADERS_TITLE_ONLY_REANCHOR", True)
     )
-
-
     headers_rescan_passes: int = Field(
         default_factory=lambda: int(os.getenv("HEADERS_RESCAN_PASSES", "2"))
     )
@@ -342,38 +339,18 @@ class Settings(BaseModel):
             "HEADERS_LLM_MODEL", "anthropic/claude-3.5-sonnet"
         )
     )
-    headers_llm_model_fallback: str = Field(
-        default_factory=lambda: os.getenv(
-            "HEADERS_LLM_MODEL_FALLBACK",
-            os.getenv("HEADERS_LLM_MODEL", "anthropic/claude-3.5-sonnet"),
-        )
-    )
     headers_llm_max_input_tokens: int = Field(
         default_factory=lambda: int(
-            os.getenv("HEADERS_LLM_MAX_INPUT_TOKENS", "80000")
+            os.getenv("HEADERS_LLM_MAX_INPUT_TOKENS", "120000")
         )
     )
     headers_llm_timeout_s: int = Field(
-        default_factory=lambda: int(os.getenv("HEADERS_LLM_TIMEOUT_S", "240"))
+        default_factory=lambda: int(os.getenv("HEADERS_LLM_TIMEOUT_S", "120"))
     )
     headers_llm_cache_dir: Path = Field(
         default_factory=lambda: Path(
             os.getenv("HEADERS_LLM_CACHE_DIR", ".cache/headers")
         )
-    )
-    headers_llm_chunking: str = Field(
-        default_factory=lambda: os.getenv("HEADERS_LLM_CHUNKING", "auto")
-    )
-    headers_llm_chunk_target_tokens: int = Field(
-        default_factory=lambda: int(
-            os.getenv("HEADERS_LLM_CHUNK_TARGET_TOKENS", "35000")
-        )
-    )
-    headers_llm_retry_max: int = Field(
-        default_factory=lambda: int(os.getenv("HEADERS_LLM_RETRY_MAX", "3"))
-    )
-    headers_llm_backoff_s: float = Field(
-        default_factory=lambda: float(os.getenv("HEADERS_LLM_BACKOFF_S", "2"))
     )
     headers_log_dir: Path = Field(
         default_factory=lambda: Path(
@@ -547,26 +524,6 @@ class Settings(BaseModel):
     def _clamp_cosine(cls, value: float) -> float:
         return max(0.0, min(1.0, value))
 
-    @field_validator("headers_llm_chunking", mode="after")
-    @classmethod
-    def _normalise_chunking(cls, value: str) -> str:
-        return (value or "auto").strip().lower() or "auto"
-
-    @field_validator("headers_llm_chunk_target_tokens", mode="after")
-    @classmethod
-    def _clamp_chunk_target(cls, value: int) -> int:
-        return max(1, int(value))
-
-    @field_validator("headers_llm_retry_max", mode="after")
-    @classmethod
-    def _clamp_retry_max(cls, value: int) -> int:
-        return max(0, int(value))
-
-    @field_validator("headers_llm_backoff_s", mode="after")
-    @classmethod
-    def _clamp_backoff(cls, value: float) -> float:
-        return max(0.0, float(value))
-
     @field_validator("headers_band_lines", mode="after")
     @classmethod
     def _clamp_band_lines(cls, value: int) -> int:
@@ -615,18 +572,3 @@ def reset_settings_cache() -> None:
     """Clear the cached settings so that subsequent calls reload from the environment."""
 
     get_settings.cache_clear()
-
-
-class SpecSearchSettings(BaseSettings):
-    """Settings specific to the spec-search LLM pipeline."""
-
-    PRIMARY_MODEL: str = "anthropic/claude-3.5-sonnet"
-    FALLBACK_MODEL: str = "openai/gpt-4.1-mini"
-    TIMEOUT_S: int = 240
-    MAX_TOKENS: int = 80_000
-    CHUNK_TARGET_TOKENS: int = 35_000
-    RETRY_MAX: int = 4
-    BACKOFF_S: float = 2.0
-
-
-spec_search_settings = SpecSearchSettings()

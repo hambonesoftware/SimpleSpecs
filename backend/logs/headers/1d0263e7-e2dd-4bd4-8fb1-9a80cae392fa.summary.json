@@ -1,0 +1,6021 @@
+{
+  "trace_schema": "v2-chunking",
+  "run_id": "1d0263e7-e2dd-4bd4-8fb1-9a80cae392fa",
+  "metadata": {
+    "mode": "llm_full",
+    "file_id": 2,
+    "cfg": {
+      "suppress_toc": true,
+      "suppress_running": true,
+      "align": "sequential"
+    },
+    "metadata": {
+      "filename": "MFC-16M_R2001_E1995.pdf",
+      "document_id": 2
+    }
+  },
+  "llm_headers": [
+    {
+      "text": "ASME MFC-16M-1995 MEASUREMENT OF FLUID FLOW IN CLOSED CONDUITS BY MEANS OF ELECTROMAGNETIC FLOWMETERS",
+      "number": null,
+      "level": 1,
+      "page": 2
+    },
+    {
+      "text": "Foreword",
+      "number": null,
+      "level": 1,
+      "page": 4
+    },
+    {
+      "text": "ASME STANDARDS COMMITTEE MFC Measurement of Fluid Flow in Closed Conduits",
+      "number": null,
+      "level": 1,
+      "page": 5
+    },
+    {
+      "text": "Foreword",
+      "number": "Foreword",
+      "level": 1,
+      "page": 6
+    },
+    {
+      "text": "Standards Committee Roster",
+      "number": null,
+      "level": 1,
+      "page": 6
+    },
+    {
+      "text": "SCOPE",
+      "number": "1",
+      "level": 1,
+      "page": 7
+    },
+    {
+      "text": "REFERENCES",
+      "number": "2",
+      "level": 1,
+      "page": 7
+    },
+    {
+      "text": "TERMINOLOGY",
+      "number": "3",
+      "level": 1,
+      "page": 7
+    },
+    {
+      "text": "THEORY AND MEASUREMENT TECHNIQUE",
+      "number": "4",
+      "level": 1,
+      "page": 8
+    },
+    {
+      "text": "FLOWMETER DESCRIPTION",
+      "number": "5",
+      "level": 1,
+      "page": 9
+    },
+    {
+      "text": "Overview",
+      "number": "5.1",
+      "level": 2,
+      "page": 9
+    },
+    {
+      "text": "Primary Device",
+      "number": "5.2",
+      "level": 2,
+      "page": 9
+    },
+    {
+      "text": "Secondary Device",
+      "number": "5.3",
+      "level": 2,
+      "page": 9
+    },
+    {
+      "text": "Outputs from the Secondary Section",
+      "number": "5.4",
+      "level": 2,
+      "page": 10
+    },
+    {
+      "text": "APPLICATION CONSIDERATIONS",
+      "number": "6",
+      "level": 1,
+      "page": 10
+    },
+    {
+      "text": "Process Liquid",
+      "number": "6.1",
+      "level": 2,
+      "page": 10
+    },
+    {
+      "text": "Liquid Electrical Conductivity",
+      "number": "6.1.1",
+      "level": 3,
+      "page": 10
+    },
+    {
+      "text": "Noisy Flow Signal",
+      "number": "6.1.2",
+      "level": 3,
+      "page": 10
+    },
+    {
+      "text": "Process Hydrodynamics",
+      "number": "6.2",
+      "level": 2,
+      "page": 10
+    },
+    {
+      "text": "Reynolds Number Effect",
+      "number": "6.2.1",
+      "level": 3,
+      "page": 10
+    },
+    {
+      "text": "Velocity Profile Effect",
+      "number": "6.2.2",
+      "level": 3,
+      "page": 10
+    },
+    {
+      "text": "Slippage",
+      "number": "6.2.3",
+      "level": 3,
+      "page": 10
+    },
+    {
+      "text": "Primary Device - Sizing Considerations",
+      "number": "6.3",
+      "level": 2,
+      "page": 10
+    },
+    {
+      "text": "General Considerations",
+      "number": "6.3.1",
+      "level": 3,
+      "page": 10
+    },
+    {
+      "text": "Special Process Considerations",
+      "number": "6.3.2",
+      "level": 3,
+      "page": 10
+    },
+    {
+      "text": "Accuracy",
+      "number": "6.3.2.1",
+      "level": 4,
+      "page": 10
+    },
+    {
+      "text": "Jet Effect",
+      "number": "6.3.2.2",
+      "level": 4,
+      "page": 10
+    },
+    {
+      "text": "Abrasive Slurries",
+      "number": "6.3.2.3",
+      "level": 4,
+      "page": 11
+    },
+    {
+      "text": "Fast-Settling Slurries",
+      "number": "6.3.2.4",
+      "level": 4,
+      "page": 11
+    },
+    {
+      "text": "Primary Device - Location, Installation, and Maintenance",
+      "number": "6.4",
+      "level": 2,
+      "page": 11
+    },
+    {
+      "text": "Primary Device Location and Orientation",
+      "number": "6.4.1",
+      "level": 3,
+      "page": 11
+    },
+    {
+      "text": "Piping Effects",
+      "number": "6.4.1.1",
+      "level": 4,
+      "page": 11
+    },
+    {
+      "text": "Full Pipe Requirements",
+      "number": "6.4.1.2",
+      "level": 4,
+      "page": 11
+    },
+    {
+      "text": "Electrode Position - Horizontal Installations",
+      "number": "6.4.1.3",
+      "level": 4,
+      "page": 11
+    },
+    {
+      "text": "In-Situ Zero Checking",
+      "number": "6.4.1.4",
+      "level": 4,
+      "page": 11
+    },
+    {
+      "text": "Entrained Solids (Slurries)",
+      "number": "6.4.1.5",
+      "level": 4,
+      "page": 11
+    },
+    {
+      "text": "Location with Regard to Electrical Interference",
+      "number": "6.4.1.6",
+      "level": 4,
+      "page": 11
+    },
+    {
+      "text": "Installation of Primary Device",
+      "number": "6.4.2",
+      "level": 3,
+      "page": 12
+    },
+    {
+      "text": "Installation Design",
+      "number": "6.4.2.1",
+      "level": 4,
+      "page": 12
+    },
+    {
+      "text": "Handling of the Primary Device",
+      "number": "6.4.2.2",
+      "level": 4,
+      "page": 12
+    },
+    {
+      "text": "Pipework Alignment and Connectors",
+      "number": "6.4.2.3",
+      "level": 4,
+      "page": 12
+    },
+    {
+      "text": "Transition Piping",
+      "number": "6.4.2.4",
+      "level": 4,
+      "page": 12
+    },
+    {
+      "text": "Electrical Installation",
+      "number": "6.4.3",
+      "level": 3,
+      "page": 12
+    },
+    {
+      "text": "General Requirements",
+      "number": "6.4.3.1",
+      "level": 4,
+      "page": 12
+    },
+    {
+      "text": "Power Factor (AC Systems Only)",
+      "number": "6.4.3.2",
+      "level": 4,
+      "page": 12
+    },
+    {
+      "text": "Cathodic Protection",
+      "number": "6.4.3.3",
+      "level": 4,
+      "page": 12
+    },
+    {
+      "text": "Coatings and Deposits",
+      "number": "6.4.4",
+      "level": 3,
+      "page": 12
+    },
+    {
+      "text": "Primary Device - Materials of Construction",
+      "number": "6.5",
+      "level": 2,
+      "page": 13
+    },
+    {
+      "text": "General Guidelines",
+      "number": "6.5.1",
+      "level": 3,
+      "page": 13
+    },
+    {
+      "text": "Liner Materials",
+      "number": "6.5.2",
+      "level": 3,
+      "page": 13
+    },
+    {
+      "text": "Electrode Materials",
+      "number": "6.5.3",
+      "level": 3,
+      "page": 13
+    },
+    {
+      "text": "Secondary Device - Installation",
+      "number": "6.6",
+      "level": 2,
+      "page": 13
+    },
+    {
+      "text": "Location of Secondary Device",
+      "number": "6.6.1",
+      "level": 3,
+      "page": 13
+    },
+    {
+      "text": "Electrical Installation",
+      "number": "6.6.2",
+      "level": 3,
+      "page": 13
+    },
+    {
+      "text": "Safety",
+      "number": "6.7",
+      "level": 2,
+      "page": 13
+    },
+    {
+      "text": "Electrical Safety",
+      "number": "6.7.1",
+      "level": 3,
+      "page": 13
+    },
+    {
+      "text": "Mechanical Safety",
+      "number": "6.7.2",
+      "level": 3,
+      "page": 13
+    },
+    {
+      "text": "EQUIPMENT MARKINGS",
+      "number": "7",
+      "level": 1,
+      "page": 13
+    },
+    {
+      "text": "Introduction",
+      "number": "7.1",
+      "level": 2,
+      "page": 13
+    },
+    {
+      "text": "Primary Device",
+      "number": "7.2",
+      "level": 2,
+      "page": 13
+    },
+    {
+      "text": "Mandatory Information",
+      "number": "7.2.1",
+      "level": 3,
+      "page": 13
+    },
+    {
+      "text": "Optional Information",
+      "number": "7.2.2",
+      "level": 3,
+      "page": 14
+    },
+    {
+      "text": "Secondary Device",
+      "number": "7.3",
+      "level": 2,
+      "page": 14
+    },
+    {
+      "text": "Mandatory Information",
+      "number": "7.3.1",
+      "level": 3,
+      "page": 14
+    },
+    {
+      "text": "LIQUID CALIBRATION",
+      "number": "8",
+      "level": 1,
+      "page": 14
+    },
+    {
+      "text": "Overview",
+      "number": "8.1",
+      "level": 2,
+      "page": 14
+    },
+    {
+      "text": "Calibration Conditions",
+      "number": "8.2",
+      "level": 2,
+      "page": 14
+    },
+    {
+      "text": "Calibration Facilities",
+      "number": "8.3",
+      "level": 2,
+      "page": 14
+    },
+    {
+      "text": "Calibration of the Primary",
+      "number": "8.4",
+      "level": 2,
+      "page": 14
+    },
+    {
+      "text": "Calibration of the Secondary",
+      "number": "8.5",
+      "level": 2,
+      "page": 14
+    },
+    {
+      "text": "Spanning of the Secondary",
+      "number": "8.6",
+      "level": 2,
+      "page": 14
+    },
+    {
+      "text": "Installation Effects",
+      "number": "8.7",
+      "level": 2,
+      "page": 14
+    },
+    {
+      "text": "Figures",
+      "number": null,
+      "level": 1,
+      "page": 6
+    },
+    {
+      "text": "Appendices",
+      "number": null,
+      "level": 1,
+      "page": 6
+    },
+    {
+      "text": "Added Details Regarding Theory and Measurement Technique",
+      "number": "A",
+      "level": 1,
+      "page": 15
+    },
+    {
+      "text": "Theory",
+      "number": "A1",
+      "level": 2,
+      "page": 15
+    },
+    {
+      "text": "Measurement Technique",
+      "number": "A2",
+      "level": 2,
+      "page": 16
+    },
+    {
+      "text": "Items of Potential Interest to Users",
+      "number": "B",
+      "level": 1,
+      "page": 18
+    },
+    {
+      "text": "PRIMARY",
+      "number": "B1",
+      "level": 2,
+      "page": 18
+    },
+    {
+      "text": "SECONDARY",
+      "number": "B2",
+      "level": 2,
+      "page": 19
+    },
+    {
+      "text": "SYSTEM",
+      "number": "B3",
+      "level": 2,
+      "page": 19
+    },
+    {
+      "text": "Liner Material Guidelines",
+      "number": "C",
+      "level": 1,
+      "page": 20
+    },
+    {
+      "text": "Bibliography",
+      "number": "D",
+      "level": 1,
+      "page": 21
+    },
+    {
+      "text": "STANDARDS FOR MEASUREMENT OF FLUID IN CLOSED CONDUITS",
+      "number": null,
+      "level": 1,
+      "page": 22
+    },
+    {
+      "text": "ASME Services",
+      "number": null,
+      "level": 1,
+      "page": 23
+    }
+  ],
+  "llm_requests": [],
+  "llm_raw_responses": [
+    "Looking at the document structure, I need to extract the hierarchical table of contents style headings and their page numbers.\n\n```SIMPLEHEADERS\n[\n  {\n    \"number\": null,\n    \"title\": \"ASME MFC-16M-1995 MEASUREMENT OF FLUID FLOW IN CLOSED CONDUITS BY MEANS OF ELECTROMAGNETIC FLOWMETERS\",\n    \"level\": 1,\n    \"page\": 2\n  },\n  {\n    \"number\": null,\n    \"title\": \"Foreword\",\n    \"level\": 1,\n    \"page\": 4\n  },\n  {\n    \"number\": null,\n    \"title\": \"ASME STANDARDS COMMITTEE MFC Measurement of Fluid Flow in Closed Conduits\",\n    \"level\": 1,\n    \"page\": 5\n  },\n  {\n    \"number\": \"Foreword\",\n    \"title\": \"Foreword\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": null,\n    \"title\": \"Standards Committee Roster\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"1\",\n    \"title\": \"SCOPE\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"2\",\n    \"title\": \"REFERENCES\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"3\",\n    \"title\": \"TERMINOLOGY\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"4\",\n    \"title\": \"THEORY AND MEASUREMENT TECHNIQUE\",\n    \"level\": 1,\n    \"page\": 8\n  },\n  {\n    \"number\": \"5\",\n    \"title\": \"FLOWMETER DESCRIPTION\",\n    \"level\": 1,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5.1\",\n    \"title\": \"Overview\",\n    \"level\": 2,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5.2\",\n    \"title\": \"Primary Device\",\n    \"level\": 2,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5.3\",\n    \"title\": \"Secondary Device\",\n    \"level\": 2,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5.4\",\n    \"title\": \"Outputs from the Secondary Section\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6\",\n    \"title\": \"APPLICATION CONSIDERATIONS\",\n    \"level\": 1,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.1\",\n    \"title\": \"Process Liquid\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.1.1\",\n    \"title\": \"Liquid Electrical Conductivity\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.1.2\",\n    \"title\": \"Noisy Flow Signal\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.2\",\n    \"title\": \"Process Hydrodynamics\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.2.1\",\n    \"title\": \"Reynolds Number Effect\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.2.2\",\n    \"title\": \"Velocity Profile Effect\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.2.3\",\n    \"title\": \"Slippage\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3\",\n    \"title\": \"Primary Device - Sizing Considerations\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.1\",\n    \"title\": \"General Considerations\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.2\",\n    \"title\": \"Special Process Considerations\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.2.1\",\n    \"title\": \"Accuracy\",\n    \"level\": 4,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.2.2\",\n    \"title\": \"Jet Effect\",\n    \"level\": 4,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.2.3\",\n    \"title\": \"Abrasive Slurries\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.3.2.4\",\n    \"title\": \"Fast-Settling Slurries\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4\",\n    \"title\": \"Primary Device - Location, Installation, and Maintenance\",\n    \"level\": 2,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1\",\n    \"title\": \"Primary Device Location and Orientation\",\n    \"level\": 3,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.1\",\n    \"title\": \"Piping Effects\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.2\",\n    \"title\": \"Full Pipe Requirements\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.3\",\n    \"title\": \"Electrode Position - Horizontal Installations\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.4\",\n    \"title\": \"In-Situ Zero Checking\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.5\",\n    \"title\": \"Entrained Solids (Slurries)\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.6\",\n    \"title\": \"Location with Regard to Electrical Interference\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.2\",\n    \"title\": \"Installation of Primary Device\",\n    \"level\": 3,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.2.1\",\n    \"title\": \"Installation Design\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.2.2\",\n    \"title\": \"Handling of the Primary Device\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.2.3\",\n    \"title\": \"Pipework Alignment and Connectors\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.2.4\",\n    \"title\": \"Transition Piping\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.3\",\n    \"title\": \"Electrical Installation\",\n    \"level\": 3,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.3.1\",\n    \"title\": \"General Requirements\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.3.2\",\n    \"title\": \"Power Factor (AC Systems Only)\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.3.3\",\n    \"title\": \"Cathodic Protection\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.4\",\n    \"title\": \"Coatings and Deposits\",\n    \"level\": 3,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.5\",\n    \"title\": \"Primary Device - Materials of Construction\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.5.1\",\n    \"title\": \"General Guidelines\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.5.2\",\n    \"title\": \"Liner Materials\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.5.3\",\n    \"title\": \"Electrode Materials\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.6\",\n    \"title\": \"Secondary Device - Installation\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.6.1\",\n    \"title\": \"Location of Secondary Device\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.6.2\",\n    \"title\": \"Electrical Installation\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.7\",\n    \"title\": \"Safety\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.7.1\",\n    \"title\": \"Electrical Safety\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.7.2\",\n    \"title\": \"Mechanical Safety\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7\",\n    \"title\": \"EQUIPMENT MARKINGS\",\n    \"level\": 1,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7.1\",\n    \"title\": \"Introduction\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7.2\",\n    \"title\": \"Primary Device\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7.2.1\",\n    \"title\": \"Mandatory Information\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7.2.2\",\n    \"title\": \"Optional Information\",\n    \"level\": 3,\n    \"page\": 14\n  },\n  {\n    \"number\": \"7.3\",\n    \"title\": \"Secondary Device\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"7.3.1\",\n    \"title\": \"Mandatory Information\",\n    \"level\": 3,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8\",\n    \"title\": \"LIQUID CALIBRATION\",\n    \"level\": 1,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.1\",\n    \"title\": \"Overview\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.2\",\n    \"title\": \"Calibration Conditions\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.3\",\n    \"title\": \"Calibration Facilities\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.4\",\n    \"title\": \"Calibration of the Primary\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.5\",\n    \"title\": \"Calibration of the Secondary\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.6\",\n    \"title\": \"Spanning of the Secondary\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.7\",\n    \"title\": \"Installation Effects\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": null,\n    \"title\": \"Figures\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": null,\n    \"title\": \"Appendices\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"A\",\n    \"title\": \"Added Details Regarding Theory and Measurement Technique\",\n    \"level\": 1,\n    \"page\": 15\n  },\n  {\n    \"number\": \"A1\",\n    \"title\": \"Theory\",\n    \"level\": 2,\n    \"page\": 15\n  },\n  {\n    \"number\": \"A2\",\n    \"title\": \"Measurement Technique\",\n    \"level\": 2,\n    \"page\": 16\n  },\n  {\n    \"number\": \"B\",\n    \"title\": \"Items of Potential Interest to Users\",\n    \"level\": 1,\n    \"page\": 18\n  },\n  {\n    \"number\": \"B1\",\n    \"title\": \"PRIMARY\",\n    \"level\": 2,\n    \"page\": 18\n  },\n  {\n    \"number\": \"B2\",\n    \"title\": \"SECONDARY\",\n    \"level\": 2,\n    \"page\": 19\n  },\n  {\n    \"number\": \"B3\",\n    \"title\": \"SYSTEM\",\n    \"level\": 2,\n    \"page\": 19\n  },\n  {\n    \"number\": \"C\",\n    \"title\": \"Liner Material Guidelines\",\n    \"level\": 1,\n    \"page\": 20\n  },\n  {\n    \"number\": \"D\",\n    \"title\": \"Bibliography\",\n    \"level\": 1,\n    \"page\": 21\n  },\n  {\n    \"number\": null,\n    \"title\": \"STANDARDS FOR MEASUREMENT OF FLUID IN CLOSED CONDUITS\",\n    \"level\": 1,\n    \"page\": 22\n  },\n  {\n    \"number\": null,\n    \"title\": \"ASME Services\",\n    \"level\": 1,\n    \"page\": 23\n  }\n]\n```"
+  ],
+  "llm_fenced_blocks": [
+    "[\n  {\n    \"number\": null,\n    \"title\": \"ASME MFC-16M-1995 MEASUREMENT OF FLUID FLOW IN CLOSED CONDUITS BY MEANS OF ELECTROMAGNETIC FLOWMETERS\",\n    \"level\": 1,\n    \"page\": 2\n  },\n  {\n    \"number\": null,\n    \"title\": \"Foreword\",\n    \"level\": 1,\n    \"page\": 4\n  },\n  {\n    \"number\": null,\n    \"title\": \"ASME STANDARDS COMMITTEE MFC Measurement of Fluid Flow in Closed Conduits\",\n    \"level\": 1,\n    \"page\": 5\n  },\n  {\n    \"number\": \"Foreword\",\n    \"title\": \"Foreword\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": null,\n    \"title\": \"Standards Committee Roster\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"1\",\n    \"title\": \"SCOPE\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"2\",\n    \"title\": \"REFERENCES\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"3\",\n    \"title\": \"TERMINOLOGY\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"4\",\n    \"title\": \"THEORY AND MEASUREMENT TECHNIQUE\",\n    \"level\": 1,\n    \"page\": 8\n  },\n  {\n    \"number\": \"5\",\n    \"title\": \"FLOWMETER DESCRIPTION\",\n    \"level\": 1,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5.1\",\n    \"title\": \"Overview\",\n    \"level\": 2,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5.2\",\n    \"title\": \"Primary Device\",\n    \"level\": 2,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5.3\",\n    \"title\": \"Secondary Device\",\n    \"level\": 2,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5.4\",\n    \"title\": \"Outputs from the Secondary Section\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6\",\n    \"title\": \"APPLICATION CONSIDERATIONS\",\n    \"level\": 1,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.1\",\n    \"title\": \"Process Liquid\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.1.1\",\n    \"title\": \"Liquid Electrical Conductivity\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.1.2\",\n    \"title\": \"Noisy Flow Signal\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.2\",\n    \"title\": \"Process Hydrodynamics\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.2.1\",\n    \"title\": \"Reynolds Number Effect\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.2.2\",\n    \"title\": \"Velocity Profile Effect\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.2.3\",\n    \"title\": \"Slippage\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3\",\n    \"title\": \"Primary Device - Sizing Considerations\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.1\",\n    \"title\": \"General Considerations\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.2\",\n    \"title\": \"Special Process Considerations\",\n    \"level\": 3,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.2.1\",\n    \"title\": \"Accuracy\",\n    \"level\": 4,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.2.2\",\n    \"title\": \"Jet Effect\",\n    \"level\": 4,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6.3.2.3\",\n    \"title\": \"Abrasive Slurries\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.3.2.4\",\n    \"title\": \"Fast-Settling Slurries\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4\",\n    \"title\": \"Primary Device - Location, Installation, and Maintenance\",\n    \"level\": 2,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1\",\n    \"title\": \"Primary Device Location and Orientation\",\n    \"level\": 3,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.1\",\n    \"title\": \"Piping Effects\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.2\",\n    \"title\": \"Full Pipe Requirements\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.3\",\n    \"title\": \"Electrode Position - Horizontal Installations\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.4\",\n    \"title\": \"In-Situ Zero Checking\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.5\",\n    \"title\": \"Entrained Solids (Slurries)\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.1.6\",\n    \"title\": \"Location with Regard to Electrical Interference\",\n    \"level\": 4,\n    \"page\": 11\n  },\n  {\n    \"number\": \"6.4.2\",\n    \"title\": \"Installation of Primary Device\",\n    \"level\": 3,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.2.1\",\n    \"title\": \"Installation Design\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.2.2\",\n    \"title\": \"Handling of the Primary Device\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.2.3\",\n    \"title\": \"Pipework Alignment and Connectors\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.2.4\",\n    \"title\": \"Transition Piping\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.3\",\n    \"title\": \"Electrical Installation\",\n    \"level\": 3,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.3.1\",\n    \"title\": \"General Requirements\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.3.2\",\n    \"title\": \"Power Factor (AC Systems Only)\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.3.3\",\n    \"title\": \"Cathodic Protection\",\n    \"level\": 4,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.4.4\",\n    \"title\": \"Coatings and Deposits\",\n    \"level\": 3,\n    \"page\": 12\n  },\n  {\n    \"number\": \"6.5\",\n    \"title\": \"Primary Device - Materials of Construction\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.5.1\",\n    \"title\": \"General Guidelines\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.5.2\",\n    \"title\": \"Liner Materials\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.5.3\",\n    \"title\": \"Electrode Materials\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.6\",\n    \"title\": \"Secondary Device - Installation\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.6.1\",\n    \"title\": \"Location of Secondary Device\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.6.2\",\n    \"title\": \"Electrical Installation\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.7\",\n    \"title\": \"Safety\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.7.1\",\n    \"title\": \"Electrical Safety\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"6.7.2\",\n    \"title\": \"Mechanical Safety\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7\",\n    \"title\": \"EQUIPMENT MARKINGS\",\n    \"level\": 1,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7.1\",\n    \"title\": \"Introduction\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7.2\",\n    \"title\": \"Primary Device\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7.2.1\",\n    \"title\": \"Mandatory Information\",\n    \"level\": 3,\n    \"page\": 13\n  },\n  {\n    \"number\": \"7.2.2\",\n    \"title\": \"Optional Information\",\n    \"level\": 3,\n    \"page\": 14\n  },\n  {\n    \"number\": \"7.3\",\n    \"title\": \"Secondary Device\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"7.3.1\",\n    \"title\": \"Mandatory Information\",\n    \"level\": 3,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8\",\n    \"title\": \"LIQUID CALIBRATION\",\n    \"level\": 1,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.1\",\n    \"title\": \"Overview\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.2\",\n    \"title\": \"Calibration Conditions\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.3\",\n    \"title\": \"Calibration Facilities\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.4\",\n    \"title\": \"Calibration of the Primary\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.5\",\n    \"title\": \"Calibration of the Secondary\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.6\",\n    \"title\": \"Spanning of the Secondary\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": \"8.7\",\n    \"title\": \"Installation Effects\",\n    \"level\": 2,\n    \"page\": 14\n  },\n  {\n    \"number\": null,\n    \"title\": \"Figures\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": null,\n    \"title\": \"Appendices\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"A\",\n    \"title\": \"Added Details Regarding Theory and Measurement Technique\",\n    \"level\": 1,\n    \"page\": 15\n  },\n  {\n    \"number\": \"A1\",\n    \"title\": \"Theory\",\n    \"level\": 2,\n    \"page\": 15\n  },\n  {\n    \"number\": \"A2\",\n    \"title\": \"Measurement Technique\",\n    \"level\": 2,\n    \"page\": 16\n  },\n  {\n    \"number\": \"B\",\n    \"title\": \"Items of Potential Interest to Users\",\n    \"level\": 1,\n    \"page\": 18\n  },\n  {\n    \"number\": \"B1\",\n    \"title\": \"PRIMARY\",\n    \"level\": 2,\n    \"page\": 18\n  },\n  {\n    \"number\": \"B2\",\n    \"title\": \"SECONDARY\",\n    \"level\": 2,\n    \"page\": 19\n  },\n  {\n    \"number\": \"B3\",\n    \"title\": \"SYSTEM\",\n    \"level\": 2,\n    \"page\": 19\n  },\n  {\n    \"number\": \"C\",\n    \"title\": \"Liner Material Guidelines\",\n    \"level\": 1,\n    \"page\": 20\n  },\n  {\n    \"number\": \"D\",\n    \"title\": \"Bibliography\",\n    \"level\": 1,\n    \"page\": 21\n  },\n  {\n    \"number\": null,\n    \"title\": \"STANDARDS FOR MEASUREMENT OF FLUID IN CLOSED CONDUITS\",\n    \"level\": 1,\n    \"page\": 22\n  },\n  {\n    \"number\": null,\n    \"title\": \"ASME Services\",\n    \"level\": 1,\n    \"page\": 23\n  }\n]"
+  ],
+  "decisions": [
+    {
+      "t": 1762389548.0189402,
+      "type": "cache_bypassed",
+      "reason": "force_no_delete_helper"
+    },
+    {
+      "t": 1762389597.179818,
+      "type": "candidate_found",
+      "number": null,
+      "title": "ASME MFC-16M-1995 MEASUREMENT OF FLUID FLOW IN CLOSED CONDUITS BY MEANS OF ELECTROMAGNETIC FLOWMETERS",
+      "page": 2,
+      "idx": 2,
+      "line_index": 1,
+      "score": 100.0,
+      "strategy": "title_only",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.179818,
+      "type": "candidate_found",
+      "number": null,
+      "title": "Foreword",
+      "page": 4,
+      "idx": 37,
+      "line_index": 0,
+      "score": 100.0,
+      "strategy": "title_only",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.179818,
+      "type": "candidate_found",
+      "number": null,
+      "title": "ASME STANDARDS COMMITTEE MFC Measurement of Fluid Flow in Closed Conduits",
+      "page": 5,
+      "idx": 53,
+      "line_index": 0,
+      "score": 100.0,
+      "strategy": "title_only",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.1833515,
+      "type": "candidate_found",
+      "number": "Foreword",
+      "title": "Foreword",
+      "page": 6,
+      "idx": 98,
+      "line_index": 0,
+      "score": 90.0,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.1833515,
+      "type": "candidate_found",
+      "number": null,
+      "title": "Standards Committee Roster",
+      "page": 6,
+      "idx": 99,
+      "line_index": 1,
+      "score": 100.0,
+      "strategy": "title_only",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.184946,
+      "type": "candidate_found",
+      "number": "1",
+      "title": "SCOPE",
+      "page": 6,
+      "idx": 123,
+      "line_index": 25,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.187985,
+      "type": "candidate_found",
+      "number": "2",
+      "title": "REFERENCES",
+      "page": 6,
+      "idx": 126,
+      "line_index": 28,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.189985,
+      "type": "candidate_found",
+      "number": "3",
+      "title": "TERMINOLOGY",
+      "page": 6,
+      "idx": 132,
+      "line_index": 34,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.1919873,
+      "type": "candidate_found",
+      "number": "4",
+      "title": "THEORY AND MEASUREMENT TECHNIQUE",
+      "page": 8,
+      "idx": 219,
+      "line_index": 17,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.1939847,
+      "type": "candidate_found",
+      "number": "5",
+      "title": "FLOWMETER DESCRIPTION",
+      "page": 8,
+      "idx": 260,
+      "line_index": 58,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.1969864,
+      "type": "candidate_found",
+      "number": "5.1",
+      "title": "Overview",
+      "page": 8,
+      "idx": 261,
+      "line_index": 59,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.198985,
+      "type": "candidate_found",
+      "number": "5.2",
+      "title": "Primary Device",
+      "page": 9,
+      "idx": 281,
+      "line_index": 15,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2005305,
+      "type": "candidate_found",
+      "number": "5.3",
+      "title": "Secondary Device",
+      "page": 9,
+      "idx": 287,
+      "line_index": 21,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2036114,
+      "type": "candidate_found",
+      "number": "5.4",
+      "title": "Outputs from the Secondary Section",
+      "page": 10,
+      "idx": 303,
+      "line_index": 7,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2057302,
+      "type": "candidate_found",
+      "number": "6",
+      "title": "APPLICATION CONSIDERATIONS",
+      "page": 10,
+      "idx": 308,
+      "line_index": 12,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2077286,
+      "type": "candidate_found",
+      "number": "6.1",
+      "title": "Process Liquid",
+      "page": 10,
+      "idx": 309,
+      "line_index": 13,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2097304,
+      "type": "candidate_found",
+      "number": "6.1.1",
+      "title": "Liquid Electrical Conductivity",
+      "page": 10,
+      "idx": 310,
+      "line_index": 14,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2127295,
+      "type": "candidate_found",
+      "number": "6.1.2",
+      "title": "Noisy Flow Signal",
+      "page": 10,
+      "idx": 326,
+      "line_index": 30,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2147331,
+      "type": "candidate_found",
+      "number": "6.2",
+      "title": "Process Hydrodynamics",
+      "page": 10,
+      "idx": 345,
+      "line_index": 49,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2172678,
+      "type": "candidate_found",
+      "number": "6.2.1",
+      "title": "Reynolds Number Effect",
+      "page": 10,
+      "idx": 346,
+      "line_index": 50,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2193959,
+      "type": "candidate_found",
+      "number": "6.2.2",
+      "title": "Velocity Profile Effect",
+      "page": 10,
+      "idx": 299,
+      "line_index": 3,
+      "score": 100.0,
+      "strategy": "last_occurrence",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2223969,
+      "type": "candidate_found",
+      "number": "6.2.3",
+      "title": "Slippage",
+      "page": 10,
+      "idx": 311,
+      "line_index": 15,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2243998,
+      "type": "candidate_found",
+      "number": "6.3",
+      "title": "Primary Device - Sizing Considerations",
+      "page": 10,
+      "idx": 316,
+      "line_index": 20,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2263958,
+      "type": "candidate_found",
+      "number": "6.3.1",
+      "title": "General Considerations",
+      "page": 10,
+      "idx": 318,
+      "line_index": 22,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.229539,
+      "type": "candidate_found",
+      "number": "6.3.2",
+      "title": "Special Process Considerations",
+      "page": 10,
+      "idx": 337,
+      "line_index": 41,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2321162,
+      "type": "candidate_found",
+      "number": "6.3.2.1",
+      "title": "Accuracy",
+      "page": 10,
+      "idx": 341,
+      "line_index": 45,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2341158,
+      "type": "candidate_found",
+      "number": "6.3.2.2",
+      "title": "Jet Effect",
+      "page": 10,
+      "idx": 348,
+      "line_index": 52,
+      "score": 75.86206896551724,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2341158,
+      "type": "candidate_found",
+      "number": "6.3.2.3",
+      "title": "Abrasive Slurries",
+      "page": 11,
+      "idx": 356,
+      "line_index": 2,
+      "score": 68.04878048780488,
+      "strategy": "num+title-weak",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2341158,
+      "type": "candidate_found",
+      "number": "6.3.2.4",
+      "title": "Fast-Settling Slurries",
+      "page": 11,
+      "idx": 369,
+      "line_index": 15,
+      "score": 82.35294117647058,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2341158,
+      "type": "candidate_found",
+      "number": "6.4",
+      "title": "Primary Device - Location, Installation, and Maintenance",
+      "page": 11,
+      "idx": 376,
+      "line_index": 22,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2341158,
+      "type": "candidate_found",
+      "number": "6.4.1",
+      "title": "Primary Device Location and Orientation",
+      "page": 11,
+      "idx": 378,
+      "line_index": 24,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2341158,
+      "type": "candidate_found",
+      "number": "6.4.1.1",
+      "title": "Piping Effects",
+      "page": 11,
+      "idx": 382,
+      "line_index": 28,
+      "score": 77.77777777777777,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2341158,
+      "type": "candidate_found",
+      "number": "6.4.1.2",
+      "title": "Full Pipe Requirements",
+      "page": 11,
+      "idx": 399,
+      "line_index": 45,
+      "score": 82.1917808219178,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2528844,
+      "type": "candidate_found",
+      "number": "6.4.1.3",
+      "title": "Electrode Position - Horizontal Installations",
+      "page": 11,
+      "idx": 405,
+      "line_index": 51,
+      "score": 84.78260869565217,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2589202,
+      "type": "candidate_found",
+      "number": "6.4.1.4",
+      "title": "In-Situ Zero Checking",
+      "page": 11,
+      "idx": 408,
+      "line_index": 54,
+      "score": 81.63265306122449,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2667317,
+      "type": "candidate_found",
+      "number": "6.4.1.5",
+      "title": "Entrained Solids (Slurries)",
+      "page": 11,
+      "idx": 412,
+      "line_index": 58,
+      "score": 86.41975308641975,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2717977,
+      "type": "candidate_found",
+      "number": "6.4.1.6",
+      "title": "Location with Regard to Electrical Interference",
+      "page": 11,
+      "idx": 435,
+      "line_index": 81,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2778287,
+      "type": "candidate_found",
+      "number": "6.4.2",
+      "title": "Installation of Primary Device",
+      "page": 12,
+      "idx": 452,
+      "line_index": 12,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2833967,
+      "type": "candidate_found",
+      "number": "6.4.2.1",
+      "title": "Installation Design",
+      "page": 12,
+      "idx": 453,
+      "line_index": 13,
+      "score": 85.1063829787234,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2889216,
+      "type": "candidate_found",
+      "number": "6.4.2.2",
+      "title": "Handling of the Primary Device",
+      "page": 12,
+      "idx": 457,
+      "line_index": 17,
+      "score": 92.6829268292683,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2929351,
+      "type": "candidate_found",
+      "number": "6.4.2.3",
+      "title": "Pipework Alignment and Connectors",
+      "page": 12,
+      "idx": 462,
+      "line_index": 22,
+      "score": 84.50704225352112,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.2969484,
+      "type": "candidate_found",
+      "number": "6.4.2.4",
+      "title": "Transition Piping",
+      "page": 12,
+      "idx": 465,
+      "line_index": 25,
+      "score": 83.72093023255815,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3019657,
+      "type": "candidate_found",
+      "number": "6.4.3",
+      "title": "Electrical Installation",
+      "page": 12,
+      "idx": 473,
+      "line_index": 33,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3019657,
+      "type": "candidate_found",
+      "number": "6.4.3.1",
+      "title": "General Requirements",
+      "page": 12,
+      "idx": 474,
+      "line_index": 34,
+      "score": 81.15942028985508,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3152676,
+      "type": "candidate_found",
+      "number": "6.4.3.2",
+      "title": "Power Factor (AC Systems Only)",
+      "page": 12,
+      "idx": 487,
+      "line_index": 47,
+      "score": 91.42857142857143,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3218937,
+      "type": "candidate_found",
+      "number": "6.4.3.3",
+      "title": "Cathodic Protection",
+      "page": 12,
+      "idx": 491,
+      "line_index": 51,
+      "score": 74.4186046511628,
+      "strategy": "num+title-weak",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.327898,
+      "type": "candidate_found",
+      "number": "6.4.4",
+      "title": "Coatings and Deposits",
+      "page": 12,
+      "idx": 495,
+      "line_index": 55,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.333525,
+      "type": "candidate_found",
+      "number": "6.5",
+      "title": "Primary Device - Materials of Construction",
+      "page": 12,
+      "idx": 504,
+      "line_index": 64,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3392093,
+      "type": "candidate_found",
+      "number": "6.5.1",
+      "title": "General Guidelines",
+      "page": 12,
+      "idx": 506,
+      "line_index": 66,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3432019,
+      "type": "candidate_found",
+      "number": "6.5.2",
+      "title": "Liner Materials",
+      "page": 12,
+      "idx": 513,
+      "line_index": 73,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3432019,
+      "type": "candidate_found",
+      "number": "6.5.3",
+      "title": "Electrode Materials",
+      "page": 13,
+      "idx": 525,
+      "line_index": 7,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3432019,
+      "type": "candidate_found",
+      "number": "6.6",
+      "title": "Secondary Device - Installation",
+      "page": 13,
+      "idx": 532,
+      "line_index": 14,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3432019,
+      "type": "candidate_found",
+      "number": "6.6.1",
+      "title": "Location of Secondary Device",
+      "page": 13,
+      "idx": 533,
+      "line_index": 15,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3575606,
+      "type": "candidate_found",
+      "number": "6.6.2",
+      "title": "Electrical Installation",
+      "page": 13,
+      "idx": 536,
+      "line_index": 18,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.363336,
+      "type": "candidate_found",
+      "number": "6.7",
+      "title": "Safety",
+      "page": 13,
+      "idx": 548,
+      "line_index": 30,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3693686,
+      "type": "candidate_found",
+      "number": "6.7.1",
+      "title": "Electrical Safety",
+      "page": 13,
+      "idx": 549,
+      "line_index": 31,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3751702,
+      "type": "candidate_found",
+      "number": "6.7.2",
+      "title": "Mechanical Safety",
+      "page": 13,
+      "idx": 559,
+      "line_index": 41,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.382213,
+      "type": "candidate_found",
+      "number": "7",
+      "title": "EQUIPMENT MARKINGS",
+      "page": 13,
+      "idx": 569,
+      "line_index": 51,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3862681,
+      "type": "candidate_found",
+      "number": "7.1",
+      "title": "Introduction",
+      "page": 13,
+      "idx": 570,
+      "line_index": 52,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3912945,
+      "type": "candidate_found",
+      "number": "7.2",
+      "title": "Primary Device",
+      "page": 13,
+      "idx": 574,
+      "line_index": 56,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3973246,
+      "type": "candidate_found",
+      "number": "7.2.1",
+      "title": "Mandatory Information",
+      "page": 13,
+      "idx": 575,
+      "line_index": 57,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.3993313,
+      "type": "candidate_found",
+      "number": "7.2.2",
+      "title": "Optional Information",
+      "page": 13,
+      "idx": 586,
+      "line_index": 68,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4033425,
+      "type": "candidate_found",
+      "number": "7.3",
+      "title": "Secondary Device",
+      "page": 14,
+      "idx": 594,
+      "line_index": 3,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4053473,
+      "type": "candidate_found",
+      "number": "7.3.1",
+      "title": "Mandatory Information",
+      "page": 14,
+      "idx": 595,
+      "line_index": 4,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.407094,
+      "type": "candidate_found",
+      "number": "8",
+      "title": "LIQUID CALIBRATION",
+      "page": 14,
+      "idx": 601,
+      "line_index": 10,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.407094,
+      "type": "candidate_found",
+      "number": "8.1",
+      "title": "Overview",
+      "page": 14,
+      "idx": 602,
+      "line_index": 11,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.407094,
+      "type": "candidate_found",
+      "number": "8.2",
+      "title": "Calibration Conditions",
+      "page": 14,
+      "idx": 609,
+      "line_index": 18,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4202602,
+      "type": "candidate_found",
+      "number": "8.3",
+      "title": "Calibration Facilities",
+      "page": 14,
+      "idx": 617,
+      "line_index": 26,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4228814,
+      "type": "candidate_found",
+      "number": "8.4",
+      "title": "Calibration of the Primary",
+      "page": 14,
+      "idx": 624,
+      "line_index": 33,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4228814,
+      "type": "candidate_found",
+      "number": "8.5",
+      "title": "Calibration of the Secondary",
+      "page": 14,
+      "idx": 631,
+      "line_index": 40,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4372425,
+      "type": "candidate_found",
+      "number": "8.6",
+      "title": "Spanning of the Secondary",
+      "page": 14,
+      "idx": 635,
+      "line_index": 44,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4442303,
+      "type": "candidate_found",
+      "number": "8.7",
+      "title": "Installation Effects",
+      "page": 14,
+      "idx": 637,
+      "line_index": 46,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4472325,
+      "type": "candidate_found",
+      "number": null,
+      "title": "Figures",
+      "page": 14,
+      "idx": 638,
+      "line_index": 47,
+      "score": 0,
+      "strategy": "sequential_fallback",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4492283,
+      "type": "candidate_found",
+      "number": null,
+      "title": "Appendices",
+      "page": 14,
+      "idx": 639,
+      "line_index": 48,
+      "score": 0,
+      "strategy": "sequential_fallback",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4543226,
+      "type": "candidate_found",
+      "number": "A",
+      "title": "Added Details Regarding Theory and Measurement Technique",
+      "page": 15,
+      "idx": 645,
+      "line_index": 0,
+      "score": 81.42857142857143,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4543226,
+      "type": "candidate_found",
+      "number": "A1",
+      "title": "Theory",
+      "page": 15,
+      "idx": 650,
+      "line_index": 5,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4543226,
+      "type": "candidate_found",
+      "number": "A2",
+      "title": "Measurement Technique",
+      "page": 16,
+      "idx": 720,
+      "line_index": 12,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4543226,
+      "type": "candidate_found",
+      "number": "B",
+      "title": "Items of Potential Interest to Users",
+      "page": 18,
+      "idx": 754,
+      "line_index": 0,
+      "score": 90.0,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4543226,
+      "type": "candidate_found",
+      "number": "B1",
+      "title": "PRIMARY",
+      "page": 18,
+      "idx": 761,
+      "line_index": 7,
+      "score": 100.0,
+      "strategy": "title_only",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4543226,
+      "type": "candidate_found",
+      "number": "B2",
+      "title": "SECONDARY",
+      "page": 19,
+      "idx": 849,
+      "line_index": 21,
+      "score": 88.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4679685,
+      "type": "candidate_found",
+      "number": "B3",
+      "title": "SYSTEM",
+      "page": 19,
+      "idx": 864,
+      "line_index": 36,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4679685,
+      "type": "candidate_found",
+      "number": "C",
+      "title": "Liner Material Guidelines",
+      "page": 20,
+      "idx": 869,
+      "line_index": 0,
+      "score": 90.0,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "candidate_found",
+      "number": "D",
+      "title": "Bibliography",
+      "page": 21,
+      "idx": 916,
+      "line_index": 0,
+      "score": 90.0,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "candidate_found",
+      "number": null,
+      "title": "STANDARDS FOR MEASUREMENT OF FLUID IN CLOSED CONDUITS",
+      "page": 21,
+      "idx": 920,
+      "line_index": 4,
+      "score": 84.78260869565217,
+      "strategy": "title_only",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "candidate_found",
+      "number": null,
+      "title": "ASME Services",
+      "page": 23,
+      "idx": 965,
+      "line_index": 0,
+      "score": 100.0,
+      "strategy": "title_only",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunking_start",
+      "headers_count": 85,
+      "lines_count": 994
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "line_index_map_built",
+      "indexed_count": 994,
+      "missing_global_idx": 0
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 0,
+      "current_idx": 2,
+      "end_index": 36,
+      "next_idx": 37,
+      "next_global": 37
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 0,
+      "header_text": "ASME MFC-16M-1995 MEASUREMENT OF FLUID FLOW IN CLOSED CONDUITS BY MEANS OF ELECTROMAGNETIC FLOWMETERS",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 2,
+      "end_global_idx": 36,
+      "start_page": 2,
+      "end_page": 3,
+      "line_count": 35
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 1,
+      "current_idx": 37,
+      "end_index": 52,
+      "next_idx": 53,
+      "next_global": 53
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 1,
+      "header_text": "Foreword",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 37,
+      "end_global_idx": 52,
+      "start_page": 4,
+      "end_page": 4,
+      "line_count": 16
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 2,
+      "current_idx": 53,
+      "end_index": 97,
+      "next_idx": 98,
+      "next_global": 98
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 2,
+      "header_text": "ASME STANDARDS COMMITTEE MFC Measurement of Fluid Flow in Closed Conduits",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 53,
+      "end_global_idx": 97,
+      "start_page": 5,
+      "end_page": 5,
+      "line_count": 45
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 3,
+      "current_idx": 98,
+      "end_index": 98,
+      "next_idx": 99,
+      "next_global": 99
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 3,
+      "header_text": "Foreword",
+      "header_number": "Foreword",
+      "level": 1,
+      "start_global_idx": 98,
+      "end_global_idx": 98,
+      "start_page": 6,
+      "end_page": 6,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 4,
+      "current_idx": 99,
+      "end_index": 122,
+      "next_idx": 123,
+      "next_global": 123
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 4,
+      "header_text": "Standards Committee Roster",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 99,
+      "end_global_idx": 122,
+      "start_page": 6,
+      "end_page": 6,
+      "line_count": 24
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 5,
+      "current_idx": 123,
+      "end_index": 125,
+      "next_idx": 126,
+      "next_global": 126
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 5,
+      "header_text": "SCOPE",
+      "header_number": "1",
+      "level": 1,
+      "start_global_idx": 123,
+      "end_global_idx": 125,
+      "start_page": 6,
+      "end_page": 6,
+      "line_count": 3
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 6,
+      "current_idx": 126,
+      "end_index": 131,
+      "next_idx": 132,
+      "next_global": 132
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 6,
+      "header_text": "REFERENCES",
+      "header_number": "2",
+      "level": 1,
+      "start_global_idx": 126,
+      "end_global_idx": 131,
+      "start_page": 6,
+      "end_page": 6,
+      "line_count": 6
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 7,
+      "current_idx": 132,
+      "end_index": 218,
+      "next_idx": 219,
+      "next_global": 219
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 7,
+      "header_text": "TERMINOLOGY",
+      "header_number": "3",
+      "level": 1,
+      "start_global_idx": 132,
+      "end_global_idx": 218,
+      "start_page": 6,
+      "end_page": 8,
+      "line_count": 87
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 8,
+      "current_idx": 219,
+      "end_index": 259,
+      "next_idx": 260,
+      "next_global": 260
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 8,
+      "header_text": "THEORY AND MEASUREMENT TECHNIQUE",
+      "header_number": "4",
+      "level": 1,
+      "start_global_idx": 219,
+      "end_global_idx": 259,
+      "start_page": 8,
+      "end_page": 8,
+      "line_count": 41
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 9,
+      "current_idx": 260,
+      "end_index": 260,
+      "next_idx": 261,
+      "next_global": 261
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 9,
+      "header_text": "FLOWMETER DESCRIPTION",
+      "header_number": "5",
+      "level": 1,
+      "start_global_idx": 260,
+      "end_global_idx": 260,
+      "start_page": 8,
+      "end_page": 8,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 10,
+      "current_idx": 261,
+      "end_index": 280,
+      "next_idx": 281,
+      "next_global": 281
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 10,
+      "header_text": "Overview",
+      "header_number": "5.1",
+      "level": 2,
+      "start_global_idx": 261,
+      "end_global_idx": 280,
+      "start_page": 8,
+      "end_page": 9,
+      "line_count": 20
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 11,
+      "current_idx": 281,
+      "end_index": 286,
+      "next_idx": 287,
+      "next_global": 287
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 11,
+      "header_text": "Primary Device",
+      "header_number": "5.2",
+      "level": 2,
+      "start_global_idx": 281,
+      "end_global_idx": 286,
+      "start_page": 9,
+      "end_page": 9,
+      "line_count": 6
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 12,
+      "current_idx": 287,
+      "end_index": 302,
+      "next_idx": 303,
+      "next_global": 303
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 12,
+      "header_text": "Secondary Device",
+      "header_number": "5.3",
+      "level": 2,
+      "start_global_idx": 287,
+      "end_global_idx": 302,
+      "start_page": 9,
+      "end_page": 10,
+      "line_count": 16
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 13,
+      "current_idx": 303,
+      "end_index": 307,
+      "next_idx": 308,
+      "next_global": 308
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 13,
+      "header_text": "Outputs from the Secondary Section",
+      "header_number": "5.4",
+      "level": 2,
+      "start_global_idx": 303,
+      "end_global_idx": 307,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 5
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 14,
+      "current_idx": 308,
+      "end_index": 308,
+      "next_idx": 309,
+      "next_global": 309
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 14,
+      "header_text": "APPLICATION CONSIDERATIONS",
+      "header_number": "6",
+      "level": 1,
+      "start_global_idx": 308,
+      "end_global_idx": 308,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 15,
+      "current_idx": 309,
+      "end_index": 309,
+      "next_idx": 310,
+      "next_global": 310
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 15,
+      "header_text": "Process Liquid",
+      "header_number": "6.1",
+      "level": 2,
+      "start_global_idx": 309,
+      "end_global_idx": 309,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 16,
+      "current_idx": 310,
+      "end_index": 315,
+      "next_idx": 316,
+      "next_global": 316
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 16,
+      "header_text": "Liquid Electrical Conductivity",
+      "header_number": "6.1.1",
+      "level": 3,
+      "start_global_idx": 310,
+      "end_global_idx": 315,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 6
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 17,
+      "current_idx": 316,
+      "end_index": 317,
+      "next_idx": 318,
+      "next_global": 318
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 17,
+      "header_text": "Primary Device - Sizing Considerations",
+      "header_number": "6.3",
+      "level": 2,
+      "start_global_idx": 316,
+      "end_global_idx": 317,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 2
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 18,
+      "current_idx": 318,
+      "end_index": 325,
+      "next_idx": 326,
+      "next_global": 326
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 18,
+      "header_text": "General Considerations",
+      "header_number": "6.3.1",
+      "level": 3,
+      "start_global_idx": 318,
+      "end_global_idx": 325,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 8
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 19,
+      "current_idx": 326,
+      "end_index": 336,
+      "next_idx": 337,
+      "next_global": 337
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 19,
+      "header_text": "Noisy Flow Signal",
+      "header_number": "6.1.2",
+      "level": 3,
+      "start_global_idx": 326,
+      "end_global_idx": 336,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 11
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 20,
+      "current_idx": 337,
+      "end_index": 340,
+      "next_idx": 341,
+      "next_global": 341
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 20,
+      "header_text": "Special Process Considerations",
+      "header_number": "6.3.2",
+      "level": 3,
+      "start_global_idx": 337,
+      "end_global_idx": 340,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 21,
+      "current_idx": 341,
+      "end_index": 344,
+      "next_idx": 345,
+      "next_global": 345
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 21,
+      "header_text": "Accuracy",
+      "header_number": "6.3.2.1",
+      "level": 4,
+      "start_global_idx": 341,
+      "end_global_idx": 344,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 22,
+      "current_idx": 345,
+      "end_index": 345,
+      "next_idx": 346,
+      "next_global": 346
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 22,
+      "header_text": "Process Hydrodynamics",
+      "header_number": "6.2",
+      "level": 2,
+      "start_global_idx": 345,
+      "end_global_idx": 345,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 23,
+      "current_idx": 346,
+      "end_index": 347,
+      "next_idx": 348,
+      "next_global": 348
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 23,
+      "header_text": "Reynolds Number Effect",
+      "header_number": "6.2.1",
+      "level": 3,
+      "start_global_idx": 346,
+      "end_global_idx": 347,
+      "start_page": 10,
+      "end_page": 10,
+      "line_count": 2
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 24,
+      "current_idx": 348,
+      "end_index": 355,
+      "next_idx": 356,
+      "next_global": 356
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 24,
+      "header_text": "Jet Effect",
+      "header_number": "6.3.2.2",
+      "level": 4,
+      "start_global_idx": 348,
+      "end_global_idx": 355,
+      "start_page": 10,
+      "end_page": 11,
+      "line_count": 8
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 25,
+      "current_idx": 356,
+      "end_index": 359,
+      "next_idx": 360,
+      "next_global": 360
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 25,
+      "header_text": "Abrasive Slurries",
+      "header_number": "6.3.2.3",
+      "level": 4,
+      "start_global_idx": 356,
+      "end_global_idx": 359,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 26,
+      "current_idx": 360,
+      "end_index": 368,
+      "next_idx": 369,
+      "next_global": 369
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 26,
+      "header_text": "Velocity Profile Effect",
+      "header_number": "6.2.2",
+      "level": 3,
+      "start_global_idx": 360,
+      "end_global_idx": 368,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 9
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 27,
+      "current_idx": 369,
+      "end_index": 375,
+      "next_idx": 376,
+      "next_global": 376
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 27,
+      "header_text": "Fast-Settling Slurries",
+      "header_number": "6.3.2.4",
+      "level": 4,
+      "start_global_idx": 369,
+      "end_global_idx": 375,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 7
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 28,
+      "current_idx": 376,
+      "end_index": 377,
+      "next_idx": 378,
+      "next_global": 378
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 28,
+      "header_text": "Primary Device - Location, Installation, and Maintenance",
+      "header_number": "6.4",
+      "level": 2,
+      "start_global_idx": 376,
+      "end_global_idx": 377,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 2
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 29,
+      "current_idx": 378,
+      "end_index": 381,
+      "next_idx": 382,
+      "next_global": 382
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 29,
+      "header_text": "Primary Device Location and Orientation",
+      "header_number": "6.4.1",
+      "level": 3,
+      "start_global_idx": 378,
+      "end_global_idx": 381,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 30,
+      "current_idx": 382,
+      "end_index": 398,
+      "next_idx": 399,
+      "next_global": 399
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 30,
+      "header_text": "Piping Effects",
+      "header_number": "6.4.1.1",
+      "level": 4,
+      "start_global_idx": 382,
+      "end_global_idx": 398,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 17
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 31,
+      "current_idx": 399,
+      "end_index": 404,
+      "next_idx": 405,
+      "next_global": 405
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 31,
+      "header_text": "Full Pipe Requirements",
+      "header_number": "6.4.1.2",
+      "level": 4,
+      "start_global_idx": 399,
+      "end_global_idx": 404,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 6
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 32,
+      "current_idx": 405,
+      "end_index": 407,
+      "next_idx": 408,
+      "next_global": 408
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 32,
+      "header_text": "Electrode Position - Horizontal Installations",
+      "header_number": "6.4.1.3",
+      "level": 4,
+      "start_global_idx": 405,
+      "end_global_idx": 407,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 3
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 33,
+      "current_idx": 408,
+      "end_index": 411,
+      "next_idx": 412,
+      "next_global": 412
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 33,
+      "header_text": "In-Situ Zero Checking",
+      "header_number": "6.4.1.4",
+      "level": 4,
+      "start_global_idx": 408,
+      "end_global_idx": 411,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 34,
+      "current_idx": 412,
+      "end_index": 433,
+      "next_idx": 434,
+      "next_global": 434
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 34,
+      "header_text": "Entrained Solids (Slurries)",
+      "header_number": "6.4.1.5",
+      "level": 4,
+      "start_global_idx": 412,
+      "end_global_idx": 433,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 22
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 35,
+      "current_idx": 434,
+      "end_index": 434,
+      "next_idx": 435,
+      "next_global": 435
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 35,
+      "header_text": "Slippage",
+      "header_number": "6.2.3",
+      "level": 3,
+      "start_global_idx": 434,
+      "end_global_idx": 434,
+      "start_page": 11,
+      "end_page": 11,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 36,
+      "current_idx": 435,
+      "end_index": 451,
+      "next_idx": 452,
+      "next_global": 452
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 36,
+      "header_text": "Location with Regard to Electrical Interference",
+      "header_number": "6.4.1.6",
+      "level": 4,
+      "start_global_idx": 435,
+      "end_global_idx": 451,
+      "start_page": 11,
+      "end_page": 12,
+      "line_count": 17
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 37,
+      "current_idx": 452,
+      "end_index": 452,
+      "next_idx": 453,
+      "next_global": 453
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 37,
+      "header_text": "Installation of Primary Device",
+      "header_number": "6.4.2",
+      "level": 3,
+      "start_global_idx": 452,
+      "end_global_idx": 452,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 38,
+      "current_idx": 453,
+      "end_index": 456,
+      "next_idx": 457,
+      "next_global": 457
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 38,
+      "header_text": "Installation Design",
+      "header_number": "6.4.2.1",
+      "level": 4,
+      "start_global_idx": 453,
+      "end_global_idx": 456,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 39,
+      "current_idx": 457,
+      "end_index": 461,
+      "next_idx": 462,
+      "next_global": 462
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 39,
+      "header_text": "Handling of the Primary Device",
+      "header_number": "6.4.2.2",
+      "level": 4,
+      "start_global_idx": 457,
+      "end_global_idx": 461,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 5
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 40,
+      "current_idx": 462,
+      "end_index": 464,
+      "next_idx": 465,
+      "next_global": 465
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 40,
+      "header_text": "Pipework Alignment and Connectors",
+      "header_number": "6.4.2.3",
+      "level": 4,
+      "start_global_idx": 462,
+      "end_global_idx": 464,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 3
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 41,
+      "current_idx": 465,
+      "end_index": 472,
+      "next_idx": 473,
+      "next_global": 473
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 41,
+      "header_text": "Transition Piping",
+      "header_number": "6.4.2.4",
+      "level": 4,
+      "start_global_idx": 465,
+      "end_global_idx": 472,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 8
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 42,
+      "current_idx": 473,
+      "end_index": 473,
+      "next_idx": 474,
+      "next_global": 474
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 42,
+      "header_text": "Electrical Installation",
+      "header_number": "6.4.3",
+      "level": 3,
+      "start_global_idx": 473,
+      "end_global_idx": 473,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 43,
+      "current_idx": 474,
+      "end_index": 486,
+      "next_idx": 487,
+      "next_global": 487
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 43,
+      "header_text": "General Requirements",
+      "header_number": "6.4.3.1",
+      "level": 4,
+      "start_global_idx": 474,
+      "end_global_idx": 486,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 13
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 44,
+      "current_idx": 487,
+      "end_index": 490,
+      "next_idx": 491,
+      "next_global": 491
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 44,
+      "header_text": "Power Factor (AC Systems Only)",
+      "header_number": "6.4.3.2",
+      "level": 4,
+      "start_global_idx": 487,
+      "end_global_idx": 490,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 45,
+      "current_idx": 491,
+      "end_index": 494,
+      "next_idx": 495,
+      "next_global": 495
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 45,
+      "header_text": "Cathodic Protection",
+      "header_number": "6.4.3.3",
+      "level": 4,
+      "start_global_idx": 491,
+      "end_global_idx": 494,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 46,
+      "current_idx": 495,
+      "end_index": 503,
+      "next_idx": 504,
+      "next_global": 504
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 46,
+      "header_text": "Coatings and Deposits",
+      "header_number": "6.4.4",
+      "level": 3,
+      "start_global_idx": 495,
+      "end_global_idx": 503,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 9
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 47,
+      "current_idx": 504,
+      "end_index": 505,
+      "next_idx": 506,
+      "next_global": 506
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 47,
+      "header_text": "Primary Device - Materials of Construction",
+      "header_number": "6.5",
+      "level": 2,
+      "start_global_idx": 504,
+      "end_global_idx": 505,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 2
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 48,
+      "current_idx": 506,
+      "end_index": 512,
+      "next_idx": 513,
+      "next_global": 513
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 48,
+      "header_text": "General Guidelines",
+      "header_number": "6.5.1",
+      "level": 3,
+      "start_global_idx": 506,
+      "end_global_idx": 512,
+      "start_page": 12,
+      "end_page": 12,
+      "line_count": 7
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 49,
+      "current_idx": 513,
+      "end_index": 524,
+      "next_idx": 525,
+      "next_global": 525
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 49,
+      "header_text": "Liner Materials",
+      "header_number": "6.5.2",
+      "level": 3,
+      "start_global_idx": 513,
+      "end_global_idx": 524,
+      "start_page": 12,
+      "end_page": 13,
+      "line_count": 12
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 50,
+      "current_idx": 525,
+      "end_index": 531,
+      "next_idx": 532,
+      "next_global": 532
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 50,
+      "header_text": "Electrode Materials",
+      "header_number": "6.5.3",
+      "level": 3,
+      "start_global_idx": 525,
+      "end_global_idx": 531,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 7
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 51,
+      "current_idx": 532,
+      "end_index": 532,
+      "next_idx": 533,
+      "next_global": 533
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 51,
+      "header_text": "Secondary Device - Installation",
+      "header_number": "6.6",
+      "level": 2,
+      "start_global_idx": 532,
+      "end_global_idx": 532,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 52,
+      "current_idx": 533,
+      "end_index": 535,
+      "next_idx": 536,
+      "next_global": 536
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 52,
+      "header_text": "Location of Secondary Device",
+      "header_number": "6.6.1",
+      "level": 3,
+      "start_global_idx": 533,
+      "end_global_idx": 535,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 3
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 53,
+      "current_idx": 536,
+      "end_index": 547,
+      "next_idx": 548,
+      "next_global": 548
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 53,
+      "header_text": "Electrical Installation",
+      "header_number": "6.6.2",
+      "level": 3,
+      "start_global_idx": 536,
+      "end_global_idx": 547,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 12
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 54,
+      "current_idx": 548,
+      "end_index": 548,
+      "next_idx": 549,
+      "next_global": 549
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 54,
+      "header_text": "Safety",
+      "header_number": "6.7",
+      "level": 2,
+      "start_global_idx": 548,
+      "end_global_idx": 548,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 55,
+      "current_idx": 549,
+      "end_index": 558,
+      "next_idx": 559,
+      "next_global": 559
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 55,
+      "header_text": "Electrical Safety",
+      "header_number": "6.7.1",
+      "level": 3,
+      "start_global_idx": 549,
+      "end_global_idx": 558,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 10
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 56,
+      "current_idx": 559,
+      "end_index": 568,
+      "next_idx": 569,
+      "next_global": 569
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 56,
+      "header_text": "Mechanical Safety",
+      "header_number": "6.7.2",
+      "level": 3,
+      "start_global_idx": 559,
+      "end_global_idx": 568,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 10
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 57,
+      "current_idx": 569,
+      "end_index": 569,
+      "next_idx": 570,
+      "next_global": 570
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 57,
+      "header_text": "EQUIPMENT MARKINGS",
+      "header_number": "7",
+      "level": 1,
+      "start_global_idx": 569,
+      "end_global_idx": 569,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 58,
+      "current_idx": 570,
+      "end_index": 573,
+      "next_idx": 574,
+      "next_global": 574
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 58,
+      "header_text": "Introduction",
+      "header_number": "7.1",
+      "level": 2,
+      "start_global_idx": 570,
+      "end_global_idx": 573,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 59,
+      "current_idx": 574,
+      "end_index": 574,
+      "next_idx": 575,
+      "next_global": 575
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 59,
+      "header_text": "Primary Device",
+      "header_number": "7.2",
+      "level": 2,
+      "start_global_idx": 574,
+      "end_global_idx": 574,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 60,
+      "current_idx": 575,
+      "end_index": 585,
+      "next_idx": 586,
+      "next_global": 586
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 60,
+      "header_text": "Mandatory Information",
+      "header_number": "7.2.1",
+      "level": 3,
+      "start_global_idx": 575,
+      "end_global_idx": 585,
+      "start_page": 13,
+      "end_page": 13,
+      "line_count": 11
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 61,
+      "current_idx": 586,
+      "end_index": 593,
+      "next_idx": 594,
+      "next_global": 594
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 61,
+      "header_text": "Optional Information",
+      "header_number": "7.2.2",
+      "level": 3,
+      "start_global_idx": 586,
+      "end_global_idx": 593,
+      "start_page": 13,
+      "end_page": 14,
+      "line_count": 8
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 62,
+      "current_idx": 594,
+      "end_index": 594,
+      "next_idx": 595,
+      "next_global": 595
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 62,
+      "header_text": "Secondary Device",
+      "header_number": "7.3",
+      "level": 2,
+      "start_global_idx": 594,
+      "end_global_idx": 594,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 63,
+      "current_idx": 595,
+      "end_index": 600,
+      "next_idx": 601,
+      "next_global": 601
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 63,
+      "header_text": "Mandatory Information",
+      "header_number": "7.3.1",
+      "level": 3,
+      "start_global_idx": 595,
+      "end_global_idx": 600,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 6
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 64,
+      "current_idx": 601,
+      "end_index": 601,
+      "next_idx": 602,
+      "next_global": 602
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 64,
+      "header_text": "LIQUID CALIBRATION",
+      "header_number": "8",
+      "level": 1,
+      "start_global_idx": 601,
+      "end_global_idx": 601,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 65,
+      "current_idx": 602,
+      "end_index": 608,
+      "next_idx": 609,
+      "next_global": 609
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 65,
+      "header_text": "Overview",
+      "header_number": "8.1",
+      "level": 2,
+      "start_global_idx": 602,
+      "end_global_idx": 608,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 7
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 66,
+      "current_idx": 609,
+      "end_index": 616,
+      "next_idx": 617,
+      "next_global": 617
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 66,
+      "header_text": "Calibration Conditions",
+      "header_number": "8.2",
+      "level": 2,
+      "start_global_idx": 609,
+      "end_global_idx": 616,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 8
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 67,
+      "current_idx": 617,
+      "end_index": 623,
+      "next_idx": 624,
+      "next_global": 624
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 67,
+      "header_text": "Calibration Facilities",
+      "header_number": "8.3",
+      "level": 2,
+      "start_global_idx": 617,
+      "end_global_idx": 623,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 7
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 68,
+      "current_idx": 624,
+      "end_index": 630,
+      "next_idx": 631,
+      "next_global": 631
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 68,
+      "header_text": "Calibration of the Primary",
+      "header_number": "8.4",
+      "level": 2,
+      "start_global_idx": 624,
+      "end_global_idx": 630,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 7
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 69,
+      "current_idx": 631,
+      "end_index": 634,
+      "next_idx": 635,
+      "next_global": 635
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 69,
+      "header_text": "Calibration of the Secondary",
+      "header_number": "8.5",
+      "level": 2,
+      "start_global_idx": 631,
+      "end_global_idx": 634,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 70,
+      "current_idx": 635,
+      "end_index": 636,
+      "next_idx": 637,
+      "next_global": 637
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 70,
+      "header_text": "Spanning of the Secondary",
+      "header_number": "8.6",
+      "level": 2,
+      "start_global_idx": 635,
+      "end_global_idx": 636,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 2
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 71,
+      "current_idx": 637,
+      "end_index": 637,
+      "next_idx": 638,
+      "next_global": 638
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 71,
+      "header_text": "Installation Effects",
+      "header_number": "8.7",
+      "level": 2,
+      "start_global_idx": 637,
+      "end_global_idx": 637,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 72,
+      "current_idx": 638,
+      "end_index": 638,
+      "next_idx": 639,
+      "next_global": 639
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 72,
+      "header_text": "Figures",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 638,
+      "end_global_idx": 638,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 1
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 73,
+      "current_idx": 639,
+      "end_index": 644,
+      "next_idx": 645,
+      "next_global": 645
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 73,
+      "header_text": "Appendices",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 639,
+      "end_global_idx": 644,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 6
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 74,
+      "current_idx": 645,
+      "end_index": 649,
+      "next_idx": 650,
+      "next_global": 650
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 74,
+      "header_text": "Added Details Regarding Theory and Measurement Technique",
+      "header_number": "A",
+      "level": 1,
+      "start_global_idx": 645,
+      "end_global_idx": 649,
+      "start_page": 15,
+      "end_page": 15,
+      "line_count": 5
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 75,
+      "current_idx": 650,
+      "end_index": 719,
+      "next_idx": 720,
+      "next_global": 720
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 75,
+      "header_text": "Theory",
+      "header_number": "A1",
+      "level": 2,
+      "start_global_idx": 650,
+      "end_global_idx": 719,
+      "start_page": 15,
+      "end_page": 16,
+      "line_count": 70
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 76,
+      "current_idx": 720,
+      "end_index": 753,
+      "next_idx": 754,
+      "next_global": 754
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 76,
+      "header_text": "Measurement Technique",
+      "header_number": "A2",
+      "level": 2,
+      "start_global_idx": 720,
+      "end_global_idx": 753,
+      "start_page": 16,
+      "end_page": 17,
+      "line_count": 34
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 77,
+      "current_idx": 754,
+      "end_index": 760,
+      "next_idx": 761,
+      "next_global": 761
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 77,
+      "header_text": "Items of Potential Interest to Users",
+      "header_number": "B",
+      "level": 1,
+      "start_global_idx": 754,
+      "end_global_idx": 760,
+      "start_page": 18,
+      "end_page": 18,
+      "line_count": 7
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 78,
+      "current_idx": 761,
+      "end_index": 848,
+      "next_idx": 849,
+      "next_global": 849
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 78,
+      "header_text": "PRIMARY",
+      "header_number": "B1",
+      "level": 2,
+      "start_global_idx": 761,
+      "end_global_idx": 848,
+      "start_page": 18,
+      "end_page": 19,
+      "line_count": 88
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 79,
+      "current_idx": 849,
+      "end_index": 863,
+      "next_idx": 864,
+      "next_global": 864
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 79,
+      "header_text": "SECONDARY",
+      "header_number": "B2",
+      "level": 2,
+      "start_global_idx": 849,
+      "end_global_idx": 863,
+      "start_page": 19,
+      "end_page": 19,
+      "line_count": 15
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 80,
+      "current_idx": 864,
+      "end_index": 868,
+      "next_idx": 869,
+      "next_global": 869
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 80,
+      "header_text": "SYSTEM",
+      "header_number": "B3",
+      "level": 2,
+      "start_global_idx": 864,
+      "end_global_idx": 868,
+      "start_page": 19,
+      "end_page": 19,
+      "line_count": 5
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 81,
+      "current_idx": 869,
+      "end_index": 915,
+      "next_idx": 916,
+      "next_global": 916
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 81,
+      "header_text": "Liner Material Guidelines",
+      "header_number": "C",
+      "level": 1,
+      "start_global_idx": 869,
+      "end_global_idx": 915,
+      "start_page": 20,
+      "end_page": 20,
+      "line_count": 47
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 82,
+      "current_idx": 916,
+      "end_index": 919,
+      "next_idx": 920,
+      "next_global": 920
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 82,
+      "header_text": "Bibliography",
+      "header_number": "D",
+      "level": 1,
+      "start_global_idx": 916,
+      "end_global_idx": 919,
+      "start_page": 21,
+      "end_page": 21,
+      "line_count": 4
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 83,
+      "current_idx": 920,
+      "end_index": 964,
+      "next_idx": 965,
+      "next_global": 965
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 83,
+      "header_text": "STANDARDS FOR MEASUREMENT OF FLUID IN CLOSED CONDUITS",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 920,
+      "end_global_idx": 964,
+      "start_page": 21,
+      "end_page": 22,
+      "line_count": 45
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_bounds_resolved",
+      "position": 84,
+      "current_idx": 965,
+      "end_index": 993,
+      "next_idx": null,
+      "next_global": null
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunk_built",
+      "position": 84,
+      "header_text": "ASME Services",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 965,
+      "end_global_idx": 993,
+      "start_page": 23,
+      "end_page": 24,
+      "line_count": 29
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "chunking_complete",
+      "chunks_count": 85
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "monotonic_violation",
+      "iteration": 1,
+      "gaps": [
+        {
+          "after_index": 15,
+          "components": [
+            {
+              "raw": "6",
+              "normalized": "6",
+              "kind": "numeric",
+              "value": 6
+            },
+            {
+              "raw": "2",
+              "normalized": "2",
+              "kind": "numeric",
+              "value": 2
+            }
+          ],
+          "level": 2
+        },
+        {
+          "after_index": 22,
+          "components": [
+            {
+              "raw": "6",
+              "normalized": "6",
+              "kind": "numeric",
+              "value": 6
+            },
+            {
+              "raw": "3",
+              "normalized": "3",
+              "kind": "numeric",
+              "value": 3
+            }
+          ],
+          "level": 2
+        }
+      ]
+    },
+    {
+      "t": 1762389597.4711416,
+      "type": "fallback_triggered",
+      "method": "gap_fill",
+      "reason": "unresolved"
+    }
+  ],
+  "chunking": {
+    "passes": 1,
+    "completes": 1,
+    "bounds_resolved": 85,
+    "skipped_inverted": 0,
+    "headers_missing_global": 0,
+    "headers_not_in_lines": 0,
+    "line_index_map": {
+      "indexed_count": 994,
+      "missing_global_idx": 0
+    },
+    "line_index_map_totals": {
+      "indexed_count": 994,
+      "missing_global_idx": 0
+    },
+    "chunks": [
+      {
+        "position": 0,
+        "header_text": "ASME MFC-16M-1995 MEASUREMENT OF FLUID FLOW IN CLOSED CONDUITS BY MEANS OF ELECTROMAGNETIC FLOWMETERS",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 2,
+        "end_global_idx": 36,
+        "start_page": 2,
+        "end_page": 3,
+        "line_count": 35
+      },
+      {
+        "position": 1,
+        "header_text": "Foreword",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 37,
+        "end_global_idx": 52,
+        "start_page": 4,
+        "end_page": 4,
+        "line_count": 16
+      },
+      {
+        "position": 2,
+        "header_text": "ASME STANDARDS COMMITTEE MFC Measurement of Fluid Flow in Closed Conduits",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 53,
+        "end_global_idx": 97,
+        "start_page": 5,
+        "end_page": 5,
+        "line_count": 45
+      },
+      {
+        "position": 3,
+        "header_text": "Foreword",
+        "header_number": "Foreword",
+        "level": 1,
+        "start_global_idx": 98,
+        "end_global_idx": 98,
+        "start_page": 6,
+        "end_page": 6,
+        "line_count": 1
+      },
+      {
+        "position": 4,
+        "header_text": "Standards Committee Roster",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 99,
+        "end_global_idx": 122,
+        "start_page": 6,
+        "end_page": 6,
+        "line_count": 24
+      },
+      {
+        "position": 5,
+        "header_text": "SCOPE",
+        "header_number": "1",
+        "level": 1,
+        "start_global_idx": 123,
+        "end_global_idx": 125,
+        "start_page": 6,
+        "end_page": 6,
+        "line_count": 3
+      },
+      {
+        "position": 6,
+        "header_text": "REFERENCES",
+        "header_number": "2",
+        "level": 1,
+        "start_global_idx": 126,
+        "end_global_idx": 131,
+        "start_page": 6,
+        "end_page": 6,
+        "line_count": 6
+      },
+      {
+        "position": 7,
+        "header_text": "TERMINOLOGY",
+        "header_number": "3",
+        "level": 1,
+        "start_global_idx": 132,
+        "end_global_idx": 218,
+        "start_page": 6,
+        "end_page": 8,
+        "line_count": 87
+      },
+      {
+        "position": 8,
+        "header_text": "THEORY AND MEASUREMENT TECHNIQUE",
+        "header_number": "4",
+        "level": 1,
+        "start_global_idx": 219,
+        "end_global_idx": 259,
+        "start_page": 8,
+        "end_page": 8,
+        "line_count": 41
+      },
+      {
+        "position": 9,
+        "header_text": "FLOWMETER DESCRIPTION",
+        "header_number": "5",
+        "level": 1,
+        "start_global_idx": 260,
+        "end_global_idx": 260,
+        "start_page": 8,
+        "end_page": 8,
+        "line_count": 1
+      },
+      {
+        "position": 10,
+        "header_text": "Overview",
+        "header_number": "5.1",
+        "level": 2,
+        "start_global_idx": 261,
+        "end_global_idx": 280,
+        "start_page": 8,
+        "end_page": 9,
+        "line_count": 20
+      },
+      {
+        "position": 11,
+        "header_text": "Primary Device",
+        "header_number": "5.2",
+        "level": 2,
+        "start_global_idx": 281,
+        "end_global_idx": 286,
+        "start_page": 9,
+        "end_page": 9,
+        "line_count": 6
+      },
+      {
+        "position": 12,
+        "header_text": "Secondary Device",
+        "header_number": "5.3",
+        "level": 2,
+        "start_global_idx": 287,
+        "end_global_idx": 302,
+        "start_page": 9,
+        "end_page": 10,
+        "line_count": 16
+      },
+      {
+        "position": 13,
+        "header_text": "Outputs from the Secondary Section",
+        "header_number": "5.4",
+        "level": 2,
+        "start_global_idx": 303,
+        "end_global_idx": 307,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 5
+      },
+      {
+        "position": 14,
+        "header_text": "APPLICATION CONSIDERATIONS",
+        "header_number": "6",
+        "level": 1,
+        "start_global_idx": 308,
+        "end_global_idx": 308,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 1
+      },
+      {
+        "position": 15,
+        "header_text": "Process Liquid",
+        "header_number": "6.1",
+        "level": 2,
+        "start_global_idx": 309,
+        "end_global_idx": 309,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 1
+      },
+      {
+        "position": 16,
+        "header_text": "Liquid Electrical Conductivity",
+        "header_number": "6.1.1",
+        "level": 3,
+        "start_global_idx": 310,
+        "end_global_idx": 315,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 6
+      },
+      {
+        "position": 17,
+        "header_text": "Primary Device - Sizing Considerations",
+        "header_number": "6.3",
+        "level": 2,
+        "start_global_idx": 316,
+        "end_global_idx": 317,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 2
+      },
+      {
+        "position": 18,
+        "header_text": "General Considerations",
+        "header_number": "6.3.1",
+        "level": 3,
+        "start_global_idx": 318,
+        "end_global_idx": 325,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 8
+      },
+      {
+        "position": 19,
+        "header_text": "Noisy Flow Signal",
+        "header_number": "6.1.2",
+        "level": 3,
+        "start_global_idx": 326,
+        "end_global_idx": 336,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 11
+      },
+      {
+        "position": 20,
+        "header_text": "Special Process Considerations",
+        "header_number": "6.3.2",
+        "level": 3,
+        "start_global_idx": 337,
+        "end_global_idx": 340,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 4
+      },
+      {
+        "position": 21,
+        "header_text": "Accuracy",
+        "header_number": "6.3.2.1",
+        "level": 4,
+        "start_global_idx": 341,
+        "end_global_idx": 344,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 4
+      },
+      {
+        "position": 22,
+        "header_text": "Process Hydrodynamics",
+        "header_number": "6.2",
+        "level": 2,
+        "start_global_idx": 345,
+        "end_global_idx": 345,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 1
+      },
+      {
+        "position": 23,
+        "header_text": "Reynolds Number Effect",
+        "header_number": "6.2.1",
+        "level": 3,
+        "start_global_idx": 346,
+        "end_global_idx": 347,
+        "start_page": 10,
+        "end_page": 10,
+        "line_count": 2
+      },
+      {
+        "position": 24,
+        "header_text": "Jet Effect",
+        "header_number": "6.3.2.2",
+        "level": 4,
+        "start_global_idx": 348,
+        "end_global_idx": 355,
+        "start_page": 10,
+        "end_page": 11,
+        "line_count": 8
+      },
+      {
+        "position": 25,
+        "header_text": "Abrasive Slurries",
+        "header_number": "6.3.2.3",
+        "level": 4,
+        "start_global_idx": 356,
+        "end_global_idx": 359,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 4
+      },
+      {
+        "position": 26,
+        "header_text": "Velocity Profile Effect",
+        "header_number": "6.2.2",
+        "level": 3,
+        "start_global_idx": 360,
+        "end_global_idx": 368,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 9
+      },
+      {
+        "position": 27,
+        "header_text": "Fast-Settling Slurries",
+        "header_number": "6.3.2.4",
+        "level": 4,
+        "start_global_idx": 369,
+        "end_global_idx": 375,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 7
+      },
+      {
+        "position": 28,
+        "header_text": "Primary Device - Location, Installation, and Maintenance",
+        "header_number": "6.4",
+        "level": 2,
+        "start_global_idx": 376,
+        "end_global_idx": 377,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 2
+      },
+      {
+        "position": 29,
+        "header_text": "Primary Device Location and Orientation",
+        "header_number": "6.4.1",
+        "level": 3,
+        "start_global_idx": 378,
+        "end_global_idx": 381,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 4
+      },
+      {
+        "position": 30,
+        "header_text": "Piping Effects",
+        "header_number": "6.4.1.1",
+        "level": 4,
+        "start_global_idx": 382,
+        "end_global_idx": 398,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 17
+      },
+      {
+        "position": 31,
+        "header_text": "Full Pipe Requirements",
+        "header_number": "6.4.1.2",
+        "level": 4,
+        "start_global_idx": 399,
+        "end_global_idx": 404,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 6
+      },
+      {
+        "position": 32,
+        "header_text": "Electrode Position - Horizontal Installations",
+        "header_number": "6.4.1.3",
+        "level": 4,
+        "start_global_idx": 405,
+        "end_global_idx": 407,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 3
+      },
+      {
+        "position": 33,
+        "header_text": "In-Situ Zero Checking",
+        "header_number": "6.4.1.4",
+        "level": 4,
+        "start_global_idx": 408,
+        "end_global_idx": 411,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 4
+      },
+      {
+        "position": 34,
+        "header_text": "Entrained Solids (Slurries)",
+        "header_number": "6.4.1.5",
+        "level": 4,
+        "start_global_idx": 412,
+        "end_global_idx": 433,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 22
+      },
+      {
+        "position": 35,
+        "header_text": "Slippage",
+        "header_number": "6.2.3",
+        "level": 3,
+        "start_global_idx": 434,
+        "end_global_idx": 434,
+        "start_page": 11,
+        "end_page": 11,
+        "line_count": 1
+      },
+      {
+        "position": 36,
+        "header_text": "Location with Regard to Electrical Interference",
+        "header_number": "6.4.1.6",
+        "level": 4,
+        "start_global_idx": 435,
+        "end_global_idx": 451,
+        "start_page": 11,
+        "end_page": 12,
+        "line_count": 17
+      },
+      {
+        "position": 37,
+        "header_text": "Installation of Primary Device",
+        "header_number": "6.4.2",
+        "level": 3,
+        "start_global_idx": 452,
+        "end_global_idx": 452,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 1
+      },
+      {
+        "position": 38,
+        "header_text": "Installation Design",
+        "header_number": "6.4.2.1",
+        "level": 4,
+        "start_global_idx": 453,
+        "end_global_idx": 456,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 4
+      },
+      {
+        "position": 39,
+        "header_text": "Handling of the Primary Device",
+        "header_number": "6.4.2.2",
+        "level": 4,
+        "start_global_idx": 457,
+        "end_global_idx": 461,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 5
+      },
+      {
+        "position": 40,
+        "header_text": "Pipework Alignment and Connectors",
+        "header_number": "6.4.2.3",
+        "level": 4,
+        "start_global_idx": 462,
+        "end_global_idx": 464,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 3
+      },
+      {
+        "position": 41,
+        "header_text": "Transition Piping",
+        "header_number": "6.4.2.4",
+        "level": 4,
+        "start_global_idx": 465,
+        "end_global_idx": 472,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 8
+      },
+      {
+        "position": 42,
+        "header_text": "Electrical Installation",
+        "header_number": "6.4.3",
+        "level": 3,
+        "start_global_idx": 473,
+        "end_global_idx": 473,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 1
+      },
+      {
+        "position": 43,
+        "header_text": "General Requirements",
+        "header_number": "6.4.3.1",
+        "level": 4,
+        "start_global_idx": 474,
+        "end_global_idx": 486,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 13
+      },
+      {
+        "position": 44,
+        "header_text": "Power Factor (AC Systems Only)",
+        "header_number": "6.4.3.2",
+        "level": 4,
+        "start_global_idx": 487,
+        "end_global_idx": 490,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 4
+      },
+      {
+        "position": 45,
+        "header_text": "Cathodic Protection",
+        "header_number": "6.4.3.3",
+        "level": 4,
+        "start_global_idx": 491,
+        "end_global_idx": 494,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 4
+      },
+      {
+        "position": 46,
+        "header_text": "Coatings and Deposits",
+        "header_number": "6.4.4",
+        "level": 3,
+        "start_global_idx": 495,
+        "end_global_idx": 503,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 9
+      },
+      {
+        "position": 47,
+        "header_text": "Primary Device - Materials of Construction",
+        "header_number": "6.5",
+        "level": 2,
+        "start_global_idx": 504,
+        "end_global_idx": 505,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 2
+      },
+      {
+        "position": 48,
+        "header_text": "General Guidelines",
+        "header_number": "6.5.1",
+        "level": 3,
+        "start_global_idx": 506,
+        "end_global_idx": 512,
+        "start_page": 12,
+        "end_page": 12,
+        "line_count": 7
+      },
+      {
+        "position": 49,
+        "header_text": "Liner Materials",
+        "header_number": "6.5.2",
+        "level": 3,
+        "start_global_idx": 513,
+        "end_global_idx": 524,
+        "start_page": 12,
+        "end_page": 13,
+        "line_count": 12
+      },
+      {
+        "position": 50,
+        "header_text": "Electrode Materials",
+        "header_number": "6.5.3",
+        "level": 3,
+        "start_global_idx": 525,
+        "end_global_idx": 531,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 7
+      },
+      {
+        "position": 51,
+        "header_text": "Secondary Device - Installation",
+        "header_number": "6.6",
+        "level": 2,
+        "start_global_idx": 532,
+        "end_global_idx": 532,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 1
+      },
+      {
+        "position": 52,
+        "header_text": "Location of Secondary Device",
+        "header_number": "6.6.1",
+        "level": 3,
+        "start_global_idx": 533,
+        "end_global_idx": 535,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 3
+      },
+      {
+        "position": 53,
+        "header_text": "Electrical Installation",
+        "header_number": "6.6.2",
+        "level": 3,
+        "start_global_idx": 536,
+        "end_global_idx": 547,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 12
+      },
+      {
+        "position": 54,
+        "header_text": "Safety",
+        "header_number": "6.7",
+        "level": 2,
+        "start_global_idx": 548,
+        "end_global_idx": 548,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 1
+      },
+      {
+        "position": 55,
+        "header_text": "Electrical Safety",
+        "header_number": "6.7.1",
+        "level": 3,
+        "start_global_idx": 549,
+        "end_global_idx": 558,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 10
+      },
+      {
+        "position": 56,
+        "header_text": "Mechanical Safety",
+        "header_number": "6.7.2",
+        "level": 3,
+        "start_global_idx": 559,
+        "end_global_idx": 568,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 10
+      },
+      {
+        "position": 57,
+        "header_text": "EQUIPMENT MARKINGS",
+        "header_number": "7",
+        "level": 1,
+        "start_global_idx": 569,
+        "end_global_idx": 569,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 1
+      },
+      {
+        "position": 58,
+        "header_text": "Introduction",
+        "header_number": "7.1",
+        "level": 2,
+        "start_global_idx": 570,
+        "end_global_idx": 573,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 4
+      },
+      {
+        "position": 59,
+        "header_text": "Primary Device",
+        "header_number": "7.2",
+        "level": 2,
+        "start_global_idx": 574,
+        "end_global_idx": 574,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 1
+      },
+      {
+        "position": 60,
+        "header_text": "Mandatory Information",
+        "header_number": "7.2.1",
+        "level": 3,
+        "start_global_idx": 575,
+        "end_global_idx": 585,
+        "start_page": 13,
+        "end_page": 13,
+        "line_count": 11
+      },
+      {
+        "position": 61,
+        "header_text": "Optional Information",
+        "header_number": "7.2.2",
+        "level": 3,
+        "start_global_idx": 586,
+        "end_global_idx": 593,
+        "start_page": 13,
+        "end_page": 14,
+        "line_count": 8
+      },
+      {
+        "position": 62,
+        "header_text": "Secondary Device",
+        "header_number": "7.3",
+        "level": 2,
+        "start_global_idx": 594,
+        "end_global_idx": 594,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 1
+      },
+      {
+        "position": 63,
+        "header_text": "Mandatory Information",
+        "header_number": "7.3.1",
+        "level": 3,
+        "start_global_idx": 595,
+        "end_global_idx": 600,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 6
+      },
+      {
+        "position": 64,
+        "header_text": "LIQUID CALIBRATION",
+        "header_number": "8",
+        "level": 1,
+        "start_global_idx": 601,
+        "end_global_idx": 601,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 1
+      },
+      {
+        "position": 65,
+        "header_text": "Overview",
+        "header_number": "8.1",
+        "level": 2,
+        "start_global_idx": 602,
+        "end_global_idx": 608,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 7
+      },
+      {
+        "position": 66,
+        "header_text": "Calibration Conditions",
+        "header_number": "8.2",
+        "level": 2,
+        "start_global_idx": 609,
+        "end_global_idx": 616,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 8
+      },
+      {
+        "position": 67,
+        "header_text": "Calibration Facilities",
+        "header_number": "8.3",
+        "level": 2,
+        "start_global_idx": 617,
+        "end_global_idx": 623,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 7
+      },
+      {
+        "position": 68,
+        "header_text": "Calibration of the Primary",
+        "header_number": "8.4",
+        "level": 2,
+        "start_global_idx": 624,
+        "end_global_idx": 630,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 7
+      },
+      {
+        "position": 69,
+        "header_text": "Calibration of the Secondary",
+        "header_number": "8.5",
+        "level": 2,
+        "start_global_idx": 631,
+        "end_global_idx": 634,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 4
+      },
+      {
+        "position": 70,
+        "header_text": "Spanning of the Secondary",
+        "header_number": "8.6",
+        "level": 2,
+        "start_global_idx": 635,
+        "end_global_idx": 636,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 2
+      },
+      {
+        "position": 71,
+        "header_text": "Installation Effects",
+        "header_number": "8.7",
+        "level": 2,
+        "start_global_idx": 637,
+        "end_global_idx": 637,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 1
+      },
+      {
+        "position": 72,
+        "header_text": "Figures",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 638,
+        "end_global_idx": 638,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 1
+      },
+      {
+        "position": 73,
+        "header_text": "Appendices",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 639,
+        "end_global_idx": 644,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 6
+      },
+      {
+        "position": 74,
+        "header_text": "Added Details Regarding Theory and Measurement Technique",
+        "header_number": "A",
+        "level": 1,
+        "start_global_idx": 645,
+        "end_global_idx": 649,
+        "start_page": 15,
+        "end_page": 15,
+        "line_count": 5
+      },
+      {
+        "position": 75,
+        "header_text": "Theory",
+        "header_number": "A1",
+        "level": 2,
+        "start_global_idx": 650,
+        "end_global_idx": 719,
+        "start_page": 15,
+        "end_page": 16,
+        "line_count": 70
+      },
+      {
+        "position": 76,
+        "header_text": "Measurement Technique",
+        "header_number": "A2",
+        "level": 2,
+        "start_global_idx": 720,
+        "end_global_idx": 753,
+        "start_page": 16,
+        "end_page": 17,
+        "line_count": 34
+      },
+      {
+        "position": 77,
+        "header_text": "Items of Potential Interest to Users",
+        "header_number": "B",
+        "level": 1,
+        "start_global_idx": 754,
+        "end_global_idx": 760,
+        "start_page": 18,
+        "end_page": 18,
+        "line_count": 7
+      },
+      {
+        "position": 78,
+        "header_text": "PRIMARY",
+        "header_number": "B1",
+        "level": 2,
+        "start_global_idx": 761,
+        "end_global_idx": 848,
+        "start_page": 18,
+        "end_page": 19,
+        "line_count": 88
+      },
+      {
+        "position": 79,
+        "header_text": "SECONDARY",
+        "header_number": "B2",
+        "level": 2,
+        "start_global_idx": 849,
+        "end_global_idx": 863,
+        "start_page": 19,
+        "end_page": 19,
+        "line_count": 15
+      },
+      {
+        "position": 80,
+        "header_text": "SYSTEM",
+        "header_number": "B3",
+        "level": 2,
+        "start_global_idx": 864,
+        "end_global_idx": 868,
+        "start_page": 19,
+        "end_page": 19,
+        "line_count": 5
+      },
+      {
+        "position": 81,
+        "header_text": "Liner Material Guidelines",
+        "header_number": "C",
+        "level": 1,
+        "start_global_idx": 869,
+        "end_global_idx": 915,
+        "start_page": 20,
+        "end_page": 20,
+        "line_count": 47
+      },
+      {
+        "position": 82,
+        "header_text": "Bibliography",
+        "header_number": "D",
+        "level": 1,
+        "start_global_idx": 916,
+        "end_global_idx": 919,
+        "start_page": 21,
+        "end_page": 21,
+        "line_count": 4
+      },
+      {
+        "position": 83,
+        "header_text": "STANDARDS FOR MEASUREMENT OF FLUID IN CLOSED CONDUITS",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 920,
+        "end_global_idx": 964,
+        "start_page": 21,
+        "end_page": 22,
+        "line_count": 45
+      },
+      {
+        "position": 84,
+        "header_text": "ASME Services",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 965,
+        "end_global_idx": 993,
+        "start_page": 23,
+        "end_page": 24,
+        "line_count": 29
+      }
+    ]
+  },
+  "final_outline": {
+    "headers": [
+      {
+        "text": "ASME MFC-16M-1995 MEASUREMENT OF FLUID FLOW IN CLOSED CONDUITS BY MEANS OF ELECTROMAGNETIC FLOWMETERS",
+        "number": null,
+        "level": 1,
+        "page": 2,
+        "line_idx": 0,
+        "global_idx": 2
+      },
+      {
+        "text": "Foreword",
+        "number": null,
+        "level": 1,
+        "page": 4,
+        "line_idx": 0,
+        "global_idx": 37
+      },
+      {
+        "text": "ASME STANDARDS COMMITTEE MFC Measurement of Fluid Flow in Closed Conduits",
+        "number": null,
+        "level": 1,
+        "page": 5,
+        "line_idx": 0,
+        "global_idx": 53
+      },
+      {
+        "text": "Foreword",
+        "number": "Foreword",
+        "level": 1,
+        "page": 6,
+        "line_idx": 0,
+        "global_idx": 98
+      },
+      {
+        "text": "Standards Committee Roster",
+        "number": null,
+        "level": 1,
+        "page": 6,
+        "line_idx": 0,
+        "global_idx": 99
+      },
+      {
+        "text": "SCOPE",
+        "number": "1",
+        "level": 1,
+        "page": 6,
+        "line_idx": 0,
+        "global_idx": 123
+      },
+      {
+        "text": "REFERENCES",
+        "number": "2",
+        "level": 1,
+        "page": 6,
+        "line_idx": 0,
+        "global_idx": 126
+      },
+      {
+        "text": "TERMINOLOGY",
+        "number": "3",
+        "level": 1,
+        "page": 6,
+        "line_idx": 0,
+        "global_idx": 132
+      },
+      {
+        "text": "THEORY AND MEASUREMENT TECHNIQUE",
+        "number": "4",
+        "level": 1,
+        "page": 8,
+        "line_idx": 0,
+        "global_idx": 219
+      },
+      {
+        "text": "FLOWMETER DESCRIPTION",
+        "number": "5",
+        "level": 1,
+        "page": 8,
+        "line_idx": 0,
+        "global_idx": 260
+      },
+      {
+        "text": "Overview",
+        "number": "5.1",
+        "level": 2,
+        "page": 8,
+        "line_idx": 0,
+        "global_idx": 261
+      },
+      {
+        "text": "Primary Device",
+        "number": "5.2",
+        "level": 2,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 281
+      },
+      {
+        "text": "Secondary Device",
+        "number": "5.3",
+        "level": 2,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 287
+      },
+      {
+        "text": "Outputs from the Secondary Section",
+        "number": "5.4",
+        "level": 2,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 303
+      },
+      {
+        "text": "APPLICATION CONSIDERATIONS",
+        "number": "6",
+        "level": 1,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 308
+      },
+      {
+        "text": "Process Liquid",
+        "number": "6.1",
+        "level": 2,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 309
+      },
+      {
+        "text": "Liquid Electrical Conductivity",
+        "number": "6.1.1",
+        "level": 3,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 310
+      },
+      {
+        "text": "Primary Device - Sizing Considerations",
+        "number": "6.3",
+        "level": 2,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 316
+      },
+      {
+        "text": "General Considerations",
+        "number": "6.3.1",
+        "level": 3,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 318
+      },
+      {
+        "text": "Noisy Flow Signal",
+        "number": "6.1.2",
+        "level": 3,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 326
+      },
+      {
+        "text": "Special Process Considerations",
+        "number": "6.3.2",
+        "level": 3,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 337
+      },
+      {
+        "text": "Accuracy",
+        "number": "6.3.2.1",
+        "level": 4,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 341
+      },
+      {
+        "text": "Process Hydrodynamics",
+        "number": "6.2",
+        "level": 2,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 345
+      },
+      {
+        "text": "Reynolds Number Effect",
+        "number": "6.2.1",
+        "level": 3,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 346
+      },
+      {
+        "text": "Jet Effect",
+        "number": "6.3.2.2",
+        "level": 4,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 348
+      },
+      {
+        "text": "Abrasive Slurries",
+        "number": "6.3.2.3",
+        "level": 4,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 356
+      },
+      {
+        "text": "Velocity Profile Effect",
+        "number": "6.2.2",
+        "level": 3,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 360
+      },
+      {
+        "text": "Fast-Settling Slurries",
+        "number": "6.3.2.4",
+        "level": 4,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 369
+      },
+      {
+        "text": "Primary Device - Location, Installation, and Maintenance",
+        "number": "6.4",
+        "level": 2,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 376
+      },
+      {
+        "text": "Primary Device Location and Orientation",
+        "number": "6.4.1",
+        "level": 3,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 378
+      },
+      {
+        "text": "Piping Effects",
+        "number": "6.4.1.1",
+        "level": 4,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 382
+      },
+      {
+        "text": "Full Pipe Requirements",
+        "number": "6.4.1.2",
+        "level": 4,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 399
+      },
+      {
+        "text": "Electrode Position - Horizontal Installations",
+        "number": "6.4.1.3",
+        "level": 4,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 405
+      },
+      {
+        "text": "In-Situ Zero Checking",
+        "number": "6.4.1.4",
+        "level": 4,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 408
+      },
+      {
+        "text": "Entrained Solids (Slurries)",
+        "number": "6.4.1.5",
+        "level": 4,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 412
+      },
+      {
+        "text": "Slippage",
+        "number": "6.2.3",
+        "level": 3,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 434
+      },
+      {
+        "text": "Location with Regard to Electrical Interference",
+        "number": "6.4.1.6",
+        "level": 4,
+        "page": 11,
+        "line_idx": 0,
+        "global_idx": 435
+      },
+      {
+        "text": "Installation of Primary Device",
+        "number": "6.4.2",
+        "level": 3,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 452
+      },
+      {
+        "text": "Installation Design",
+        "number": "6.4.2.1",
+        "level": 4,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 453
+      },
+      {
+        "text": "Handling of the Primary Device",
+        "number": "6.4.2.2",
+        "level": 4,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 457
+      },
+      {
+        "text": "Pipework Alignment and Connectors",
+        "number": "6.4.2.3",
+        "level": 4,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 462
+      },
+      {
+        "text": "Transition Piping",
+        "number": "6.4.2.4",
+        "level": 4,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 465
+      },
+      {
+        "text": "Electrical Installation",
+        "number": "6.4.3",
+        "level": 3,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 473
+      },
+      {
+        "text": "General Requirements",
+        "number": "6.4.3.1",
+        "level": 4,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 474
+      },
+      {
+        "text": "Power Factor (AC Systems Only)",
+        "number": "6.4.3.2",
+        "level": 4,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 487
+      },
+      {
+        "text": "Cathodic Protection",
+        "number": "6.4.3.3",
+        "level": 4,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 491
+      },
+      {
+        "text": "Coatings and Deposits",
+        "number": "6.4.4",
+        "level": 3,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 495
+      },
+      {
+        "text": "Primary Device - Materials of Construction",
+        "number": "6.5",
+        "level": 2,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 504
+      },
+      {
+        "text": "General Guidelines",
+        "number": "6.5.1",
+        "level": 3,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 506
+      },
+      {
+        "text": "Liner Materials",
+        "number": "6.5.2",
+        "level": 3,
+        "page": 12,
+        "line_idx": 0,
+        "global_idx": 513
+      },
+      {
+        "text": "Electrode Materials",
+        "number": "6.5.3",
+        "level": 3,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 525
+      },
+      {
+        "text": "Secondary Device - Installation",
+        "number": "6.6",
+        "level": 2,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 532
+      },
+      {
+        "text": "Location of Secondary Device",
+        "number": "6.6.1",
+        "level": 3,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 533
+      },
+      {
+        "text": "Electrical Installation",
+        "number": "6.6.2",
+        "level": 3,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 536
+      },
+      {
+        "text": "Safety",
+        "number": "6.7",
+        "level": 2,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 548
+      },
+      {
+        "text": "Electrical Safety",
+        "number": "6.7.1",
+        "level": 3,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 549
+      },
+      {
+        "text": "Mechanical Safety",
+        "number": "6.7.2",
+        "level": 3,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 559
+      },
+      {
+        "text": "EQUIPMENT MARKINGS",
+        "number": "7",
+        "level": 1,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 569
+      },
+      {
+        "text": "Introduction",
+        "number": "7.1",
+        "level": 2,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 570
+      },
+      {
+        "text": "Primary Device",
+        "number": "7.2",
+        "level": 2,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 574
+      },
+      {
+        "text": "Mandatory Information",
+        "number": "7.2.1",
+        "level": 3,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 575
+      },
+      {
+        "text": "Optional Information",
+        "number": "7.2.2",
+        "level": 3,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 586
+      },
+      {
+        "text": "Secondary Device",
+        "number": "7.3",
+        "level": 2,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 594
+      },
+      {
+        "text": "Mandatory Information",
+        "number": "7.3.1",
+        "level": 3,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 595
+      },
+      {
+        "text": "LIQUID CALIBRATION",
+        "number": "8",
+        "level": 1,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 601
+      },
+      {
+        "text": "Overview",
+        "number": "8.1",
+        "level": 2,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 602
+      },
+      {
+        "text": "Calibration Conditions",
+        "number": "8.2",
+        "level": 2,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 609
+      },
+      {
+        "text": "Calibration Facilities",
+        "number": "8.3",
+        "level": 2,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 617
+      },
+      {
+        "text": "Calibration of the Primary",
+        "number": "8.4",
+        "level": 2,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 624
+      },
+      {
+        "text": "Calibration of the Secondary",
+        "number": "8.5",
+        "level": 2,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 631
+      },
+      {
+        "text": "Spanning of the Secondary",
+        "number": "8.6",
+        "level": 2,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 635
+      },
+      {
+        "text": "Installation Effects",
+        "number": "8.7",
+        "level": 2,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 637
+      },
+      {
+        "text": "Figures",
+        "number": null,
+        "level": 1,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 638
+      },
+      {
+        "text": "Appendices",
+        "number": null,
+        "level": 1,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 639
+      },
+      {
+        "text": "Added Details Regarding Theory and Measurement Technique",
+        "number": "A",
+        "level": 1,
+        "page": 15,
+        "line_idx": 0,
+        "global_idx": 645
+      },
+      {
+        "text": "Theory",
+        "number": "A1",
+        "level": 2,
+        "page": 15,
+        "line_idx": 0,
+        "global_idx": 650
+      },
+      {
+        "text": "Measurement Technique",
+        "number": "A2",
+        "level": 2,
+        "page": 16,
+        "line_idx": 0,
+        "global_idx": 720
+      },
+      {
+        "text": "Items of Potential Interest to Users",
+        "number": "B",
+        "level": 1,
+        "page": 18,
+        "line_idx": 0,
+        "global_idx": 754
+      },
+      {
+        "text": "PRIMARY",
+        "number": "B1",
+        "level": 2,
+        "page": 18,
+        "line_idx": 0,
+        "global_idx": 761
+      },
+      {
+        "text": "SECONDARY",
+        "number": "B2",
+        "level": 2,
+        "page": 19,
+        "line_idx": 0,
+        "global_idx": 849
+      },
+      {
+        "text": "SYSTEM",
+        "number": "B3",
+        "level": 2,
+        "page": 19,
+        "line_idx": 0,
+        "global_idx": 864
+      },
+      {
+        "text": "Liner Material Guidelines",
+        "number": "C",
+        "level": 1,
+        "page": 20,
+        "line_idx": 0,
+        "global_idx": 869
+      },
+      {
+        "text": "Bibliography",
+        "number": "D",
+        "level": 1,
+        "page": 21,
+        "line_idx": 0,
+        "global_idx": 916
+      },
+      {
+        "text": "STANDARDS FOR MEASUREMENT OF FLUID IN CLOSED CONDUITS",
+        "number": null,
+        "level": 1,
+        "page": 21,
+        "line_idx": 0,
+        "global_idx": 920
+      },
+      {
+        "text": "ASME Services",
+        "number": null,
+        "level": 1,
+        "page": 23,
+        "line_idx": 0,
+        "global_idx": 965
+      }
+    ],
+    "sections": [
+      {
+        "header_text": "ASME MFC-16M-1995 MEASUREMENT OF FLUID FLOW IN CLOSED CONDUITS BY MEANS OF ELECTROMAGNETIC FLOWMETERS",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 2,
+        "end_global_idx": 36,
+        "start_page": 2,
+        "end_page": 3
+      },
+      {
+        "header_text": "Foreword",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 37,
+        "end_global_idx": 52,
+        "start_page": 4,
+        "end_page": 4
+      },
+      {
+        "header_text": "ASME STANDARDS COMMITTEE MFC Measurement of Fluid Flow in Closed Conduits",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 53,
+        "end_global_idx": 97,
+        "start_page": 5,
+        "end_page": 5
+      },
+      {
+        "header_text": "Foreword",
+        "header_number": "Foreword",
+        "level": 1,
+        "start_global_idx": 98,
+        "end_global_idx": 98,
+        "start_page": 6,
+        "end_page": 6
+      },
+      {
+        "header_text": "Standards Committee Roster",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 99,
+        "end_global_idx": 122,
+        "start_page": 6,
+        "end_page": 6
+      },
+      {
+        "header_text": "SCOPE",
+        "header_number": "1",
+        "level": 1,
+        "start_global_idx": 123,
+        "end_global_idx": 125,
+        "start_page": 6,
+        "end_page": 6
+      },
+      {
+        "header_text": "REFERENCES",
+        "header_number": "2",
+        "level": 1,
+        "start_global_idx": 126,
+        "end_global_idx": 131,
+        "start_page": 6,
+        "end_page": 6
+      },
+      {
+        "header_text": "TERMINOLOGY",
+        "header_number": "3",
+        "level": 1,
+        "start_global_idx": 132,
+        "end_global_idx": 218,
+        "start_page": 6,
+        "end_page": 8
+      },
+      {
+        "header_text": "THEORY AND MEASUREMENT TECHNIQUE",
+        "header_number": "4",
+        "level": 1,
+        "start_global_idx": 219,
+        "end_global_idx": 259,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "FLOWMETER DESCRIPTION",
+        "header_number": "5",
+        "level": 1,
+        "start_global_idx": 260,
+        "end_global_idx": 260,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "Overview",
+        "header_number": "5.1",
+        "level": 2,
+        "start_global_idx": 261,
+        "end_global_idx": 280,
+        "start_page": 8,
+        "end_page": 9
+      },
+      {
+        "header_text": "Primary Device",
+        "header_number": "5.2",
+        "level": 2,
+        "start_global_idx": 281,
+        "end_global_idx": 286,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Secondary Device",
+        "header_number": "5.3",
+        "level": 2,
+        "start_global_idx": 287,
+        "end_global_idx": 302,
+        "start_page": 9,
+        "end_page": 10
+      },
+      {
+        "header_text": "Outputs from the Secondary Section",
+        "header_number": "5.4",
+        "level": 2,
+        "start_global_idx": 303,
+        "end_global_idx": 307,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "APPLICATION CONSIDERATIONS",
+        "header_number": "6",
+        "level": 1,
+        "start_global_idx": 308,
+        "end_global_idx": 308,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "Process Liquid",
+        "header_number": "6.1",
+        "level": 2,
+        "start_global_idx": 309,
+        "end_global_idx": 309,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "Liquid Electrical Conductivity",
+        "header_number": "6.1.1",
+        "level": 3,
+        "start_global_idx": 310,
+        "end_global_idx": 315,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "Primary Device - Sizing Considerations",
+        "header_number": "6.3",
+        "level": 2,
+        "start_global_idx": 316,
+        "end_global_idx": 317,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "General Considerations",
+        "header_number": "6.3.1",
+        "level": 3,
+        "start_global_idx": 318,
+        "end_global_idx": 325,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "Noisy Flow Signal",
+        "header_number": "6.1.2",
+        "level": 3,
+        "start_global_idx": 326,
+        "end_global_idx": 336,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "Special Process Considerations",
+        "header_number": "6.3.2",
+        "level": 3,
+        "start_global_idx": 337,
+        "end_global_idx": 340,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "Accuracy",
+        "header_number": "6.3.2.1",
+        "level": 4,
+        "start_global_idx": 341,
+        "end_global_idx": 344,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "Process Hydrodynamics",
+        "header_number": "6.2",
+        "level": 2,
+        "start_global_idx": 345,
+        "end_global_idx": 345,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "Reynolds Number Effect",
+        "header_number": "6.2.1",
+        "level": 3,
+        "start_global_idx": 346,
+        "end_global_idx": 347,
+        "start_page": 10,
+        "end_page": 10
+      },
+      {
+        "header_text": "Jet Effect",
+        "header_number": "6.3.2.2",
+        "level": 4,
+        "start_global_idx": 348,
+        "end_global_idx": 355,
+        "start_page": 10,
+        "end_page": 11
+      },
+      {
+        "header_text": "Abrasive Slurries",
+        "header_number": "6.3.2.3",
+        "level": 4,
+        "start_global_idx": 356,
+        "end_global_idx": 359,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Velocity Profile Effect",
+        "header_number": "6.2.2",
+        "level": 3,
+        "start_global_idx": 360,
+        "end_global_idx": 368,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Fast-Settling Slurries",
+        "header_number": "6.3.2.4",
+        "level": 4,
+        "start_global_idx": 369,
+        "end_global_idx": 375,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Primary Device - Location, Installation, and Maintenance",
+        "header_number": "6.4",
+        "level": 2,
+        "start_global_idx": 376,
+        "end_global_idx": 377,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Primary Device Location and Orientation",
+        "header_number": "6.4.1",
+        "level": 3,
+        "start_global_idx": 378,
+        "end_global_idx": 381,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Piping Effects",
+        "header_number": "6.4.1.1",
+        "level": 4,
+        "start_global_idx": 382,
+        "end_global_idx": 398,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Full Pipe Requirements",
+        "header_number": "6.4.1.2",
+        "level": 4,
+        "start_global_idx": 399,
+        "end_global_idx": 404,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Electrode Position - Horizontal Installations",
+        "header_number": "6.4.1.3",
+        "level": 4,
+        "start_global_idx": 405,
+        "end_global_idx": 407,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "In-Situ Zero Checking",
+        "header_number": "6.4.1.4",
+        "level": 4,
+        "start_global_idx": 408,
+        "end_global_idx": 411,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Entrained Solids (Slurries)",
+        "header_number": "6.4.1.5",
+        "level": 4,
+        "start_global_idx": 412,
+        "end_global_idx": 433,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Slippage",
+        "header_number": "6.2.3",
+        "level": 3,
+        "start_global_idx": 434,
+        "end_global_idx": 434,
+        "start_page": 11,
+        "end_page": 11
+      },
+      {
+        "header_text": "Location with Regard to Electrical Interference",
+        "header_number": "6.4.1.6",
+        "level": 4,
+        "start_global_idx": 435,
+        "end_global_idx": 451,
+        "start_page": 11,
+        "end_page": 12
+      },
+      {
+        "header_text": "Installation of Primary Device",
+        "header_number": "6.4.2",
+        "level": 3,
+        "start_global_idx": 452,
+        "end_global_idx": 452,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Installation Design",
+        "header_number": "6.4.2.1",
+        "level": 4,
+        "start_global_idx": 453,
+        "end_global_idx": 456,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Handling of the Primary Device",
+        "header_number": "6.4.2.2",
+        "level": 4,
+        "start_global_idx": 457,
+        "end_global_idx": 461,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Pipework Alignment and Connectors",
+        "header_number": "6.4.2.3",
+        "level": 4,
+        "start_global_idx": 462,
+        "end_global_idx": 464,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Transition Piping",
+        "header_number": "6.4.2.4",
+        "level": 4,
+        "start_global_idx": 465,
+        "end_global_idx": 472,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Electrical Installation",
+        "header_number": "6.4.3",
+        "level": 3,
+        "start_global_idx": 473,
+        "end_global_idx": 473,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "General Requirements",
+        "header_number": "6.4.3.1",
+        "level": 4,
+        "start_global_idx": 474,
+        "end_global_idx": 486,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Power Factor (AC Systems Only)",
+        "header_number": "6.4.3.2",
+        "level": 4,
+        "start_global_idx": 487,
+        "end_global_idx": 490,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Cathodic Protection",
+        "header_number": "6.4.3.3",
+        "level": 4,
+        "start_global_idx": 491,
+        "end_global_idx": 494,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Coatings and Deposits",
+        "header_number": "6.4.4",
+        "level": 3,
+        "start_global_idx": 495,
+        "end_global_idx": 503,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Primary Device - Materials of Construction",
+        "header_number": "6.5",
+        "level": 2,
+        "start_global_idx": 504,
+        "end_global_idx": 505,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "General Guidelines",
+        "header_number": "6.5.1",
+        "level": 3,
+        "start_global_idx": 506,
+        "end_global_idx": 512,
+        "start_page": 12,
+        "end_page": 12
+      },
+      {
+        "header_text": "Liner Materials",
+        "header_number": "6.5.2",
+        "level": 3,
+        "start_global_idx": 513,
+        "end_global_idx": 524,
+        "start_page": 12,
+        "end_page": 13
+      },
+      {
+        "header_text": "Electrode Materials",
+        "header_number": "6.5.3",
+        "level": 3,
+        "start_global_idx": 525,
+        "end_global_idx": 531,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Secondary Device - Installation",
+        "header_number": "6.6",
+        "level": 2,
+        "start_global_idx": 532,
+        "end_global_idx": 532,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Location of Secondary Device",
+        "header_number": "6.6.1",
+        "level": 3,
+        "start_global_idx": 533,
+        "end_global_idx": 535,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Electrical Installation",
+        "header_number": "6.6.2",
+        "level": 3,
+        "start_global_idx": 536,
+        "end_global_idx": 547,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Safety",
+        "header_number": "6.7",
+        "level": 2,
+        "start_global_idx": 548,
+        "end_global_idx": 548,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Electrical Safety",
+        "header_number": "6.7.1",
+        "level": 3,
+        "start_global_idx": 549,
+        "end_global_idx": 558,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Mechanical Safety",
+        "header_number": "6.7.2",
+        "level": 3,
+        "start_global_idx": 559,
+        "end_global_idx": 568,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "EQUIPMENT MARKINGS",
+        "header_number": "7",
+        "level": 1,
+        "start_global_idx": 569,
+        "end_global_idx": 569,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Introduction",
+        "header_number": "7.1",
+        "level": 2,
+        "start_global_idx": 570,
+        "end_global_idx": 573,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Primary Device",
+        "header_number": "7.2",
+        "level": 2,
+        "start_global_idx": 574,
+        "end_global_idx": 574,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Mandatory Information",
+        "header_number": "7.2.1",
+        "level": 3,
+        "start_global_idx": 575,
+        "end_global_idx": 585,
+        "start_page": 13,
+        "end_page": 13
+      },
+      {
+        "header_text": "Optional Information",
+        "header_number": "7.2.2",
+        "level": 3,
+        "start_global_idx": 586,
+        "end_global_idx": 593,
+        "start_page": 13,
+        "end_page": 14
+      },
+      {
+        "header_text": "Secondary Device",
+        "header_number": "7.3",
+        "level": 2,
+        "start_global_idx": 594,
+        "end_global_idx": 594,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Mandatory Information",
+        "header_number": "7.3.1",
+        "level": 3,
+        "start_global_idx": 595,
+        "end_global_idx": 600,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "LIQUID CALIBRATION",
+        "header_number": "8",
+        "level": 1,
+        "start_global_idx": 601,
+        "end_global_idx": 601,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Overview",
+        "header_number": "8.1",
+        "level": 2,
+        "start_global_idx": 602,
+        "end_global_idx": 608,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Calibration Conditions",
+        "header_number": "8.2",
+        "level": 2,
+        "start_global_idx": 609,
+        "end_global_idx": 616,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Calibration Facilities",
+        "header_number": "8.3",
+        "level": 2,
+        "start_global_idx": 617,
+        "end_global_idx": 623,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Calibration of the Primary",
+        "header_number": "8.4",
+        "level": 2,
+        "start_global_idx": 624,
+        "end_global_idx": 630,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Calibration of the Secondary",
+        "header_number": "8.5",
+        "level": 2,
+        "start_global_idx": 631,
+        "end_global_idx": 634,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Spanning of the Secondary",
+        "header_number": "8.6",
+        "level": 2,
+        "start_global_idx": 635,
+        "end_global_idx": 636,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Installation Effects",
+        "header_number": "8.7",
+        "level": 2,
+        "start_global_idx": 637,
+        "end_global_idx": 637,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Figures",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 638,
+        "end_global_idx": 638,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Appendices",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 639,
+        "end_global_idx": 644,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Added Details Regarding Theory and Measurement Technique",
+        "header_number": "A",
+        "level": 1,
+        "start_global_idx": 645,
+        "end_global_idx": 649,
+        "start_page": 15,
+        "end_page": 15
+      },
+      {
+        "header_text": "Theory",
+        "header_number": "A1",
+        "level": 2,
+        "start_global_idx": 650,
+        "end_global_idx": 719,
+        "start_page": 15,
+        "end_page": 16
+      },
+      {
+        "header_text": "Measurement Technique",
+        "header_number": "A2",
+        "level": 2,
+        "start_global_idx": 720,
+        "end_global_idx": 753,
+        "start_page": 16,
+        "end_page": 17
+      },
+      {
+        "header_text": "Items of Potential Interest to Users",
+        "header_number": "B",
+        "level": 1,
+        "start_global_idx": 754,
+        "end_global_idx": 760,
+        "start_page": 18,
+        "end_page": 18
+      },
+      {
+        "header_text": "PRIMARY",
+        "header_number": "B1",
+        "level": 2,
+        "start_global_idx": 761,
+        "end_global_idx": 848,
+        "start_page": 18,
+        "end_page": 19
+      },
+      {
+        "header_text": "SECONDARY",
+        "header_number": "B2",
+        "level": 2,
+        "start_global_idx": 849,
+        "end_global_idx": 863,
+        "start_page": 19,
+        "end_page": 19
+      },
+      {
+        "header_text": "SYSTEM",
+        "header_number": "B3",
+        "level": 2,
+        "start_global_idx": 864,
+        "end_global_idx": 868,
+        "start_page": 19,
+        "end_page": 19
+      },
+      {
+        "header_text": "Liner Material Guidelines",
+        "header_number": "C",
+        "level": 1,
+        "start_global_idx": 869,
+        "end_global_idx": 915,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "Bibliography",
+        "header_number": "D",
+        "level": 1,
+        "start_global_idx": 916,
+        "end_global_idx": 919,
+        "start_page": 21,
+        "end_page": 21
+      },
+      {
+        "header_text": "STANDARDS FOR MEASUREMENT OF FLUID IN CLOSED CONDUITS",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 920,
+        "end_global_idx": 964,
+        "start_page": 21,
+        "end_page": 22
+      },
+      {
+        "header_text": "ASME Services",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 965,
+        "end_global_idx": 993,
+        "start_page": 23,
+        "end_page": 24
+      }
+    ],
+    "mode": "llm_strict",
+    "messages": []
+  },
+  "elapsed_s": 50.197068899986334,
+  "function_calls": [
+    {
+      "order": 1,
+      "name": "backend.services.headers_orchestrator.extract_headers_and_chunks"
+    },
+    {
+      "order": 2,
+      "name": "backend.services.pdf_native.collect_line_metrics"
+    },
+    {
+      "order": 3,
+      "name": "backend.services.pdf_native.collect_line_metrics"
+    },
+    {
+      "order": 4,
+      "name": "backend.services.headers_llm_strict.align_headers_llm_strict"
+    },
+    {
+      "order": 5,
+      "name": "backend.services.headers_llm_strict.align_headers_llm_strict"
+    },
+    {
+      "order": 6,
+      "name": "backend.services.headers_orchestrator._enforce_header_sequence"
+    },
+    {
+      "order": 7,
+      "name": "backend.services.headers_orchestrator._enforce_header_sequence"
+    }
+  ]
+}

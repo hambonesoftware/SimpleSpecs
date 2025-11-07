@@ -1,0 +1,1560 @@
+{
+  "trace_schema": "v2-chunking",
+  "run_id": "a03cd497-5949-44eb-b3c7-05a4161776f7",
+  "metadata": {
+    "mode": "llm_full",
+    "file_id": 2,
+    "cfg": {
+      "suppress_toc": true,
+      "suppress_running": true,
+      "align": "sequential"
+    },
+    "metadata": {
+      "filename": "MFC-16M_R2001_E1995.pdf",
+      "document_id": 2
+    }
+  },
+  "llm_headers": [
+    {
+      "text": "Foreword",
+      "number": null,
+      "level": 1,
+      "page": 4
+    },
+    {
+      "text": "Standards Committee Roster",
+      "number": null,
+      "level": 1,
+      "page": 5
+    },
+    {
+      "text": "Scope",
+      "number": "1",
+      "level": 1,
+      "page": 7
+    },
+    {
+      "text": "References",
+      "number": "2",
+      "level": 1,
+      "page": 7
+    },
+    {
+      "text": "Terminology",
+      "number": "3",
+      "level": 1,
+      "page": 8
+    },
+    {
+      "text": "Theory and Measurement Technique",
+      "number": "4",
+      "level": 1,
+      "page": 9
+    },
+    {
+      "text": "Flowmeter Description",
+      "number": "5",
+      "level": 1,
+      "page": 10
+    },
+    {
+      "text": "Application Considerations",
+      "number": "6",
+      "level": 1,
+      "page": 11
+    },
+    {
+      "text": "Equipment Markings",
+      "number": "7",
+      "level": 1,
+      "page": 13
+    },
+    {
+      "text": "Liquid Calibration",
+      "number": "8",
+      "level": 1,
+      "page": 14
+    },
+    {
+      "text": "Figures",
+      "number": null,
+      "level": 1,
+      "page": 6
+    },
+    {
+      "text": "Examples of Electrodes for an Electromagnetic Flowmeter",
+      "number": "1",
+      "level": 2,
+      "page": 9
+    },
+    {
+      "text": "Examples of Magnetic Field (B) Variation with Time (I)",
+      "number": "2",
+      "level": 2,
+      "page": 13
+    },
+    {
+      "text": "Appendices",
+      "number": null,
+      "level": 1,
+      "page": 6
+    },
+    {
+      "text": "Added Details Regarding Theory and Measurement Technique",
+      "number": "A",
+      "level": 2,
+      "page": 15
+    },
+    {
+      "text": "Items of Potential Interest to Users",
+      "number": "B",
+      "level": 2,
+      "page": 17
+    },
+    {
+      "text": "Liner Material Guidelines",
+      "number": "C",
+      "level": 2,
+      "page": 20
+    },
+    {
+      "text": "Bibliography",
+      "number": "D",
+      "level": 2,
+      "page": 21
+    },
+    {
+      "text": "Lorentz Force Law Applied to a Conducting Liquid Flowing in a Rectangular Cross-Section Conduit with Insulating Walls",
+      "number": "A2",
+      "level": 2,
+      "page": 10
+    },
+    {
+      "text": "Vector Relationship of the Variables in the Lorentz Force Law",
+      "number": "A1",
+      "level": 2,
+      "page": 9
+    }
+  ],
+  "llm_requests": [],
+  "llm_raw_responses": [
+    "```SIMPLEHEADERS\n[\n  {\n    \"number\": null,\n    \"title\": \"Foreword\",\n    \"level\": 1,\n    \"page\": 4\n  },\n  {\n    \"number\": null,\n    \"title\": \"Standards Committee Roster\",\n    \"level\": 1,\n    \"page\": 5\n  },\n  {\n    \"number\": \"1\",\n    \"title\": \"Scope\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"2\",\n    \"title\": \"References\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"3\",\n    \"title\": \"Terminology\",\n    \"level\": 1,\n    \"page\": 8\n  },\n  {\n    \"number\": \"4\",\n    \"title\": \"Theory and Measurement Technique\",\n    \"level\": 1,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5\",\n    \"title\": \"Flowmeter Description\",\n    \"level\": 1,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6\",\n    \"title\": \"Application Considerations\",\n    \"level\": 1,\n    \"page\": 11\n  },\n  {\n    \"number\": \"7\",\n    \"title\": \"Equipment Markings\",\n    \"level\": 1,\n    \"page\": 13\n  },\n  {\n    \"number\": \"8\",\n    \"title\": \"Liquid Calibration\",\n    \"level\": 1,\n    \"page\": 14\n  },\n  {\n    \"number\": null,\n    \"title\": \"Figures\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"1\",\n    \"title\": \"Examples of Electrodes for an Electromagnetic Flowmeter\",\n    \"level\": 2,\n    \"page\": 9\n  },\n  {\n    \"number\": \"2\",\n    \"title\": \"Examples of Magnetic Field (B) Variation with Time (I)\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": null,\n    \"title\": \"Appendices\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"A\",\n    \"title\": \"Added Details Regarding Theory and Measurement Technique\",\n    \"level\": 2,\n    \"page\": 15\n  },\n  {\n    \"number\": \"B\",\n    \"title\": \"Items of Potential Interest to Users\",\n    \"level\": 2,\n    \"page\": 17\n  },\n  {\n    \"number\": \"C\",\n    \"title\": \"Liner Material Guidelines\",\n    \"level\": 2,\n    \"page\": 20\n  },\n  {\n    \"number\": \"D\",\n    \"title\": \"Bibliography\",\n    \"level\": 2,\n    \"page\": 21\n  },\n  {\n    \"number\": null,\n    \"title\": \"Figures\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"A2\",\n    \"title\": \"Lorentz Force Law Applied to a Conducting Liquid Flowing in a Rectangular Cross-Section Conduit with Insulating Walls\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"A1\",\n    \"title\": \"Vector Relationship of the Variables in the Lorentz Force Law\",\n    \"level\": 2,\n    \"page\": 9\n  }\n]\n```"
+  ],
+  "llm_fenced_blocks": [
+    "[\n  {\n    \"number\": null,\n    \"title\": \"Foreword\",\n    \"level\": 1,\n    \"page\": 4\n  },\n  {\n    \"number\": null,\n    \"title\": \"Standards Committee Roster\",\n    \"level\": 1,\n    \"page\": 5\n  },\n  {\n    \"number\": \"1\",\n    \"title\": \"Scope\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"2\",\n    \"title\": \"References\",\n    \"level\": 1,\n    \"page\": 7\n  },\n  {\n    \"number\": \"3\",\n    \"title\": \"Terminology\",\n    \"level\": 1,\n    \"page\": 8\n  },\n  {\n    \"number\": \"4\",\n    \"title\": \"Theory and Measurement Technique\",\n    \"level\": 1,\n    \"page\": 9\n  },\n  {\n    \"number\": \"5\",\n    \"title\": \"Flowmeter Description\",\n    \"level\": 1,\n    \"page\": 10\n  },\n  {\n    \"number\": \"6\",\n    \"title\": \"Application Considerations\",\n    \"level\": 1,\n    \"page\": 11\n  },\n  {\n    \"number\": \"7\",\n    \"title\": \"Equipment Markings\",\n    \"level\": 1,\n    \"page\": 13\n  },\n  {\n    \"number\": \"8\",\n    \"title\": \"Liquid Calibration\",\n    \"level\": 1,\n    \"page\": 14\n  },\n  {\n    \"number\": null,\n    \"title\": \"Figures\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"1\",\n    \"title\": \"Examples of Electrodes for an Electromagnetic Flowmeter\",\n    \"level\": 2,\n    \"page\": 9\n  },\n  {\n    \"number\": \"2\",\n    \"title\": \"Examples of Magnetic Field (B) Variation with Time (I)\",\n    \"level\": 2,\n    \"page\": 13\n  },\n  {\n    \"number\": null,\n    \"title\": \"Appendices\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"A\",\n    \"title\": \"Added Details Regarding Theory and Measurement Technique\",\n    \"level\": 2,\n    \"page\": 15\n  },\n  {\n    \"number\": \"B\",\n    \"title\": \"Items of Potential Interest to Users\",\n    \"level\": 2,\n    \"page\": 17\n  },\n  {\n    \"number\": \"C\",\n    \"title\": \"Liner Material Guidelines\",\n    \"level\": 2,\n    \"page\": 20\n  },\n  {\n    \"number\": \"D\",\n    \"title\": \"Bibliography\",\n    \"level\": 2,\n    \"page\": 21\n  },\n  {\n    \"number\": null,\n    \"title\": \"Figures\",\n    \"level\": 1,\n    \"page\": 6\n  },\n  {\n    \"number\": \"A2\",\n    \"title\": \"Lorentz Force Law Applied to a Conducting Liquid Flowing in a Rectangular Cross-Section Conduit with Insulating Walls\",\n    \"level\": 2,\n    \"page\": 10\n  },\n  {\n    \"number\": \"A1\",\n    \"title\": \"Vector Relationship of the Variables in the Lorentz Force Law\",\n    \"level\": 2,\n    \"page\": 9\n  }\n]"
+  ],
+  "decisions": [
+    {
+      "t": 1762389704.7044723,
+      "type": "cache_bypassed",
+      "reason": "force_no_delete_helper"
+    },
+    {
+      "t": 1762389888.737774,
+      "type": "candidate_found",
+      "number": null,
+      "title": "Foreword",
+      "page": 4,
+      "idx": 37,
+      "line_index": 0,
+      "score": 100.0,
+      "strategy": "title_only",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.737774,
+      "type": "candidate_found",
+      "number": null,
+      "title": "Standards Committee Roster",
+      "page": 5,
+      "idx": 53,
+      "line_index": 0,
+      "score": 84.44444444444444,
+      "strategy": "title_only",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.737774,
+      "type": "candidate_found",
+      "number": "1",
+      "title": "Scope",
+      "page": 6,
+      "idx": 123,
+      "line_index": 25,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.737774,
+      "type": "candidate_found",
+      "number": "2",
+      "title": "References",
+      "page": 6,
+      "idx": 126,
+      "line_index": 28,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.737774,
+      "type": "candidate_found",
+      "number": "3",
+      "title": "Terminology",
+      "page": 6,
+      "idx": 132,
+      "line_index": 34,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.737774,
+      "type": "candidate_found",
+      "number": "4",
+      "title": "Theory and Measurement Technique",
+      "page": 8,
+      "idx": 219,
+      "line_index": 17,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7483258,
+      "type": "candidate_found",
+      "number": "5",
+      "title": "Flowmeter Description",
+      "page": 8,
+      "idx": 260,
+      "line_index": 58,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7483258,
+      "type": "candidate_found",
+      "number": "6",
+      "title": "Application Considerations",
+      "page": 10,
+      "idx": 308,
+      "line_index": 12,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7483258,
+      "type": "candidate_found",
+      "number": "7",
+      "title": "Equipment Markings",
+      "page": 13,
+      "idx": 569,
+      "line_index": 51,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7538724,
+      "type": "candidate_found",
+      "number": "8",
+      "title": "Liquid Calibration",
+      "page": 14,
+      "idx": 601,
+      "line_index": 10,
+      "score": 100.0,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7538724,
+      "type": "candidate_found",
+      "number": null,
+      "title": "Figures",
+      "page": 14,
+      "idx": 602,
+      "line_index": 11,
+      "score": 0,
+      "strategy": "sequential_fallback",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7538724,
+      "type": "candidate_found",
+      "number": "1",
+      "title": "Examples of Electrodes for an Electromagnetic Flowmeter",
+      "page": 8,
+      "idx": 211,
+      "line_index": 9,
+      "score": 100.0,
+      "strategy": "last_occurrence",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7538724,
+      "type": "candidate_found",
+      "number": "2",
+      "title": "Examples of Magnetic Field (B) Variation with Time (I)",
+      "page": 9,
+      "idx": 276,
+      "line_index": 10,
+      "score": 96.29629629629629,
+      "strategy": "num+title",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7538724,
+      "type": "candidate_found",
+      "number": null,
+      "title": "Appendices",
+      "page": 9,
+      "idx": 277,
+      "line_index": 11,
+      "score": 0,
+      "strategy": "sequential_fallback",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7655442,
+      "type": "candidate_found",
+      "number": "A",
+      "title": "Added Details Regarding Theory and Measurement Technique",
+      "page": 15,
+      "idx": 645,
+      "line_index": 0,
+      "score": 81.42857142857143,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7655442,
+      "type": "candidate_found",
+      "number": "B",
+      "title": "Items of Potential Interest to Users",
+      "page": 18,
+      "idx": 754,
+      "line_index": 0,
+      "score": 90.0,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7712843,
+      "type": "candidate_found",
+      "number": "C",
+      "title": "Liner Material Guidelines",
+      "page": 20,
+      "idx": 869,
+      "line_index": 0,
+      "score": 90.0,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7732842,
+      "type": "candidate_found",
+      "number": "D",
+      "title": "Bibliography",
+      "page": 21,
+      "idx": 916,
+      "line_index": 0,
+      "score": 90.0,
+      "strategy": "num+title",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.775284,
+      "type": "candidate_found",
+      "number": "A2",
+      "title": "Lorentz Force Law Applied to a Conducting Liquid Flowing in a Rectangular Cross-Section Conduit with Insulating Walls",
+      "page": 16,
+      "idx": 711,
+      "line_index": 3,
+      "score": 96.12403100775194,
+      "strategy": "last_occurrence",
+      "band": false,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "candidate_found",
+      "number": "A1",
+      "title": "Vector Relationship of the Variables in the Lorentz Force Law",
+      "page": 16,
+      "idx": 710,
+      "line_index": 2,
+      "score": 90.0,
+      "strategy": "last_occurrence",
+      "band": true,
+      "toc_page": false
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunking_start",
+      "headers_count": 20,
+      "lines_count": 994
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "line_index_map_built",
+      "indexed_count": 994,
+      "missing_global_idx": 0
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 0,
+      "current_idx": 37,
+      "end_index": 52,
+      "next_idx": 53,
+      "next_global": 53
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 0,
+      "header_text": "Foreword",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 37,
+      "end_global_idx": 52,
+      "start_page": 4,
+      "end_page": 4,
+      "line_count": 16
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 1,
+      "current_idx": 53,
+      "end_index": 122,
+      "next_idx": 123,
+      "next_global": 123
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 1,
+      "header_text": "Standards Committee Roster",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 53,
+      "end_global_idx": 122,
+      "start_page": 5,
+      "end_page": 6,
+      "line_count": 70
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 2,
+      "current_idx": 123,
+      "end_index": 125,
+      "next_idx": 126,
+      "next_global": 126
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 2,
+      "header_text": "Scope",
+      "header_number": "1",
+      "level": 1,
+      "start_global_idx": 123,
+      "end_global_idx": 125,
+      "start_page": 6,
+      "end_page": 6,
+      "line_count": 3
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 3,
+      "current_idx": 126,
+      "end_index": 131,
+      "next_idx": 132,
+      "next_global": 132
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 3,
+      "header_text": "References",
+      "header_number": "2",
+      "level": 1,
+      "start_global_idx": 126,
+      "end_global_idx": 131,
+      "start_page": 6,
+      "end_page": 6,
+      "line_count": 6
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 4,
+      "current_idx": 132,
+      "end_index": 210,
+      "next_idx": 211,
+      "next_global": 211
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 4,
+      "header_text": "Terminology",
+      "header_number": "3",
+      "level": 1,
+      "start_global_idx": 132,
+      "end_global_idx": 210,
+      "start_page": 6,
+      "end_page": 8,
+      "line_count": 79
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 5,
+      "current_idx": 211,
+      "end_index": 218,
+      "next_idx": 219,
+      "next_global": 219
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 5,
+      "header_text": "Examples of Electrodes for an Electromagnetic Flowmeter",
+      "header_number": "1",
+      "level": 2,
+      "start_global_idx": 211,
+      "end_global_idx": 218,
+      "start_page": 8,
+      "end_page": 8,
+      "line_count": 8
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 6,
+      "current_idx": 219,
+      "end_index": 259,
+      "next_idx": 260,
+      "next_global": 260
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 6,
+      "header_text": "Theory and Measurement Technique",
+      "header_number": "4",
+      "level": 1,
+      "start_global_idx": 219,
+      "end_global_idx": 259,
+      "start_page": 8,
+      "end_page": 8,
+      "line_count": 41
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 7,
+      "current_idx": 260,
+      "end_index": 275,
+      "next_idx": 276,
+      "next_global": 276
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 7,
+      "header_text": "Flowmeter Description",
+      "header_number": "5",
+      "level": 1,
+      "start_global_idx": 260,
+      "end_global_idx": 275,
+      "start_page": 8,
+      "end_page": 9,
+      "line_count": 16
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 8,
+      "current_idx": 276,
+      "end_index": 276,
+      "next_idx": 277,
+      "next_global": 277
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 8,
+      "header_text": "Examples of Magnetic Field (B) Variation with Time (I)",
+      "header_number": "2",
+      "level": 2,
+      "start_global_idx": 276,
+      "end_global_idx": 276,
+      "start_page": 9,
+      "end_page": 9,
+      "line_count": 1
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 9,
+      "current_idx": 277,
+      "end_index": 307,
+      "next_idx": 308,
+      "next_global": 308
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 9,
+      "header_text": "Appendices",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 277,
+      "end_global_idx": 307,
+      "start_page": 9,
+      "end_page": 10,
+      "line_count": 31
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 10,
+      "current_idx": 308,
+      "end_index": 568,
+      "next_idx": 569,
+      "next_global": 569
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 10,
+      "header_text": "Application Considerations",
+      "header_number": "6",
+      "level": 1,
+      "start_global_idx": 308,
+      "end_global_idx": 568,
+      "start_page": 10,
+      "end_page": 13,
+      "line_count": 261
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 11,
+      "current_idx": 569,
+      "end_index": 600,
+      "next_idx": 601,
+      "next_global": 601
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 11,
+      "header_text": "Equipment Markings",
+      "header_number": "7",
+      "level": 1,
+      "start_global_idx": 569,
+      "end_global_idx": 600,
+      "start_page": 13,
+      "end_page": 14,
+      "line_count": 32
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 12,
+      "current_idx": 601,
+      "end_index": 601,
+      "next_idx": 602,
+      "next_global": 602
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 12,
+      "header_text": "Liquid Calibration",
+      "header_number": "8",
+      "level": 1,
+      "start_global_idx": 601,
+      "end_global_idx": 601,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 1
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 13,
+      "current_idx": 602,
+      "end_index": 644,
+      "next_idx": 645,
+      "next_global": 645
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 13,
+      "header_text": "Figures",
+      "header_number": null,
+      "level": 1,
+      "start_global_idx": 602,
+      "end_global_idx": 644,
+      "start_page": 14,
+      "end_page": 14,
+      "line_count": 43
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 14,
+      "current_idx": 645,
+      "end_index": 709,
+      "next_idx": 710,
+      "next_global": 710
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 14,
+      "header_text": "Added Details Regarding Theory and Measurement Technique",
+      "header_number": "A",
+      "level": 2,
+      "start_global_idx": 645,
+      "end_global_idx": 709,
+      "start_page": 15,
+      "end_page": 16,
+      "line_count": 65
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 15,
+      "current_idx": 710,
+      "end_index": 710,
+      "next_idx": 711,
+      "next_global": 711
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 15,
+      "header_text": "Vector Relationship of the Variables in the Lorentz Force Law",
+      "header_number": "A1",
+      "level": 2,
+      "start_global_idx": 710,
+      "end_global_idx": 710,
+      "start_page": 16,
+      "end_page": 16,
+      "line_count": 1
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 16,
+      "current_idx": 711,
+      "end_index": 753,
+      "next_idx": 754,
+      "next_global": 754
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 16,
+      "header_text": "Lorentz Force Law Applied to a Conducting Liquid Flowing in a Rectangular Cross-Section Conduit with Insulating Walls",
+      "header_number": "A2",
+      "level": 2,
+      "start_global_idx": 711,
+      "end_global_idx": 753,
+      "start_page": 16,
+      "end_page": 17,
+      "line_count": 43
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 17,
+      "current_idx": 754,
+      "end_index": 868,
+      "next_idx": 869,
+      "next_global": 869
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 17,
+      "header_text": "Items of Potential Interest to Users",
+      "header_number": "B",
+      "level": 2,
+      "start_global_idx": 754,
+      "end_global_idx": 868,
+      "start_page": 18,
+      "end_page": 19,
+      "line_count": 115
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 18,
+      "current_idx": 869,
+      "end_index": 915,
+      "next_idx": 916,
+      "next_global": 916
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 18,
+      "header_text": "Liner Material Guidelines",
+      "header_number": "C",
+      "level": 2,
+      "start_global_idx": 869,
+      "end_global_idx": 915,
+      "start_page": 20,
+      "end_page": 20,
+      "line_count": 47
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_bounds_resolved",
+      "position": 19,
+      "current_idx": 916,
+      "end_index": 993,
+      "next_idx": null,
+      "next_global": null
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunk_built",
+      "position": 19,
+      "header_text": "Bibliography",
+      "header_number": "D",
+      "level": 2,
+      "start_global_idx": 916,
+      "end_global_idx": 993,
+      "start_page": 21,
+      "end_page": 24,
+      "line_count": 78
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "chunking_complete",
+      "chunks_count": 20
+    },
+    {
+      "t": 1762389888.7772803,
+      "type": "monotonic_violation",
+      "iteration": 1,
+      "gaps": [
+        {
+          "after_index": 5,
+          "components": [
+            {
+              "raw": "2",
+              "normalized": "2",
+              "kind": "numeric",
+              "value": 2
+            }
+          ],
+          "level": 2
+        },
+        {
+          "after_index": 5,
+          "components": [
+            {
+              "raw": "3",
+              "normalized": "3",
+              "kind": "numeric",
+              "value": 3
+            }
+          ],
+          "level": 2
+        },
+        {
+          "after_index": 8,
+          "components": [
+            {
+              "raw": "3",
+              "normalized": "3",
+              "kind": "numeric",
+              "value": 3
+            }
+          ],
+          "level": 2
+        },
+        {
+          "after_index": 8,
+          "components": [
+            {
+              "raw": "4",
+              "normalized": "4",
+              "kind": "numeric",
+              "value": 4
+            }
+          ],
+          "level": 2
+        },
+        {
+          "after_index": 8,
+          "components": [
+            {
+              "raw": "5",
+              "normalized": "5",
+              "kind": "numeric",
+              "value": 5
+            }
+          ],
+          "level": 2
+        }
+      ]
+    },
+    {
+      "t": 1762389888.7782853,
+      "type": "fallback_triggered",
+      "method": "gap_fill",
+      "reason": "unresolved"
+    }
+  ],
+  "chunking": {
+    "passes": 1,
+    "completes": 1,
+    "bounds_resolved": 20,
+    "skipped_inverted": 0,
+    "headers_missing_global": 0,
+    "headers_not_in_lines": 0,
+    "line_index_map": {
+      "indexed_count": 994,
+      "missing_global_idx": 0
+    },
+    "line_index_map_totals": {
+      "indexed_count": 994,
+      "missing_global_idx": 0
+    },
+    "chunks": [
+      {
+        "position": 0,
+        "header_text": "Foreword",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 37,
+        "end_global_idx": 52,
+        "start_page": 4,
+        "end_page": 4,
+        "line_count": 16
+      },
+      {
+        "position": 1,
+        "header_text": "Standards Committee Roster",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 53,
+        "end_global_idx": 122,
+        "start_page": 5,
+        "end_page": 6,
+        "line_count": 70
+      },
+      {
+        "position": 2,
+        "header_text": "Scope",
+        "header_number": "1",
+        "level": 1,
+        "start_global_idx": 123,
+        "end_global_idx": 125,
+        "start_page": 6,
+        "end_page": 6,
+        "line_count": 3
+      },
+      {
+        "position": 3,
+        "header_text": "References",
+        "header_number": "2",
+        "level": 1,
+        "start_global_idx": 126,
+        "end_global_idx": 131,
+        "start_page": 6,
+        "end_page": 6,
+        "line_count": 6
+      },
+      {
+        "position": 4,
+        "header_text": "Terminology",
+        "header_number": "3",
+        "level": 1,
+        "start_global_idx": 132,
+        "end_global_idx": 210,
+        "start_page": 6,
+        "end_page": 8,
+        "line_count": 79
+      },
+      {
+        "position": 5,
+        "header_text": "Examples of Electrodes for an Electromagnetic Flowmeter",
+        "header_number": "1",
+        "level": 2,
+        "start_global_idx": 211,
+        "end_global_idx": 218,
+        "start_page": 8,
+        "end_page": 8,
+        "line_count": 8
+      },
+      {
+        "position": 6,
+        "header_text": "Theory and Measurement Technique",
+        "header_number": "4",
+        "level": 1,
+        "start_global_idx": 219,
+        "end_global_idx": 259,
+        "start_page": 8,
+        "end_page": 8,
+        "line_count": 41
+      },
+      {
+        "position": 7,
+        "header_text": "Flowmeter Description",
+        "header_number": "5",
+        "level": 1,
+        "start_global_idx": 260,
+        "end_global_idx": 275,
+        "start_page": 8,
+        "end_page": 9,
+        "line_count": 16
+      },
+      {
+        "position": 8,
+        "header_text": "Examples of Magnetic Field (B) Variation with Time (I)",
+        "header_number": "2",
+        "level": 2,
+        "start_global_idx": 276,
+        "end_global_idx": 276,
+        "start_page": 9,
+        "end_page": 9,
+        "line_count": 1
+      },
+      {
+        "position": 9,
+        "header_text": "Appendices",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 277,
+        "end_global_idx": 307,
+        "start_page": 9,
+        "end_page": 10,
+        "line_count": 31
+      },
+      {
+        "position": 10,
+        "header_text": "Application Considerations",
+        "header_number": "6",
+        "level": 1,
+        "start_global_idx": 308,
+        "end_global_idx": 568,
+        "start_page": 10,
+        "end_page": 13,
+        "line_count": 261
+      },
+      {
+        "position": 11,
+        "header_text": "Equipment Markings",
+        "header_number": "7",
+        "level": 1,
+        "start_global_idx": 569,
+        "end_global_idx": 600,
+        "start_page": 13,
+        "end_page": 14,
+        "line_count": 32
+      },
+      {
+        "position": 12,
+        "header_text": "Liquid Calibration",
+        "header_number": "8",
+        "level": 1,
+        "start_global_idx": 601,
+        "end_global_idx": 601,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 1
+      },
+      {
+        "position": 13,
+        "header_text": "Figures",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 602,
+        "end_global_idx": 644,
+        "start_page": 14,
+        "end_page": 14,
+        "line_count": 43
+      },
+      {
+        "position": 14,
+        "header_text": "Added Details Regarding Theory and Measurement Technique",
+        "header_number": "A",
+        "level": 2,
+        "start_global_idx": 645,
+        "end_global_idx": 709,
+        "start_page": 15,
+        "end_page": 16,
+        "line_count": 65
+      },
+      {
+        "position": 15,
+        "header_text": "Vector Relationship of the Variables in the Lorentz Force Law",
+        "header_number": "A1",
+        "level": 2,
+        "start_global_idx": 710,
+        "end_global_idx": 710,
+        "start_page": 16,
+        "end_page": 16,
+        "line_count": 1
+      },
+      {
+        "position": 16,
+        "header_text": "Lorentz Force Law Applied to a Conducting Liquid Flowing in a Rectangular Cross-Section Conduit with Insulating Walls",
+        "header_number": "A2",
+        "level": 2,
+        "start_global_idx": 711,
+        "end_global_idx": 753,
+        "start_page": 16,
+        "end_page": 17,
+        "line_count": 43
+      },
+      {
+        "position": 17,
+        "header_text": "Items of Potential Interest to Users",
+        "header_number": "B",
+        "level": 2,
+        "start_global_idx": 754,
+        "end_global_idx": 868,
+        "start_page": 18,
+        "end_page": 19,
+        "line_count": 115
+      },
+      {
+        "position": 18,
+        "header_text": "Liner Material Guidelines",
+        "header_number": "C",
+        "level": 2,
+        "start_global_idx": 869,
+        "end_global_idx": 915,
+        "start_page": 20,
+        "end_page": 20,
+        "line_count": 47
+      },
+      {
+        "position": 19,
+        "header_text": "Bibliography",
+        "header_number": "D",
+        "level": 2,
+        "start_global_idx": 916,
+        "end_global_idx": 993,
+        "start_page": 21,
+        "end_page": 24,
+        "line_count": 78
+      }
+    ]
+  },
+  "final_outline": {
+    "headers": [
+      {
+        "text": "Foreword",
+        "number": null,
+        "level": 1,
+        "page": 4,
+        "line_idx": 0,
+        "global_idx": 37
+      },
+      {
+        "text": "Standards Committee Roster",
+        "number": null,
+        "level": 1,
+        "page": 5,
+        "line_idx": 0,
+        "global_idx": 53
+      },
+      {
+        "text": "Scope",
+        "number": "1",
+        "level": 1,
+        "page": 6,
+        "line_idx": 0,
+        "global_idx": 123
+      },
+      {
+        "text": "References",
+        "number": "2",
+        "level": 1,
+        "page": 6,
+        "line_idx": 0,
+        "global_idx": 126
+      },
+      {
+        "text": "Terminology",
+        "number": "3",
+        "level": 1,
+        "page": 6,
+        "line_idx": 0,
+        "global_idx": 132
+      },
+      {
+        "text": "Examples of Electrodes for an Electromagnetic Flowmeter",
+        "number": "1",
+        "level": 2,
+        "page": 8,
+        "line_idx": 0,
+        "global_idx": 211
+      },
+      {
+        "text": "Theory and Measurement Technique",
+        "number": "4",
+        "level": 1,
+        "page": 8,
+        "line_idx": 0,
+        "global_idx": 219
+      },
+      {
+        "text": "Flowmeter Description",
+        "number": "5",
+        "level": 1,
+        "page": 8,
+        "line_idx": 0,
+        "global_idx": 260
+      },
+      {
+        "text": "Examples of Magnetic Field (B) Variation with Time (I)",
+        "number": "2",
+        "level": 2,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 276
+      },
+      {
+        "text": "Appendices",
+        "number": null,
+        "level": 1,
+        "page": 9,
+        "line_idx": 0,
+        "global_idx": 277
+      },
+      {
+        "text": "Application Considerations",
+        "number": "6",
+        "level": 1,
+        "page": 10,
+        "line_idx": 0,
+        "global_idx": 308
+      },
+      {
+        "text": "Equipment Markings",
+        "number": "7",
+        "level": 1,
+        "page": 13,
+        "line_idx": 0,
+        "global_idx": 569
+      },
+      {
+        "text": "Liquid Calibration",
+        "number": "8",
+        "level": 1,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 601
+      },
+      {
+        "text": "Figures",
+        "number": null,
+        "level": 1,
+        "page": 14,
+        "line_idx": 0,
+        "global_idx": 602
+      },
+      {
+        "text": "Added Details Regarding Theory and Measurement Technique",
+        "number": "A",
+        "level": 2,
+        "page": 15,
+        "line_idx": 0,
+        "global_idx": 645
+      },
+      {
+        "text": "Vector Relationship of the Variables in the Lorentz Force Law",
+        "number": "A1",
+        "level": 2,
+        "page": 16,
+        "line_idx": 0,
+        "global_idx": 710
+      },
+      {
+        "text": "Lorentz Force Law Applied to a Conducting Liquid Flowing in a Rectangular Cross-Section Conduit with Insulating Walls",
+        "number": "A2",
+        "level": 2,
+        "page": 16,
+        "line_idx": 0,
+        "global_idx": 711
+      },
+      {
+        "text": "Items of Potential Interest to Users",
+        "number": "B",
+        "level": 2,
+        "page": 18,
+        "line_idx": 0,
+        "global_idx": 754
+      },
+      {
+        "text": "Liner Material Guidelines",
+        "number": "C",
+        "level": 2,
+        "page": 20,
+        "line_idx": 0,
+        "global_idx": 869
+      },
+      {
+        "text": "Bibliography",
+        "number": "D",
+        "level": 2,
+        "page": 21,
+        "line_idx": 0,
+        "global_idx": 916
+      }
+    ],
+    "sections": [
+      {
+        "header_text": "Foreword",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 37,
+        "end_global_idx": 52,
+        "start_page": 4,
+        "end_page": 4
+      },
+      {
+        "header_text": "Standards Committee Roster",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 53,
+        "end_global_idx": 122,
+        "start_page": 5,
+        "end_page": 6
+      },
+      {
+        "header_text": "Scope",
+        "header_number": "1",
+        "level": 1,
+        "start_global_idx": 123,
+        "end_global_idx": 125,
+        "start_page": 6,
+        "end_page": 6
+      },
+      {
+        "header_text": "References",
+        "header_number": "2",
+        "level": 1,
+        "start_global_idx": 126,
+        "end_global_idx": 131,
+        "start_page": 6,
+        "end_page": 6
+      },
+      {
+        "header_text": "Terminology",
+        "header_number": "3",
+        "level": 1,
+        "start_global_idx": 132,
+        "end_global_idx": 210,
+        "start_page": 6,
+        "end_page": 8
+      },
+      {
+        "header_text": "Examples of Electrodes for an Electromagnetic Flowmeter",
+        "header_number": "1",
+        "level": 2,
+        "start_global_idx": 211,
+        "end_global_idx": 218,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "Theory and Measurement Technique",
+        "header_number": "4",
+        "level": 1,
+        "start_global_idx": 219,
+        "end_global_idx": 259,
+        "start_page": 8,
+        "end_page": 8
+      },
+      {
+        "header_text": "Flowmeter Description",
+        "header_number": "5",
+        "level": 1,
+        "start_global_idx": 260,
+        "end_global_idx": 275,
+        "start_page": 8,
+        "end_page": 9
+      },
+      {
+        "header_text": "Examples of Magnetic Field (B) Variation with Time (I)",
+        "header_number": "2",
+        "level": 2,
+        "start_global_idx": 276,
+        "end_global_idx": 276,
+        "start_page": 9,
+        "end_page": 9
+      },
+      {
+        "header_text": "Appendices",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 277,
+        "end_global_idx": 307,
+        "start_page": 9,
+        "end_page": 10
+      },
+      {
+        "header_text": "Application Considerations",
+        "header_number": "6",
+        "level": 1,
+        "start_global_idx": 308,
+        "end_global_idx": 568,
+        "start_page": 10,
+        "end_page": 13
+      },
+      {
+        "header_text": "Equipment Markings",
+        "header_number": "7",
+        "level": 1,
+        "start_global_idx": 569,
+        "end_global_idx": 600,
+        "start_page": 13,
+        "end_page": 14
+      },
+      {
+        "header_text": "Liquid Calibration",
+        "header_number": "8",
+        "level": 1,
+        "start_global_idx": 601,
+        "end_global_idx": 601,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Figures",
+        "header_number": null,
+        "level": 1,
+        "start_global_idx": 602,
+        "end_global_idx": 644,
+        "start_page": 14,
+        "end_page": 14
+      },
+      {
+        "header_text": "Added Details Regarding Theory and Measurement Technique",
+        "header_number": "A",
+        "level": 2,
+        "start_global_idx": 645,
+        "end_global_idx": 709,
+        "start_page": 15,
+        "end_page": 16
+      },
+      {
+        "header_text": "Vector Relationship of the Variables in the Lorentz Force Law",
+        "header_number": "A1",
+        "level": 2,
+        "start_global_idx": 710,
+        "end_global_idx": 710,
+        "start_page": 16,
+        "end_page": 16
+      },
+      {
+        "header_text": "Lorentz Force Law Applied to a Conducting Liquid Flowing in a Rectangular Cross-Section Conduit with Insulating Walls",
+        "header_number": "A2",
+        "level": 2,
+        "start_global_idx": 711,
+        "end_global_idx": 753,
+        "start_page": 16,
+        "end_page": 17
+      },
+      {
+        "header_text": "Items of Potential Interest to Users",
+        "header_number": "B",
+        "level": 2,
+        "start_global_idx": 754,
+        "end_global_idx": 868,
+        "start_page": 18,
+        "end_page": 19
+      },
+      {
+        "header_text": "Liner Material Guidelines",
+        "header_number": "C",
+        "level": 2,
+        "start_global_idx": 869,
+        "end_global_idx": 915,
+        "start_page": 20,
+        "end_page": 20
+      },
+      {
+        "header_text": "Bibliography",
+        "header_number": "D",
+        "level": 2,
+        "start_global_idx": 916,
+        "end_global_idx": 993,
+        "start_page": 21,
+        "end_page": 24
+      }
+    ],
+    "mode": "llm_strict",
+    "messages": []
+  },
+  "elapsed_s": 184.61889049998717,
+  "function_calls": [
+    {
+      "order": 1,
+      "name": "backend.services.headers_orchestrator.extract_headers_and_chunks"
+    },
+    {
+      "order": 2,
+      "name": "backend.services.pdf_native.collect_line_metrics"
+    },
+    {
+      "order": 3,
+      "name": "backend.services.pdf_native.collect_line_metrics"
+    },
+    {
+      "order": 4,
+      "name": "backend.services.headers_llm_strict.align_headers_llm_strict"
+    },
+    {
+      "order": 5,
+      "name": "backend.services.headers_llm_strict.align_headers_llm_strict"
+    },
+    {
+      "order": 6,
+      "name": "backend.services.headers_orchestrator._enforce_header_sequence"
+    },
+    {
+      "order": 7,
+      "name": "backend.services.headers_orchestrator._enforce_header_sequence"
+    }
+  ]
+}

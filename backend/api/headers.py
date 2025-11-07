@@ -179,14 +179,6 @@ async def extract_headers_and_chunks(
 
     orchestrated, tracer = await orchestrator_impl(document_bytes, **orchestrator_kwargs)
 
-    if not orchestrated.get("ok", True):
-        error_payload = {
-            "ok": False,
-            "error": orchestrated.get("error", "extraction_failed"),
-            "meta": orchestrated.get("meta"),
-        }
-        return JSONResponse(error_payload, status_code=502)
-
     raw_doc_hash = orchestrated.get("doc_hash")
     doc_hash = str(raw_doc_hash) if raw_doc_hash not in {None, ""} else ""
     lines = list(orchestrated.get("lines", []))

@@ -1,203 +1,51 @@
-"""Test fixtures for the spec-search pipeline."""
+"""Test configuration for SimpleSpecs."""
+
 from __future__ import annotations
 
-import asyncio
-from pathlib import Path
-from typing import List, Union
-
 import sys
-import types
+from pathlib import Path
+from typing import Generator
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-# Provide stub modules so importing ``backend`` does not require optional extras.
-try:
-    import python_multipart  # noqa: F401 - prefer the real package when available
-except ModuleNotFoundError:
-    stub = types.ModuleType("python_multipart")
-    stub.multipart = types.ModuleType("python_multipart.multipart")
-    sys.modules["python_multipart"] = stub
-    sys.modules["python_multipart.multipart"] = stub.multipart
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
 
-if "dotenv" not in sys.modules:
-    dotenv_stub = types.ModuleType("dotenv")
-
-    def _load_dotenv(*_args, **_kwargs):  # pragma: no cover - simple stub
-        return None
-
-    def _dotenv_values(*_args, **_kwargs):  # pragma: no cover - simple stub
-        return {}
-
-    dotenv_stub.load_dotenv = _load_dotenv
-    dotenv_stub.dotenv_values = _dotenv_values
-    sys.modules["dotenv"] = dotenv_stub
-
-try:
-    import pydantic  # noqa: F401 - prefer the real package when available
-except ModuleNotFoundError:
-    pydantic_stub = types.ModuleType("pydantic")
-
-    class _FieldInfo:
-        def __init__(self, default=None, default_factory=None, **_kwargs):
-            self.default = default
-            self.default_factory = default_factory
-
-    def Field(*, default=None, default_factory=None, **kwargs):
-        return _FieldInfo(default=default, default_factory=default_factory, **kwargs)
-
-    def field_validator(field_name, mode="after"):
-        def decorator(func):
-            func.__field_validator__ = (field_name, mode)
-            return func
-
-        return decorator
-
-    class _ModelMeta(type):
-        def __new__(mcls, name, bases, namespace):
-            annotations = dict(namespace.get("__annotations__", {}))
-            fields = {}
-            validators = {}
-            for attr_name, attr in list(namespace.items()):
-                marker = getattr(attr, "__field_validator__", None)
-                if marker is not None:
-                    field, mode = marker
-                    validators.setdefault(field, []).append({"mode": mode, "func": attr})
-                    namespace.pop(attr_name)
-            for field_name, _annotation in annotations.items():
-                default = namespace.get(field_name, _FieldInfo())
-                if isinstance(default, _FieldInfo):
-                    fields[field_name] = default
-                    namespace.pop(field_name, None)
-                else:
-                    fields[field_name] = _FieldInfo(default=default)
-                    namespace.pop(field_name, None)
-            namespace["__fields__"] = fields
-            namespace["__validators__"] = validators
-            return super().__new__(mcls, name, bases, namespace)
-
-    class BaseModel(metaclass=_ModelMeta):
-        def __init__(self, **data):
-            for name, field in self.__fields__.items():
-                if name in data:
-                    value = data[name]
-                elif field.default_factory is not None:
-                    value = field.default_factory()
-                else:
-                    value = field.default
-                for validator in self.__validators__.get(name, []):
-                    if validator["mode"] == "before":
-                        func = validator["func"]
-                        if isinstance(func, classmethod):
-                            bound = func.__get__(None, self.__class__)
-                        else:
-                            bound = func
-                        try:
-                            value = bound(self.__class__, value)
-                        except TypeError:
-                            value = bound(value)
-                setattr(self, name, value)
-            for name, validators in self.__validators__.items():
-                for validator in validators:
-                    if validator["mode"] == "after":
-                        current = getattr(self, name)
-                        func = validator["func"]
-                        if isinstance(func, classmethod):
-                            bound = func.__get__(None, self.__class__)
-                        else:
-                            bound = func
-                        try:
-                            updated = bound(self.__class__, current)
-                        except TypeError:
-                            updated = bound(current)
-                        setattr(self, name, updated)
-
-        def model_dump(self):  # pragma: no cover - helper for compatibility
-            return {name: getattr(self, name) for name in self.__fields__}
-
-    class RootModel(BaseModel):
-        __annotations__ = {"root": object}
-
-        def __init__(self, root):
-            super().__init__(root=root)
-
-        @property
-        def root(self):
-            return getattr(self, "root")
-
-    class BaseSettings(BaseModel):
-        pass
-
-    pydantic_stub.BaseModel = BaseModel
-    pydantic_stub.RootModel = RootModel
-    pydantic_stub.BaseSettings = BaseSettings
-    pydantic_stub.Field = Field
-    pydantic_stub.field_validator = field_validator
-    sys.modules["pydantic"] = pydantic_stub
-
-try:
-    import pydantic_settings  # noqa: F401 - prefer real package
-except ModuleNotFoundError:
-    settings_stub = types.ModuleType("pydantic_settings")
-    try:
-        from pydantic import BaseSettings as _BaseSettings  # type: ignore
-    except Exception:  # pragma: no cover - simple compatibility shim
-        class _BaseSettings:  # type: ignore
-            pass
-
-    settings_stub.BaseSettings = _BaseSettings
-    sys.modules["pydantic_settings"] = settings_stub
+from backend.config import reset_settings_cache  # noqa: E402
+from backend.database import reset_database_state  # noqa: E402
+from backend.observability import metrics_registry  # noqa: E402
 
 
-def pytest_pyfunc_call(pyfuncitem):
-    if asyncio.iscoroutinefunction(pyfuncitem.obj):
-        loop = asyncio.new_event_loop()
-        try:
-            loop.run_until_complete(pyfuncitem.obj(**pyfuncitem.funcargs))
-        finally:
-            loop.close()
-        return True
-    return None
+@pytest.fixture(autouse=True)
+def _isolate_environment(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> Generator[None, None, None]:
+    """Provide isolated configuration for each test."""
 
-import pytest
-
-from backend.llm_client import LLMClient, LLMRequest
-
-
-class MockLLM(LLMClient):
-    """Mock LLM client with queued responses."""
-
-    def __init__(self) -> None:
-        super().__init__(transport=self._dispatch)
-        self._queue: List[Union[str, Exception]] = []
-        self.requests: List[LLMRequest] = []
-
-    def enqueue(self, response: Union[str, Exception]) -> None:
-        self._queue.append(response)
-
-    async def _dispatch(self, request: LLMRequest) -> str:
-        self.requests.append(request)
-        if not self._queue:
-            raise RuntimeError("MockLLM was called without a queued response")
-        item = self._queue.pop(0)
-        if isinstance(item, Exception):
-            raise item
-        return item
+    db_path = tmp_path / "test.db"
+    upload_dir = tmp_path / "uploads"
+    export_dir = tmp_path / "exports"
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_path}")
+    monkeypatch.setenv("UPLOAD_DIR", str(upload_dir))
+    monkeypatch.setenv("EXPORT_DIR", str(export_dir))
+    monkeypatch.setenv("EXPORT_RETENTION_DAYS", "1")
+    monkeypatch.setenv("MAX_UPLOAD_SIZE", str(1024))
+    reset_settings_cache()
+    reset_database_state()
+    metrics_registry.reset()
+    yield
+    reset_settings_cache()
+    reset_database_state()
+    metrics_registry.reset()
 
 
-@pytest.fixture
-def mock_llm() -> MockLLM:
-    return MockLLM()
+@pytest.fixture()
+def client() -> Generator[TestClient, None, None]:
+    """Return a test client for the FastAPI application."""
 
+    from backend.main import app
 
-@pytest.fixture
-def sample_text_simple() -> str:
-    path = Path("tests/fixtures/sample_text_simple.txt")
-    return path.read_text()
-
-
-@pytest.fixture
-def sample_text_normative() -> str:
-    path = Path("tests/fixtures/sample_text_normative.txt")
-    return path.read_text()
+    with TestClient(app) as test_client:
+        yield test_client
