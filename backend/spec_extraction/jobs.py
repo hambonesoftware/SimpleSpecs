@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import json
+import logging
+from bisect import bisect_right
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Iterable, Iterator, Sequence
 
+from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
@@ -16,11 +19,13 @@ from backend.services.simpleheaders_state import SimpleHeadersState
 
 from . import get_engine, init_db
 from .llm_client import ExtractionResult, LLMClient
-from .models import Agent, AgentJob, Document, Section, SpecRecord
+from .models import Agent, AgentJob, Document, Header, Section, SpecRecord
 
 init_db()
 
 _LLM_CLIENT: LLMClient | None = None
+
+LOGGER = logging.getLogger(__name__)
 
 
 def set_llm_client(client: LLMClient) -> None:
@@ -167,6 +172,15 @@ async def run_job(job_id: str) -> None:
         _record_job_error(job_id, "Section text unavailable")
         return
 
+    LOGGER.info(
+        "[specs] dispatching LLM request document=%s section=%s agent=%s pages=%s-%s",
+        section_snapshot.document_id,
+        section_snapshot.title,
+        agent_snapshot.code,
+        section_snapshot.page_start,
+        section_snapshot.page_end,
+    )
+
     payload = json.dumps(
         {
             "title": section_snapshot.title,
@@ -303,6 +317,7 @@ def persist_sections(
     document_id: str,
     filename: str,
     sections: Sequence[dict],
+    headers: Sequence[dict] | None = None,
 ) -> None:
     """Persist section metadata emitted by the alignment pipeline."""
 
@@ -317,6 +332,8 @@ def persist_sections(
             except IntegrityError:
                 session.rollback()
                 document = session.get(Document, document_id)
+
+        sections_by_start: dict[int, str] = {}
         for entry in sections:
             title = str(entry.get("header_text") or entry.get("title") or "").strip()
             if not title:
@@ -346,7 +363,9 @@ def persist_sections(
                     updated_at=timestamp,
                 )
                 session.add(section)
+                session.flush()
             else:
+                section = existing
                 updated = False
                 if existing.start_global_idx != start_idx:
                     existing.start_global_idx = start_idx
@@ -356,7 +375,67 @@ def persist_sections(
                     updated = True
                 if updated:
                     existing.updated_at = timestamp
+
+            if start_idx is not None and section.id:
+                sections_by_start[start_idx] = section.id
+
+        if headers is not None:
+            _persist_headers(
+                session,
+                document_id=document_id,
+                headers=headers,
+                sections_by_start=sections_by_start,
+            )
+
         session.commit()
+
+
+def _persist_headers(
+    session: Session,
+    *,
+    document_id: str,
+    headers: Sequence[dict],
+    sections_by_start: dict[int, str],
+) -> None:
+    """Replace persisted headers for ``document_id`` with the supplied payload."""
+
+    session.exec(delete(Header).where(Header.document_id == document_id))
+
+    if not headers:
+        return
+
+    sorted_starts = sorted((idx, section_id) for idx, section_id in sections_by_start.items())
+    start_values = [item[0] for item in sorted_starts]
+    section_ids = [item[1] for item in sorted_starts]
+
+    for entry in headers:
+        title = str(entry.get("text") or entry.get("title") or "").strip()
+        if not title:
+            continue
+        number_raw = entry.get("number")
+        number = str(number_raw).strip() if number_raw not in (None, "") else None
+        level = _safe_int(entry.get("level")) or 1
+        page = _safe_int(entry.get("page"))
+        line_idx = _safe_int(entry.get("line_idx"))
+        global_idx = _safe_int(entry.get("global_idx"))
+
+        section_id: str | None = None
+        if global_idx is not None and start_values:
+            position = bisect_right(start_values, global_idx) - 1
+            if position >= 0:
+                section_id = section_ids[position]
+
+        header = Header(
+            document_id=document_id,
+            section_id=section_id,
+            title=title,
+            number=number,
+            level=level,
+            page=page,
+            line_idx=line_idx,
+            global_idx=global_idx,
+        )
+        session.add(header)
 
 
 def _safe_int(value) -> int | None:

@@ -54,6 +54,42 @@ class Section(SQLModel, table=True):
     )
 
 
+class Header(SQLModel, table=True):
+    """LLM-aligned header metadata persisted for downstream extraction."""
+
+    __tablename__ = "specx_headers"
+    __table_args__ = (
+        UniqueConstraint(
+            "document_id",
+            "title",
+            "page",
+            "line_idx",
+            name="uq_spec_header_span",
+        ),
+    )
+
+    id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
+    document_id: str = Field(foreign_key="specx_documents.id", index=True, nullable=False)
+    section_id: Optional[str] = Field(
+        default=None,
+        foreign_key="specx_sections.id",
+        nullable=True,
+        index=True,
+    )
+    title: str = Field(nullable=False)
+    number: Optional[str] = Field(default=None, nullable=True)
+    level: int = Field(default=1, nullable=False)
+    page: Optional[int] = Field(default=None, nullable=True)
+    line_idx: Optional[int] = Field(default=None, nullable=True)
+    global_idx: Optional[int] = Field(default=None, nullable=True, index=True)
+    created_at: datetime = Field(default_factory=_utcnow, nullable=False)
+    updated_at: datetime = Field(
+        default_factory=_utcnow,
+        nullable=False,
+        sa_column_kwargs={"onupdate": _utcnow},
+    )
+
+
 class Agent(SQLModel, table=True):
     """Static lookup table describing the configured agents."""
 
@@ -109,6 +145,7 @@ class SpecRecord(SQLModel, table=True):
 __all__ = [
     "Agent",
     "AgentJob",
+    "Header",
     "Document",
     "Section",
     "SpecRecord",
