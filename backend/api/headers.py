@@ -223,6 +223,7 @@ async def extract_headers_and_chunks(
             document_id=str(doc_id),
             filename=document.filename,
             sections=sections_payload,
+            headers=simpleheaders_payload,
         )
     except Exception:  # pragma: no cover - persistence should not block response
         pass
