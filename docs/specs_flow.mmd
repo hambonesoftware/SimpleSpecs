@@ -1,0 +1,12 @@
+```mermaid
+flowchart TD
+    upload[Document uploaded] --> parse[Header alignment pipeline]
+    parse --> persist[Persist sections + metadata]
+    persist --> dispatch[POST /api/specs/dispatch]
+    dispatch --> queue[Create AgentJob rows]
+    queue --> workers[Background workers run LLM extraction]
+    workers --> records[Upsert SpecRecord results]
+    records --> status[GET /api/specs/status]
+    records --> list[GET /api/specs]
+    list --> ui[Frontend accordion view]
+```

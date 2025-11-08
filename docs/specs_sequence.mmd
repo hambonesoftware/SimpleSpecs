@@ -1,0 +1,27 @@
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as FastAPI /api/specs
+    participant Jobs as AgentJob Queue
+    participant LLM as LLMClient
+    participant DB as Specs DB
+
+    Client->>API: POST /dispatch {documentId}
+    API->>DB: ensure Document + Sections exist
+    API->>Jobs: enqueue_jobs_for_document
+    Jobs->>DB: INSERT AgentJob rows
+    API-->>Client: 202 Accepted (counts)
+    loop per AgentJob
+        API->>Jobs: Background task run_job(job_id)
+        Jobs->>DB: mark running, fetch Section
+        Jobs->>LLM: extract_specs(prompt)
+        LLM-->>Jobs: SIMPLEBUCKETS JSON
+        Jobs->>DB: upsert SpecRecord, mark done
+    end
+    Client->>API: GET /status?documentId
+    API->>DB: aggregate Section.status
+    API-->>Client: {counts}
+    Client->>API: GET /api/specs?documentId
+    API->>DB: load Sections + SpecRecords
+    API-->>Client: sections with agent results
+```

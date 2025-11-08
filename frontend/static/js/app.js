@@ -13,6 +13,9 @@ import {
   fetchCachedHeaders,
   fetchSectionText,
   fetchSpecifications,
+  dispatchSpecAgents,
+  fetchSpecAgentSections,
+  fetchSpecAgentStatus,
   compareSpecifications,
   downloadBlob,
   fetchSpecRecord,
@@ -31,6 +34,8 @@ import {
   renderHeaderOutline,
   renderSpecsBuckets,
   renderRiskPanel,
+  renderSpecAnalysis,
+  renderSpecAnalysisStatus,
   showToast,
   formatDate,
 } from './ui.js';
@@ -50,6 +55,12 @@ const state = {
   headerSearchAttempted: false,
   specsSearchAttempted: false,
   headerMatches: [],
+  specAnalysis: {
+    sections: [],
+    agentFilter: 'all',
+    levelFilter: 'all',
+    pollingHandle: null,
+  },
 };
 
 const elements = {
@@ -65,6 +76,12 @@ const elements = {
   parseContent: document.querySelector('#parse-content'),
   headersContent: document.querySelector('#headers-content'),
   headersRawContent: document.querySelector('#headers-raw-content'),
+  analyzeSpecs: document.querySelector('#analyze-specs'),
+  specsAnalysis: document.querySelector('#specs-analysis'),
+  specsAnalysisStatus: document.querySelector('#specs-analysis-status'),
+  specsAnalysisResults: document.querySelector('#specs-analysis-results'),
+  specsAgentFilter: document.querySelector('#specs-agent-filter'),
+  specsLevelFilter: document.querySelector('#specs-level-filter'),
   specsContent: document.querySelector('#specs-content'),
   riskContent: document.querySelector('#risk-content'),
   approveSpecs: document.querySelector('#approve-specs'),
@@ -111,6 +128,132 @@ function normaliseHeadersForUi(payload) {
     return { ...payload, simpleheaders: payload.headers };
   }
   return payload;
+}
+
+function stopSpecPolling() {
+  if (state.specAnalysis.pollingHandle) {
+    clearTimeout(state.specAnalysis.pollingHandle);
+    state.specAnalysis.pollingHandle = null;
+  }
+}
+
+function resetSpecAnalysis() {
+  stopSpecPolling();
+  state.specAnalysis.sections = [];
+  state.specAnalysis.agentFilter = 'all';
+  state.specAnalysis.levelFilter = 'all';
+  if (elements.specsAnalysis) {
+    elements.specsAnalysis.hidden = true;
+  }
+  if (elements.specsAnalysisResults) {
+    elements.specsAnalysisResults.innerHTML = '';
+  }
+  renderSpecAnalysisStatus(elements.specsAnalysisStatus, '');
+  if (elements.specsAgentFilter) {
+    elements.specsAgentFilter.value = 'all';
+  }
+  if (elements.specsLevelFilter) {
+    elements.specsLevelFilter.value = 'all';
+  }
+}
+
+function renderSpecAnalysisView() {
+  renderSpecAnalysis(elements.specsAnalysisResults, state.specAnalysis.sections, {
+    agent: state.specAnalysis.agentFilter,
+    level: state.specAnalysis.levelFilter,
+  });
+}
+
+async function loadSpecSections(documentId) {
+  try {
+    const response = await fetchSpecAgentSections(documentId);
+    if (response?.ok && Array.isArray(response.sections)) {
+      state.specAnalysis.sections = response.sections;
+      renderSpecAnalysisView();
+    }
+  } catch (error) {
+    console.error('Failed to load spec agent sections', error);
+  }
+}
+
+async function pollSpecStatus(documentId) {
+  try {
+    const statusResponse = await fetchSpecAgentStatus(documentId);
+    const counts = statusResponse?.counts ?? {};
+    const sectionsTotal = counts.sections ?? 0;
+    const running = counts.running ?? 0;
+    const complete = counts.complete ?? 0;
+    const failed = counts.failed ?? 0;
+    const statusText = sectionsTotal
+      ? `Sections: ${sectionsTotal} • Complete: ${complete} • Running: ${running}${
+          failed ? ` • Failed: ${failed}` : ''
+        }`
+      : 'Awaiting sections…';
+    renderSpecAnalysisStatus(
+      elements.specsAnalysisStatus,
+      statusText,
+      failed ? 'warning' : running ? 'info' : 'success',
+    );
+    if (sectionsTotal) {
+      await loadSpecSections(documentId);
+    }
+    if (sectionsTotal && running === 0) {
+      stopSpecPolling();
+      const toastMessage = failed
+        ? `Spec agents finished with ${failed} section${failed === 1 ? '' : 's'} failing.`
+        : 'Spec agents finished successfully.';
+      showToast(toastMessage, failed ? 'warning' : 'info');
+      return;
+    }
+  } catch (error) {
+    console.error('Spec status poll failed', error);
+    renderSpecAnalysisStatus(
+      elements.specsAnalysisStatus,
+      'Waiting for agent jobs to report status…',
+      'warning',
+    );
+  }
+  state.specAnalysis.pollingHandle = setTimeout(() => {
+    void pollSpecStatus(documentId);
+  }, 3000);
+}
+
+async function dispatchSpecAnalysis() {
+  const documentId = state.selectedId;
+  if (!documentId) {
+    showToast('Select a document first.', 'error');
+    return;
+  }
+  if (elements.specsAnalysis) {
+    elements.specsAnalysis.hidden = false;
+  }
+  state.specAnalysis.agentFilter = 'all';
+  state.specAnalysis.levelFilter = 'all';
+  if (elements.specsAgentFilter) {
+    elements.specsAgentFilter.value = 'all';
+  }
+  if (elements.specsLevelFilter) {
+    elements.specsLevelFilter.value = 'all';
+  }
+  renderSpecAnalysisStatus(elements.specsAnalysisStatus, 'Dispatching agent jobs…', 'info');
+  elements.specsAnalysisResults.innerHTML = '';
+  stopSpecPolling();
+  try {
+    await dispatchSpecAgents(documentId);
+    showToast('Spec extraction jobs queued.');
+  } catch (error) {
+    console.error(error);
+    renderSpecAnalysisStatus(
+      elements.specsAnalysisStatus,
+      error instanceof Error ? error.message : 'Failed to dispatch spec jobs.',
+      'error',
+    );
+    return;
+  }
+  await loadSpecSections(documentId);
+  state.specAnalysis.pollingHandle = setTimeout(() => {
+    void pollSpecStatus(documentId);
+  }, 1000);
 }
 
 // Helper: update the header mode tag based on a mode string
@@ -185,6 +328,20 @@ elements.refreshHeaders?.addEventListener('click', () => {
 
 elements.startSpecs?.addEventListener('click', () => {
   void runSpecsSearch();
+});
+
+elements.analyzeSpecs?.addEventListener('click', () => {
+  void dispatchSpecAnalysis();
+});
+
+elements.specsAgentFilter?.addEventListener('change', (event) => {
+  state.specAnalysis.agentFilter = event.target.value || 'all';
+  renderSpecAnalysisView();
+});
+
+elements.specsLevelFilter?.addEventListener('change', (event) => {
+  state.specAnalysis.levelFilter = (event.target.value || 'all').toUpperCase();
+  renderSpecAnalysisView();
 });
 
 // Wire the rerun specs button, if present.  We call our global SpecsPatch
@@ -386,6 +543,9 @@ async function refreshDocuments() {
         documents.length === 1 ? '' : 's'
       }.`;
     }
+    if (!state.selectedId && elements.analyzeSpecs) {
+      elements.analyzeSpecs.disabled = documents.length === 0;
+    }
   } catch (error) {
     console.error(error);
     elements.documentsStatus.textContent = error instanceof Error ? error.message : 'Unable to fetch documents.';
@@ -398,6 +558,9 @@ async function selectDocument(documentId) {
     return;
   }
   state.selectedId = documentId;
+  if (elements.analyzeSpecs) {
+    elements.analyzeSpecs.disabled = false;
+  }
   state.approvedLines.clear();
   state.specRecord = null;
   state.approvalLoading = true;
@@ -412,6 +575,7 @@ async function selectDocument(documentId) {
   state.headerSearchAttempted = false;
   state.specsSearchAttempted = false;
   state.headerMatches = [];
+  resetSpecAnalysis();
   if (elements.workspaceSubtitle) {
     elements.workspaceSubtitle.textContent = 'Loading analysis results…';
   }
