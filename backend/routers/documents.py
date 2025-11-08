@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -22,6 +23,18 @@ from ..services.pdf_native import collect_line_metrics
 from ..services.simpleheaders_state import SimpleHeadersState
 
 router = APIRouter(prefix="/api", tags=["documents"])
+
+
+def _compute_lines_hash(lines: list[dict]) -> str:
+    """Return a deterministic hash for cached line entries."""
+
+    digest = hashlib.sha256()
+    for entry in lines:
+        digest.update(str(entry.get("global_idx")).encode("utf-8", "ignore"))
+        digest.update(b"|")
+        digest.update(str(entry.get("text", "")).encode("utf-8", "ignore"))
+        digest.update(b"\n")
+    return digest.hexdigest()
 
 
 class PageBlockPayload(BaseModel):
@@ -171,6 +184,7 @@ def _ensure_section_cache(
     document: Document,
     doc_hash: str,
     settings: Settings,
+    payload: dict | None = None,
 ) -> None:
     """Populate :class:`SimpleHeadersState` when missing for ``document``."""
 
@@ -182,6 +196,31 @@ def _ensure_section_cache(
         cached_hash, cached_lines = cached
         if cached_lines and (not doc_hash or cached_hash == doc_hash):
             return
+
+    if payload:
+        raw_lines = payload.get("lines")
+        if isinstance(raw_lines, list) and raw_lines:
+            lines: list[dict] = []
+            for entry in raw_lines:
+                if not isinstance(entry, dict):
+                    continue
+                text = str(entry.get("text", ""))
+                global_idx = entry.get("global_idx")
+                try:
+                    global_idx_int = int(global_idx) if global_idx is not None else None
+                except (TypeError, ValueError):
+                    global_idx_int = None
+                if global_idx_int is None:
+                    continue
+                lines.append({
+                    **entry,
+                    "text": text,
+                    "global_idx": global_idx_int,
+                })
+            if lines:
+                cache_hash = doc_hash or _compute_lines_hash(lines)
+                SimpleHeadersState.set(document.id, cache_hash, lines)
+                return
 
     document_path = settings.upload_dir / str(document.id) / document.filename
     if not document_path.exists():
@@ -243,7 +282,12 @@ async def get_cached_headers(
 
     payload = dict(artifact.body or {})
     doc_hash = str(payload.get("doc_hash", "") or "")
-    _ensure_section_cache(document=document, doc_hash=doc_hash, settings=settings)
+    _ensure_section_cache(
+        document=document,
+        doc_hash=doc_hash,
+        settings=settings,
+        payload=payload,
+    )
     return StoredHeadersResponse(
         headers=list(payload.get("headers", [])),
         sections=list(payload.get("sections", [])),
