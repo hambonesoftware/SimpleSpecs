@@ -7,12 +7,43 @@ import logging
 import os
 import time
 import uuid
-from datetime import datetime, timezone
+from collections.abc import Mapping as MappingABC, Sequence
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping, MutableMapping
 
 
 LOGGER = logging.getLogger(__name__)
+
+
+def _json_safe(value: Any) -> Any:
+    """Return a JSON-serialisable representation of ``value``."""
+
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+
+    if isinstance(value, Path):
+        return str(value)
+
+    if isinstance(value, datetime):
+        return value.astimezone(timezone.utc).isoformat() if value.tzinfo else value.isoformat()
+
+    if isinstance(value, date):
+        return value.isoformat()
+
+    if isinstance(value, set):
+        return [_json_safe(item) for item in sorted(value, key=str)]
+
+    if isinstance(value, MappingABC):
+        return {str(key): _json_safe(val) for key, val in value.items()}
+
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return [_json_safe(item) for item in value]
+
+    if hasattr(value, "__dict__"):
+        return _json_safe(vars(value))
+
+    return str(value)
 
 
 class SpecTracer:
@@ -30,7 +61,10 @@ class SpecTracer:
         self.out_dir.mkdir(parents=True, exist_ok=True)
         self._path = self.out_dir / f"{self.run_id}.json"
         self._closed = False
-        self._metadata: MutableMapping[str, Any] = dict(metadata or {})
+        initial_metadata = metadata or {}
+        self._metadata: MutableMapping[str, Any] = {
+            key: _json_safe(val) for key, val in initial_metadata.items()
+        }
         self._events: list[dict[str, Any]] = []
         self._started_at = time.time()
         LOGGER.debug("[specs] SpecTracer created", {"run_id": self.run_id, "path": str(self._path)})
@@ -41,8 +75,11 @@ class SpecTracer:
 
         if not fields:
             return
-        self._metadata.update({k: v for k, v in fields.items() if v is not None})
-        self._record("metadata", **fields)
+        safe_fields = {k: _json_safe(v) for k, v in fields.items() if v is not None}
+        if not safe_fields:
+            return
+        self._metadata.update(safe_fields)
+        self._record("metadata", **safe_fields)
 
     def function_call(self, name: str, **context: Any) -> None:
         self._record("function_call", name=name, **context)
@@ -107,7 +144,7 @@ class SpecTracer:
     # ------------------------------------------------------------------
     def _record(self, event_type: str, **data: Any) -> None:
         payload = {"type": event_type, "ts": time.time(), **data}
-        self._events.append(payload)
+        self._events.append(_json_safe(payload))
 
     def _build_summary(self, finished_at: float) -> Dict[str, Any]:
         started_dt = datetime.fromtimestamp(self._started_at, tz=timezone.utc)
