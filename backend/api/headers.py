@@ -107,7 +107,7 @@ async def extract_headers_and_chunks(
     )
     if use_simple_llm:
         try:
-            llm_obj = get_headers_llm_json(document_id, session, settings)
+            llm_obj = await get_headers_llm_json(document_id, session, settings)
         except InvalidLLMJSONError:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,

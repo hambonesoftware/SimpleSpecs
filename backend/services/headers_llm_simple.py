@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+import anyio
+
 from fastapi import HTTPException
 
 from ..config import Settings
@@ -90,7 +92,7 @@ def _strip_fences(payload: str) -> str:
     return text.strip()
 
 
-def get_headers_llm_json(
+async def get_headers_llm_json(
     document_id: int,
     session,
     settings: Settings,
@@ -110,11 +112,13 @@ def get_headers_llm_json(
         messages.append({"role": "user", "content": prefix + chunk})
 
     try:
-        response_text = openrouter_client.chat(
-            messages,
-            model=settings.headers_llm_model,
-            temperature=0.0,
-            timeout_read=settings.headers_llm_timeout_s,
+        response_text = await anyio.to_thread.run_sync(
+            lambda: openrouter_client.chat(
+                messages,
+                model=settings.headers_llm_model,
+                temperature=0.0,
+                timeout_read=settings.headers_llm_timeout_s,
+            ),
         )
     except openrouter_client.OpenRouterError as exc:  # pragma: no cover - network failure
         raise HTTPException(
