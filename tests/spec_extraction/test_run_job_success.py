@@ -86,4 +86,4 @@ def test_run_job_success() -> None:
 
         section = session.get(Section, section_id)
         assert section is not None
-        assert section.status == "running"
+        assert section.status == "complete"

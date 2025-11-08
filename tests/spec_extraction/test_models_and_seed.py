@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, select
 
 from backend.spec_extraction import get_engine, init_db
 from backend.spec_extraction.models import Agent, Document, Section
@@ -9,15 +9,14 @@ from backend.spec_extraction.models import Agent, Document, Section
 def test_agent_seed_and_models(monkeypatch) -> None:
     init_db()
     with Session(get_engine()) as session:
+        session.exec(delete(Agent))
+        session.commit()
+
+    init_db()
+    with Session(get_engine()) as session:
         agents = session.exec(select(Agent)).all()
         codes = {agent.code for agent in agents}
-        assert codes == {
-            "Mechanical",
-            "Electrical",
-            "Controls",
-            "Software",
-            "ProjectManagement",
-        }
+        assert codes == {"Mechanical"}
 
         document = Document(id="doc-1", filename="sample.pdf")
         session.add(document)

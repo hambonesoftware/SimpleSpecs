@@ -60,7 +60,7 @@ def test_normative_tripwire_triggers_fallback() -> None:
         filename="doc.pdf",
         sections=[
             {
-                "header_text": "Electrical",
+                "header_text": "Mechanical",
                 "start_page": 6,
                 "end_page": 7,
                 "start_global_idx": 20,
@@ -73,8 +73,8 @@ def test_normative_tripwire_triggers_fallback() -> None:
         1,
         "hash",
         [
-            {"global_idx": 20, "text": "The subsystem shall provide uninterrupted power."},
-            {"global_idx": 21, "text": "Backup supply must start within 5 seconds."},
+            {"global_idx": 20, "text": "The assembly shall resist 5 g vibration."},
+            {"global_idx": 21, "text": "Fasteners must be torqued to 45 N·m."},
         ],
     )
 
@@ -85,7 +85,7 @@ def test_normative_tripwire_triggers_fallback() -> None:
 
     with Session(get_engine()) as session:
         section = session.exec(select(Section)).one()
-        agent = session.exec(select(Agent).where(Agent.code == "Electrical")).one()
+        agent = session.exec(select(Agent).where(Agent.code == "Mechanical")).one()
         job = session.exec(
             select(AgentJob)
             .where(AgentJob.section_id == section.id)

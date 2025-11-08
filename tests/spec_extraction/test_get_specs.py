@@ -59,7 +59,7 @@ def test_get_specs_endpoints(client) -> None:
     assert section_payload["sectionId"] == section_id
     assert section_payload["specs"]["Mechanical"]["result"]["requirements"][0]["text"] == "Install guard rails."
     assert section_payload["specs"]["Mechanical"]["confidence"] == "0.820"
-    assert section_payload["specs"]["Electrical"] is None
+    assert list(section_payload["specs"].keys()) == ["Mechanical"]
 
     single = client.get(f"/api/specs/{section_id}")
     assert single.status_code == 200
