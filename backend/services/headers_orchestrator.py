@@ -407,6 +407,7 @@ async def extract_headers_and_chunks(
             "llm_headers": llm_headers,
             "llm_raw_responses": llm_raw_responses,
             "llm_fenced_blocks": llm_fenced_blocks,
+            "lines": lines,
         }
         if tracer:
             body["trace_path"] = getattr(tracer, "path", None)
