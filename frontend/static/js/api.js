@@ -284,6 +284,26 @@ export async function fetchSpecifications(documentId) {
   return request(`/api/specs/extract/${documentId}`, { method: "POST" });
 }
 
+export async function dispatchSpecAgents(documentId) {
+  return request(`/api/specs/dispatch`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ documentId: String(documentId) }),
+  });
+}
+
+export async function fetchSpecAgentSections(documentId) {
+  return request(`/api/specs?documentId=${encodeURIComponent(documentId)}`);
+}
+
+export async function fetchSpecAgentSection(sectionId) {
+  return request(`/api/specs/${encodeURIComponent(sectionId)}`);
+}
+
+export async function fetchSpecAgentStatus(documentId) {
+  return request(`/api/specs/status?documentId=${encodeURIComponent(documentId)}`);
+}
+
 export async function compareSpecifications(documentId) {
   return request(`/api/specs/compare/${documentId}`, { method: "POST" });
 }

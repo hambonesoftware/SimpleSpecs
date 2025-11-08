@@ -8,10 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .spec_search.router import router as spec_search_router
+from .spec_extraction.router import router as spec_extraction_router
 
 app = FastAPI(title="SimpleSpecs Spec Search", version="1.0.0")
 
 app.include_router(spec_search_router)
+app.include_router(spec_extraction_router)
 
 frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 if frontend_dir.exists():

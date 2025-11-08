@@ -30,6 +30,7 @@ from .routers import (
     specs,
     specs_buckets,  # NEW: adds wipe + rerun endpoints for spec buckets
 )
+from .spec_extraction.router import router as spec_extraction_router
 
 settings = get_settings()
 logger = logging.getLogger("uvicorn.error")
@@ -128,6 +129,7 @@ ROUTERS: Iterable = (
     parse.router,
     search.router,
     specs_buckets.router,  # NEW: exposes /api/specs/{id}/buckets + /run-again
+    spec_extraction_router,
     specs.router,
     compare.router,
     observability.router,

@@ -32,6 +32,35 @@ SimpleSpecs parses engineering specification PDFs and structures the extracted d
 
 The server creates the `uploads/` and `exports/` directories on startup if they are missing. Adjust their locations via the `UPLOAD_DIR` and `EXPORT_DIR` environment variables.
 
+### Per-Section Spec Extraction (Agents)
+
+SimpleSpecs now persists every aligned header section and can fan out five discipline-specific agents to extract structured requirements. The workflow stores all artefacts in a dedicated SQLite database (default `SPECS_DB_URL=sqlite:////tmp/simplespecs.db`). Configure the models and retry window with the following environment variables:
+
+```
+SPECS_PRIMARY_MODEL=anthropic/claude-3.5-sonnet
+SPECS_FALLBACK_MODEL=openai/gpt-4.1-mini
+SPECS_TIMEOUT_S=120
+SPECS_RETRY_MAX=1
+SPECS_BACKOFF_S=1.5
+```
+
+**API endpoints**
+
+- `POST /api/specs/dispatch { "documentId": "123" }` queues five jobs per aligned section.
+- `GET  /api/specs?documentId=123` returns every section with per-agent results.
+- `GET  /api/specs/{sectionId}` fetches a single section payload.
+- `GET  /api/specs/status?documentId=123` reports aggregate completion counts.
+
+Jobs run in-process using FastAPI background tasks. Results are stored in `spec_records` with one row per `(section, agent)` pair. For local experiments you can trigger the workflow from the CLI:
+
+```bash
+python scripts/specs_dispatch.py 123 --run
+```
+
+After running the header alignment flow (`POST /api/headers/{document_id}`) the frontend shows an **Analyze Specs** button beside the aligned sections. Clicking the button dispatches the jobs, polls the status endpoint, and renders the accordion view once all agents complete. Use the dropdown filters to focus on specific disciplines or requirement levels.
+
+The specs database is initialised automatically on import; use `SPECS_DB_URL` to point to a persistent location in production.
+
 ### Header extraction configuration
 
 SimpleSpecs sends the full document text to OpenRouter for a high-fidelity outline. Configure behaviour via the following environment variables (also available in `.env.template`):
