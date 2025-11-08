@@ -24,7 +24,7 @@ def test_run_job_retry_and_error() -> None:
         filename="doc.pdf",
         sections=[
             {
-                "header_text": "Controls",
+                "header_text": "Mechanical",
                 "start_page": 4,
                 "end_page": 5,
                 "start_global_idx": 10,
@@ -37,8 +37,8 @@ def test_run_job_retry_and_error() -> None:
         1,
         "hash",
         [
-            {"global_idx": 10, "text": "Control panel should provide redundancy."},
-            {"global_idx": 11, "text": "Add alarm logic."},
+            {"global_idx": 10, "text": "Support frame should provide redundancy."},
+            {"global_idx": 11, "text": "Add guard rail."},
         ],
     )
 
@@ -46,14 +46,14 @@ def test_run_job_retry_and_error() -> None:
 
     failing = MockLLMClient(
         responses={
-            ("Controls", "primary"): ["missing fence", "ABORT"],
+            ("Mechanical", "primary"): ["missing fence", "ABORT"],
         }
     )
     set_llm_client(failing)
 
     with Session(get_engine()) as session:
         section = session.exec(select(Section)).one()
-        agent = session.exec(select(Agent).where(Agent.code == "Controls")).one()
+        agent = session.exec(select(Agent).where(Agent.code == "Mechanical")).one()
         job = session.exec(
             select(AgentJob)
             .where(AgentJob.section_id == section.id)

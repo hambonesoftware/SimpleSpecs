@@ -11,6 +11,7 @@ from typing import Iterable, Iterator, Sequence
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
+from backend.config import get_settings
 from backend.services.simpleheaders_state import SimpleHeadersState
 
 from . import get_engine, init_db
@@ -64,8 +65,25 @@ class _AgentSnapshot:
     code: str
 
 
+def _section_sort_key(section: Section) -> tuple:
+    """Return a deterministic ordering key for sections."""
+
+    return (
+        section.start_global_idx is None,
+        section.start_global_idx or 0,
+        section.page_start is None,
+        section.page_start or 0,
+        section.created_at,
+        section.id,
+    )
+
+
 async def enqueue_jobs_for_document(document_id: str) -> tuple[int, int]:
     """Create queued jobs for every section/agent combination."""
+
+    settings = get_settings()
+    enabled_agents = tuple(settings.specs_enabled_agents) or ("Mechanical",)
+    max_headers = settings.specs_max_headers
 
     with _session_scope() as session:
         document = session.get(Document, document_id)
@@ -77,9 +95,16 @@ async def enqueue_jobs_for_document(document_id: str) -> tuple[int, int]:
         if not sections:
             return 0, 0
 
-        agents = session.exec(select(Agent)).all()
+        sections = sorted(sections, key=_section_sort_key)
+        if max_headers and max_headers > 0:
+            sections = sections[:max_headers]
+
+        agent_query = select(Agent)
+        if enabled_agents:
+            agent_query = agent_query.where(Agent.code.in_(enabled_agents))
+        agents = session.exec(agent_query).all()
         if not agents:
-            return 0, 0
+            return len(sections), 0
 
         sections_count = len(sections)
         jobs_created = 0
