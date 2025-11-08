@@ -10,6 +10,8 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, select
 
+from backend.config import get_settings
+
 from . import get_engine
 from .jobs import enqueue_jobs_for_document, list_job_ids, run_job
 from .models import Agent, Document, Section, SpecRecord
@@ -58,7 +60,12 @@ async def list_specs(documentId: str = Query(...)) -> Any:
         sections = session.exec(
             select(Section).where(Section.document_id == document_id)
         ).all()
-        agents = session.exec(select(Agent)).all()
+        settings = get_settings()
+        enabled_agents = tuple(settings.specs_enabled_agents) or ("Mechanical",)
+        agent_stmt = select(Agent)
+        if enabled_agents:
+            agent_stmt = agent_stmt.where(Agent.code.in_(enabled_agents))
+        agents = session.exec(agent_stmt).all()
         section_ids = [section.id for section in sections]
         records = (
             session.exec(
@@ -113,7 +120,12 @@ async def get_section_specs(section_id: UUID) -> Any:
         document = session.get(Document, section.document_id)
         if document is None:
             raise HTTPException(status_code=404, detail="Document not indexed for specs")
-        agents = session.exec(select(Agent)).all()
+        settings = get_settings()
+        enabled_agents = tuple(settings.specs_enabled_agents) or ("Mechanical",)
+        agent_stmt = select(Agent)
+        if enabled_agents:
+            agent_stmt = agent_stmt.where(Agent.code.in_(enabled_agents))
+        agents = session.exec(agent_stmt).all()
         records = session.exec(
             select(SpecRecord).where(SpecRecord.section_id == section_key)
         ).all()

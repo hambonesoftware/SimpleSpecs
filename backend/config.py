@@ -64,6 +64,22 @@ def _parse_weights(raw: str | None) -> tuple[float, ...]:
             continue
     return tuple(parts) if parts else (0.55, 0.30, 0.10, 0.05)
 
+
+def _parse_csv(raw: str | None) -> tuple[str, ...]:
+    """Return a tuple of non-empty strings parsed from ``raw``."""
+
+    if raw is None:
+        return ()
+    items = [part.strip() for part in raw.split(",") if part.strip()]
+    return tuple(items)
+
+
+def _default_spec_agents() -> tuple[str, ...]:
+    """Return the configured spec agents or a Mechanical-only default."""
+
+    parsed = _parse_csv(os.getenv("SPECS_ENABLED_AGENTS", "Mechanical"))
+    return parsed or ("Mechanical",)
+
 HEADERS_ALIGN_STRATEGY: str = os.getenv("HEADERS_ALIGN_STRATEGY", "sequential")
 HEADERS_SUPPRESS_TOC: bool = os.getenv("HEADERS_SUPPRESS_TOC", "1") in (
     "1",
@@ -506,6 +522,12 @@ class Settings(BaseModel):
     )
     specs_backoff_s: float = Field(
         default_factory=lambda: float(os.getenv("SPECS_BACKOFF_S", "1.5"))
+    )
+    specs_max_headers: int = Field(
+        default_factory=lambda: int(os.getenv("SPECS_MAX_HEADERS", "10"))
+    )
+    specs_enabled_agents: Tuple[str, ...] = Field(
+        default_factory=_default_spec_agents
     )
 
     @field_validator("upload_dir", mode="after")

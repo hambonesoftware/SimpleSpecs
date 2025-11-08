@@ -12,6 +12,14 @@ from backend.config import PROJECT_ROOT, get_settings
 
 from .models import Agent
 
+_AGENT_DESCRIPTIONS: dict[str, str] = {
+    "Mechanical": "Mechanical discipline specialist",
+    "Electrical": "Electrical discipline specialist",
+    "Controls": "Controls and automation specialist",
+    "Software": "Software and firmware specialist",
+    "ProjectManagement": "Project management specialist",
+}
+
 _ENGINE = None
 
 
@@ -63,22 +71,17 @@ def init_db() -> None:
 
 
 def _seed_agents(session: Session) -> None:
-    """Ensure the five built-in agent descriptors exist."""
+    """Ensure configured agent descriptors exist in the database."""
 
     existing = set(session.exec(select(Agent.code)))
-    required = {
-        "Mechanical": "Mechanical discipline specialist",
-        "Electrical": "Electrical discipline specialist",
-        "Controls": "Controls and automation specialist",
-        "Software": "Software and firmware specialist",
-        "ProjectManagement": "Project management specialist",
-    }
-    missing = required.keys() - existing
-    if not missing:
-        return
+    settings = get_settings()
+    enabled = tuple(settings.specs_enabled_agents) or ("Mechanical",)
+    allowed = [code for code in enabled if code in _AGENT_DESCRIPTIONS]
+    missing = set(allowed) - existing
     for code in missing:
-        session.add(Agent(code=code, description=required[code]))
-    session.commit()
+        session.add(Agent(code=code, description=_AGENT_DESCRIPTIONS[code]))
+    if missing:
+        session.commit()
 
 
 def reset_engine() -> None:
