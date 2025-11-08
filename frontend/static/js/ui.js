@@ -7,6 +7,8 @@ const DISCIPLINE_ORDER = [
   'unknown',
 ];
 
+const AGENT_CODES = ['Mechanical', 'Electrical', 'Controls', 'Software', 'ProjectManagement'];
+
 export function initDropZone({ zone, input, browseButton, onFiles }) {
   if (!zone) return;
 
@@ -938,6 +940,189 @@ export function renderRiskPanel(container, report) {
 
   container.innerHTML = '';
   container.append(summary, missingHeading, missingList, findingsDetails, complianceFragment);
+}
+
+export function renderSpecAnalysisStatus(container, message, variant = 'info') {
+  if (!container) return;
+  container.innerHTML = '';
+  if (!message) {
+    container.hidden = true;
+    return;
+  }
+  container.hidden = false;
+  const status = document.createElement('p');
+  status.className = `panel-status panel-status--${variant}`;
+  status.textContent = message;
+  container.append(status);
+}
+
+export function renderSpecAnalysis(container, sections, { agent = 'all', level = 'all' } = {}) {
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!Array.isArray(sections) || !sections.length) {
+    const empty = document.createElement('p');
+    empty.className = 'panel-status';
+    empty.textContent = 'No aligned sections available yet.';
+    container.append(empty);
+    return;
+  }
+
+  sections.forEach((section) => {
+    const details = document.createElement('details');
+    details.className = 'spec-section';
+    const summary = document.createElement('summary');
+    summary.className = 'spec-section__summary';
+
+    const title = document.createElement('span');
+    title.className = 'spec-section__title';
+    title.textContent = section.title || 'Untitled section';
+
+    const meta = document.createElement('span');
+    meta.className = 'spec-section__meta';
+    const pageStart = Number.isFinite(section.pageStart) ? section.pageStart : null;
+    const pageEnd = Number.isFinite(section.pageEnd) ? section.pageEnd : null;
+    if (pageStart != null && pageEnd != null && pageStart !== pageEnd) {
+      meta.textContent = `Pages ${pageStart}–${pageEnd}`;
+    } else if (pageStart != null) {
+      meta.textContent = `Page ${pageStart}`;
+    } else if (pageEnd != null) {
+      meta.textContent = `Page ${pageEnd}`;
+    } else {
+      meta.textContent = 'Page range unknown';
+    }
+
+    const status = document.createElement('span');
+    status.className = `spec-section__status status-${section.status}`;
+    status.textContent = section.status;
+
+    summary.append(title, meta, status);
+    details.append(summary);
+
+    const grid = document.createElement('div');
+    grid.className = 'spec-section__grid';
+
+    AGENT_CODES.forEach((code) => {
+      if (agent !== 'all' && agent !== code) {
+        return;
+      }
+      const record = section?.specs?.[code] ?? null;
+      const card = document.createElement('article');
+      card.className = 'spec-agent-card';
+      card.dataset.agent = code;
+
+      const header = document.createElement('header');
+      header.className = 'spec-agent-card__header';
+      const heading = document.createElement('h5');
+      heading.textContent = prettifyAgent(code);
+      header.append(heading);
+
+      if (record?.confidence) {
+        const confidence = document.createElement('span');
+        confidence.className = 'spec-agent-card__confidence';
+        confidence.textContent = `Confidence ${record.confidence}`;
+        header.append(confidence);
+      }
+
+      card.append(header);
+
+      const body = document.createElement('div');
+      body.className = 'spec-agent-card__body';
+
+      const requirements = Array.isArray(record?.result?.requirements)
+        ? record.result.requirements
+        : [];
+      const filtered = level === 'all'
+        ? requirements
+        : requirements.filter((req) => String(req.level).toUpperCase() === level);
+
+      if (!record) {
+        const note = document.createElement('p');
+        note.className = 'spec-agent-card__empty';
+        note.textContent = section.status === 'failed'
+          ? 'Job failed for this agent.'
+          : 'No result yet.';
+        body.append(note);
+      } else if (!filtered.length) {
+        const note = document.createElement('p');
+        note.className = 'spec-agent-card__empty';
+        note.textContent = level === 'all'
+          ? 'No requirements extracted.'
+          : `No requirements at level ${level}.`;
+        body.append(note);
+      } else {
+        const list = document.createElement('ul');
+        list.className = 'spec-agent-card__list';
+        filtered.forEach((req) => {
+          const item = document.createElement('li');
+          item.className = 'spec-agent-card__item';
+
+          const headerRow = document.createElement('div');
+          headerRow.className = 'spec-agent-card__item-header';
+          const levelBadge = document.createElement('span');
+          levelBadge.className = `spec-level spec-level--${String(req.level).toUpperCase()}`;
+          levelBadge.textContent = String(req.level).toUpperCase();
+          headerRow.append(levelBadge);
+          if (req.page_hint != null) {
+            const page = document.createElement('span');
+            page.className = 'spec-agent-card__page';
+            page.textContent = `Page ${req.page_hint}`;
+            headerRow.append(page);
+          }
+          item.append(headerRow);
+
+          const text = document.createElement('p');
+          text.className = 'spec-agent-card__text';
+          text.textContent = req.text;
+          item.append(text);
+
+          list.append(item);
+        });
+        body.append(list);
+      }
+
+      if (Array.isArray(record?.result?.notes) && record.result.notes.length) {
+        const notes = document.createElement('ul');
+        notes.className = 'spec-agent-card__notes';
+        record.result.notes.forEach((note) => {
+          const li = document.createElement('li');
+          li.textContent = note;
+          notes.append(li);
+        });
+        body.append(notes);
+      }
+
+      card.append(body);
+      grid.append(card);
+    });
+
+    if (!grid.childElementCount) {
+      const fallback = document.createElement('p');
+      fallback.className = 'panel-status';
+      fallback.textContent = 'Filters hide all agent results.';
+      grid.append(fallback);
+    }
+
+    details.append(grid);
+    container.append(details);
+  });
+}
+
+function prettifyAgent(code) {
+  switch (code) {
+    case 'Mechanical':
+      return 'Mechanical';
+    case 'Electrical':
+      return 'Electrical';
+    case 'Controls':
+      return 'Controls';
+    case 'Software':
+      return 'Software';
+    case 'ProjectManagement':
+      return 'Project Management';
+    default:
+      return code;
+  }
 }
 
 export function showToast(message, variant = 'info', timeout = 3500) {

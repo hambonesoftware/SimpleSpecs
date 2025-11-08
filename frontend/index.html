@@ -72,6 +72,14 @@
               <h3 id="panel-headers-title">Header outline</h3>
               <span id="header-mode-tag" class="panel-tag" hidden></span>
               <button
+                id="analyze-specs"
+                type="button"
+                class="ghost-button panel-inline-button"
+                aria-label="Analyze aligned sections with specialised agents"
+              >
+                Analyze Specs
+              </button>
+              <button
                 id="refresh-headers"
                 type="button"
                 class="ghost-button panel-inline-button"
@@ -83,6 +91,35 @@
             <button type="button" class="ghost-button" data-export="headers">Download JSON</button>
           </div>
           <div class="panel-body" id="headers-content" aria-live="polite"></div>
+          <div class="panel-subsection" id="specs-analysis" hidden>
+            <div class="panel-subsection__header">
+              <h4>Per-section agent results</h4>
+              <div class="specs-analysis__filters">
+                <label>
+                  Agent
+                  <select id="specs-agent-filter">
+                    <option value="all">All</option>
+                    <option value="Mechanical">Mechanical</option>
+                    <option value="Electrical">Electrical</option>
+                    <option value="Controls">Controls</option>
+                    <option value="Software">Software</option>
+                    <option value="ProjectManagement">Project management</option>
+                  </select>
+                </label>
+                <label>
+                  Level
+                  <select id="specs-level-filter">
+                    <option value="all">All</option>
+                    <option value="MUST">MUST</option>
+                    <option value="SHOULD">SHOULD</option>
+                    <option value="MAY">MAY</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div class="panel-subsection__body" id="specs-analysis-status" aria-live="polite"></div>
+            <div class="panel-subsection__body" id="specs-analysis-results" aria-live="polite"></div>
+          </div>
         </section>
 
         <section class="panel" id="panel-specs" aria-labelledby="panel-specs-title">
