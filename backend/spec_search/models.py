@@ -69,6 +69,7 @@ class SpecSearchMeta(BaseModel):
 
     attempts: List[AttemptTelemetry] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
+    log_path: Optional[str] = None
 
 
 class SpecSearchData(RootModel):
