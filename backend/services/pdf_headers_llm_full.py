@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import re
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Sequence, TYPE_CHECKING
@@ -34,6 +36,9 @@ class LLMFullHeadersResult:
     headers: List[Dict]
     raw_responses: List[str]
     fenced_blocks: List[str]
+    prompt_hash: str | None = None
+    latency_ms: int | None = None
+    from_cache: bool = False
 
     def combined_fenced(self) -> str:
         """Return a single fenced block for downstream consumers."""
@@ -167,6 +172,7 @@ async def get_headers_llm_full(
                         for entry in cached.get("fenced_blocks", [])
                         if isinstance(entry, str)
                     ],
+                    from_cache=True,
                 )
         except Exception:
             if tracer is not None:
@@ -176,10 +182,13 @@ async def get_headers_llm_full(
         tracer.ev("llm_cache_miss", path=str(cache_file))
 
     # --------- Build LLM inputs ----------
+    start_time = time.perf_counter()
     text_blocks = _build_text_blocks(lines, excluded_pages)
     token_limit = min(int(settings.headers_llm_max_input_tokens), HEADER_CHUNK_TOKEN_LIMIT)
     parts = split_by_token_limit(text_blocks, token_limit) or ["\n".join(text_blocks)]
     total_parts = len(parts)
+
+    prompt_hasher = hashlib.sha256()
 
     client_params: dict[str, str] = {}
     if settings.openrouter_http_referer:
@@ -219,6 +228,10 @@ async def get_headers_llm_full(
                 ),
             },
         ]
+
+        prompt_hasher.update(
+            json.dumps(messages, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        )
 
         loop = asyncio.get_running_loop()
         if tracer is not None:
@@ -307,10 +320,15 @@ async def get_headers_llm_full(
             if tracer is not None:
                 tracer.ev("llm_cache_write_failed", path=str(cache_file))
 
+    latency_ms = int((time.perf_counter() - start_time) * 1000)
+    prompt_hash = prompt_hasher.hexdigest()
+
     return LLMFullHeadersResult(
         headers=deduped,
         raw_responses=raw_responses,
         fenced_blocks=fenced_blocks,
+        prompt_hash=prompt_hash,
+        latency_ms=latency_ms,
     )
 
 

@@ -12,6 +12,7 @@ from .artifacts import (
 )
 from .document import Document
 from .header_anchor import HeaderAnchor
+from .header_outline import HeaderOutlineCache, HeaderOutlineRun
 from .section import DocumentSection
 from .spec_record import SpecAuditEntry, SpecRecord
 
@@ -26,6 +27,8 @@ __all__ = [
     "DocumentTable",
     "DocumentSection",
     "HeaderAnchor",
+    "HeaderOutlineCache",
+    "HeaderOutlineRun",
     "PromptResponse",
     "SpecRecord",
     "SpecAuditEntry",
