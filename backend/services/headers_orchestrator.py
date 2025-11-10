@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import time
@@ -23,6 +24,7 @@ from .pdf_headers_llm_full import (
     LLMFullHeadersResult,
     get_headers_llm_full,
 )
+from .outline_cache import persist_outline_cache
 from .pdf_native import collect_line_metrics
 from .section_chunking import single_chunks_from_headers
 from ..utils.logging import configure_logging
@@ -106,6 +108,7 @@ async def extract_headers_and_chunks(
         tracer.log_call(f"{__name__}.extract_headers_and_chunks")
 
     start_time = time.perf_counter()
+    source_hash = hashlib.sha256(document_bytes).hexdigest()
     if tracer:
         tracer.ev(
             "start_run",
@@ -263,6 +266,45 @@ async def extract_headers_and_chunks(
             fenced_text = llm_result.combined_fenced()
             strict_attempted = False
             vector_attempted = False
+
+            if (
+                session is not None
+                and doc_id is not None
+                and not llm_result.from_cache
+                and llm_result.prompt_hash
+            ):
+                outline_payload = {
+                    "headers": llm_result.headers,
+                    "raw_responses": llm_result.raw_responses,
+                    "fenced_blocks": llm_result.fenced_blocks,
+                }
+                outline_meta = {
+                    "model": settings.headers_llm_model,
+                    "headers_mode": settings.headers_mode,
+                    "header_count": len(llm_result.headers),
+                    "raw_response_count": len(llm_result.raw_responses),
+                    "doc_hash": doc_hash,
+                }
+                if llm_result.latency_ms is not None:
+                    outline_meta["latency_ms"] = llm_result.latency_ms
+                try:
+                    persist_outline_cache(
+                        session,
+                        document_id=doc_id,
+                        outline=outline_payload,
+                        meta=outline_meta,
+                        model=settings.headers_llm_model,
+                        prompt_hash=llm_result.prompt_hash,
+                        source_hash=source_hash,
+                        tokens_prompt=None,
+                        tokens_completion=None,
+                        latency_ms=llm_result.latency_ms,
+                        supersede_old=True,
+                    )
+                except Exception:  # pragma: no cover - defensive logging
+                    LOGGER.warning(
+                        "[headers] Failed to persist outline cache to DB", exc_info=True
+                    )
 
             if settings.headers_llm_strict and llm_headers:
                 strict_attempted = True

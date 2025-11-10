@@ -56,6 +56,7 @@ def init_db() -> None:
         artifacts,
         document,
         header_anchor,
+        header_outline,
         section,
         spec_record,
     )
