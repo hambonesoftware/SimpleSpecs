@@ -23,8 +23,23 @@ def sha256_text(text: str) -> str:
     return _sha256_bytes(text.encode("utf-8"))
 
 
-def supersede_previous_runs(session: Session, document_id: int) -> None:
-    """Mark completed runs for ``document_id`` as superseded."""
+def supersede_previous_runs(
+    session: Session,
+    document_id: int,
+    *,
+    exclude_run_id: int | None = None,
+) -> None:
+    """Mark completed runs for ``document_id`` as superseded.
+
+    Parameters
+    ----------
+    session:
+        Active database session.
+    document_id:
+        Identifier of the document whose runs should be superseded.
+    exclude_run_id:
+        Optional run identifier that should remain marked as ``completed``.
+    """
 
     runs = session.exec(
         select(HeaderOutlineRun).where(
@@ -34,8 +49,17 @@ def supersede_previous_runs(session: Session, document_id: int) -> None:
     ).all()
     if not runs:
         return
+
+    touched = False
     for run in runs:
+        if exclude_run_id is not None and int(run.id or 0) == exclude_run_id:
+            continue
         run.status = "superseded"
+        touched = True
+
+    if not touched:
+        return
+
     session.add_all(runs)
     session.commit()
 
@@ -56,33 +80,76 @@ def persist_outline_cache(
 ) -> int:
     """Persist a header outline run and its cached payload.
 
-    Returns the database identifier of the created :class:`HeaderOutlineRun`.
+    Returns the identifier of the relevant :class:`HeaderOutlineRun`. The
+    function is idempotent for the tuple ``(document_id, prompt_hash,
+    source_hash)`` and will update the existing run/cache when invoked again
+    with the same hashes.
     """
 
-    if supersede_old:
-        supersede_previous_runs(session, document_id)
-
-    run = HeaderOutlineRun(
-        document_id=document_id,
-        model=model,
-        prompt_hash=prompt_hash,
-        source_hash=source_hash,
-        status="completed",
-    )
-    session.add(run)
-    session.flush()  # ensures ``run.id`` is available
-
     unique_key = f"{document_id}:{prompt_hash}:{source_hash}"
-    cache = HeaderOutlineCache(
-        run_id=run.id or 0,
-        document_id=document_id,
-        outline_json=json.dumps(outline, ensure_ascii=False),
-        meta_json=json.dumps(meta or {}, ensure_ascii=False),
-        tokens_prompt=tokens_prompt,
-        tokens_completion=tokens_completion,
-        latency_ms=latency_ms,
-        unique_key=unique_key,
-    )
+
+    existing_run = session.exec(
+        select(HeaderOutlineRun)
+        .where(
+            HeaderOutlineRun.document_id == document_id,
+            HeaderOutlineRun.prompt_hash == prompt_hash,
+            HeaderOutlineRun.source_hash == source_hash,
+        )
+        .order_by(HeaderOutlineRun.created_at.desc())
+    ).first()
+
+    if existing_run is None:
+        run = HeaderOutlineRun(
+            document_id=document_id,
+            model=model,
+            prompt_hash=prompt_hash,
+            source_hash=source_hash,
+            status="completed",
+        )
+        session.add(run)
+        session.flush()
+    else:
+        run = existing_run
+        run.model = model
+        run.status = "completed"
+        run.error = None
+        session.add(run)
+        session.flush()
+
+    if supersede_old:
+        supersede_previous_runs(session, document_id, exclude_run_id=int(run.id or 0))
+
+    cache = session.exec(
+        select(HeaderOutlineCache)
+        .where(
+            HeaderOutlineCache.document_id == document_id,
+            HeaderOutlineCache.unique_key == unique_key,
+        )
+        .order_by(HeaderOutlineCache.created_at.desc())
+    ).first()
+
+    payload_json = json.dumps(outline, ensure_ascii=False)
+    meta_json = json.dumps(meta or {}, ensure_ascii=False)
+
+    if cache is None:
+        cache = HeaderOutlineCache(
+            run_id=int(run.id or 0),
+            document_id=document_id,
+            outline_json=payload_json,
+            meta_json=meta_json,
+            tokens_prompt=tokens_prompt,
+            tokens_completion=tokens_completion,
+            latency_ms=latency_ms,
+            unique_key=unique_key,
+        )
+    else:
+        cache.run_id = int(run.id or 0)
+        cache.outline_json = payload_json
+        cache.meta_json = meta_json
+        cache.tokens_prompt = tokens_prompt
+        cache.tokens_completion = tokens_completion
+        cache.latency_ms = latency_ms
+
     session.add(cache)
     session.commit()
     return int(run.id or 0)
@@ -95,7 +162,11 @@ def latest_outline_for_document(
 
     statement = (
         select(HeaderOutlineCache)
-        .where(HeaderOutlineCache.document_id == document_id)
+        .join(HeaderOutlineRun, HeaderOutlineRun.id == HeaderOutlineCache.run_id)
+        .where(
+            HeaderOutlineCache.document_id == document_id,
+            HeaderOutlineRun.status == "completed",
+        )
         .order_by(HeaderOutlineCache.created_at.desc())
         .limit(1)
     )

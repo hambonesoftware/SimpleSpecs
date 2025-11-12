@@ -202,10 +202,11 @@ def test_extract_headers_and_chunks_force_refresh(monkeypatch, tmp_path):
     assert cache_hash == "fresh-hash"
     assert len(cache_lines) == 2
 
-    assert response["llm_raw_responses"] == ["raw-response"]
-    assert response["simpleheaders"][0]["page"] == 0
+    assert response["documentId"] == document_id
+    assert response["simpleheaders"][0]["text"] == "Intro"
     assert response["sections"][0]["header_text"] == "Intro"
-    assert response["doc_hash"] == "fresh-hash"
+    assert response.get("docHash") == "fresh-hash"
+    assert response["mode"] == "llm_full"
     assert "outline message" in response["messages"]
     assert "orchestrator message" in response["messages"]
 

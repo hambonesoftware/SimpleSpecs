@@ -70,6 +70,7 @@ SimpleSpecs sends the full document text to OpenRouter for a high-fidelity outli
 - `HEADERS_LLM_MAX_INPUT_TOKENS`: approximate token budget per request chunk (default `120000`).
 - `HEADERS_LLM_TIMEOUT_S`: request timeout in seconds (default `120`).
 - `HEADERS_LLM_CACHE_DIR`: on-disk cache for previously processed documents.
+- `HEADERS_CACHE_TO_DB`: set to `0` to disable persisting raw outlines to SQLite (disk caching remains active).
 
 The pipeline requires `OPENROUTER_API_KEY`. Cached responses avoid repeated model invocations for unchanged documents.
 
@@ -117,6 +118,58 @@ HEADERS_BAND_LINES=5
 HEADERS_RESCAN_PASSES=2
 HEADERS_DEDUPE_POLICY=best
 ```
+
+### DB-first header retrieval
+
+Header discovery now hydrates the UI from the persisted SQLite cache before invoking the LLM:
+
+1. `GET /api/documents/{document_id}/status` returns `{ parsed: bool, headers: bool }`. When `parsed` is `false`, the frontend calls `POST /api/parse/{document_id}` until the document is parsed.
+2. If `headers` is `true`, `GET /api/headers/{document_id}` returns the stored outline, metadata, and aligned sections without touching the LLM.
+3. `GET /api/headers/{document_id}/outline` exposes only the raw outline payload and metadata (useful for tooling).
+4. `POST /api/headers/{document_id}` refreshes the outline on demand. The handler deduplicates runs by `document_id` + `prompt_hash` + `source_hash`, marks prior runs as `superseded`, writes the outline to both SQLite (`header_outline_cache`) and the on-disk cache (`HEADERS_LLM_CACHE_DIR`), persists aligned sections, and finally re-reads the payload from the database.
+
+Sample response from `GET /api/headers/42`:
+
+```json
+{
+  "documentId": 42,
+  "runId": 7,
+  "outline": { "headers": [{ "text": "Introduction", "number": "1" }] },
+  "meta": {
+    "model": "anthropic/claude-3.5-sonnet",
+    "promptHash": "9b0d…",
+    "sourceHash": "c2a1…",
+    "tokens": { "prompt": null, "completion": null },
+    "latencyMs": 1842,
+    "createdAt": "2025-01-01T00:00:00+00:00"
+  },
+  "sections": [
+    {
+      "section_key": "intro",
+      "title": "Introduction",
+      "number": "1",
+      "level": 1,
+      "start_global_idx": 12,
+      "end_global_idx": 48,
+      "start_page": 2,
+      "end_page": 3
+    }
+  ],
+  "simpleheaders": [
+    {
+      "text": "Introduction",
+      "number": "1",
+      "level": 1,
+      "page": 2,
+      "global_idx": 12,
+      "section_key": "intro"
+    }
+  ],
+  "mode": "llm_full"
+}
+```
+
+When `HEADERS_CACHE_TO_DB=0`, sections continue to persist in SQLite but the raw outline is only written to disk; the GET endpoints will respond with `404` until a new cached outline is created.
 
 When tracing (`?trace=1`) the sequential tracer records the corrective steps taken during the invariant loop, including
 `reanchor_parent`, `reanchor_parent_implied`, `child_relocate_to_window`, `dedupe_drop`, and per-pass `invariants_pass` summaries.

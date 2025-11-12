@@ -17,10 +17,12 @@ from ..models import (
     DocumentArtifact,
     DocumentArtifactType,
     DocumentPage,
+    DocumentSection,
     DocumentTable,
 )
 from ..services.pdf_native import collect_line_metrics
 from ..services.simpleheaders_state import SimpleHeadersState
+from ..services.outline_cache import latest_outline_for_document
 
 router = APIRouter(prefix="/api", tags=["documents"])
 
@@ -296,6 +298,31 @@ async def get_cached_headers(
         doc_hash=payload.get("doc_hash"),
         created_at=artifact.created_at.isoformat() if artifact.created_at else None,
     )
+
+
+@router.get("/documents/{document_id}/status")
+def document_status(
+    document_id: int,
+    *,
+    session: Session = Depends(get_session),
+):
+    """Return parse/header availability flags for the given document."""
+
+    document = session.get(Document, document_id)
+    if document is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+
+    parsed = bool(document.last_parsed_at)
+
+    outline_cache = latest_outline_for_document(session, document_id)
+    has_sections = session.exec(
+        select(DocumentSection.id)
+        .where(DocumentSection.document_id == document_id)
+        .limit(1)
+    ).first() is not None
+    headers_ready = bool(outline_cache and has_sections)
+
+    return {"parsed": parsed, "headers": headers_ready}
 
 
 __all__ = ["router"]

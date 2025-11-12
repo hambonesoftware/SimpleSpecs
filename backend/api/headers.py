@@ -2,16 +2,25 @@
 
 from __future__ import annotations
 
+import hashlib
 import inspect
-from typing import Any, Dict
+import json
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse, PlainTextResponse
+from sqlalchemy import desc
 from sqlmodel import Session, select
 
 from ..config import Settings, get_settings
 from ..database import get_session
-from ..models import Document, DocumentSection
+from ..models import (
+    Document,
+    DocumentArtifact,
+    DocumentArtifactType,
+    DocumentSection,
+    HeaderOutlineRun,
+)
 from ..services.artifact_store import get_or_create_parse_result
 from ..services.header_match import find_header_occurrences
 from ..services.headers import (
@@ -28,11 +37,278 @@ from ..services.headers_orchestrator import (
     extract_headers_and_chunks as orchestrate_headers_and_chunks,
 )
 from ..spec_extraction.jobs import persist_sections
-from ..services.pdf_native import parse_pdf
+from ..services.pdf_native import collect_line_metrics, parse_pdf
 from ..services.sections import build_and_store_sections, delete_sections_for_document
 from ..services.simpleheaders_state import SimpleHeadersState
+from ..services.outline_cache import latest_outline_for_document
 
 router = APIRouter(prefix="/api", tags=["headers"])
+
+
+def _compute_lines_hash(lines: list[dict]) -> str:
+    """Return a deterministic hash for cached line entries."""
+
+    digest = hashlib.sha256()
+    for entry in lines:
+        digest.update(str(entry.get("global_idx")).encode("utf-8", "ignore"))
+        digest.update(b"|")
+        digest.update(str(entry.get("text", "")).encode("utf-8", "ignore"))
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def _hydrate_simpleheaders_state(
+    *,
+    document: Document,
+    settings: Settings,
+    doc_hash: str,
+    payload: Optional[dict],
+) -> None:
+    """Ensure :class:`SimpleHeadersState` is hydrated for ``document``."""
+
+    if document.id is None:
+        return
+
+    cached = SimpleHeadersState.get(document.id)
+    if cached is not None:
+        cached_hash, cached_lines = cached
+        if cached_lines and (not doc_hash or cached_hash == doc_hash):
+            return
+
+    if payload:
+        raw_lines = payload.get("lines")
+        if isinstance(raw_lines, list) and raw_lines:
+            lines: list[dict] = []
+            for entry in raw_lines:
+                if not isinstance(entry, dict):
+                    continue
+                text = str(entry.get("text", ""))
+                global_idx = entry.get("global_idx")
+                try:
+                    global_idx_int = int(global_idx) if global_idx is not None else None
+                except (TypeError, ValueError):
+                    global_idx_int = None
+                if global_idx_int is None:
+                    continue
+                normalised = dict(entry)
+                normalised["text"] = text
+                normalised["global_idx"] = global_idx_int
+                lines.append(normalised)
+            if lines:
+                cache_hash = doc_hash or _compute_lines_hash(lines)
+                SimpleHeadersState.set(document.id, cache_hash, lines)
+                return
+
+    document_path = settings.upload_dir / str(document.id) / document.filename
+    if not document_path.exists():
+        return
+
+    try:
+        document_bytes = document_path.read_bytes()
+    except OSError:
+        return
+
+    try:
+        lines, _, computed_hash = collect_line_metrics(
+            document_bytes,
+            {"document_id": document.id, "filename": document.filename},
+            suppress_toc=settings.headers_suppress_toc,
+            suppress_running=settings.headers_suppress_running,
+            tracer=None,
+        )
+    except Exception:
+        return
+
+    if not lines:
+        return
+
+    cache_hash = doc_hash or computed_hash
+    SimpleHeadersState.set(document.id, cache_hash, lines)
+
+
+def _serialise_section_model(section: DocumentSection) -> dict[str, Any]:
+    """Return a serialisable representation of a persisted section."""
+
+    section_id = int(section.id) if section.id is not None else None
+    payload: dict[str, Any] = {
+        "id": section_id,
+        "documentId": section.document_id,
+        "sectionKey": section.section_key,
+        "title": section.title,
+        "number": section.number,
+        "level": section.level,
+        "start_page": section.start_page,
+        "end_page": section.end_page,
+        "startGlobalIdx": section.start_global_idx,
+        "endGlobalIdx": section.end_global_idx,
+        "page": section.start_page,
+        "globalIdx": section.start_global_idx,
+        "bbox": None,
+    }
+
+    # Legacy keys used by existing UI helpers.
+    payload.setdefault("start_page", section.start_page)
+    payload.setdefault("end_page", section.end_page)
+    payload.setdefault("start_global_idx", section.start_global_idx)
+    payload.setdefault("end_global_idx", section.end_global_idx)
+
+    return payload
+
+
+def _serialise_simpleheader_from_section(section: DocumentSection) -> dict[str, Any]:
+    """Build a SimpleHeaders-style entry from a section row."""
+
+    return {
+        "text": section.title,
+        "number": section.number,
+        "level": section.level,
+        "page": section.start_page,
+        "line_idx": None,
+        "global_idx": section.start_global_idx,
+        "section_key": section.section_key,
+    }
+
+
+def _build_meta_payload(
+    run: HeaderOutlineRun,
+    cache: "HeaderOutlineCache",
+) -> dict[str, Any]:
+    """Merge stored metadata with runtime attributes."""
+
+    extra: dict[str, Any] = {}
+    if cache.meta_json:
+        try:
+            candidate = json.loads(cache.meta_json)
+        except json.JSONDecodeError:
+            candidate = {}
+        if isinstance(candidate, dict):
+            extra = candidate
+
+    meta = dict(extra)
+    meta.update(
+        {
+            "model": run.model,
+            "promptHash": run.prompt_hash,
+            "sourceHash": run.source_hash,
+            "tokens": {
+                "prompt": cache.tokens_prompt,
+                "completion": cache.tokens_completion,
+            },
+            "latencyMs": cache.latency_ms,
+            "createdAt": run.created_at.isoformat() if run.created_at else None,
+        }
+    )
+    return meta
+
+
+def get_headers_from_db(
+    session: Session,
+    document_id: int,
+    *,
+    settings: Settings,
+    document: Optional[Document] = None,
+) -> Optional[dict[str, Any]]:
+    """Return persisted headers for ``document_id`` when available."""
+
+    document = document or session.get(Document, document_id)
+    if document is None:
+        return None
+
+    cache = latest_outline_for_document(session, document_id)
+    if cache is None:
+        return None
+
+    run = session.get(HeaderOutlineRun, cache.run_id)
+    if run is None or run.status != "completed":
+        return None
+
+    try:
+        outline = json.loads(cache.outline_json)
+    except json.JSONDecodeError:
+        outline = None
+
+    sections = session.exec(
+        select(DocumentSection)
+        .where(DocumentSection.document_id == document_id)
+        .order_by(DocumentSection.start_global_idx.asc())
+    ).all()
+
+    sections_payload = [_serialise_section_model(section) for section in sections]
+    simpleheaders = [
+        _serialise_simpleheader_from_section(section)
+        for section in sections
+    ]
+
+    artifact = session.exec(
+        select(DocumentArtifact)
+        .where(
+            DocumentArtifact.document_id == document_id,
+            DocumentArtifact.artifact_type == DocumentArtifactType.HEADER_TREE,
+        )
+        .order_by(desc(DocumentArtifact.created_at))
+    ).first()
+    artifact_payload = dict(artifact.body or {}) if artifact else {}
+
+    meta = _build_meta_payload(run, cache)
+    doc_hash = str(
+        meta.get("doc_hash")
+        or artifact_payload.get("doc_hash")
+        or ""
+    )
+
+    _hydrate_simpleheaders_state(
+        document=document,
+        settings=settings,
+        doc_hash=doc_hash,
+        payload=artifact_payload if artifact_payload else None,
+    )
+
+    payload: dict[str, Any] = {
+        "documentId": document_id,
+        "runId": int(run.id or 0),
+        "outline": outline,
+        "meta": meta,
+        "sections": sections_payload,
+        "simpleheaders": simpleheaders,
+    }
+
+    if doc_hash:
+        payload["docHash"] = doc_hash
+
+    if artifact_payload.get("mode"):
+        payload["mode"] = artifact_payload["mode"]
+
+    messages = artifact_payload.get("messages")
+    if isinstance(messages, list):
+        payload["messages"] = [str(message) for message in messages if message]
+
+    return payload
+
+
+def get_outline_from_db(
+    session: Session,
+    document_id: int,
+    *,
+    settings: Settings,
+    document: Optional[Document] = None,
+) -> Optional[dict[str, Any]]:
+    """Return the persisted outline payload for ``document_id``."""
+
+    record = get_headers_from_db(
+        session,
+        document_id,
+        settings=settings,
+        document=document,
+    )
+    if record is None:
+        return None
+
+    return {
+        "documentId": record["documentId"],
+        "runId": record["runId"],
+        "outline": record.get("outline"),
+        "meta": record.get("meta"),
+    }
 
 
 @router.post("/headers/{document_id}")
@@ -88,6 +364,16 @@ async def extract_headers_and_chunks(
         )
 
     doc_id = int(document.id)
+
+    if not force:
+        cached_payload = get_headers_from_db(
+            session,
+            doc_id,
+            settings=settings,
+            document=document,
+        )
+        if cached_payload is not None:
+            return cached_payload
 
     if force:
         try:
@@ -186,8 +472,6 @@ async def extract_headers_and_chunks(
     SimpleHeadersState.set(doc_id, doc_hash, lines)
 
     llm_headers = list(orchestrated.get("llm_headers", []))
-    llm_raw_responses = list(orchestrated.get("llm_raw_responses", []))
-    llm_fenced_blocks = list(orchestrated.get("llm_fenced_blocks", []))
 
     persisted_sections = build_and_store_sections(
         session=session,
@@ -198,6 +482,13 @@ async def extract_headers_and_chunks(
     section_key_by_gid = {
         int(section.start_global_idx): section.section_key for section in persisted_sections
     }
+
+    simpleheaders_source = orchestrated.get("headers", []) or []
+    simpleheaders_payload = _serialise_simpleheaders(
+        simpleheaders_source,
+        section_key_by_gid,
+    )
+
     raw_sections = orchestrated.get("sections", []) or []
     if raw_sections:
         sections_payload: list[dict[str, object | None]] = []
@@ -228,47 +519,58 @@ async def extract_headers_and_chunks(
     except Exception:  # pragma: no cover - persistence should not block response
         pass
 
-    simpleheaders_source = orchestrated.get("headers", [])
-    simpleheaders_payload = _serialise_simpleheaders(
-        simpleheaders_source, section_key_by_gid
-    )
-
-    fenced_text = orchestrated.get("fenced_text") or header_result.fenced_text
-    messages = list(header_result.messages) + list(orchestrated.get("messages", []))
-
     outline_payload = header_result.to_json()
     if llm_headers:
         outline_nodes = build_outline_from_simpleheaders(llm_headers)
         outline_payload = [node.to_dict() for node in outline_nodes]
 
-    response_payload: dict[str, object] = {
-        "source": header_result.source,
-        "document_id": doc_id,
-        "outline": outline_payload,
-        "simpleheaders": simpleheaders_payload,
-        "sections": sections_payload,
-        "mode": orchestrated.get("mode"),
-        "messages": messages,
-        "fenced_text": fenced_text,
-        "doc_hash": doc_hash,
-        "excluded_pages": orchestrated.get("excluded_pages", []),
-        "llm_headers": llm_headers,
-        "llm_raw_responses": llm_raw_responses,
-        "llm_fenced_blocks": llm_fenced_blocks,
-    }
-
-    failure_raw = orchestrated.get("llm_failure_raw_response")
-    if isinstance(failure_raw, str) and failure_raw:
-        response_payload["llm_failure_raw_response"] = failure_raw
-
     if trace and tracer is not None:
-        response_payload["trace"] = {
+        trace_payload = {
             "events": tracer.as_list(),
             "path": tracer.path,
             "summary_path": tracer.summary_path,
         }
+    else:
+        trace_payload = None
 
-    return response_payload
+    db_payload = get_headers_from_db(
+        session,
+        doc_id,
+        settings=settings,
+        document=document,
+    )
+
+    if db_payload is None:
+        db_payload = {
+            "documentId": doc_id,
+            "runId": None,
+            "outline": outline_payload,
+            "meta": {
+                "model": settings.headers_llm_model,
+                "promptHash": None,
+                "sourceHash": doc_hash or None,
+                "tokens": {"prompt": None, "completion": None},
+                "latencyMs": orchestrated.get("latency_ms"),
+                "createdAt": None,
+            },
+            "sections": sections_payload,
+            "simpleheaders": simpleheaders_payload,
+        }
+        if doc_hash:
+            db_payload["docHash"] = doc_hash
+        mode = orchestrated.get("mode")
+        if mode:
+            db_payload["mode"] = mode
+        fallback_messages = list(header_result.messages) + list(
+            orchestrated.get("messages", [])
+        )
+        if fallback_messages:
+            db_payload["messages"] = fallback_messages
+
+    if trace_payload is not None:
+        db_payload["trace"] = trace_payload
+
+    return db_payload
 
 
 def _serialise_simpleheaders(headers: list[dict], section_keys: dict[int, str]) -> list[dict]:
