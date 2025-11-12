@@ -11,6 +11,7 @@ import {
   parseDocument,
   fetchHeaders,
   fetchCachedHeaders,
+  fetchDocumentStatus,
   fetchSectionText,
   fetchSpecifications,
   dispatchSpecAgents,
@@ -99,7 +100,11 @@ function deriveHeaderMatches(payload) {
   if (!payload || typeof payload !== 'object') {
     return [];
   }
-  const headers = Array.isArray(payload.headers) ? payload.headers : [];
+  const headers = Array.isArray(payload.simpleheaders)
+    ? payload.simpleheaders
+    : Array.isArray(payload.headers)
+      ? payload.headers
+      : [];
   return headers
     .map((header) => {
       const text = typeof header.text === 'string' ? header.text : '';
@@ -443,10 +448,10 @@ function setHeaderRefreshBusy(busy) {
     button.setAttribute('aria-label', 'Running header search');
     return;
   }
-  const defaultLabel = state.headerSearchAttempted ? 'Run again' : 'Start search';
+  const defaultLabel = state.headerSearchAttempted ? 'Run again' : 'Run header search';
   const ariaLabel = state.headerSearchAttempted
     ? 'Run the header search again'
-    : 'Start the header search';
+    : 'Run the header search';
   button.textContent = defaultLabel;
   delete button.dataset.loading;
   button.removeAttribute('aria-busy');
@@ -507,15 +512,15 @@ function renderPanelStartPrompt(container, { message, buttonLabel, onStart }) {
 // Display initial prompts for header and specs searches
 function showHeaderSearchPrompt() {
   renderPanelStartPrompt(elements.headersContent, {
-    message: 'Press Start to generate the header outline.',
-    buttonLabel: 'Start search',
+    message: 'No headers saved yet. Click Run header search to discover headers.',
+    buttonLabel: 'Run header search',
     onStart: () => {
       void refreshHeaders();
     },
   });
   if (elements.headersRawContent) {
     elements.headersRawContent.innerHTML =
-      '<p class="panel-status">Run the header search to view the raw response and trace.</p>';
+      '<p class="panel-status">Run the header search to view the persisted outline and trace.</p>';
   }
 }
 
@@ -557,65 +562,87 @@ async function selectDocument(documentId) {
   if (state.selectedId === documentId) {
     return;
   }
+
   state.selectedId = documentId;
   if (elements.analyzeSpecs) {
     elements.analyzeSpecs.disabled = false;
   }
+
   state.approvedLines.clear();
   state.specRecord = null;
   state.approvalLoading = true;
   renderDocumentList(elements.documentsList, state.documents, documentId);
   elements.documentsList?.setAttribute('aria-activedescendant', `document-${documentId}`);
+
   const documentRecord = state.documents.find((doc) => doc.id === documentId);
   setDocumentMeta(elements.documentMeta, documentRecord);
+
   state.parse = null;
   state.headers = null;
   state.specs = null;
   state.risk = null;
+  state.headerMatches = [];
   state.headerSearchAttempted = false;
   state.specsSearchAttempted = false;
-  state.headerMatches = [];
   resetSpecAnalysis();
+  showSpecsSearchPrompt();
+
   if (elements.workspaceSubtitle) {
     elements.workspaceSubtitle.textContent = 'Loading analysis results…';
   }
+
   setPanelLoading(elements.parseContent, 'Parsing document…');
-  showHeaderSearchPrompt();
-  showSpecsSearchPrompt();
+  setPanelLoading(elements.headersContent, 'Checking saved headers…');
+  if (elements.headersRawContent) {
+    elements.headersRawContent.innerHTML = '<p class="panel-status">Checking header cache…</p>';
+  }
   setPanelLoading(elements.riskContent, 'Computing risk score…');
   updateHeaderModeTag(null);
   setHeaderRefreshBusy(false);
+  if (elements.refreshHeaders) {
+    elements.refreshHeaders.disabled = true;
+  }
   setSpecsSearchBusy(false);
   setApprovalStatus('Loading approval status…', 'muted');
   updateApprovalUI({ busy: true });
+
+  let status = { parsed: false, headers: false };
   try {
-    const [
-      parseResult,
-      riskResult,
-      recordResult,
-      cachedHeadersResult,
-    ] = await Promise.allSettled([
-      parseDocument(documentId),
-      compareSpecifications(documentId),
-      fetchSpecRecord(documentId),
-      fetchCachedHeaders(documentId),
-    ]);
-    if (parseResult.status === 'fulfilled') {
-      state.parse = parseResult.value;
-      renderParseSummary(elements.parseContent, state.parse);
-    } else {
-      state.parse = null;
-      setPanelError(elements.parseContent, parseResult.reason?.message ?? 'Unable to parse document.');
+    const statusResponse = await fetchDocumentStatus(documentId);
+    if (statusResponse && typeof statusResponse === 'object') {
+      status = { ...status, ...statusResponse };
     }
-    if (riskResult.status === 'fulfilled') {
-      state.risk = riskResult.value;
-      renderRiskPanel(elements.riskContent, state.risk);
-    } else {
-      state.risk = null;
-      setPanelError(elements.riskContent, riskResult.reason?.message ?? 'Unable to compute risk score.');
+  } catch (error) {
+    console.error('Failed to fetch document status', error);
+    showToast('Unable to fetch document status.', 'error');
+  }
+
+  try {
+    const parseResult = await parseDocument(documentId);
+    state.parse = parseResult;
+    renderParseSummary(elements.parseContent, state.parse);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to parse document.';
+    state.parse = null;
+    setPanelError(elements.parseContent, message);
+  }
+
+  if (!status.parsed || !status.headers) {
+    try {
+      const refreshedStatus = await fetchDocumentStatus(documentId);
+      if (refreshedStatus && typeof refreshedStatus === 'object') {
+        status = { ...status, ...refreshedStatus };
+      }
+    } catch (error) {
+      console.warn('Unable to refresh document status after parsing', error);
     }
-    if (cachedHeadersResult.status === 'fulfilled') {
-      state.headers = cachedHeadersResult.value;
+  }
+
+  let headersLoaded = false;
+  if (status.headers) {
+    try {
+      const cachedHeaders = await fetchCachedHeaders(documentId);
+      state.headers = cachedHeaders;
       state.headerMatches = deriveHeaderMatches(state.headers);
       const uiPayload = normaliseHeadersForUi(state.headers);
       renderHeaderRawResponse(elements.headersRawContent, uiPayload);
@@ -623,43 +650,69 @@ async function selectDocument(documentId) {
         documentId,
         fetchSection: fetchSectionText,
       });
-      updateHeaderModeTag(state.headers?.mode ?? null);
+      const modeHint = state.headers?.mode
+        ?? state.headers?.meta?.mode
+        ?? state.headers?.meta?.headers_mode
+        ?? null;
+      updateHeaderModeTag(modeHint);
       state.headerSearchAttempted = true;
-      setHeaderRefreshBusy(false);
-    } else if (cachedHeadersResult.status === 'rejected') {
-      const message = cachedHeadersResult.reason?.message ?? '';
-      const isNotFound = typeof message === 'string' && /^404\b/.test(message);
-      if (!isNotFound && message) {
-        setPanelError(elements.headersRawContent, message);
-        setPanelError(elements.headersContent, message);
-      }
+      headersLoaded = true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to load saved headers.';
+      setPanelError(elements.headersRawContent, message);
+      setPanelError(elements.headersContent, message);
     }
-    if (cachedHeadersResult.status !== 'fulfilled') {
-      setHeaderRefreshBusy(false);
+  }
+
+  if (!headersLoaded) {
+    showHeaderSearchPrompt();
+    if (elements.headersRawContent) {
+      elements.headersRawContent.innerHTML =
+        '<p class="panel-status">No headers saved yet. Run the header search to populate this panel.</p>';
     }
-    if (recordResult.status === 'fulfilled') {
-      state.specRecord = recordResult.value;
-      const payload = recordResult.value?.record?.payload ?? null;
-      if (payload && typeof payload === 'object') {
-        state.specs = payload;
-        state.specsSearchAttempted = true;
-        renderSpecsView();
-      } else {
-        state.specs = null;
-      }
-      state.approvalLoading = false;
-      updateApprovalUI();
+    state.headers = null;
+    state.headerMatches = [];
+    updateHeaderModeTag(null);
+  }
+
+  const [riskResult, recordResult] = await Promise.allSettled([
+    compareSpecifications(documentId),
+    fetchSpecRecord(documentId),
+  ]);
+
+  if (riskResult.status === 'fulfilled') {
+    state.risk = riskResult.value;
+    renderRiskPanel(elements.riskContent, state.risk);
+  } else {
+    state.risk = null;
+    const message = riskResult.reason?.message ?? 'Unable to compute risk score.';
+    setPanelError(elements.riskContent, message);
+  }
+
+  if (recordResult.status === 'fulfilled') {
+    state.specRecord = recordResult.value;
+    const payload = recordResult.value?.record?.payload ?? null;
+    if (payload && typeof payload === 'object') {
+      state.specs = payload;
+      state.specsSearchAttempted = true;
+      renderSpecsView();
     } else {
-      state.specRecord = null;
-      state.approvalLoading = false;
-      setApprovalStatus('Unable to load approval status.', 'error');
-      updateApprovalUI({ preserveStatus: true });
+      state.specs = null;
     }
-    setSpecsSearchBusy(false);
-  } finally {
-    if (elements.workspaceSubtitle) {
-      elements.workspaceSubtitle.textContent = `Document ${documentId} ready.`;
-    }
+    state.approvalLoading = false;
+    updateApprovalUI();
+  } else {
+    state.specRecord = null;
+    state.approvalLoading = false;
+    setApprovalStatus('Unable to load approval status.', 'error');
+    updateApprovalUI({ preserveStatus: true });
+  }
+
+  setSpecsSearchBusy(false);
+  setHeaderRefreshBusy(false);
+
+  if (elements.workspaceSubtitle) {
+    elements.workspaceSubtitle.textContent = `Document ${documentId} ready.`;
   }
 }
 
@@ -676,18 +729,21 @@ async function refreshHeaders() {
   setPanelLoading(elements.headersRawContent, 'Fetching raw response…');
   updateHeaderModeTag(null);
   try {
-    const headersResult = await fetchHeaders(documentId, { force: true });
-    state.headers = headersResult;
+    await fetchHeaders(documentId, { force: true });
+    const latest = await fetchCachedHeaders(documentId);
+    state.headers = latest;
     state.headerMatches = deriveHeaderMatches(state.headers);
-    // The UI expects `simpleheaders` + `sections` fields.  If present, pass through;
-    // otherwise, alias `headers` as `simpleheaders`.
-    const uiPayload = normaliseHeadersForUi(headersResult);
+    const uiPayload = normaliseHeadersForUi(state.headers);
     renderHeaderRawResponse(elements.headersRawContent, uiPayload);
     renderHeaderOutline(elements.headersContent, uiPayload, {
       documentId,
       fetchSection: fetchSectionText,
     });
-    updateHeaderModeTag(state.headers?.mode ?? null);
+    const modeHint = state.headers?.mode
+      ?? state.headers?.meta?.mode
+      ?? state.headers?.meta?.headers_mode
+      ?? null;
+    updateHeaderModeTag(modeHint);
     if (Array.isArray(state.headers?.messages)) {
       for (const message of state.headers.messages) {
         if (message) showToast(message, 'warning', 6000);
@@ -706,7 +762,11 @@ async function refreshHeaders() {
         documentId,
         fetchSection: fetchSectionText,
       });
-      updateHeaderModeTag(previousHeaders?.mode ?? null);
+      const modeHint = previousHeaders?.mode
+        ?? previousHeaders?.meta?.mode
+        ?? previousHeaders?.meta?.headers_mode
+        ?? null;
+      updateHeaderModeTag(modeHint);
     } else {
       state.headerMatches = [];
       setPanelError(elements.headersRawContent, message);

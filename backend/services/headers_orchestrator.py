@@ -267,8 +267,10 @@ async def extract_headers_and_chunks(
             strict_attempted = False
             vector_attempted = False
 
+            cache_to_db = getattr(settings, "headers_cache_to_db", True)
             if (
-                session is not None
+                cache_to_db
+                and session is not None
                 and doc_id is not None
                 and not llm_result.from_cache
                 and llm_result.prompt_hash

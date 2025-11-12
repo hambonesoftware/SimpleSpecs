@@ -315,8 +315,9 @@ def test_headers_endpoint_returns_outline(
     response = client.post(f"/api/headers/{document.id}")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["source"] == "openrouter"
-    assert payload["document_id"] == document.id
+    assert payload["documentId"] == document.id
+    assert payload["meta"]["sourceHash"] == "abc123"
+    assert payload["meta"]["model"] == "anthropic/claude-3.5-sonnet"
     assert payload["outline"][0]["title"] == "General Requirements"
     assert payload["outline"][0]["children"][0]["title"] == "Scope"
     assert payload["mode"] == "llm_full"

@@ -313,6 +313,9 @@ class Settings(BaseModel):
     headers_suppress_running: bool = Field(
         default_factory=lambda: _env_flag("HEADERS_SUPPRESS_RUNNING", True)
     )
+    headers_cache_to_db: bool = Field(
+        default_factory=lambda: _env_flag("HEADERS_CACHE_TO_DB", True)
+    )
     headers_align_strategy: str = Field(
         default_factory=lambda: os.getenv("HEADERS_ALIGN_STRATEGY", "sequential")
     )

@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 from typing import Any, Dict
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from fastapi.responses import PlainTextResponse
 from sqlmodel import Session
 
@@ -86,12 +86,15 @@ async def compute_headers(
         None,
         description="Header alignment strategy (sequential, legacy).",
     ),
+    body: dict | None = Body(default=None),
     session: Session = Depends(get_session),
     settings: Settings = Depends(get_settings),
 ):
     """Forward the request to :func:`backend.api.headers.extract_headers_and_chunks`."""
 
-    if force:
+    effective_force = bool(force or (body or {}).get("force"))
+
+    if effective_force:
         purge_cache = getattr(headers_api, "purge_llm_cache_for_document", None)
         if callable(purge_cache):
             try:
@@ -103,11 +106,55 @@ async def compute_headers(
         document_id=document_id,
         session=session,
         settings=settings,
-        force=force,
+        force=effective_force,
         align=align,
     )
 
     return result
+
+
+@router.get("/headers/{document_id}")
+def get_headers(
+    document_id: int,
+    *,
+    session: Session = Depends(get_session),
+    settings: Settings = Depends(get_settings),
+):
+    """Return the persisted headers payload for ``document_id``."""
+
+    payload = headers_api.get_headers_from_db(
+        session,
+        document_id,
+        settings=settings,
+    )
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Headers not found",
+        )
+    return payload
+
+
+@router.get("/headers/{document_id}/outline")
+def get_headers_outline(
+    document_id: int,
+    *,
+    session: Session = Depends(get_session),
+    settings: Settings = Depends(get_settings),
+):
+    """Return the persisted raw outline for ``document_id``."""
+
+    payload = headers_api.get_outline_from_db(
+        session,
+        document_id,
+        settings=settings,
+    )
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Outline not found",
+        )
+    return payload
 
 
 parse_pdf = parse_pdf_impl

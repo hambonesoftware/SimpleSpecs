@@ -239,6 +239,10 @@ export async function parseDocument(documentId) {
   return request(`/api/parse/${documentId}`, { method: "POST" });
 }
 
+export async function fetchDocumentStatus(documentId) {
+  return request(`/api/documents/${documentId}/status`);
+}
+
 /**
  * Fetch headers for a document.
  * Options:
@@ -248,7 +252,8 @@ export async function parseDocument(documentId) {
  */
 export async function fetchHeaders(documentId, opts = {}) {
   const params = new URLSearchParams();
-  if (opts.force) params.set('force', '1');
+  const bodyPayload = {};
+  if (opts.force) bodyPayload.force = true;
 
   const hasAlign = Object.prototype.hasOwnProperty.call(opts, 'align');
   const alignValue = hasAlign ? opts.align : 'sequential';
@@ -260,7 +265,12 @@ export async function fetchHeaders(documentId, opts = {}) {
 
   const qs = params.toString();
   const path = qs ? `/api/headers/${documentId}?${qs}` : `/api/headers/${documentId}`;
-  return request(path, { method: "POST" });
+  const init = { method: "POST" };
+  if (Object.keys(bodyPayload).length) {
+    init.body = JSON.stringify(bodyPayload);
+    init.headers = { 'Content-Type': 'application/json' };
+  }
+  return request(path, init);
 }
 
 export async function fetchSectionText(documentId, start, end, sectionKey) {
@@ -309,7 +319,7 @@ export async function compareSpecifications(documentId) {
 }
 
 export async function fetchCachedHeaders(documentId) {
-  return request(`/api/documents/${documentId}/headers`);
+  return request(`/api/headers/${documentId}`);
 }
 // Wipe all stored/spec-cached buckets for a document on the server
 export async function deleteSpecsBuckets(documentId) {
